@@ -697,7 +697,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.9.3</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.9.4</span>
       </div>
     </div>
   </div>
@@ -727,6 +727,10 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.9.4", d:"lokakuu 2026", items:[
+    "Korjattu tärkeä virhe: kivun tason, suunnan tai \"Kipu ohi\" -merkinnän muutos jo tallennetulla päivällä näkyi ruudulla, mutta ei tallentunut pysyvästi (versiot 2.9.0–2.9.3). Tarkista viime päivien kipumerkinnät.",
+    "Vanhamuotoisen kipukirjauksen avaaminen ei enää tallenna päivää turhaan uudelleen",
+  ]},
   {v:"2.9.3", d:"lokakuu 2026", items:[
     "Korjattu: jos tavoitepainoksi oli tallentunut 0 tai tyhjä arvo, Trendit näytti \"Pudotettavaa\" koko painon verran. Tavoitepaino hyväksytään nyt vain väliltä 30–300 kg.",
   ]},
@@ -2185,6 +2189,14 @@ function sameEntryContent(a,b){
   };
   return JSON.stringify(norm(a))===JSON.stringify(norm(b));
 }
+// Vanha yksittäinen kipukenttä (injury_bodyPart ym.) muunnetaan lomakkeessa injury_items-listaksi.
+// Vertailua varten molemmat esitetään samassa muodossa, jotta pelkkä vanhan päivän avaaminen ei tallenna riviä uudelleen.
+function legacyNormalized(e){
+  if(!e) return e;
+  const o={...e, injury_items:getInjuryItems(e)};
+  delete o.injury_bodyPart; delete o.injury_painLevel; delete o.injury_direction;
+  return o;
+}
 function autoSaveEntry(ds){
   const dow = new Date(ds+"T00:00:00").getDay();
   const hasData = hasMeaningfulFormData(ds, dow);
@@ -2210,7 +2222,7 @@ function autoSaveEntry(ds){
   const entry={...existing, date:ds,
     weight:S.weight, sleep:S.sleep, steps:S.steps,
     recovery:S.recovery, motivation:S.motivation,
-    bp_sys:S.bp_sys, bp_dia:S.bp_dia, notes:S.notes, injury_notes:S.injury_notes, injury_items:[...S.injury_items],
+    bp_sys:S.bp_sys, bp_dia:S.bp_dia, notes:S.notes, injury_notes:S.injury_notes, injury_items:S.injury_items.map(i=>({...i})), // syväkopio: ks. setInjury*-funktiot
     blood_sugar:S.blood_sugar,
     menstrual_start:S.menstrual_start, menstrual_pain:S.menstrual_pain, menstrual_mood:S.menstrual_mood, menstrual_bloating:S.menstrual_bloating,
     migraine:S.migraine, migraine_severity:S.migraine_severity,
@@ -2233,7 +2245,7 @@ function autoSaveEntry(ds){
   // Pelkkä päivän avaaminen käynnistää autosaven (renderLog → updateSaveBtn). Jos kirjaus ei eroa
   // tallennetusta merkityksellisesti, ei tallenneta: vanhoihin riveihin ei kirjoiteta tyhjiä uusia
   // kenttiä, eikä selaaminen näytä "Tallennettu"-ilmoitusta tai tyhjennä AI-välimuistia.
-  if(S.entries[ds]&&sameEntryContent(S.entries[ds],entry)){ LAST_SAVED_JSON=json; return; }
+  if(S.entries[ds]&&sameEntryContent(legacyNormalized(S.entries[ds]),legacyNormalized(entry))){ LAST_SAVED_JSON=json; return; }
   // Kirjausaikaleimat (kirjauskohtaiset, ei kenttäkohtaisia). created_at vain uudelle kirjaukselle —
   // vanhalle riville ei keksitä luontiaikaa. updated_at jokaisesta todellisesta sisältömuutoksesta.
   const nowIso=new Date().toISOString();
@@ -2437,7 +2449,7 @@ function saveDraft(){
   if(S.entries[S.date]) return; // tallennettu jo, ei tarvita drafttia
   const d={date:S.date,weight:S.weight,sleep:S.sleep,steps:S.steps,
     recovery:S.recovery,motivation:S.motivation,bp_sys:S.bp_sys,bp_dia:S.bp_dia,
-    notes:S.notes,injury_notes:S.injury_notes,injury_items:[...S.injury_items],
+    notes:S.notes,injury_notes:S.injury_notes,injury_items:S.injury_items.map(i=>({...i})),
     blood_sugar:S.blood_sugar,
     menstrual_start:S.menstrual_start,menstrual_pain:S.menstrual_pain,menstrual_mood:S.menstrual_mood,menstrual_bloating:S.menstrual_bloating,
     migraine:S.migraine,migraine_severity:S.migraine_severity,training_done:S.training_done,training_load:S.training_load,
@@ -2477,7 +2489,7 @@ function loadDayIntoForm(ds) {
           S.recovery=dr.recovery??null; S.motivation=dr.motivation??null;
           S.bp_sys=dr.bp_sys??null; S.bp_dia=dr.bp_dia??null;
           S.notes=dr.notes??""; S.injury_notes=dr.injury_notes??"";
-          if(dr.injury_items) S.injury_items=[...dr.injury_items];
+          if(dr.injury_items) S.injury_items=dr.injury_items.map(i=>({...i}));
           else if(dr.injury_bodyPart) S.injury_items=[{bodyPart:dr.injury_bodyPart,painLevel:dr.injury_painLevel??null,direction:dr.injury_direction??null,resolved:false}];
           else S.injury_items=[];
           S.blood_sugar=dr.blood_sugar??null;
@@ -2504,7 +2516,7 @@ function loadDayIntoForm(ds) {
   S.bp_sys=e.bp_sys??null; S.bp_dia=e.bp_dia??null;
   S.notes=e.notes??""; S.injury_notes=e.injury_notes??"";
   // Backward compat: muunna vanha yksittäinen kipukenttä taulukoksi
-  if(e.injury_items) S.injury_items=[...e.injury_items];
+  if(e.injury_items) S.injury_items=e.injury_items.map(i=>({...i})); // syväkopio: lomakkeen muokkaus ei saa muuttaa tallennettua kirjausta suoraan
   else if(e.injury_bodyPart) S.injury_items=[{bodyPart:e.injury_bodyPart,painLevel:e.injury_painLevel??null,direction:e.injury_direction??null,resolved:false}];
   else S.injury_items=[];
   S.blood_sugar=e.blood_sugar??null;
@@ -5748,16 +5760,19 @@ function removeInjuryItem(idx){
   S.injury_items.splice(idx,1);
   injuryChanged();
 }
+// Setterit korvaavat kipukohteen uudella objektilla eivätkä muokkaa sitä paikallaan. Muokkaus paikallaan muutti
+// myös S.entries-kirjausta (jaettu objekti), jolloin autosaven sisältövertailu ei nähnyt muutosta eikä
+// tallentanut sitä localStorageen (korjattu v2.9.4).
 function setInjuryPainLevel(idx,n){
-  S.injury_items[idx].painLevel=S.injury_items[idx].painLevel===n?null:n;
+  const it=S.injury_items[idx]; S.injury_items[idx]={...it,painLevel:it.painLevel===n?null:n};
   injuryChanged();
 }
 function setInjuryDir(idx,dir){
-  S.injury_items[idx].direction=S.injury_items[idx].direction===dir?null:dir;
+  const it=S.injury_items[idx]; S.injury_items[idx]={...it,direction:it.direction===dir?null:dir};
   injuryChanged();
 }
 function toggleInjuryResolved(idx){
-  S.injury_items[idx].resolved=!S.injury_items[idx].resolved;
+  const it=S.injury_items[idx]; S.injury_items[idx]={...it,resolved:!it.resolved};
   injuryChanged();
 }
 
