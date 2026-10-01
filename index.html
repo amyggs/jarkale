@@ -740,7 +740,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.10.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.10.3</span>
       </div>
     </div>
   </div>
@@ -770,6 +770,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.10.3", d:"lokakuu 2026", items:[
+    "Mittausvienti Järkäle PT:lle tallentuu nyt .txt-päätteellä, jotta sen voi jakaa suoraan Driveen. Sisältö ja rakenne ovat täsmälleen ennallaan.",
+  ]},
   {v:"2.10.2", d:"lokakuu 2026", items:[
     "Varmuuskopion voi nyt jakaa suoraan Google Driveen: tiedosto tallentuu .txt-päätteellä (sisältö on sama kuin ennen), koska Chrome ei salli .json-tiedostojen jakamista. Palautus hyväksyy sekä uudet .txt- että vanhat .json-varmuuskopiot.",
   ]},
@@ -4946,8 +4949,10 @@ function buildPTExportData(){
 async function exportForPT(){
   flushPendingAutoSave();
   const data=buildPTExportData();
-  const filename=`jarkale-pt-${today()}.json`;
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  // Sisältö ja skeema täsmälleen ennallaan (JSON, schema_version 1). Vain pääte .txt, jotta Chromen
+  // jakovalikko aukeaa (Web Share ei salli .json-päätettä) — sama ratkaisu kuin varmuuskopiossa v2.10.2.
+  const filename=`jarkale-pt-${today()}.txt`;
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"text/plain"});
   const shared=await shareOrDownloadFile(blob,filename,"text/plain");
   if(!shared){
     const url=URL.createObjectURL(blob);
