@@ -739,7 +739,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.10.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.10.1</span>
       </div>
     </div>
   </div>
@@ -769,6 +769,10 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.10.1", d:"lokakuu 2026", items:[
+    "Päivän tilan tallenne ei enää merkitse seuraamatonta tietoa nollaksi: jos esimerkiksi kipuseuranta on pois päältä, kipu tallentuu tyhjänä eikä \"ei kipua\"",
+    "Lääkemerkinnät päivittävät kirjauksen aikaleimat samoin kuin muut kirjaukset",
+  ]},
   {v:"2.10.0", d:"lokakuu 2026", items:[
     "Kirjaa: jos edellisinä päivinä on kirjattu kipu, jota ei ole merkitty ohi, näkymä kysyy \"Jatkuuko kipu?\" ja voit vastata yhdellä napautuksella (Parempi / Ennallaan / Huonompi / Ohi). Mitään ei kopioida automaattisesti.",
     "Mitat-sivu uudistettu: ylhäällä kokonaiskuva (vyötärö, rasvaprosentit, FFMI) muutoksineen ja pienine käyrineen, alla taulukko kaikista mittauksista uusin ensin",
@@ -5326,13 +5330,15 @@ function collectDayStateInputs(ds){
   const yesterday=iso(new Date(new Date(ds+"T00:00:00")-864e5));
   const prev=S.entries[yesterday];
   const act=(S.injury_items||[]).filter(i=>!i.resolved&&i.painLevel>=1);
+  // Ei-seurattu tieto tallennetaan null-arvona, ei nollana tai normaalina (puuttuva ≠ normaali).
+  // Esim. kipu 0 tarkoittaa "kipuseuranta päällä, ei aktiivista kipua"; null = kipuja ei seurata.
   return {
-    sleep:S.sleep??null,
+    sleep:trk("sleep")?(S.sleep??null):null,
     sleep_goal:g.sleepHours||7,
-    recovery:S.recovery??null,
-    general_energy_rating:S.motivation??null,
-    highest_active_pain:act.length?Math.max(...act.map(i=>i.painLevel||0)):0,
-    prev_day_load:(prev&&prev.training_done&&prev.training_load!=null)?prev.training_load:null,
+    recovery:trk("recovery")?(S.recovery??null):null,
+    general_energy_rating:trk("motivation")?(S.motivation??null):null,
+    highest_active_pain:trk("injury")?(act.length?Math.max(...act.map(i=>i.painLevel||0)):0):null,
+    prev_day_load:(trk("training")&&prev&&prev.training_done&&prev.training_load!=null)?prev.training_load:null,
   };
 }
 function lockDayStateSnapshot(){
@@ -5973,13 +5979,23 @@ function renderMedCards(ds, dow){
   container.innerHTML=`<div style="border:1px solid var(--bord);border-radius:12px;overflow:hidden;margin-bottom:8px">${rows}</div>`;
 }
 
+// Lääkemerkinnät kirjoitetaan suoraan S.entries-riville (eivät kulje autosaven kautta), joten aikaleimat
+// päivitetään tässä samoin säännöin kuin autosavessa: created_at vain uudelle riville, updated_at jokaisesta muutoksesta.
+function touchEntryTimestamps(ds, wasNew){
+  const e=S.entries[ds]; if(!e) return;
+  const nowIso=new Date().toISOString();
+  if(wasNew&&!e.created_at) e.created_at=nowIso;
+  e.updated_at=nowIso;
+}
 function toggleMedTaken(mid, medId){
   const ds=S.date;
+  const wasNew=!S.entries[ds];
   if(!S.entries[ds]) S.entries[ds]={date:ds};
   if(!S.entries[ds].meds) S.entries[ds].meds={};
   const med=(S.settings.medications||[]).find(m=>m.id===medId);
   const curr=S.entries[ds].meds[mid]||{taken:false,amount:med?.dose??null};
   S.entries[ds].meds[mid]={taken:!curr.taken,amount:curr.amount??med?.dose??null};
+  touchEntryTimestamps(ds,wasNew);
   haptic(10);
   saveAll();
   const dow=new Date(ds+"T00:00:00").getDay();
@@ -5996,16 +6012,20 @@ function cleanupEmptyEntries(){
 
 function setMedAmount(mid,val){
   const ds=S.date;
+  const wasNew=!S.entries[ds];
   if(!S.entries[ds]) S.entries[ds]={date:ds};
   if(!S.entries[ds].meds) S.entries[ds].meds={};
   const curr=S.entries[ds].meds[mid]||{taken:false,amount:null};
+  const before=JSON.stringify(curr);
   S.entries[ds].meds[mid]={...curr,amount:val!==""&&val!=null?+val:null};
   cleanupEmptyEntries(); // annoksen muuttaminen ilman ottomerkintää ei saa jättää tyhjää päiväobjektia
+  if(S.entries[ds]&&JSON.stringify(S.entries[ds].meds[mid])!==before) touchEntryTimestamps(ds,wasNew);
   saveAll();
 }
 
 function adjMedDose(mid,medId,delta){
   const ds=S.date;
+  const wasNew=!S.entries[ds];
   if(!S.entries[ds]) S.entries[ds]={date:ds};
   if(!S.entries[ds].meds) S.entries[ds].meds={};
   const med=(S.settings.medications||[]).find(m=>m.id===medId);
@@ -6013,6 +6033,7 @@ function adjMedDose(mid,medId,delta){
   const newAmt=Math.max(0,Math.round(((curr.amount??med?.dose??0)+delta)*100)/100);
   S.entries[ds].meds[mid]={...curr,amount:newAmt};
   cleanupEmptyEntries();
+  if(S.entries[ds]&&newAmt!==curr.amount) touchEntryTimestamps(ds,wasNew);
   saveAll();
   const dow=new Date(ds+"T00:00:00").getDay();
   renderMedCards(ds,dow);
