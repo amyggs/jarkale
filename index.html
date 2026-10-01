@@ -364,6 +364,12 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .ws-stat .v{font-size:20px;font-weight:800;line-height:1.25;}
 .ws-stat .v small{font-size:12px;color:var(--dim);font-weight:600;}
 .chips{display:flex;flex-wrap:wrap;gap:6px;}
+#pain-carry{margin-bottom:12px;}
+.pc-row+.pc-row{margin-top:12px;padding-top:12px;border-top:1px solid var(--bord);}
+.pc-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.pc-name{font-weight:700;font-size:14px;}
+.pc-meta{font-size:12px;color:var(--dim);flex:1;}
+.pc-x{width:44px;height:36px;margin:-6px -10px -6px 0;border:none;background:transparent;color:var(--dim);font-size:18px;}
 .chip{min-height:44px;padding:6px 12px;border:none;border-radius:12px;background:var(--surf2);color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;line-height:1.2;}
 .chip.grow{flex:1;padding:6px 6px;font-size:12px;}
 .chip.on{background:var(--seg-on);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--orange);}
@@ -371,6 +377,39 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .df-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;min-height:32px;}
 .df-close{width:44px;height:44px;margin:-6px -10px -6px 0;border:none;background:transparent;color:var(--dim);font-size:20px;}
 .ws-stat .s{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mo-add{width:100%;min-height:46px;border-radius:12px;border:1.5px dashed var(--bord);background:transparent;color:var(--orange);font:700 14px Manrope,system-ui,sans-serif;margin-bottom:12px;}
+.mo-kpi{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bord);}
+.mo-kpi:first-of-type{border-top:none;}
+.mo-kl{flex:1;min-width:0;}
+.mo-kn{font-size:12px;color:var(--dim);font-weight:600;}
+.mo-kv{font-size:22px;font-weight:800;line-height:1.3;display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;}
+.mo-kv small{font-size:13px;color:var(--dim);font-weight:600;}
+.mo-tag{font-size:11px;font-weight:700;background:var(--surf2);border-radius:6px;padding:2px 7px;margin-left:6px;align-self:center;}
+.mo-kd{font-size:12px;color:var(--dim);font-weight:600;}
+.mo-spark{flex:none;}
+.mo-info-btn{border:none;background:transparent;color:var(--dim);font:600 12px Manrope,system-ui,sans-serif;text-decoration:underline;padding:10px 0 0;min-height:32px;}
+.mo-info{font-size:12px;color:var(--dim);line-height:1.5;margin-top:6px;}
+.mo-info p+p{margin-top:6px;}
+.mo-info b{color:var(--text);}
+.mo-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.mo-table{border-collapse:separate;border-spacing:0;font-size:13px;white-space:nowrap;min-width:100%;}
+.mo-table th,.mo-table td{padding:7px 10px;text-align:right;font-weight:600;}
+.mo-table tbody td{border-top:1px solid var(--bord);}
+.mo-table tbody th{border-top:1px solid var(--bord);}
+.mo-table th[scope=row],.mo-table .mo-corner,.mo-grp th{position:sticky;left:0;z-index:1;background:var(--surf);text-align:left;padding-left:15px;font-weight:600;color:var(--text);max-width:150px;overflow:hidden;text-overflow:ellipsis;}
+.mo-table th[scope=row]{box-shadow:6px 0 6px -6px rgba(0,0,0,.25);}
+.mo-u{color:var(--dim);font-weight:500;font-size:11px;}
+.mo-grp th,.mo-grp td{padding-top:14px;font-size:11px;color:var(--dim)!important;font-weight:700;border-top:none!important;}
+.mo-ch{color:var(--dim);font-size:12px;}
+.mo-table thead th{color:var(--dim);font-size:12px;padding-top:0;padding-bottom:6px;}
+.mo-date{border:none;background:var(--surf2);color:var(--text);border-radius:8px;font:700 12px Manrope,system-ui,sans-serif;padding:6px 8px;min-height:32px;display:inline-block;}
+.mo-date.on{box-shadow:inset 0 0 0 1.5px var(--orange);}
+span.mo-date{background:transparent;color:var(--dim);}
+.mo-na{color:var(--dim);opacity:.5;font-weight:500;}
+.mo-table td:last-child,.mo-table th:last-child{padding-right:15px;}
+.mo-notes{padding:10px 15px 0;font-size:12px;color:var(--dim);line-height:1.5;border-top:1px solid var(--bord);margin-top:4px;}
+.mo-notes b{color:var(--text);margin-right:4px;}
+.mo-notes div+div{margin-top:4px;}
 </style>
 </head>
 <body>
@@ -525,6 +564,9 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
       <div id="readiness-card" style="margin-bottom:12px"></div>
 
       <!-- Lisäseurannat toggle -->
+      <!-- Jatkuvan kivun tarjous (renderPainCarry): edellisten päivien ratkaisemattomat kivut yhdellä napautuksella -->
+      <div id="pain-carry" style="display:none" class="card"></div>
+
       <!-- Julkaisu 1: päivän poikkeamat (renderDayFactors). Ei vaadi napautusta tavallisena päivänä. -->
       <div id="day-factors" style="display:none;margin-bottom:12px"></div>
 
@@ -697,7 +739,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.9.4</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.10.0</span>
       </div>
     </div>
   </div>
@@ -727,6 +769,12 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.10.0", d:"lokakuu 2026", items:[
+    "Kirjaa: jos edellisinä päivinä on kirjattu kipu, jota ei ole merkitty ohi, näkymä kysyy \"Jatkuuko kipu?\" ja voit vastata yhdellä napautuksella (Parempi / Ennallaan / Huonompi / Ohi). Mitään ei kopioida automaattisesti.",
+    "Mitat-sivu uudistettu: ylhäällä kokonaiskuva (vyötärö, rasvaprosentit, FFMI) muutoksineen ja pienine käyrineen, alla taulukko kaikista mittauksista uusin ensin",
+    "Mittausta muokataan napauttamalla sen päivää taulukossa, ja poisto löytyy muokkauslomakkeesta",
+    "Korjattu: mittauksen päivämäärän vaihto muokkauksessa jätti vanhan mittauksen rinnalle. Jos valitulla päivällä on jo mittaus, sovellus kysyy ennen korvaamista.",
+  ]},
   {v:"2.9.4", d:"lokakuu 2026", items:[
     "Korjattu tärkeä virhe: kivun tason, suunnan tai \"Kipu ohi\" -merkinnän muutos jo tallennetulla päivällä näkyi ruudulla, mutta ei tallentunut pysyvästi (versiot 2.9.0–2.9.3). Tarkista viime päivien kipumerkinnät.",
     "Vanhamuotoisen kipukirjauksen avaaminen ei enää tallenna päivää turhaan uudelleen",
@@ -2086,6 +2134,7 @@ function renderLog() {
   }
 
   renderWeekStatus(ds);
+  renderPainCarry();
   renderDayFactors();
   renderMedCards(ds, dow);
   renderReadiness();
@@ -3942,248 +3991,130 @@ function renderHistoria(){
 function setHistSub(sub){S.histSub=sub;HISTORIA_SHOW_ALL=false;renderHistoria();}
 
 // ═══ MITTAUKSET ═════════════════════════════════════════════════
+// ═══ MITAT-NÄKYMÄ (v2.10): kokonaiskuva + taulukko kaikista mittauksista ═══
+// Lasketut arvot (Navy %, JP %, FFMI, FMI, paino) johdetaan aina raakamittauksista näyttöhetkellä; niitä ei tallenneta.
+const MEAS_LIMB_KEYS=["ar","al","tr","tl","cr","cl"]; // raajat: kasvu = hyvä suunta (kaula ja rinta neutraaleja)
+function measDerived(m){
+  const ht=S.settings.profile?.height, age=S.settings.profile?.age;
+  const bf=calcNavyBF(m.wn,m.neck,ht,m.hips);
+  const w=findWeightNear(m.date);
+  const ffmi=calcFFMI(w,bf,ht), fmi=calcFMI(w,bf,ht);
+  return {navy:bf??null, jp:calcJPBodyFat(m,null,age)??null, ffmi:ffmi?ffmi.norm:null, fmi:fmi?fmi.fmi:null, weight:w??null};
+}
+function measFmtDate(ds,withYear){const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.${withYear?d.getFullYear():""}`;}
+function measDelta(d,dir,unit){
+  if(d==null) return "";
+  d=+d.toFixed(1);
+  const col=d===0||!dir?"var(--dim)":((d*dir)>0?"var(--green)":"var(--red)");
+  return `<span style="color:${col}">${d===0?"±0":(d>0?"+":"−")+Math.abs(d)}${unit||""}</span>`;
+}
+function measSpark(vals){
+  const pts=vals.filter(v=>v!=null);
+  if(pts.length<3) return "";
+  const W=72,H=24,mn=Math.min(...pts),mx=Math.max(...pts),rg=(mx-mn)||1;
+  const xy=pts.map((v,i)=>`${(i/(pts.length-1)*(W-4)+2).toFixed(1)},${(H-2-(v-mn)/rg*(H-4)).toFixed(1)}`);
+  const last=xy[xy.length-1].split(",");
+  return `<svg class="mo-spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${xy.join(" ")}" fill="none" stroke="var(--dim)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity=".6"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="var(--orange)"/></svg>`;
+}
 function renderMeasurements(){
   const all=[...HIST_MEAS,...(S.measurements||[])].sort((a,b)=>a.date.localeCompare(b.date));
+  const el=document.getElementById("historia-content");
+  if(!all.length && !MEAS_FORM.show){
+    el.innerHTML=`<div style="text-align:center;padding:50px 0"><div style="font-size:24px;margin-bottom:10px">📏</div><div style="color:var(--text);font-size:15px;font-weight:500">Ei mittauksia vielä</div><div style="color:var(--dim);font-size:13px;margin-top:6px;margin-bottom:18px">Lisää ensimmäinen mittauksesi</div><button onclick="showMeasForm()" class="btn-primary" style="padding:0 22px">+ Lisää mittaus</button></div>`;
+    return;
+  }
+  const der=all.map(measDerived);
   let h="";
 
+  // 1) Lisää-nappi tai lomake ylimpänä
+  h+=MEAS_FORM.show ? buildMeasFormHTML()
+    : `<button onclick="showMeasForm()" class="mo-add">+ Lisää mittaus</button>`;
 
-  // Muutos edelliseen mittaukseen
-  if(all.length>=2){
-    const prev=all[all.length-2], last=all[all.length-1];
-    const daysBetween=Math.round((new Date(last.date+"T00:00:00")-new Date(prev.date+"T00:00:00"))/864e5);
-    // Muunna päivämäärät luettavaan fi-muotoon
-    const fmtShort=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;};
+  if(all.length){
+    const first=all[0], last=all[all.length-1];
+    const multiYear=first.date.slice(0,4)!==last.date.slice(0,4)||last.date.slice(0,4)!==today().slice(0,4);
+    const sinceLast=Math.round((new Date(today()+"T00:00:00")-new Date(last.date+"T00:00:00"))/864e5);
+    const interval=(getActiveGoals().measurementIntervalDays)||28;
+
+    // 2) Kokonaiskuva
+    const kpis=[
+      {l:"Vyötärö napa", u:" cm", dir:-1, get:(m)=>m.wn, cat:null},
+      {l:"Rasvaprosentti · Navy", u:" %", dir:-1, get:(m,d)=>d.navy, cat:v=>bfCategory(v)},
+      {l:"Rasvaprosentti · ihopoimu", u:" %", dir:-1, get:(m,d)=>d.jp, cat:v=>bfCategory(v)},
+      {l:"FFMI · rasvaton massa", u:"", dir:1, get:(m,d)=>d.ffmi, cat:v=>ffmiCategory(v)},
+    ];
+    let rows="";
+    kpis.forEach(k=>{
+      const vals=all.map((m,i)=>k.get(m,der[i]));
+      const idx=vals.map((v,i)=>v!=null?i:-1).filter(i=>i>=0);
+      if(!idx.length) return;
+      const li=idx[idx.length-1], v=vals[li];
+      const prevV=idx.length>=2?vals[idx[idx.length-2]]:null, firstV=idx.length>=2?vals[idx[0]]:null;
+      const c=k.cat?k.cat(v):null;
+      rows+=`<div class="mo-kpi">
+        <div class="mo-kl">
+          <div class="mo-kn">${k.l}</div>
+          <div class="mo-kv">${v}<small>${k.u}</small>${c?`<span class="mo-tag" style="color:${c.col}">${c.lbl}</span>`:""}</div>
+          ${idx.length>=2?`<div class="mo-kd">${measDelta(v-prevV,k.dir,k.u)} edellisestä · ${measDelta(v-firstV,k.dir,k.u)} alusta</div>`
+            :`<div class="mo-kd">Ensimmäinen arvo ${measFmtDate(all[li].date,multiYear)}</div>`}
+        </div>
+        ${measSpark(vals)}
+      </div>`;
+    });
     h+=`<div class="card" style="margin-bottom:12px">
-      <div style="margin-bottom:12px">
-        <div class="section-head" style="margin:0 0 5px 0">Muutos edelliseen mittaukseen</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-size:13px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:3px 8px">${fmtShort(prev.date)}</span>
-          <span style="color:var(--dim);font-size:13px">→</span>
-          <span style="font-size:13px;color:var(--orange);background:var(--surf2);border-radius:8px;padding:3px 8px;font-weight:600">${fmtShort(last.date)}</span>
-          <span style="color:var(--dim);font-size:11px">${daysBetween} pv välillä</span>
-        </div>
-      </div>`;
-    MEAS_FIELDS.forEach(f=>{
-      const sv=prev[f.k],lv=last[f.k];
-      if(sv==null||lv==null) return;
-      const diff=+(lv-sv).toFixed(1);
-      const isLimb=["chest","ar","al","tr","tl","cr","cl"].includes(f.k); // muscle group = growth is good
-      const col=diff===0?"var(--dim)":(isLimb?(diff>0?"var(--green)":"var(--red)"):(diff<0?"var(--green)":"var(--red)"));
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bord)">
-        <span style="color:var(--dim);font-size:13px">${f.l}</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="color:var(--text);font-size:13px">${lv} cm</span>
-          <span style="color:${col};font-size:13px;font-weight:600;min-width:60px;text-align:right">${diff===0?"±0":(diff>0?"↑ +":"↓ ")+Math.abs(diff)} cm</span>
-        </div>
-      </div>`;
-    });
-    SKINFOLD_FIELDS_ALL.forEach(f=>{
-      const sv=prev[f.k],lv=last[f.k];
-      if(sv==null||lv==null) return;
-      const diff=+(lv-sv).toFixed(1);
-      const col=diff===0?"var(--dim)":(diff<0?"var(--green)":"var(--red)");
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bord)">
-        <span style="color:var(--dim);font-size:13px">${f.l}</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="color:var(--text);font-size:13px">${lv} mm</span>
-          <span style="color:${col};font-size:13px;font-weight:600;min-width:60px;text-align:right">${diff===0?"±0":(diff>0?"↑ +":"↓ ")+Math.abs(diff)} mm</span>
-        </div>
-      </div>`;
-    });
-    // Rasvaprosentti muutos
-    const ht=S.settings.profile?.height;
-    const bfFirst=calcNavyBF(prev.wn,prev.neck,ht,prev.hips);
-    const bfLast=calcNavyBF(last.wn,last.neck,ht,last.hips);
-    if(bfLast!=null){
-      const cat=bfCategory(bfLast);
-      const diffStr=(()=>{
-        if(bfFirst==null) return "";
-        const d=+(bfLast-bfFirst).toFixed(1);
-        const col=d===0?"var(--dim)":d<0?"var(--green)":"var(--red)";
-        return `<span style="color:${col};font-size:13px;font-weight:600">${d===0?"±0":(d>0?"↑ +":"↓ ")+Math.abs(d)}%</span>`;
-      })();
-      h+=`<div style="padding:7px 0;margin-top:4px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-          <span style="color:var(--dim);font-size:13px">💧 Rasvaprosentti · Navy-metodi</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:15px;font-weight:700;color:${cat.col}">${bfLast}%</span>
-            ${diffStr}
-            <span style="font-size:10px;background:color-mix(in srgb,${cat.col} 12%,var(--surf2));color:${cat.col};padding:2px 6px;border-radius:5px">${cat.lbl}</span>
-          </div>
-        </div>
-        <div style="font-size:10px;color:var(--dim)">Karkea arvio — ei huomioi lihasmassaa</div>
-      </div>`;
-      // FFMI (rasvattoman massan indeksi) — käyttää samaa Navy BF%:a + lähintä painoa
-      const wLast=findWeightNear(last.date);
-      const wFirst=findWeightNear(prev.date);
-      const ffmiLast=calcFFMI(wLast,bfLast,ht);
-      const ffmiFirst=(wFirst!=null&&bfFirst!=null)?calcFFMI(wFirst,bfFirst,ht):null;
-      if(ffmiLast){
-        const fcat=ffmiCategory(ffmiLast.norm);
-        const fDiffStr=(()=>{
-          if(!ffmiFirst) return "";
-          const d=+(ffmiLast.norm-ffmiFirst.norm).toFixed(1);
-          const col=d===0?"var(--dim)":d>0?"var(--green)":"var(--red)";
-          return `<span style="color:${col};font-size:13px;font-weight:600">${d===0?"±0":(d>0?"↑ +":"↓ ")+Math.abs(d)}</span>`;
-        })();
-        h+=`<div style="padding:7px 0;margin-top:4px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-            <span style="color:var(--dim);font-size:13px">💪 FFMI · Rasvaton massa</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:15px;font-weight:700;color:${fcat.col}">${ffmiLast.norm}</span>
-              ${fDiffStr}
-              <span style="font-size:10px;background:color-mix(in srgb,${fcat.col} 12%,var(--surf2));color:${fcat.col};padding:2px 6px;border-radius:5px">${fcat.lbl}</span>
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--dim)">Suuntaa-antava arvio lihasmassasta suhteessa pituuteen. Riippuu painosta ja Navy-rasvaprosenttiarviosta.</div>
-        </div>`;
-      }
-      // FMI (rasvamassaindeksi) — sama lähtödata kuin FFMI, eri näkökulma
-      const fmiLast=calcFMI(wLast,bfLast,ht);
-      const fmiFirst=(wFirst!=null&&bfFirst!=null)?calcFMI(wFirst,bfFirst,ht):null;
-      if(fmiLast){
-        const mcat=fmiCategory(fmiLast.fmi);
-        const mDiffStr=(()=>{
-          if(!fmiFirst) return "";
-          const d=+(fmiLast.fmi-fmiFirst.fmi).toFixed(1);
-          const col=d===0?"var(--dim)":d<0?"var(--green)":"var(--red)"; // rasvamassan lasku on hyvä
-          return `<span style="color:${col};font-size:13px;font-weight:600">${d===0?"±0":(d>0?"↑ +":"↓ ")+Math.abs(d)}</span>`;
-        })();
-        h+=`<div style="padding:7px 0;margin-top:4px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-            <span style="color:var(--dim);font-size:13px">💧 FMI · Rasvamassa</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:15px;font-weight:700;color:${mcat?mcat.col:"var(--text)"}">${fmiLast.fmi}</span>
-              ${mDiffStr}
-              ${mcat?`<span style="font-size:10px;background:color-mix(in srgb,${mcat.col} 12%,var(--surf2));color:${mcat.col};padding:2px 6px;border-radius:5px">${mcat.lbl}</span>`:""}
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--dim)">Rasvamassa (${fmiLast.fatMassKg} kg) suhteessa pituuteen. FFMI:n vastinpari — kertoo saman kuvan toisesta suunnasta.</div>
-        </div>`;
-      }
-    }
-    // Ihopoimu (Jackson-Pollock) — erillinen, rinnakkainen menetelmä. Ei riipu Navy-arvon onnistumisesta.
-    const age=S.settings.profile?.age;
-    const jpFirst=calcJPBodyFat(prev,null,age);
-    const jpLast=calcJPBodyFat(last,null,age);
-    if(jpLast!=null){
-      const jpCat=bfCategory(jpLast);
-      const jpDiffStr=(()=>{
-        if(jpFirst==null) return "";
-        const d=+(jpLast-jpFirst).toFixed(1);
-        const col=d===0?"var(--dim)":d<0?"var(--green)":"var(--red)";
-        return `<span style="color:${col};font-size:13px;font-weight:600">${d===0?"±0":(d>0?"↑ +":"↓ ")+Math.abs(d)}%</span>`;
-      })();
-      h+=`<div style="padding:7px 0;margin-top:4px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-          <span style="color:var(--dim);font-size:13px">📐 Rasvaprosentti · Ihopoimu (JP)</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:15px;font-weight:700;color:${jpCat.col}">${jpLast}%</span>
-            ${jpDiffStr}
-            <span style="font-size:10px;background:color-mix(in srgb,${jpCat.col} 12%,var(--surf2));color:${jpCat.col};padding:2px 6px;border-radius:5px">${jpCat.lbl}</span>
-          </div>
-        </div>
-        <div style="font-size:10px;color:var(--dim)">Jackson-Pollock 3-kohta, ihopoimuista. Vaihtoehtoinen arvio Navy-metodin rinnalle.</div>
-      </div>`;
-    }
-    h+=`</div>`;
-  }
-
-  // Lisää/muokkaa-lomake tai nappi
-  if(MEAS_FORM.show){
-    h+=buildMeasFormHTML();
-  } else {
-    h+=`<button onclick="showMeasForm()" style="width:100%;height:42px;border-radius:12px;border:1.5px dashed var(--bord);background:transparent;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px">+ Lisää mittaus</button>`;
-  }
-
-  // Rakenna yksittäinen mittauskortti
-  const buildMeasCard=(m,showEdit=true)=>{
-    const d=new Date(m.date+"T00:00:00");
-    const ht=S.settings.profile?.height;
-    const bf=calcNavyBF(m.wn,m.neck,ht,m.hips);
-    const cat=bf?bfCategory(bf):null;
-    const wNear=findWeightNear(m.date);
-    const ffmi=calcFFMI(wNear,bf,ht);
-    const fcat=ffmi?ffmiCategory(ffmi.norm):null;
-    const fmi=calcFMI(wNear,bf,ht);
-    const mcat2=fmi?fmiCategory(fmi.fmi):null;
-    const jpBf=calcJPBodyFat(m,null,S.settings.profile?.age);
-    const jpCat=jpBf?bfCategory(jpBf):null;
-    return `<div class="card" style="margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:var(--text);font-size:13px;font-weight:600">${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}</span>
-        <div style="display:flex;gap:8px;align-items:center">
-          ${m.h?`<span style="color:var(--dim);font-size:10px;background:var(--surf2);border-radius:5px;padding:2px 7px">historia</span>`:showEdit?`<button onclick="startEditMeas('${m.date}')" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 6px">✎</button><button onclick="deleteMeas('${m.date}')" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>`:""}
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${rows?4:0}px">
+        <span class="section-head" style="margin:0">Kokonaiskuva</span>
+        <span style="font-size:12px;color:var(--dim)">${all.length} ${all.length===1?"mittaus":"mittausta"}${all.length>1?` · ${measFmtDate(first.date,true)} – ${measFmtDate(last.date,true)}`:` · ${measFmtDate(last.date,true)}`}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">
-        ${MEAS_FIELDS.filter(f=>m[f.k]!=null).map(f=>`<div style="display:flex;justify-content:space-between"><span style="color:var(--dim);font-size:11px">${f.l}</span><span style="color:var(--text);font-size:13px;font-weight:600">${m[f.k]} cm</span></div>`).join("")}
-        ${SKINFOLD_FIELDS_ALL.filter(f=>m[f.k]!=null).map(f=>`<div style="display:flex;justify-content:space-between"><span style="color:var(--dim);font-size:11px">${f.l}</span><span style="color:var(--text);font-size:13px;font-weight:600">${m[f.k]} mm</span></div>`).join("")}
-      </div>
-      ${cat?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bord)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="color:var(--dim);font-size:11px">Rasvaprosentti · Navy</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:15px;font-weight:700;color:${cat.col}">${bf}%</span>
-            <span style="font-size:10px;background:color-mix(in srgb,${cat.col} 12%,var(--surf2));color:${cat.col};padding:2px 7px;border-radius:5px">${cat.lbl}</span>
-          </div>
-        </div>
+      ${rows}
+      <div style="font-size:12px;color:var(--dim);margin-top:${rows?10:6}px">Edellisestä mittauksesta ${sinceLast} pv${sinceLast>=interval?` · <span style="color:var(--orange);font-weight:700">mittausväli ${interval} pv täynnä</span>`:` · väli ${interval} pv`}</div>
+      <button class="mo-info-btn" onclick="window._measInfoOpen=!window._measInfoOpen;renderMeasurements()">${window._measInfoOpen?"Piilota selitykset":"Mistä luvut tulevat?"}</button>
+      ${window._measInfoOpen?`<div class="mo-info">
+        <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
+        <p><b>Ihopoimu (Jackson-Pollock 3-kohta)</b> on erillinen, rinnakkainen arvio. Tulos riippuu eniten siitä, osuuko poimu joka kerta samaan kohtaan.</p>
+        <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista. <b>FMI</b> on sama rasvamassasta.</p>
+        <p>Vihreä/punainen kertoo suunnan: vyötärössä ja rasvaprosentissa lasku on hyvä, FFMI:ssä ja raajojen ympäryksissä kasvu.</p>
       </div>`:""}
-      ${fcat?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bord)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="color:var(--dim);font-size:11px">FFMI · Rasvaton massa</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:15px;font-weight:700;color:${fcat.col}">${ffmi.norm}</span>
-            <span style="font-size:10px;background:color-mix(in srgb,${fcat.col} 12%,var(--surf2));color:${fcat.col};padding:2px 7px;border-radius:5px">${fcat.lbl}</span>
-          </div>
-        </div>
-      </div>`:""}
-      ${fmi?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bord)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="color:var(--dim);font-size:11px">FMI · Rasvamassa</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:15px;font-weight:700;color:${mcat2?mcat2.col:"var(--text)"}">${fmi.fmi}</span>
-            ${mcat2?`<span style="font-size:10px;background:color-mix(in srgb,${mcat2.col} 12%,var(--surf2));color:${mcat2.col};padding:2px 7px;border-radius:5px">${mcat2.lbl}</span>`:""}
-          </div>
-        </div>
-      </div>`:""}
-      ${jpCat?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bord)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="color:var(--dim);font-size:11px">Rasvaprosentti · Ihopoimu (JP)</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:15px;font-weight:700;color:${jpCat.col}">${jpBf}%</span>
-            <span style="font-size:10px;background:color-mix(in srgb,${jpCat.col} 12%,var(--surf2));color:${jpCat.col};padding:2px 7px;border-radius:5px">${jpCat.lbl}</span>
-          </div>
-        </div>
-      </div>`:""}
-      ${m.comment?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bord);color:var(--dim);font-size:12px;font-style:italic">${esc(m.comment)}</div>`:""}
     </div>`;
-  };
 
-  // Näytä viimeisin mittaus
-  if(all.length>0){
-    const latest=all[all.length-1];
-    h+=buildMeasCard(latest,true);
+    // 3) Taulukko: rivit = mitatut kentät, sarakkeet = päivät uusin ensin
+    const cols=[...all.keys()].reverse();
+    const fmtV=v=>v==null?`<span class="mo-na">–</span>`:v;
+    const mkRow=(label,vals,dir,unit)=>{
+      const idx=vals.map((v,i)=>v!=null?i:-1).filter(i=>i>=0);
+      if(!idx.length) return "";
+      const ch=idx.length>=2?measDelta(vals[idx[idx.length-1]]-vals[idx[0]],dir,""):`<span class="mo-na">–</span>`;
+      return `<tr><th scope="row">${label}${unit?` <span class="mo-u">${unit}</span>`:""}</th><td class="mo-ch">${ch}</td>${cols.map(i=>`<td>${fmtV(vals[i])}</td>`).join("")}</tr>`;
+    };
+    const grp=(t,body)=>body?`<tr class="mo-grp"><th scope="rowgroup">${t}</th><td colspan="${cols.length+1}"></td></tr>${body}`:"";
+    const circ=MEAS_FIELDS.map(f=>mkRow(f.l,all.map(m=>m[f.k]??null),MEAS_LIMB_KEYS.includes(f.k)?1:(["neck","chest"].includes(f.k)?0:-1),"cm")).join("");
+    const sf=SKINFOLD_FIELDS_ALL.map(f=>mkRow(f.l.replace(" (ihopoimu)",""),all.map(m=>m[f.k]??null),-1,"mm")).join("");
+    const calc=[
+      mkRow("Navy",der.map(d=>d.navy),-1,"%"),
+      mkRow("Ihopoimu (JP)",der.map(d=>d.jp),-1,"%"),
+      mkRow("FFMI",der.map(d=>d.ffmi),1,""),
+      mkRow("FMI",der.map(d=>d.fmi),-1,""),
+      mkRow("Paino",der.map(d=>d.weight),0,"kg"),
+    ].join("");
+    const head=`<tr><th scope="col" class="mo-corner"></th><th scope="col" class="mo-ch">Muutos</th>${cols.map(i=>{
+      const m=all[i], editable=!m.h;
+      return `<th scope="col">${editable?`<button class="mo-date${MEAS_FORM.editing===m.date?" on":""}" onclick="startEditMeas('${m.date}')" aria-label="Muokkaa mittausta ${measFmtDate(m.date,true)}">${measFmtDate(m.date,multiYear)}</button>`:`<span class="mo-date">${measFmtDate(m.date,multiYear)}</span>`}</th>`;
+    }).join("")}</tr>`;
+    h+=`<div class="card" style="margin-bottom:12px;padding-left:0;padding-right:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 15px;margin-bottom:8px">
+        <span class="section-head" style="margin:0">Kaikki mittaukset</span>
+        <span style="font-size:11px;color:var(--dim)">Napauta päivää muokataksesi</span>
+      </div>
+      <div class="mo-scroll"><table class="mo-table">
+        <thead>${head}</thead>
+        <tbody>${grp("Ympärysmitat",circ)}${grp("Ihopoimut",sf)}${grp("Lasketut",calc)}</tbody>
+      </table></div>
+      ${all.some(m=>m.comment)?`<div class="mo-notes">${[...all].reverse().filter(m=>m.comment).map(m=>`<div><b>${measFmtDate(m.date,true)}</b> ${esc(m.comment)}</div>`).join("")}</div>`:""}
+    </div>`;
   }
 
-  // Vanhemmat mittaukset togglen taakse
-  const older=[...all].reverse().slice(1);
-  if(older.length>0){
-    const measOpen=window._measHistOpen;
-    h+=`<button onclick="window._measHistOpen=!window._measHistOpen;renderMeasurements()" style="width:100%;height:40px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;cursor:pointer;margin-bottom:8px">
-      <span>Aiemmat mittaukset (${older.length})</span><span>${measOpen?"▴":"▾"}</span>
-    </button>`;
-    if(measOpen){
-      older.forEach(m=>{ h+=buildMeasCard(m,true); });
-    }
-  }
-
-
-  if(!all.length && !MEAS_FORM.show){
-    h=`<div style="text-align:center;padding:50px 0"><div style="font-size:24px;margin-bottom:10px">📏</div><div style="color:var(--text);font-size:15px;font-weight:500">Ei mittauksia vielä</div><div style="color:var(--dim);font-size:13px;margin-top:6px;margin-bottom:18px">Lisää ensimmäinen mittauksesi</div><button onclick="showMeasForm()" class="btn-primary" style="padding:0 22px">+ Lisää mittaus</button></div>`;
-  }
-
-  document.getElementById("historia-content").innerHTML=h;
+  el.innerHTML=h;
+  if(MEAS_FORM.show){ const sc=el.querySelector(".mo-scroll"); if(sc) sc.scrollLeft=0; }
 }
 
 function buildMeasFormHTML(){
@@ -4245,6 +4176,7 @@ function buildMeasFormHTML(){
       <button onclick="saveMeasForm()" class="btn-primary" style="flex:1">Tallenna</button>
       <button onclick="cancelMeasForm()" style="height:46px;padding:0 18px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--dim);font-size:13px;cursor:pointer">Peruuta</button>
     </div>
+    ${f.editing?`<button onclick="deleteMeas('${f.editing}')" style="width:100%;min-height:44px;margin-top:8px;border:none;background:transparent;color:var(--red);font:600 13px Manrope,system-ui,sans-serif">Poista mittaus</button>`:""}
   </div>`;
 }
 
@@ -4260,6 +4192,7 @@ function startEditMeas(date){
   SKINFOLD_FIELDS_ALL.forEach(f=>{if(m[f.k]!=null) values[f.k]=m[f.k];});
   MEAS_FORM={show:true,editing:date,date:m.date,values,comment:m.comment||""};
   renderMeasurements();
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 function cancelMeasForm(){
   MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
@@ -4290,12 +4223,12 @@ function saveMeasForm(){
     const commentVal=(commentEl?commentEl.value:f.comment||"").trim();
     if(commentVal) entry.comment=commentVal;
     if(!S.measurements) S.measurements=[];
-    if(f.editing){
-      S.measurements=S.measurements.map(m=>m.date===f.editing?entry:m);
-    } else {
-      S.measurements=S.measurements.filter(m=>m.date!==f.date);
-      S.measurements.push(entry);
-    }
+    // Yksi mittaus per päivä. Jos valitulla päivällä on jo toinen mittaus, kysytään ennen korvaamista
+    // (myös muokkauksessa, kun päivämäärää on vaihdettu — aiemmin se jätti vanhan rivin rinnalle).
+    const clash=f.date!==f.editing&&S.measurements.some(m=>m.date===f.date);
+    if(clash&&!confirm(`Päivälle ${f.date.split("-").reverse().join(".")} on jo mittaus. Korvataanko se?`)) return;
+    S.measurements=S.measurements.filter(m=>m.date!==f.date&&m.date!==f.editing);
+    S.measurements.push(entry);
     S.measurements.sort((a,b)=>a.date.localeCompare(b.date));
     saveAll();
     haptic(15);
@@ -4309,6 +4242,7 @@ function deleteMeas(date){
   clearAllAnalysisCaches();
   if(!confirm("Poista tämä mittaus?")) return;
   S.measurements=(S.measurements||[]).filter(m=>m.date!==date);
+  if(MEAS_FORM.editing===date) MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
   saveAll();
   renderMeasurements();
 }
@@ -5449,6 +5383,66 @@ function renderDayFactors(){
     <div class="chips">${DAY_FACTORS.map(f=>`<button class="chip${sel.includes(f.id)?" on":""}" aria-pressed="${sel.includes(f.id)}" onclick="toggleDayFactor('${f.id}')">${f.l}</button>`).join("")}</div>`;
 }
 
+// ═══ JATKUVAN KIVUN TARJOUS (v2.10) ═══════════════════════════════
+// Jos edellisinä päivinä (enintään 7 pv taaksepäin) on kirjattu kipu, jota ei ole merkitty ohi
+// eikä sitä ole vielä kirjattu valitulle päivälle, tarjotaan yhden napautuksen päivitys.
+// Mitään ei kopioida automaattisesti: uusi kipumerkintä syntyy vasta käyttäjän valinnasta.
+const PAIN_CARRY_DISMISSED={}; // päivä → Set(kehonosa), vain tämän istunnon ajan
+function pendingPainCarry(ds){
+  if(!trk("injury")) return [];
+  const present=new Set((S.injury_items||[]).map(i=>i.bodyPart));
+  const dismissed=PAIN_CARRY_DISMISSED[ds]||new Set();
+  const seen=new Set(), out=[];
+  const d=new Date(ds+"T00:00:00");
+  for(let k=1;k<=7;k++){
+    d.setDate(d.getDate()-1);
+    const x=iso(d), e=S.entries[x]; if(!e) continue;
+    getInjuryItems(e).forEach(it=>{
+      if(!it.bodyPart||seen.has(it.bodyPart)) return;
+      seen.add(it.bodyPart); // vain kehonosan viimeisin tila ratkaisee
+      if(!it.resolved&&!present.has(it.bodyPart)&&!dismissed.has(it.bodyPart)) out.push({...it,from:x,daysAgo:k});
+    });
+  }
+  return out;
+}
+function carryPain(bodyPart, choice){
+  const src=pendingPainCarry(S.date).find(p=>p.bodyPart===bodyPart); if(!src) return;
+  const dirMap={parempi:"paranee",ennallaan:"sama",huonompi:"pahenee"};
+  const item=choice==="ohi"
+    ? {bodyPart,painLevel:null,direction:null,resolved:true}
+    : {bodyPart,painLevel:src.painLevel??null,direction:dirMap[choice]||null,resolved:false};
+  S.injury_items=[...(S.injury_items||[]),item];
+  haptic(8);
+  injuryChanged();
+  renderPainCarry();
+}
+function dismissPainCarry(bodyPart){
+  (PAIN_CARRY_DISMISSED[S.date]=PAIN_CARRY_DISMISSED[S.date]||new Set()).add(bodyPart);
+  renderPainCarry();
+}
+function renderPainCarry(){
+  const el=document.getElementById("pain-carry"); if(!el) return;
+  const list=pendingPainCarry(S.date);
+  if(!list.length||localStorage.getItem("seuranta-setup-done")!=="1"){ el.style.display="none"; el.innerHTML=""; return; }
+  const when=k=>k===1?"eilen":`${k} pv sitten`;
+  el.style.display="block";
+  el.innerHTML=`<div class="lbl-small" style="margin:0 0 8px">Jatkuuko kipu?</div>`+list.map(p=>{
+    const pt=INJURY_PARTS.find(x=>x.id===p.bodyPart);
+    const name=pt?pt.l:(INJURY_LEGACY[p.bodyPart]||p.bodyPart);
+    const days=painEpisodeDays(p.bodyPart,p.from);
+    return `<div class="pc-row">
+      <div class="pc-head"><span class="pc-name">${esc(name)}</span>
+        <span class="pc-meta">${p.painLevel?p.painLevel+"/5 · ":""}${when(p.daysAgo)}${days>1?` · ${days} pv`:""}</span>
+        <button class="pc-x" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">×</button></div>
+      <div class="chips" style="flex-wrap:nowrap">
+        <button class="chip grow" onclick="carryPain('${p.bodyPart}','parempi')">Parempi</button>
+        <button class="chip grow" onclick="carryPain('${p.bodyPart}','ennallaan')">Ennallaan</button>
+        <button class="chip grow" onclick="carryPain('${p.bodyPart}','huonompi')">Huonompi</button>
+        <button class="chip grow" onclick="carryPain('${p.bodyPart}','ohi')">Ohi</button>
+      </div></div>`;
+  }).join("")+`<div style="font-size:11px;color:var(--dim);margin-top:8px">Taso säilyy edellisestä, tarkenna tarvittaessa lisäseurannoissa.</div>`;
+}
+
 function shouldShowDayStateCard(){
   return trk("sleep") && trk("recovery") && S.sleep!=null && S.recovery!=null;
 }
@@ -5748,6 +5742,7 @@ function renderInjurySelector(){
 
 function injuryChanged(){
   saveDraft();
+  renderPainCarry();
   renderInjurySelector();
   updateSaveBtn(S.date, new Date(S.date+"T00:00:00").getDay());
   renderReadiness();
