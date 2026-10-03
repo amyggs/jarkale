@@ -384,6 +384,9 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .ico-tile{width:34px;height:34px;border-radius:10px;background:var(--surf2);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;flex:none;}
 .ttl-ico{display:flex;align-items:center;gap:9px;}
 .ttl-ico .ico{color:var(--orange);}
+.sum-text{color:var(--text);font-size:14px;line-height:1.6;}
+.sum-text p+p{margin-top:10px;}
+.sum-text b{display:block;font-size:12px;font-weight:700;color:var(--orange);margin-bottom:2px;}
 .ch-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:11px;color:var(--dim);font-weight:600;}
 .ch-legend span{display:inline-flex;align-items:center;gap:6px;}
 .ch-legend .ln{width:16px;height:0;border-top:2.2px solid var(--text);display:inline-block;}
@@ -805,7 +808,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.6</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.7</span>
       </div>
     </div>
   </div>
@@ -835,6 +838,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.7", d:"lokakuu 2026", items:[
+    "Kirjallinen yhteenveto tulkitsee nyt eikä vain luettele lukuja: kokonaiskuva suhteessa tavoitteisiin ja edelliseen jaksoon, huomionarvoiset muutokset ja ensi jaksolla seurattavat asiat. Sovellus laskee vertailut valmiiksi, joten teksti perustuu oikeisiin lukuihin.",
+  ]},
   {v:"2.11.6", d:"lokakuu 2026", items:[
     "Tekoäly yhdistetty yhdeksi ominaisuudeksi: Kirjallinen yhteenveto mistä tahansa aikavälistä (myös viikosta). Valmis teksti kopioidaan tai jaetaan napilla.",
     "Valmentajalle-raportti ja erillinen tekoälyn viikkokooste poistettu. Valmennusraportointi hoidetaan Järkäle PT:ssä, ja viikon kooste näkyy ilman tekoälyä viikkoyhteenvedossa.",
@@ -2962,7 +2968,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
           }catch(_){/* ei JSON, jätä sellaisenaan */}
         }
         window._lastSummaryText=cleanText;
-        return `<div style="color:var(--text);font-size:14px;line-height:1.65">${esc(cleanText).replace(/\n/g,"<br>")}</div>
+        return `<div class="sum-text">${esc(cleanText).replace(/^(Kokonaiskuva|Huomionarvoista|Seurattavaa):/gm,"<b>$1</b>").replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"</p><p>").replace(/^/,"<p>")}</p></div>
           <div class="chips" style="flex-wrap:nowrap;margin-top:12px"><button class="chip grow" id="sum-copy-btn" onclick="copySummary()">Kopioi</button><button class="chip grow" onclick="shareSummary('${start}','${end}')">Jaa</button></div>`;
       })()}
     </div>`;
@@ -2970,65 +2976,140 @@ function renderPeriodSummaryCard(start,end,state,text,error){
   }
 }
 
+// ═══ KIRJALLISEN YHTEENVEDON LASKETUT FAKTAT (v2.11.7) ═══
+// Kaikki vertailut lasketaan tässä valmiiksi, jotta tekoäly tulkitsee oikeita lukuja eikä laske tai keksi itse.
+// Puuttuvaa ei korvata: jos vertailuun ei ole dataa, riviä ei synny.
+function summaryFacts(start,end){
+  const r1=v=>v==null?null:+v.toFixed(1), r2=v=>v==null?null:+v.toFixed(2);
+  const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
+  const fi=v=>v==null?"–":String(v).replace(".",",");
+  const days=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5)+1;
+  const rangeEntries=(a,b)=>Object.values(S.entries).filter(e=>e.date>=a&&e.date<=b).sort((x,y)=>x.date.localeCompare(y.date));
+  const g=getActiveGoals(end), sleepGoal=g.sleepHours||7;
+  const stats=(a,b)=>{
+    const ue=rangeEntries(a,b), n=days(a,b);
+    const w=ue.filter(e=>e.weight!=null).map(e=>({date:e.date,w:e.weight}));
+    const rate=w.length>=4?calcWeightRate(w):null;
+    const tr=ue.filter(e=>e.training_done);
+    const pick=k=>ue.map(e=>e[k]).filter(v=>v!=null);
+    return {n, logged:ue.filter(hasMeaningfulEntry).length, ue, tr,
+      wAvg:w.length>=3?r1(avg(w.map(x=>x.w))):null, wFirst:w[0]?.w??null, wLast:w.at(-1)?.w??null, wN:w.length, rate:rate!=null?r2(rate):null,
+      sleep:pick("sleep").length>=3?r1(avg(pick("sleep"))):null, sleepN:pick("sleep").length, sleepHit:pick("sleep").filter(v=>v>=sleepGoal).length,
+      rec:pick("recovery").length>=3?r1(avg(pick("recovery"))):null, recLow:pick("recovery").filter(v=>v<=2).length,
+      mot:pick("motivation").length>=3?r1(avg(pick("motivation"))):null,
+      trN:tr.length, perWeek:r1(tr.length/(n/7)), load:tr.filter(e=>e.training_load!=null).length?r1(avg(tr.filter(e=>e.training_load!=null).map(e=>e.training_load))):null};
+  };
+  const C=stats(start,end); const pp=getPrevPeriod(start,end); const P=stats(pp.start,pp.end);
+  const L=[];
+  L.push(`Kirjattuja päiviä ${C.logged}/${C.n}${P.logged?` (edellinen vastaava jakso ${P.logged}/${P.n})`:""}.`);
+  // Paino
+  if(trk("weight")&&C.wAvg!=null){
+    let t=`Paino: keskiarvo ${fi(C.wAvg)} kg (${C.wN} punnitusta), jakson ensimmäinen ${fi(C.wFirst)} kg ja viimeinen ${fi(C.wLast)} kg.`;
+    if(C.rate!=null) t+=` Trendi ${C.rate>0?"+":""}${fi(C.rate)} kg/vko.`;
+    if(P.wAvg!=null) t+=` Edellisellä jaksolla keskiarvo ${fi(P.wAvg)} kg${P.rate!=null?` ja trendi ${P.rate>0?"+":""}${fi(P.rate)} kg/vko`:""}.`;
+    const tgt=getActiveTargetWeight(end);
+    if(tgt!=null&&C.wLast!=null){ const left=r1(tgt-C.wLast); t+=` Tavoitepaino ${fi(tgt)} kg, matkaa ${fi(Math.abs(left))} kg${C.rate!=null&&Math.sign(C.rate)===Math.sign(left)&&Math.abs(C.rate)>0.02?`, nykyvauhdilla noin ${Math.ceil(Math.abs(left)/Math.abs(C.rate))} viikkoa`:C.rate!=null&&Math.abs(C.rate)>0.02?", mutta trendi on tavoitteeseen nähden väärään suuntaan":""}.`; }
+    const se=getCurrentSeason(end); if(se) t+=` Käynnissä oleva kausi: ${se.name}.`;
+    L.push(t);
+  }
+  // Uni, palautuminen, vire
+  if(trk("sleep")&&C.sleep!=null) L.push(`Uni: keskimäärin ${fi(C.sleep)} h, tavoite ${fi(sleepGoal)} h täyttyi ${C.sleepHit}/${C.sleepN} yönä${P.sleep!=null?` (edellinen jakso ${fi(P.sleep)} h, ${P.sleepHit}/${P.sleepN})`:""}.`);
+  if(trk("recovery")&&C.rec!=null) L.push(`Palautuminen: keskimäärin ${fi(C.rec)}/5, matala (1–2) ${C.recLow} päivänä${P.rec!=null?` (edellinen jakso ${fi(P.rec)}/5, matala ${P.recLow} pv)`:""}.`);
+  if(trk("motivation")&&C.mot!=null) L.push(`Yleinen vire: keskimäärin ${fi(C.mot)}/5${P.mot!=null?` (edellinen jakso ${fi(P.mot)}/5)`:""}.`);
+  // Treeni
+  if(trk("training")){
+    let t=`Salitreenit: ${C.trN} kpl eli ${fi(C.perWeek)}/vko${g.workoutsPerWeek?`, tavoite ${g.workoutsPerWeek}/vko`:""}${C.load!=null?`, rasitus keskimäärin ${fi(C.load)}/5`:""}${P.n&&P.trN!=null?` (edellinen jakso ${P.trN} kpl)`:""}.`;
+    const oc={worse:0,normal:0,better:0}; C.tr.forEach(e=>{ if(oc[e.training_outcome]!=null) oc[e.training_outcome]++; });
+    const ocN=oc.worse+oc.normal+oc.better;
+    if(ocN) t+=` Treenin kulku omaan normaaliin nähden: heikommin ${oc.worse}, normaalisti ${oc.normal}, paremmin ${oc.better} (arvioitu ${ocN}/${C.trN} treenistä).`;
+    const mods={}; C.tr.forEach(e=>(e.training_modifications||[]).forEach(m=>{mods[m]=(mods[m]||0)+1;}));
+    if(Object.keys(mods).length) t+=` Treenin muutokset: ${Object.entries(mods).map(([m,n])=>`${aiLabel(TRAINING_MODIFICATIONS,m).toLowerCase()} ${n}`).join(", ")}.`;
+    const planned=C.tr.filter(e=>e.planned_lightening===true).length; if(planned) t+=` Näistä etukäteen suunniteltuja kevennyksiä ${planned}.`;
+    L.push(t);
+    // Rinnakkaisvertailu: heikommin kulkeneet vs. muut (vain jos heikommin ≥2)
+    if(oc.worse>=2){
+      const rated=C.tr.filter(e=>e.training_outcome);
+      const W=rated.filter(e=>e.training_outcome==="worse"), O=rated.filter(e=>e.training_outcome!=="worse");
+      const prevOf=e=>{const d=new Date(e.date+"T00:00:00");d.setDate(d.getDate()-1);return S.entries[iso(d)];};
+      const share=(arr,fn,has)=>{const a=arr.filter(has);return a.length?`${a.filter(fn).length}/${a.length}`:"–";};
+      const parts=[];
+      if(trk("sleep")) parts.push(`uni alle tavoitteen: heikommin ${share(W,e=>e.sleep<sleepGoal,e=>e.sleep!=null)}, muut ${share(O,e=>e.sleep<sleepGoal,e=>e.sleep!=null)}`);
+      if(trk("recovery")) parts.push(`palautuminen 1–2: heikommin ${share(W,e=>e.recovery<=2,e=>e.recovery!=null)}, muut ${share(O,e=>e.recovery<=2,e=>e.recovery!=null)}`);
+      if(trk("injury")) parts.push(`aktiivinen kipu ≥2/5: heikommin ${share(W,e=>getInjuryItems(e).some(i=>!i.resolved&&i.painLevel>=2),()=>true)}, muut ${share(O,e=>getInjuryItems(e).some(i=>!i.resolved&&i.painLevel>=2),()=>true)}`);
+      parts.push(`edellisenä päivänä rasitus ≥4: heikommin ${share(W,e=>{const p=prevOf(e);return !!(p&&p.training_done&&p.training_load>=4);},()=>true)}, muut ${share(O,e=>{const p=prevOf(e);return !!(p&&p.training_done&&p.training_load>=4);},()=>true)}`);
+      L.push(`Rinnakkaisvertailu heikommin kulkeneiden (${W.length}) ja muiden arvioitujen treenien (${O.length}) välillä — ${parts.join("; ")}. Otos on pieni; kyse on samanaikaisuudesta, ei syystä.`);
+    }
+  }
+  // Poikkeamat ja seuraavan päivän palautuminen
+  const fac={}; C.ue.forEach(e=>(e.day_factors||[]).forEach(f=>{(fac[f]=fac[f]||[]).push(e.date);}));
+  if(Object.keys(fac).length){
+    const t=Object.entries(fac).map(([f,ds])=>{
+      const nxt=ds.map(d=>{const x=new Date(d+"T00:00:00");x.setDate(x.getDate()+1);return S.entries[iso(x)]?.recovery;}).filter(v=>v!=null);
+      return `${aiLabel(DAY_FACTORS,f).toLowerCase()} ${ds.length} pv${trk("recovery")&&nxt.length?` (seuraavan päivän palautuminen keskimäärin ${fi(r1(avg(nxt)))}/5, n=${nxt.length})`:""}`;
+    });
+    L.push(`Poikkeavat päivät: ${t.join("; ")}${trk("recovery")&&C.rec!=null?`. Jakson palautuminen keskimäärin ${fi(C.rec)}/5`:""}.`);
+  }
+  // Kivut: kehonosittain ensimmäinen ja viimeinen tila jaksolla
+  if(trk("injury")){
+    const by={}; C.ue.forEach(e=>getInjuryItems(e).forEach(i=>{ if(!i.bodyPart) return; (by[i.bodyPart]=by[i.bodyPart]||[]).push({...i,date:e.date}); }));
+    const t=Object.entries(by).map(([bp,arr])=>{
+      const pt=INJURY_PARTS.find(x=>x.id===bp); const name=pt?pt.l:(INJURY_LEGACY[bp]||bp);
+      const a=arr[0], z=arr.at(-1);
+      if(z.resolved) return `${name}: merkitty ohi ${z.date}`;
+      const dur=painEpisodeDays(bp,z.date);
+      return `${name}: taso ${a.painLevel??"–"}/5 → ${z.painLevel??"–"}/5, suunta viimeksi ${z.direction==="paranee"?"paranee":z.direction==="pahenee"?"pahenee":z.direction==="sama"?"ennallaan":"ei kirjattu"}, jatkunut ${dur} pv`;
+    });
+    if(t.length) L.push(`Kivut: ${t.join("; ")}.`);
+  }
+  // Viikoittainen erittely pidemmille jaksoille
+  if(C.n>14){
+    const wk=[]; let d=new Date(start+"T00:00:00");
+    while(iso(d)<=end){ const a=iso(d); const e=new Date(d); e.setDate(e.getDate()+6); const b=iso(e)>end?end:iso(e); const s=stats(a,b);
+      wk.push(`${a.slice(8,10)}.${a.slice(5,7)}.: ${s.wAvg!=null?`paino ${fi(s.wAvg)} kg, `:""}${trk("training")?`treenit ${s.trN}, `:""}${s.sleep!=null?`uni ${fi(s.sleep)} h, `:""}kirjattu ${s.logged}/${s.n}`);
+      d.setDate(d.getDate()+7); }
+    L.push(`Viikoittain (alkupäivä): ${wk.join(" · ")}.`);
+  }
+  return {lines:L, totalDays:C.n, logged:C.logged};
+}
+
 function buildPeriodPrompt(start,end,rangeLabel,curr){
-  const totalDays=Math.round((new Date(end+"T00:00:00")-new Date(start+"T00:00:00"))/864e5)+1;
+  const F=summaryFacts(start,end);
   const ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end).sort((a,b)=>a.date.localeCompare(b.date));
-  const g=getActiveGoals(end);
-  const prof=S.settings.profile||{};
-  const season=getCurrentSeason(end);
+  const g=getActiveGoals(end), prof=S.settings.profile||{};
+  const goalsStr=[g.sleepHours?`uni ${g.sleepHours} h/yö`:"",g.workoutsPerWeek?`treeniä ${g.workoutsPerWeek}/vko`:"",g.cardioPerWeek?`cardioa ${g.cardioPerWeek}/vko`:"",getActiveTargetWeight(end)!=null?`tavoitepaino ${getActiveTargetWeight(end)} kg`:""].filter(Boolean).join(", ");
+  // Päivärivit vain lyhyille jaksoille (pitkillä viikkoerittely riittää ja pitää syötteen kohtuullisena)
+  const dayLines=F.totalDays<=31?ue.map(e=>`  ${e.date} (${DAYS[new Date(e.date+"T00:00:00").getDay()]}): ${aiDayLine(e)}`).join("\n"):"";
+  return `Kirjoita käyttäjälle kirjallinen yhteenveto hänen omasta seurantajaksostaan. Tavoite on, että hän näkee kokonaiskuvan ja oppii jotain, mitä ei huomaisi vain lukuja selaamalla. Pelkkä lukujen toistaminen lauseina ei riitä.
 
-  const fmt=aiDayLine; // yhteinen, yksiselitteinen päivärivi (ks. aiDayLine)
+RAKENNE (kolme kappaletta, kukin alkaa otsikkosanalla ja kaksoispisteellä, ei muuta muotoilua):
+Kokonaiskuva: 2–3 virkettä. Miten jakso meni suhteessa tavoitteisiin ja edelliseen vastaavaan jaksoon. Sano selvästi, mikä parani, mikä heikkeni ja mikä pysyi ennallaan.
+Huomionarvoista: 2–4 asiaa, jotka erottuvat. Esimerkiksi selvä muutos edelliseen jaksoon, tavoitteesta jääminen tai sen ylittäminen, viikko joka poikkeaa muista, kivun kehitys tai rinnakkaisvertailun ero. Kerro aina luvut, joihin havainto perustuu. Jos ero perustuu pieneen otokseen, sano se.
+Seurattavaa: 1–2 konkreettista asiaa, joita kannattaa seurata seuraavalla jaksolla, esimerkiksi "jatkuuko painon lasku samaa tahtia" tai "toistuuko matala palautuminen kovan treenin jälkeisinä päivinä". Muotoile seurattavaksi asiaksi, älä käskyksi tai treeni- tai terveysneuvoksi.
 
-  const dataStr=ue.map(e=>`  ${e.date} (${DAYS[new Date(e.date+"T00:00:00").getDay()]}): ${fmt(e)}`).join("\n")||"  ei kirjauksia";
+SÄÄNNÖT:
+- Käytä vain alla olevia lukuja. Älä laske itse uusia keskiarvoja, äläkä keksi lukuja tai tapahtumia.
+- Älä väitä syy-yhteyksiä. Samanaikaisuuden saa kertoa ("heikommin kulkeneista treeneistä 3/4 osui päiviin, joina uni jäi alle tavoitteen, muista 2/10"), mutta ei "koska" tai "johtui".
+- Jos jokin tieto puuttuu tai kirjauksia on vähän, sano se lyhyesti, älä täytä aukkoa arvaamalla.
+- Ei lääketieteellisiä tulkintoja, ei tsemppaamista, ei geneerisiä hyvinvointineuvoja.
+- Kirjoita neutraalisti ilman puhuttelua ("Uni oli keskimäärin 6,9 h"), jotta tekstin voi jakaa sellaisenaan.
+- Pituus noin 120–220 sanaa.
 
-  const focus=totalDays<=14
-    ?"Lyhyt jakso: kuvaa päivätason vaihtelua ja poikkeavia päiviä."
-    :totalDays<=60
-    ?"Kuvaa viikoittaista kehitystä: painon suunta, unen ja treenien toteutuminen viikoittain."
-    :"Pitkä jakso: kuvaa kokonaiskehitystä, kuten painon kehitys, kipujen kulku ja harjoittelun määrä kausittain.";
+KIELI:
+- Luontevaa, huoliteltua suomen yleiskieltä, kuin kokenut suomalainen toimittaja kirjoittaisi. Lyhyet virkkeet, oikeat sijamuodot, ei käännösrakenteita, ei anglismeja, ei keksittyjä sanoja.
+- Desimaalipilkku (108,1 kg) ja suomalaiset lyhenteet (h, kg, vko, pv).
+- Tarkista ennen vastaamista, että jokainen virke on kieliopillisesti oikein.
 
-  const profStr=[
-    prof.height?`pituus ${prof.height}cm`:"",
-    prof.targetWeight?`tavoitepaino ${prof.targetWeight}kg`:"",
-    season?`kausi: ${season.name}`:"",
-    g.sleepHours?`unitavoite ${g.sleepHours}h`:"",
-    g.workoutsPerWeek?`treenitavoite ${g.workoutsPerWeek}/vko`:"",
-  ].filter(Boolean).join(", ");
+ESIMERKKI TYYLISTÄ (keksitty data, älä käytä sen lukuja):
+Kokonaiskuva: Jakso meni treenien osalta tavoitteen mukaan, 4,8 treeniä viikossa, mutta uni jäi edelleen tavoitteesta. Paino laski 0,3 kg viikossa, mikä on nopeampaa kuin edellisellä jaksolla (0,1 kg/vko). Palautuminen pysyi lähes ennallaan.
+Huomionarvoista: Kolmannella viikolla treenejä oli vain kaksi ja uni keskimäärin 6,1 h, selvästi muita viikkoja vähemmän. Heikommin kulkeneista treeneistä kolme neljästä osui päiviin, joina uni jäi alle tavoitteen, muista treeneistä kaksi kymmenestä; otos on vielä pieni. Oikean hauiksen kipu on pysynyt tasolla 1/5 jo 62 päivää.
+Seurattavaa: Toistuuko heikompi treeni lyhyiden öiden jälkeen myös seuraavalla jaksolla. Jatkuuko painon lasku nykytahtia, kun tavoitteeseen on matkaa 4,2 kg.
 
-  const goalsStr=[
-    g.sleepHours?`uni ${g.sleepHours}h/yö`:"",
-    g.workoutsPerWeek?`treeniä ${g.workoutsPerWeek}/vko`:"",
-    g.cardioPerWeek?`cardioa ${g.cardioPerWeek}/vko`:"",
-    prof.targetWeight?`tavoitepaino ${prof.targetWeight}kg`:"",
-  ].filter(Boolean).join(", ");
+JAKSO: ${start} – ${end} (${F.totalDays} päivää)
+TAVOITTEET: ${goalsStr||"ei asetettu"}${prof.height?`\nPITUUS: ${prof.height} cm`:""}
 
-  return `Kirjoita kirjallinen yhteenveto alla olevasta jaksosta. Käyttäjä lukee sen itse ja voi jakaa sen sellaisenaan esimerkiksi valmentajalle.
-
-SISÄLTÖ:
-- 4–7 lyhyttä virkettä yhtenä tai kahtena kappaleena
-- Kerro, mitä jaksolla tapahtui, konkreettisin luvuin: paino ja sen suunta, uni, palautuminen ja vire, treenien määrä ja kulku, kivut sekä poikkeavat päivät, jos niitä on
-- Jos tavoitteet on asetettu, vertaa toteumaa niihin lukuina
-- Mainitse, jos kirjauksia on vähän tai jokin tieto puuttuu
-- ${focus}
-- Älä anna neuvoja, älä esitä kysymyksiä äläkä päättele syy-yhteyksiä, joita käyttäjä ei ole itse kirjannut
-- Kirjoita neutraalisti ilman puhuttelua, esimerkiksi "Uni oli keskimäärin 6,9 h." – ei "nukuit" eikä "sinun"
-
-KIELI (tärkeää):
-- Kirjoita luontevaa, huoliteltua suomen yleiskieltä, kuin kokenut suomalainen toimittaja
-- Lyhyet, selkeät virkkeet. Oikeat sijamuodot ja taivutukset. Ei englannista käännettyjä rakenteita, ei anglismeja, ei keksittyjä sanoja
-- Käytä desimaalipilkkua (108,1 kg) ja suomalaisia lyhenteitä (h, kg, vko, pv)
-- Ei Markdown-muotoilua: ei #, ei **, ei luettelomerkkejä
-- Tarkista ennen vastaamista, että jokainen virke on kieliopillisesti oikein ja kuulostaa suomalaisen kirjoittamalta
-
-ESIMERKKI TYYLISTÄ (keksitty data):
-Jaksolla kirjattiin 26 päivää 28:sta. Painon viikkokeskiarvo laski 107,9 kilosta 107,1 kiloon, eli noin 0,2 kg viikossa. Uni oli keskimäärin 6,8 h, ja tavoite (7,5 h) täyttyi yhdeksänä yönä. Salitreenejä kertyi 18, joista kolme kulki tavallista heikommin; yksi niistä kevennettiin tarkoituksella. Oikean hauiksen kipu jatkui koko jakson tasolla 1–2/5 ennallaan.
-
-JAKSO: ${start} – ${end} (${totalDays} päivää, ${ue.length} kirjausta)
-KÄYTTÄJÄ: ${profStr||"ei profiilia"}
-TAVOITTEET: ${goalsStr||"ei asetettu"}
-
-DATA:
-${dataStr}`;
+VALMIIKSI LASKETUT LUVUT (luotettavat, käytä näitä):
+${F.lines.map(l=>"- "+l).join("\n")}
+${dayLines?`\nPÄIVÄKOHTAISET KIRJAUKSET (taustaksi, erilliset merkinnät | -merkillä):\n${dayLines}`:""}`;
 }
 
 function initPeriodSummaryCard(start,end,rangeLabel,curr){
@@ -3654,7 +3735,7 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600, model=AI_MO
 
 // Tekstivastaus — valmentajaraportti + jaksoanalyysi käyttävät tätä
 async function callClaudeForText(prompt) {
-  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 1000, AI_MODEL_TEXT);
+  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 1400, AI_MODEL_TEXT);
 }
 async function callClaudeForSummary(prompt) { return callClaudeForText(prompt); } // taaksepäin yhteensopiva nimi
 
