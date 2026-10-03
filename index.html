@@ -415,6 +415,11 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .wr-sec{margin-top:14px;}
 .wr-sec-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--dim);margin-bottom:8px;}
 .wr-sec-h .ico{color:var(--orange);}
+.wr-ocl{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;font-weight:600;color:var(--dim);}
+.wr-ocl b{color:var(--text);font-weight:800;font-size:15px;}
+.wr-ocl .zero b{color:var(--dim);}
+.wr-ctx{margin-top:6px;font-size:12px;font-weight:600;color:var(--dim);}
+.wr-ctx b{color:var(--text);}
 .wr-oc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
 .wr-oc-c{background:var(--surf2);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;}
 .wr-oc-c b{font-size:18px;font-weight:800;line-height:1.2;}
@@ -799,7 +804,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.1</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.2</span>
       </div>
     </div>
   </div>
@@ -829,6 +834,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.2", d:"lokakuu 2026", items:[
+    "Viikkoyhteenveto: korostettu havaintolaatikko poistettu (se toisti näkyvää tietoa). Treenin kulku yhdellä rivillä, ja sen alla rinnakkainen vertailu: kuinka usein uni jäi alle tavoitteen heikommin kulkeneina vs. muina treenipäivinä. Kivuissa \"jatkunut N pv\".",
+  ]},
   {v:"2.11.1", d:"lokakuu 2026", items:[
     "Oma ikonisarja emojien tilalle koko sovelluksessa (seurantavalinnat, asetukset, Päivän huomio, tekoälykortit, teemanappi)",
     "Viikkoyhteenveto selkeämmäksi: treenin kulku omina laatikoinaan, kivut riveittäin (taso, suunta, kesto), poikkeamat tageina ja havainto omana korostettuna kohtanaan",
@@ -2503,6 +2511,13 @@ function buildWeekRecap(weekStart){
     const tr=ents.filter(e=>e.training_done);
     const oc={worse:0,normal:0,better:0}; tr.forEach(e=>{ if(e.training_outcome&&oc[e.training_outcome]!=null) oc[e.training_outcome]++; });
     R.training={n:tr.length, goal:g.workoutsPerWeek||null, outcomes:oc, outcomeN:oc.worse+oc.normal+oc.better};
+    // Rinnakkainen vertailu (ei johtopäätöstä): kuinka usein uni jäi alle tavoitteen heikommin kulkeneina
+    // treenipäivinä vs. muina treenipäivinä, joilla kulku on kirjattu. Nimittäjänä vain päivät, joilta uni on kirjattu.
+    if(trk("sleep")&&oc.worse>0){
+      const goalS=g.sleepHours||7, rated=tr.filter(e=>e.training_outcome&&e.sleep!=null);
+      const w=rated.filter(e=>e.training_outcome==="worse"), o=rated.filter(e=>e.training_outcome!=="worse");
+      if(w.length) R.training.sleepCtx={goal:goalS, worseN:w.length, worseLow:w.filter(e=>e.sleep<goalS).length, otherN:o.length, otherLow:o.filter(e=>e.sleep<goalS).length};
+    }
   }
   if(trk("sleep")){
     const s=ents.map(e=>e.sleep).filter(v=>v!=null), goal=g.sleepHours||7;
@@ -2526,44 +2541,15 @@ function buildWeekRecap(weekStart){
         days:it.resolved?null:painEpisodeDays(it.bodyPart,it.date)};
     }).sort((a,b)=>(a.resolved-b.resolved)||((b.level||0)-(a.level||0)));
   }
-  R.insight=R.enough?weekRecapInsight(R,ents):null;
+  // v2.11.2: erillinen havaintolaatikko poistettu — se toisti näkyvää tietoa ja ohjasi huomiota. Käyttäjä tulkitsee itse.
   return R;
-}
-// Yksi havainto, tärkeysjärjestyksessä. Vain kun otos riittää; kuvaileva, ei syy-väitteitä.
-function weekRecapInsight(R,ents){
-  const goal=R.sleep?.goal||null;
-  // 1. Heikommin kulkeneet treenit ja saman päivän uni/palautuminen
-  if(R.training&&R.training.outcomes.worse>=2){
-    const worse=ents.filter(e=>e.training_done&&e.training_outcome==="worse");
-    const lowSleep=goal!=null?worse.filter(e=>e.sleep!=null&&e.sleep<=goal-1).length:0;
-    const lowRec=trk("recovery")?worse.filter(e=>e.recovery!=null&&e.recovery<=2).length:0;
-    const n=worse.length, kaikki=n===2?"molempina päivinä":"kaikkina näinä päivinä";
-    if(lowSleep===n) return `Treeni kulki heikommin ${n} kertaa. ${kaikki[0].toUpperCase()+kaikki.slice(1)} uni jäi vähintään tunnin alle tavoitteen.`;
-    if(lowRec===n) return `Treeni kulki heikommin ${n} kertaa. ${kaikki[0].toUpperCase()+kaikki.slice(1)} palautuminen oli matala (1–2/5).`;
-    return `Treeni kulki heikommin ${n} kertaa tällä viikolla.`;
-  }
-  // 2. Painon viikkomuutos
-  if(R.weight&&R.weight.delta!=null&&Math.abs(R.weight.delta)>=0.3){
-    return `Painon viikkokeskiarvo ${R.weight.delta<0?"laski":"nousi"} ${Math.abs(R.weight.delta)} kg edellisestä viikosta.`;
-  }
-  // 3. Uni
-  if(R.sleep&&R.sleep.n>=4&&R.sleep.below>=Math.ceil(R.sleep.n/2)){
-    return `Uni jäi alle ${R.sleep.goal} h tavoitteen ${R.sleep.below}/${R.sleep.n} yönä.`;
-  }
-  // 4. Treenitavoite
-  if(R.training&&R.training.goal&&R.complete){
-    if(R.training.n>=R.training.goal) return `Treenitavoite täyttyi (${R.training.n}/${R.training.goal}).`;
-  }
-  // 5. Palautuminen
-  if(R.recovery&&R.recovery.low>=3) return `Palautuminen oli matala (1–2/5) ${R.recovery.low} päivänä.`;
-  return null;
 }
 function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   const wk=isoWeekNo(new Date(R.weekStart+"T00:00:00"));
   const fd=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.`;};
   const head=`<div class="wr-head">
       <div class="wr-title"><span class="wr-kicker">${compact?"Viime viikko":"Viikko"}</span><span class="wr-week">Viikko ${wk} <span>${fd(R.weekStart)}–${fd(R.weekEnd)}</span></span></div>
-      <span class="wr-meta">${R.logged}/${R.passed} pv</span>
+      <span class="wr-meta">kirjattu ${R.logged}/${R.passed}</span>
       ${dismissable?`<button class="pc-x" aria-label="Piilota viikkoyhteenveto" onclick="dismissWeekRecap('${R.weekStart}')">×</button>`:""}
     </div>`;
   if(!R.enough) return `<div class="card wr">${head}<div class="wr-note">Yhteenveto tarvitsee vähintään ${WEEK_RECAP_MIN_LOGGED} kirjattua päivää.${R.complete?"":" Viikko on vielä kesken."}</div></div>`;
@@ -2581,22 +2567,23 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   const secs=[];
   if(R.training&&R.training.outcomeN){
     const o=R.training.outcomes;
-    const cell=(n,l)=>`<div class="wr-oc-c${n?"":" zero"}"><b>${n}</b><span>${l}</span></div>`;
-    secs.push(sec("activity","Treenin kulku",`<div class="wr-oc">${cell(o.worse,"heikommin")}${cell(o.normal,"normaalisti")}${cell(o.better,"paremmin")}</div>`));
+    const it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
+    const c=R.training.sleepCtx;
+    const ctx=c?`<div class="wr-ctx">Uni alle ${c.goal} h: heikommin kulkeneet <b>${c.worseLow}/${c.worseN}</b>${c.otherN?` · muut <b>${c.otherLow}/${c.otherN}</b>`:""}</div>`:"";
+    secs.push(sec("activity","Treenin kulku",`<div class="wr-ocl">${it(o.worse,"heikommin")}${it(o.normal,"normaalisti")}${it(o.better,"paremmin")}</div>${ctx}`));
   }
   if(R.pains&&R.pains.length){
     const list=compact?R.pains.slice(0,3):R.pains;
     const dirTxt={paranee:"paranee",sama:"ennallaan",pahenee:"pahenee"};
     const rows=list.map(p=>`<div class="wr-pain"><span class="n">${esc(p.name)}</span>${p.resolved
       ?`<span class="m ok">${ico("check",14)} ohi</span>`
-      :`<span class="m">${[p.level?`<b>${p.level}/5</b>`:"",p.dirId?dirTxt[p.dirId]:"",p.days>1?`${p.days} pv`:""].filter(Boolean).join(" · ")}</span>`}</div>`).join("");
+      :`<span class="m">${[p.level?`<b>${p.level}/5</b>`:"",p.dirId?dirTxt[p.dirId]:"",p.days>1?`jatkunut ${p.days} pv`:""].filter(Boolean).join(" · ")}</span>`}</div>`).join("");
     secs.push(sec("bandage","Kivut",rows+(compact&&R.pains.length>3?`<div class="wr-more">+${R.pains.length-3} muuta</div>`:"")));
   }
   if(R.factors.length) secs.push(sec("calendar","Poikkeamat",`<div class="wr-tags">${R.factors.map(f=>`<span class="wr-tag">${f.l}<b>${f.n} pv</b></span>`).join("")}</div>`));
   return `<div class="card wr">${head}
     ${tiles.length?`<div class="ws-stats wr-tiles">${tiles.join("")}</div>`:""}
     ${secs.join("")}
-    ${R.insight?`<div class="wr-insight">${icoTile("bulb")}<span>${R.insight}</span></div>`:""}
     ${compact?`<button class="wr-link" onclick="openWeekInTrends('${R.weekStart}')">Avaa viikko Trendeissä ›</button>`:""}
   </div>`;
 }
