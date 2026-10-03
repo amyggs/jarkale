@@ -808,7 +808,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.7</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.8</span>
       </div>
     </div>
   </div>
@@ -838,6 +838,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.8", d:"lokakuu 2026", items:[
+    "Korjattu: kirjallinen yhteenveto saattoi palata tyhjänä. Vastaukselle varataan nyt enemmän pituutta, ja tyhjän vastauksen jälkeen sovellus yrittää automaattisesti varamallilla.",
+  ]},
   {v:"2.11.7", d:"lokakuu 2026", items:[
     "Kirjallinen yhteenveto tulkitsee nyt eikä vain luettele lukuja: kokonaiskuva suhteessa tavoitteisiin ja edelliseen jaksoon, huomionarvoiset muutokset ja ensi jaksolla seurattavat asiat. Sovellus laskee vertailut valmiiksi, joten teksti perustuu oikeisiin lukuihin.",
   ]},
@@ -2952,7 +2955,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Kirjallinen yhteenveto</span>
         <div style="display:flex;align-items:center;gap:8px">
-          ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
+          ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}${cached&&cached.model?` · ${/haiku/.test(cached.model)?"Haiku":"Sonnet"}`:""}</span>`:""}
           <button onclick="triggerPeriodSummary('${start}','${end}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:8px;border:1px solid var(--bord)">↻</button>
         </div>
       </div>
@@ -3150,13 +3153,14 @@ async function triggerPeriodSummary(start,end){
   // Varmista että div on DOM:issa
   if(!document.getElementById("period-summary-card")) renderTrendit();
   renderPeriodSummaryCard(start,end,"loading");
+  document.querySelectorAll(".ai-start").forEach(el=>el.style.display="none");
   document.getElementById("period-summary-card")?.scrollIntoView({behavior:"smooth",block:"nearest"});
   try{
     const rangeLabel="";
     const curr=computeSummary(start,end);
     const prompt=buildPeriodPrompt(start,end,rangeLabel,curr);
     const text=await callClaudeForSummary(prompt);
-    try{localStorage.setItem(periodCacheKey(start,end),JSON.stringify({text,ts:Date.now()}));}catch(_){}
+    try{localStorage.setItem(periodCacheKey(start,end),JSON.stringify({text,ts:Date.now(),model:window._lastAiModel||null}));}catch(_){}
     renderPeriodSummaryCard(start,end,"done",text);
   }catch(e){
     renderPeriodSummaryCard(start,end,"error",null,String(e).replace("Error: ",""));
@@ -3728,14 +3732,20 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600, model=AI_MO
   if(resp.status===429) throw new Error("Liikaa pyyntöjä — yritä hetken kuluttua");
   if(!resp.ok) throw new Error(`API-virhe (${resp.status}) — yritä uudelleen`);
   const data=await resp.json();
-  const textBlock=data.content?.find(b=>b.type==="text");
-  if(!textBlock) throw new Error("Tyhjä vastaus — yritä uudelleen");
-  return textBlock.text.trim();
+  // Kaikki tekstilohkot yhteen (malli voi palauttaa myös muita lohkotyyppejä, esim. päättelyä)
+  const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text||"").join("\n").trim();
+  if(!text){
+    // Tyhjä vastaus (esim. koko pituus kului päättelyyn tai malli kieltäytyi): kokeillaan varamallilla
+    if(model!==AI_MODEL_FALLBACK) return callClaudeAI(systemPrompt,userPrompt,maxTokens,AI_MODEL_FALLBACK);
+    throw new Error(`Tyhjä vastaus${data.stop_reason?` (${data.stop_reason})`:""} — yritä uudelleen`);
+  }
+  window._lastAiModel=model;
+  return text;
 }
 
 // Tekstivastaus — valmentajaraportti + jaksoanalyysi käyttävät tätä
 async function callClaudeForText(prompt) {
-  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 1400, AI_MODEL_TEXT);
+  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 4000, AI_MODEL_TEXT);
 }
 async function callClaudeForSummary(prompt) { return callClaudeForText(prompt); } // taaksepäin yhteensopiva nimi
 
