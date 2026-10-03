@@ -805,7 +805,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.4</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.5</span>
       </div>
     </div>
   </div>
@@ -835,6 +835,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.5", d:"lokakuu 2026", items:[
+    "Sovellus tallentaa taustalla, milloin palautuminen, vire ja kipu on viimeksi muutettu, ja Päivän tilan tallenne ottaa ajat talteen lukitushetkellä. Tällä voidaan myöhemmin erottaa ennen treeniä annetut arviot jälkikäteen kirjatuista. Ei uusia napautuksia.",
+    "Kun merkitset \"Kevensin tarkoituksella\", voit halutessasi kertoa, oliko kevennys suunniteltu etukäteen",
+    "Päiväkirja-CSV:n versio 3: uudet sarakkeet lopussa, vanhat ennallaan",
+  ]},
   {v:"2.11.4", d:"lokakuu 2026", items:[
     "Korjattu: uusi kuvake ei päivittynyt yläpalkkiin, koska selain käytti välimuistissa ollutta vanhaa kuvaa. Päivitykset hakevat nyt tiedostot aina palvelimelta.",
   ]},
@@ -2353,6 +2358,8 @@ function autoSaveEntry(ds){
     day_state_snapshot:S.day_state_snapshot??null,
     day_state_model_version:S.day_state_model_version??null,
     day_state_snapshot_locked_at:S.day_state_snapshot_locked_at??null,
+    field_changed_at:{...(S.field_changed_at||{})},
+    planned_lightening:S.training_done?(S.planned_lightening??null):null,
   };
   // Älä tallenna jos mikään ei muuttunut
   const json=JSON.stringify(entry);
@@ -2698,6 +2705,7 @@ function saveDraft(){
     training_type:S.training_type,cardio_done:S.cardio_done,cardio_type:S.cardio_type,cardio_duration:S.cardio_duration,cardio_hr_min:S.cardio_hr_min,cardio_hr_max:S.cardio_hr_max,training_notes:S.training_notes,
     training_outcome:S.training_outcome,training_modifications:[...(S.training_modifications||[])],day_factors:[...(S.day_factors||[])],
     day_state_snapshot:S.day_state_snapshot,day_state_model_version:S.day_state_model_version,day_state_snapshot_locked_at:S.day_state_snapshot_locked_at,
+    field_changed_at:{...(S.field_changed_at||{})},planned_lightening:S.planned_lightening??null,
     showExtra:S.showExtra};
   try{localStorage.setItem("seuranta-draft",JSON.stringify(d));}catch(_){}
 }
@@ -2713,6 +2721,9 @@ function loadR1Fields(src){
   S.day_state_snapshot=src.day_state_snapshot??null;
   S.day_state_model_version=src.day_state_model_version??null;
   S.day_state_snapshot_locked_at=src.day_state_snapshot_locked_at??null;
+  // v2.11.5: kenttäkohtaiset viimeisimmän muutoksen ajat (analyysi: kirjattiinko tuntuma ennen treenin kulkua)
+  S.field_changed_at=(src.field_changed_at&&typeof src.field_changed_at==="object")?{...src.field_changed_at}:{};
+  S.planned_lightening=src.planned_lightening??null;
   S.showDayFactors=false;
   S.showTrainingMods=false;
 }
@@ -5017,14 +5028,16 @@ async function exportCSV(){
   // jotta vanhojen sarakkeiden nimet, paikat ja merkitys eivät muutu. Lue sarakkeet nimen perusteella.
   // Periaatteet: canonical enum-arvot (ei UI-tekstejä), listat LIST_DELIM-erottimella,
   // puuttuva/tyhjä = tyhjä solu (ei "none"/"normal"), snapshot viedään sellaisena kuin se lukittiin.
-  const CSV_SCHEMA_VERSION=2;
+  const CSV_SCHEMA_VERSION=3; // v3 (v2.11.5): kenttäkohtaiset muutosajat ja suunniteltu kevennys lisätty loppuun
   const R1_HDR=["training_outcome","training_modifications","day_factors",
     "injury_items", // rakenteinen kipulista: bodyPart:painLevel:direction:resolved, kohteet LIST_DELIM-erottimella
     "day_state_complete","day_state_body","day_state_energy","day_state_reasons",
     "day_state_input_sleep","day_state_input_sleep_goal","day_state_input_recovery","day_state_input_energy_rating",
     "day_state_input_highest_pain","day_state_input_prev_day_load",
     "day_state_model_version","day_state_snapshot_locked_at",
-    "created_at","updated_at","csv_schema_version"];
+    "created_at","updated_at","csv_schema_version",
+    "recovery_changed_at","energy_changed_at","pain_changed_at",
+    "day_state_recovery_changed_at","day_state_energy_changed_at","day_state_pain_changed_at","planned_lightening"];
   meds.forEach(m=>{hdr.push(`${m.name}_otettu`,`${m.name}_annos_${m.unit||"mg"}`);});
   const rows=Object.values(S.entries).sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
     const injItems2=getInjuryItems(e);
@@ -5044,6 +5057,9 @@ async function exportCSV(){
       v(ci.sleep),v(ci.sleep_goal),v(ci.recovery),v(ci.general_energy_rating),v(ci.highest_active_pain),v(ci.prev_day_load),
       v(e.day_state_model_version),v(e.day_state_snapshot_locked_at),
       v(e.created_at),v(e.updated_at),CSV_SCHEMA_VERSION);
+    const fc=e.field_changed_at||{}, sc=(snap&&snap.inputs_changed_at)||{};
+    cols.push(v(fc.recovery),v(fc.motivation),v(fc.injury),v(sc.recovery),v(sc.motivation),v(sc.injury),
+      e.planned_lightening===true?"true":e.planned_lightening===false?"false":"");
     return cols.map(csvCell).join(",");
   });
   const csv="\ufeff"+[[...hdr,...R1_HDR].map(csvCell).join(","),...rows].join("\r\n");
@@ -5298,8 +5314,14 @@ function adj(field,delta){
 
 // adjBP poistettu — verenpaine syötetään suoraan kentistä
 
+// Kenttäkohtainen muutosaika. Korvaa objektin (ei muokkausta paikallaan, ks. v2.9.4-korjaus) ja tallentaa ajan
+// jokaisesta muutoksesta. Päivän tilan tallenne kopioi ajat lukitushetkellä, joten analyysissä nähdään,
+// kuinka paljon ennen treenin kulun kirjausta lukitut arvot oli annettu.
+const FIELD_STAMP_KEYS=["recovery","motivation","injury"];
+function stampField(k){ S.field_changed_at={...(S.field_changed_at||{}),[k]:new Date().toISOString()}; }
 function setStars(field,val){
   S[field]=S[field]===val?null:val;
+  if(FIELD_STAMP_KEYS.includes(field)) stampField(field);
   haptic(6);
   const accent=field==="recovery"?"var(--green)":"var(--blue)";
   const container=document.getElementById("stars-"+field);
@@ -5435,6 +5457,9 @@ function normalizeImportedData(d){
       if("day_state_model_version" in e && !Number.isInteger(e.day_state_model_version)) e.day_state_model_version=null;
       if("day_state_snapshot_locked_at" in e && (typeof e.day_state_snapshot_locked_at!=="string"||isNaN(Date.parse(e.day_state_snapshot_locked_at)))) e.day_state_snapshot_locked_at=null;
       ["created_at","updated_at"].forEach(k=>{ if(k in e && (typeof e[k]!=="string"||isNaN(Date.parse(e[k])))) e[k]=null; });
+      if("field_changed_at" in e){ const f=e.field_changed_at; if(!f||typeof f!=="object"||Array.isArray(f)) delete e.field_changed_at;
+        else Object.keys(f).forEach(k=>{ if(typeof f[k]!=="string"||isNaN(Date.parse(f[k]))) f[k]=null; }); }
+      if("planned_lightening" in e && e.planned_lightening!==true && e.planned_lightening!==false) e.planned_lightening=null;
       if(!hasMeaningfulEntry(e)) delete d.entries[key];
     });
   }
@@ -5548,6 +5573,8 @@ function lockDayStateSnapshot(){
     general_energy:vire?vire.level:null,        // low | normal | high | null
     reasons:bs?(bs.reasonCodes||[]):[],         // rakenteiset syyt, ei UI-tekstiä
     captured_inputs:collectDayStateInputs(S.date), // kaikki lukitushetkellä kirjatut lähtötiedot, puuttuvat null
+    // v2.11.5: milloin lukitut tuntumatiedot oli viimeksi muutettu (null = ei tiedossa, esim. ennen v2.11.5 kirjattu)
+    inputs_changed_at:Object.fromEntries(FIELD_STAMP_KEYS.map(k=>[k,(S.field_changed_at||{})[k]??null])),
   };
   S.day_state_model_version=DAY_STATE_MODEL_VERSION;
   S.day_state_snapshot_locked_at=new Date().toISOString();
@@ -5560,9 +5587,14 @@ function setTrainingOutcome(id){
   if(next==="worse") S.showTrainingMods=true;
   haptic(6); saveDraft(); scheduleAutoSave(); renderTrainingSection();
 }
+function setPlannedLightening(v){
+  S.planned_lightening=S.planned_lightening===v?null:v;
+  haptic(6); saveDraft(); scheduleAutoSave(); renderTrainingSection();
+}
 function toggleTrainingMod(id){
   const a=S.training_modifications||[];
   S.training_modifications=a.includes(id)?a.filter(x=>x!==id):[...a,id];
+  if(id==="deliberate_lightening"&&!S.training_modifications.includes(id)) S.planned_lightening=null;
   haptic(6); saveDraft(); scheduleAutoSave(); renderTrainingSection();
 }
 function toggleDayFactor(id){
@@ -5944,6 +5976,7 @@ function renderInjurySelector(){
 }
 
 function injuryChanged(){
+  stampField("injury");
   saveDraft();
   renderPainCarry();
   renderInjurySelector();
@@ -6091,7 +6124,9 @@ function renderTrainingSection(){
         const show=S.training_outcome==="worse"||S.showTrainingMods||mods.length>0;
         if(!show) return `<button class="df-open" style="margin-top:8px" onclick="S.showTrainingMods=true;renderTrainingSection()">+ Treeni muuttui</button>`;
         return `<div style="margin-top:10px"><span class="lbl-small">Muuttuiko treeni suunnitellusta? (valinnainen)</span>
-          <div class="chips">${TRAINING_MODIFICATIONS.map(m=>`<button class="chip${mods.includes(m.id)?" on":""}" aria-pressed="${mods.includes(m.id)}" onclick="toggleTrainingMod('${m.id}')">${m.l}</button>`).join("")}</div></div>`;
+          <div class="chips">${TRAINING_MODIFICATIONS.map(m=>`<button class="chip${mods.includes(m.id)?" on":""}" aria-pressed="${mods.includes(m.id)}" onclick="toggleTrainingMod('${m.id}')">${m.l}</button>`).join("")}</div>
+          ${mods.includes("deliberate_lightening")?`<div style="margin-top:10px"><span class="lbl-small">Oliko kevennys suunniteltu etukäteen? (valinnainen)</span>
+            <div class="chips" style="flex-wrap:nowrap">${[[true,"Kyllä, suunniteltu"],[false,"Ei, päätin treenissä"]].map(([v,l])=>`<button class="chip grow${S.planned_lightening===v?" on":""}" aria-pressed="${S.planned_lightening===v}" onclick="setPlannedLightening(${v})">${l}</button>`).join("")}</div></div>`:""}</div>`;
       })()}
     </div>
     <div style="margin-bottom:10px">
