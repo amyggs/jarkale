@@ -805,7 +805,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.5</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.6</span>
       </div>
     </div>
   </div>
@@ -835,6 +835,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.6", d:"lokakuu 2026", items:[
+    "Tekoäly yhdistetty yhdeksi ominaisuudeksi: Kirjallinen yhteenveto mistä tahansa aikavälistä (myös viikosta). Valmis teksti kopioidaan tai jaetaan napilla.",
+    "Valmentajalle-raportti ja erillinen tekoälyn viikkokooste poistettu. Valmennusraportointi hoidetaan Järkäle PT:ssä, ja viikon kooste näkyy ilman tekoälyä viikkoyhteenvedossa.",
+    "Yhteenvedon suomen kieli parantunut: käytössä Claude Sonnet -malli ja tarkemmat kieliohjeet. Teksti kirjoitetaan neutraalisti ilman puhuttelua, joten sen voi jakaa sellaisenaan.",
+  ]},
   {v:"2.11.5", d:"lokakuu 2026", items:[
     "Sovellus tallentaa taustalla, milloin palautuminen, vire ja kipu on viimeksi muutettu, ja Päivän tilan tallenne ottaa ajat talteen lukitushetkellä. Tällä voidaan myöhemmin erottaa ennen treeniä annetut arviot jälkikäteen kirjatuista. Ei uusia napautuksia.",
     "Kun merkitset \"Kevensin tarkoituksella\", voit halutessasi kertoa, oliko kevennys suunniteltu etukäteen",
@@ -2846,60 +2851,22 @@ function buildPikakatsausHTML(wEntries, days, t, curr, goals) {
   </div>`;
 }
 
-function coachDataSufficient(wEntries) {
-  if(wEntries.length<3) return false;
-  return wEntries.some(e=>e.training_done||e.training_notes||getInjuryItems(e).length>0||
-    (e.notes&&e.notes.trim())) ||
-    wEntries.filter(e=>e.recovery!=null||e.motivation!=null).length>=2;
+// Kirjallinen yhteenveto (v2.11.6): yksi tekoälyominaisuus mille tahansa aikavälille, jaettavissa.
+// Korvaa aiemmat Viikkokoosteen ja Valmentajalle-raportin (Järkäle PT tekee valmentajaraportoinnin).
+function summaryMinEntries(start,end){
+  const days=Math.round((new Date(end+"T00:00:00")-new Date(start+"T00:00:00"))/864e5)+1;
+  return days<=7?3:7;
 }
-
 function buildAnalysisSectionHTML(wEntries, weekStart, rangeId, entryCount, start, end) {
-  const logged = wEntries.length;
-  const summaryReady = logged>=4;
-  const coachReady = coachDataSufficient(wEntries);
-  const periodReady = entryCount>=7;
-
-  // Jos tulos on jo generoitu tälle jaksolle, piilota käynnistysrivi — tulos näkyy jo omana korttinaan alempana
-  const hasCached=(key)=>{ try{ return !!localStorage.getItem(key); }catch(_){ return false; } };
-  const summaryDone = weekStart && hasCached(wsumCacheKey(weekStart));
-  const coachDone = weekStart && hasCached(coachCacheKey(weekStart));
-  const periodDone = start && end && hasCached(periodCacheKey(start,end));
-
-  const row = (icon, title, hint, ready, btnLabel, btnAction, done) => done ? "" : `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bord)">
-      <div>
-        <div style="font-size:13px;font-weight:500;color:${ready?"var(--text)":"var(--dim)"}">${icon} ${title}</div>
-        <div style="font-size:11px;color:var(--dim);margin-top:2px">${hint}</div>
-      </div>
-      <button onclick="${ready?btnAction:"return"}"
-        style="height:32px;padding:0 14px;border-radius:8px;border:1.5px solid ${ready?"var(--orange)":"var(--bord)"};
-          background:${ready?"rgba(201,162,39,.1)":"transparent"};
-          color:${ready?"var(--orange)":"var(--dim)"};font-size:13px;font-weight:600;
-          cursor:${ready?"pointer":"not-allowed"};flex-shrink:0">
-        ${ready?btnLabel:"Ei vielä"}
-      </button>
-    </div>`;
-
-  const summaryHint = summaryReady
-    ? "Viikon kirjausten analyysi"
-    : `Saatavilla ${logged}/4 kirjauksen jälkeen`;
-
-  const coachHint = coachReady
-    ? "Kooste jaettavaksi valmentajalle"
-    : "Tarvitaan treeni-, palautumis- tai kipumerkintöjä";
-
-  const periodHint = periodReady
-    ? "Pidemmän jakson analyysi"
-    : `${entryCount}/7 kirjausta — tarvitaan vähintään 7`;
-
-  const allDone = rangeId==="vko" ? (summaryDone&&coachDone) : periodDone;
-  if(allDone) return ""; // kaikki tämän jakson tulokset jo generoitu — vältä tyhjän otsikkokortin näyttäminen
-  return `<div style="background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:14px 15px;margin-bottom:12px">
-    <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">Analyysi</div>
-    ${rangeId==="vko"?`
-      ${row(ico("sparkle",16),"Viikkokooste",summaryHint,summaryReady,"Laadi",`triggerWeeklySummary('${weekStart}')`,summaryDone)}
-      ${row(ico("clipboard",16),"Valmentajalle",coachHint,coachReady,"Laadi",`triggerCoachReport('${weekStart||""}')`,coachDone)}
-    `:row(ico("sparkle",16),"Jaksoanalyysi",periodHint,periodReady,"Laadi",`triggerPeriodSummary('${start||""}','${end||""}')`,periodDone)}
+  if(!start||!end) return "";
+  const need=summaryMinEntries(start,end);
+  const ready=entryCount>=need;
+  let done=false; try{ done=!!localStorage.getItem(periodCacheKey(start,end)); }catch(_){}
+  if(done) return ""; // valmis yhteenveto näkyy omana korttinaan
+  return `<div class="card ai-start">
+    <div class="ttl-ico" style="font-size:14px;font-weight:700;color:${ready?"var(--text)":"var(--dim)"}">${ico("sparkle",17)}Kirjallinen yhteenveto</div>
+    <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">${ready?"Tekoäly kirjoittaa valitusta aikavälistä tiiviin yhteenvedon, jonka voit kopioida tai jakaa.":`${entryCount}/${need} kirjausta — tarvitaan vähintään ${need}.`}</div>
+    <button class="chip${ready?" on":""}" style="width:100%" ${ready?`onclick="triggerPeriodSummary('${start}','${end}')"`:"disabled"}>${ready?"Kirjoita yhteenveto":"Ei vielä"}</button>
   </div>`;
 }
 
@@ -2909,226 +2876,26 @@ const RTABS=[{id:"d28",l:"28 pv"},{id:"vko",l:"Vko"},{id:"kk",l:"Kk"},{id:"q",l:
 
 
 
-// ═══ VALMENTAJARAPORTTI ══════════════════════════════════════════
-
-function coachCacheKey(weekStart){return "seuranta-coach-"+weekStart;}
-
-function buildCoachPrompt(weekStart){
-  const days=[];
-  const mon=new Date(weekStart+"T00:00:00");
-  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);days.push(iso(d));}
-  const t=today();
-  const wEntries=days.filter(dt=>dt<=t).map(dt=>S.entries[dt]).filter(Boolean);
-  if(!wEntries.length) return null;
-
-  const weekEnd=days.filter(dt=>dt<=t).at(-1)||t;
-  const season=getCurrentSeason(weekEnd);
-  const g=getActiveGoals(weekEnd);
-
-  // Kooste datasta promptia varten — kunnioita piilotettuja seurantoja
-  const weights=trk("weight")?wEntries.filter(e=>e.weight).map(e=>e.weight):[];
-  const sleeps=trk("sleep")?wEntries.filter(e=>e.sleep).map(e=>e.sleep):[];
-  const recoveries=trk("recovery")?wEntries.filter(e=>e.recovery).map(e=>e.recovery):[];
-  const avg=arr=>arr.length?(arr.reduce((s,v)=>s+v,0)/arr.length).toFixed(1):null;
-  const trainingDays=trk("training")?wEntries.filter(e=>e.training_done):[];
-  const cardioDays=trk("cardio")?wEntries.filter(e=>e.cardio_done):[];
-  const trainingNotes=trk("training")?wEntries.filter(e=>e.training_notes).map(e=>`${e.date}: ${e.training_notes}`).join("; "):"";
-  const generalNotes=trk("notes")?wEntries.filter(e=>e.notes).map(e=>`${e.date}: ${e.notes}`).join("; "):"";
-  const injuryNotes=trk("injury")?wEntries.filter(e=>getInjuryItems(e).length>0||e.injury_notes).map(e=>{
-    const bits=[e.date];
-    const pain=aiPainText(e); if(pain) bits.push(pain);
-    if(e.injury_notes) bits.push(`kipuhuomio: "${e.injury_notes}"`);
-    return bits.join(": ");
-  }).join("\n"):"";
-  // Julkaisu 1 -tiedot: vain kirjatut, puuttuvaa ei tulkita
-  const outcomes=trainingDays.filter(e=>e.training_outcome).map(e=>`${e.date}: ${AI_OUTCOME_TXT[e.training_outcome]}${(e.training_modifications||[]).length?` (muutokset: ${e.training_modifications.map(m=>aiLabel(TRAINING_MODIFICATIONS,m)).join(", ")})`:""}`).join("; ");
-  const factors=wEntries.filter(e=>(e.day_factors||[]).length).map(e=>`${e.date}: ${e.day_factors.map(f=>aiLabel(DAY_FACTORS,f)).join(", ")}`).join("; ");
-  const types=[...new Set(trainingDays.filter(e=>e.training_type).map(e=>e.training_type))].join(", ");
-  const avgLoad=trainingDays.filter(e=>e.training_load).length
-    ?(trainingDays.filter(e=>e.training_load).reduce((s,e)=>s+e.training_load,0)/trainingDays.filter(e=>e.training_load).length).toFixed(1):null;
-
-  return `Kirjoita käyttäjän puolesta lyhyt viikkokooste jaettavaksi valmentajalle.
-
-EHDOTTOMAT SÄÄNNÖT:
-- Kirjoita minä-muodossa, sujuvalla ja luontevalla suomella
-- Vältä kömpelöitä lauserakenteita ja suoria käännösvaikutelmia
-- Lauseet lyhyitä ja selkeitä — älä kierrä tai selittele turhaan
-- EI Markdown-muotoilua — ei #, ei **, ei -listoja
-- Käytä selkeää rakennetta näillä OTSIKOILLA (kirjoita otsikko omalle rivilleen, kaksoispiste perään):
-  Treeni ja aktiivisuus:
-  Loukkaantumiset ja kivut:
-  Uni ja palautuminen:
-  Yleinen fiilis ja yhteenveto:
-- Jos osioon ei ole dataa, kirjoita "Ei raportoitavaa tältä viikolta."
-- Jokainen osio 2–3 lausetta — tiivis, ei täytesanoja
-- Perusta VAIN alla olevaan dataan — ei oletuksia, ei yleistyksiä
-- Kirjaa mitä tapahtui — älä anna neuvoja tai suosituksia
-- Vältä syy-seuraussuhteita: "saattoi vaikuttaa" ei "johtui". Älä yhdistä kipua, treenihuomioita ja poikkeamia toisiinsa, ellei käyttäjä ole itse kirjannut yhteyttä
-- Kiputaso X/5 on kivun voimakkuus. Pitkään ennallaan pysynyt kipu on jatkuva vaiva, ei uusi eikä paheneva
-- Ei tsemppipuhetta, ei kannustuksia, ei kehuita
-
-VIIKKO: ${days[0]}–${days[6]}
-KAUSI: ${season?season.name:"ei asetettu"}
-
-TREENIDATA:
-Treenipäiviä: ${trainingDays.length}/7
-Cardio-päiviä: ${cardioDays.length}/7
-Tyypit: ${types||"ei kirjattu"}
-Rasituksen ka: ${avgLoad?avgLoad+"/5":"ei kirjattu"}
-Treenin kulku omaan normaaliin nähden: ${outcomes||"ei kirjattu"}
-Treenihuomiot: ${trainingNotes||"ei huomioita"}
-Päivän poikkeamat (sairaus, stressi, matkustus ym.): ${factors||"ei kirjattu"}
-
-LOUKKAANTUMISET JA KIVUT:
-${injuryNotes||"ei merkintöjä"}
-
-UNI JA PALAUTUMINEN:
-Unen ka: ${avg(sleeps)?avg(sleeps)+"h":"ei kirjattu"} (tavoite ${g.sleepHours||7}h)
-Palautumisen ka: ${avg(recoveries)?avg(recoveries)+"/5":"ei kirjattu"}
-Yleisen vireen ka: ${(()=>{const m=avg(wEntries.filter(e=>e.motivation).map(e=>e.motivation));return m?m+"/5":"ei kirjattu";})()}
-
-PAINO:
-${weights.length?`Ka ${avg(weights)} kg, vaihteluväli ${Math.min(...weights).toFixed(1)}–${Math.max(...weights).toFixed(1)} kg`:"ei kirjattu"}
-
-YLEISET HUOMIOT:
-${generalNotes||"ei huomioita"}`;
-}
-
-function renderCoachCard(weekStart, state, text, error){
-  const el=document.getElementById("coach-report-card"); if(!el) return;
-
-  if(state==="empty"){
-    // Ei omaa käynnistysnappia — buildAnalysisSectionHTML on ainoa käynnistyspaikka
-    el.innerHTML="";
-    return;
-  }
-
-  if(state==="loading"){
-    el.innerHTML=`<div style="border:1px solid rgba(96,165,250,.2);border-radius:16px;padding:14px 16px;background:rgba(96,165,250,.03)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);animation:dotPulse 1.2s ease-in-out infinite"></div>
-        <span style="color:var(--blue);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Laaditaan raporttia</span>
-      </div>
-      <div style="height:12px;background:rgba(96,165,250,.1);border-radius:8px;margin-bottom:7px"></div>
-      <div style="height:12px;background:rgba(96,165,250,.1);border-radius:8px;width:75%;margin-bottom:7px"></div>
-      <div style="height:12px;background:rgba(96,165,250,.1);border-radius:8px;width:90%"></div>
-    </div>`;
-    return;
-  }
-
-  if(state==="error"){
-    el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Raportti epäonnistui</span>
-        <button onclick="triggerCoachReport('${weekStart}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
-      </div>
-      ${error?`<div style="color:var(--dim);font-size:11px">${error}</div>`:""}
-    </div>`;
-    return;
-  }
-
-  if(state==="done"&&text){
-    // Puhdista mahdolliset JSON/markdown-merkinnät ennen näyttöä
-    let cleanText=text.trim();
-    if(cleanText.startsWith("```json")||cleanText.startsWith("```")){
-      cleanText=cleanText.replace(/^```json\n?|^```\n?|```$/g,"").trim();
-    }
-    // Jos on JSON-objekti, yritä poimia viikkokooste-avain
-    if(cleanText.startsWith("{")){
-      try{
-        const parsed=JSON.parse(cleanText);
-        cleanText=parsed.viikkokooste||parsed.text||parsed.content||cleanText;
-      }catch(_){
-        // ei JSON, jätä sellaisenaan
-      }
-    }
-    // Muotoile raportti — otsikot erottuvat
-    const formatted=cleanText.split("\n").map(line=>{
-      const trimmed=line.trim();
-      if(!trimmed) return '<div style="height:8px"></div>';
-      // Otsikkorivi: päättyy kaksoispisteeseen ja on lyhyt
-      if(trimmed.endsWith(":") && trimmed.length<50){
-        return `<div style="font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.08em;margin-top:14px;margin-bottom:4px">${esc(trimmed)}</div>`;
-      }
-      return `<div style="font-size:13px;color:var(--text);line-height:1.65;margin-bottom:2px">${esc(trimmed)}</div>`;
-    }).join("");
-
-    const cached=JSON.parse(localStorage.getItem(coachCacheKey(weekStart))||"{}");
-    const mins=cached.ts?Math.round((Date.now()-cached.ts)/60000):null;
-    const ageStr=mins!==null?(mins<2?"juuri nyt":mins<60?`${mins} min sitten`:`${Math.round(mins/60)}h sitten`):"";
-
-    el.innerHTML=`<div style="border:1px solid rgba(96,165,250,.2);border-radius:16px;overflow:hidden">
-      <div style="padding:12px 16px;background:rgba(96,165,250,.05);border-bottom:1px solid rgba(96,165,250,.12);display:flex;align-items:center;justify-content:space-between">
-        <span style="color:var(--blue);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${ico("clipboard",14)} Valmentajaraportti</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
-          <button onclick="triggerCoachReport('${weekStart}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 5px;border-radius:5px;border:1px solid var(--bord)" title="Hae uudelleen">↻</button>
-          <button onclick="const b=document.getElementById('coach-body-${weekStart}');if(b){b.style.display=b.style.display==='none'?'block':'none'}" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 4px">▾</button>
-          <button onclick="document.getElementById('coach-report-card').style.display='none'" style="background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0 4px;line-height:1" title="Sulje">×</button>
-        </div>
-      </div>
-      <div id="coach-body-${weekStart}" style="padding:14px 16px">
-        ${formatted}
-      </div>
-      <div style="padding:12px 16px;border-top:1px solid var(--bord)">
-        <button onclick="copyCoachReport('${weekStart}')" id="copy-coach-btn" style="width:100%;height:42px;border-radius:12px;border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Kopioi raportti</button>
-      </div>
-    </div>`;
-  }
-}
-
-function initCoachCard(weekStart){
-  try{
-    const raw=localStorage.getItem(coachCacheKey(weekStart));
-    if(raw){const c=JSON.parse(raw);if(c.text){renderCoachCard(weekStart,"done",c.text);return;}}
-  }catch(_){}
-  renderCoachCard(weekStart,"empty");
-}
-
-async function triggerCoachReport(weekStart){
-  if(!weekStart){
-    // Laske nykyisen viikon maanantai
-    const td=new Date();const dow=td.getDay();const toMon=dow===0?-6:1-dow;
-    const mon=new Date(td);mon.setDate(td.getDate()+toMon);
-    weekStart=iso(mon);
-  }
-  renderCoachCard(weekStart,"loading");
-  try{
-    const prompt=buildCoachPrompt(weekStart);
-    if(!prompt){renderCoachCard(weekStart,"error",null,"Ei tarpeeksi dataa raporttia varten.");return;}
-    const text=await callClaudeForSummary(prompt);
-    localStorage.setItem(coachCacheKey(weekStart),JSON.stringify({text,ts:Date.now()}));
-    renderCoachCard(weekStart,"done",text);
-  }catch(e){
-    renderCoachCard(weekStart,"error",null,String(e).replace("Error: ",""));
-  }
-}
-
-async function copyCoachReport(weekStart){
-  try{
-    const raw=localStorage.getItem(coachCacheKey(weekStart));
-    if(!raw) return;
-    const {text}=JSON.parse(raw);
-    await navigator.clipboard.writeText(text);
-    const btn=document.getElementById("copy-coach-btn");
-    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="Kopioi raportti";btn.style.background="var(--blue)";},2000);}
-  }catch(_){
-    // Fallback vanhemmille selaimille
-    const raw=localStorage.getItem(coachCacheKey(weekStart));
-    if(!raw) return;
-    const {text}=JSON.parse(raw);
-    const ta=document.createElement("textarea");
-    ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
-    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
-    document.body.removeChild(ta);
-    const btn=document.getElementById("copy-coach-btn");
-    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="Kopioi raportti";btn.style.background="var(--blue)";},2000);}
-  }
-}
+// ═══ KIRJALLINEN YHTEENVETO (tekoäly) ════════════════════════════
 
 // ═══ JAKSOKOOSTEEN GENEROINTI (kk, q, vuosi, kaikki) ═══════════
 
 function periodCacheKey(start,end){return "seuranta-psummary-"+start+"-"+end;}
+function summaryShareText(start,end){
+  const f=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;};
+  return `Järkäle-yhteenveto ${f(start)}–${f(end)}\n\n${window._lastSummaryText||""}`;
+}
+async function copySummary(){
+  const btn=document.getElementById("sum-copy-btn");
+  const r=getRange(); const txt=summaryShareText(r.start,r.dataEnd);
+  try{ await navigator.clipboard.writeText(txt); if(btn){btn.textContent="✓ Kopioitu"; setTimeout(()=>{btn.textContent="Kopioi";},2000);} }
+  catch(_){ if(btn) btn.textContent="Kopiointi ei onnistunut"; }
+}
+async function shareSummary(start,end){
+  const txt=summaryShareText(start,end);
+  try{ if(navigator.share){ await navigator.share({text:txt}); return; } }catch(_){ return; }
+  copySummary();
+}
 
 function renderPeriodSummaryCard(start,end,state,text,error){
   const el=document.getElementById("period-summary-card"); if(!el) return;
@@ -3136,7 +2903,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
 
   if(state==="insufficient"){
     el.innerHTML=`<div style="border:1px dashed rgba(255,255,255,.1);border-radius:16px;padding:14px 16px;text-align:center">
-      <div style="color:var(--dim);font-size:13px;margin-bottom:4px">${ico("sparkle",15)} Jaksoanalyysi</div>
+      <div style="color:var(--dim);font-size:13px;margin-bottom:4px">${ico("sparkle",15)} Kirjallinen yhteenveto</div>
       <div style="color:var(--dim);font-size:11px">${text||"Ei tarpeeksi dataa — kirjaa vähintään 7 päivää"}</div>
     </div>`;
     return;
@@ -3152,7 +2919,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
     el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.04)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--orange);animation:dotPulse 1.2s ease-in-out infinite"></div>
-        <span style="color:var(--orange);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Analysoidaan</span>
+        <span style="color:var(--orange);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Kirjoitetaan</span>
       </div>
       <div style="height:12px;background:rgba(249,115,22,.1);border-radius:8px;margin-bottom:7px;animation:shimmer 1.5s linear infinite;background-size:200% auto;background-image:linear-gradient(90deg,rgba(249,115,22,.08) 0%,rgba(249,115,22,.18) 50%,rgba(249,115,22,.08) 100%)"></div>
       <div style="height:12px;background:rgba(249,115,22,.1);border-radius:8px;width:80%;animation:shimmer 1.5s linear infinite .2s;background-size:200% auto;background-image:linear-gradient(90deg,rgba(249,115,22,.08) 0%,rgba(249,115,22,.18) 50%,rgba(249,115,22,.08) 100%)"></div>
@@ -3163,7 +2930,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
   if(state==="error"){
     el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Jaksoanalyysi epäonnistui</span>
+        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Yhteenveto epäonnistui</span>
         <button onclick="triggerPeriodSummary('${start}','${end}')" style="flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
       </div>
       ${error?`<div style="color:var(--dim);font-size:11px;line-height:1.5">${error}</div>`:""}
@@ -3177,7 +2944,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
     const ageStr=mins!==null?(mins<2?"juuri nyt":mins<60?`${mins} min sitten`:`${Math.round(mins/60)}h sitten`):"";
     el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.03)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Jaksoanalyysi</span>
+        <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Kirjallinen yhteenveto</span>
         <div style="display:flex;align-items:center;gap:8px">
           ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
           <button onclick="triggerPeriodSummary('${start}','${end}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:8px;border:1px solid var(--bord)">↻</button>
@@ -3194,7 +2961,9 @@ function renderPeriodSummaryCard(start,end,state,text,error){
             cleanText=parsed.analyysi||parsed.summary||parsed.text||parsed.content||cleanText;
           }catch(_){/* ei JSON, jätä sellaisenaan */}
         }
-        return `<div style="color:var(--text);font-size:13px;line-height:1.65">${esc(cleanText).replace(/\n/g,"<br>")}</div>`;
+        window._lastSummaryText=cleanText;
+        return `<div style="color:var(--text);font-size:14px;line-height:1.65">${esc(cleanText).replace(/\n/g,"<br>")}</div>
+          <div class="chips" style="flex-wrap:nowrap;margin-top:12px"><button class="chip grow" id="sum-copy-btn" onclick="copySummary()">Kopioi</button><button class="chip grow" onclick="shareSummary('${start}','${end}')">Jaa</button></div>`;
       })()}
     </div>`;
     }catch(_){}
@@ -3213,10 +2982,10 @@ function buildPeriodPrompt(start,end,rangeLabel,curr){
   const dataStr=ue.map(e=>`  ${e.date} (${DAYS[new Date(e.date+"T00:00:00").getDay()]}): ${fmt(e)}`).join("\n")||"  ei kirjauksia";
 
   const focus=totalDays<=14
-    ?"Painota päivittäisiä yhteyksiä (uni vs palautuminen, treeni vs väsymys)."
+    ?"Lyhyt jakso: kuvaa päivätason vaihtelua ja poikkeavia päiviä."
     :totalDays<=60
-    ?"Painota viikoittaisia trendejä, painon kehitystä ja treenivolyymin muutoksia."
-    :"Painota pidempiä trendejä: painon kokonaiskehitys, loukkaantumisten kaari, harjoittelun kehitys kausien välillä.";
+    ?"Kuvaa viikoittaista kehitystä: painon suunta, unen ja treenien toteutuminen viikoittain."
+    :"Pitkä jakso: kuvaa kokonaiskehitystä, kuten painon kehitys, kipujen kulku ja harjoittelun määrä kausittain.";
 
   const profStr=[
     prof.height?`pituus ${prof.height}cm`:"",
@@ -3233,18 +3002,26 @@ function buildPeriodPrompt(start,end,rangeLabel,curr){
     prof.targetWeight?`tavoitepaino ${prof.targetWeight}kg`:"",
   ].filter(Boolean).join(", ");
 
-  return `Olet henkilökohtainen terveysdatan analyytikko. Kirjoita jaksoanalyysi.
+  return `Kirjoita kirjallinen yhteenveto alla olevasta jaksosta. Käyttäjä lukee sen itse ja voi jakaa sen sellaisenaan esimerkiksi valmentajalle.
 
-EHDOTTOMAT SÄÄNNÖT:
-- Kirjoita 3-5 lyhyttä lausetta
-- EI Markdown-muotoilua — ei #, ei **, ei listoja
-- Älä anna geneerisiä terveysneuvoja
-- Jokainen lause perustuu VAIN alla olevaan dataan
-- Käytä sinuttelua, kirjoita suomeksi
-- Huomiot, treenin kulku, poikkeamat ja kivut antavat kontekstia numeroille, mutta älä päättele niiden välille syy-yhteyksiä, joita käyttäjä ei ole itse kirjannut
+SISÄLTÖ:
+- 4–7 lyhyttä virkettä yhtenä tai kahtena kappaleena
+- Kerro, mitä jaksolla tapahtui, konkreettisin luvuin: paino ja sen suunta, uni, palautuminen ja vire, treenien määrä ja kulku, kivut sekä poikkeavat päivät, jos niitä on
+- Jos tavoitteet on asetettu, vertaa toteumaa niihin lukuina
+- Mainitse, jos kirjauksia on vähän tai jokin tieto puuttuu
 - ${focus}
-- Jos tavoitteet on asetettu, vertaa tuloksia niihin konkreettisesti lukuina
-- Jos jokin suunta herättää huomion, päätä yhteen kysymykseen ilman vastausta. Jos mitään huomionarvoista ei ole, älä keksi kysymystä
+- Älä anna neuvoja, älä esitä kysymyksiä äläkä päättele syy-yhteyksiä, joita käyttäjä ei ole itse kirjannut
+- Kirjoita neutraalisti ilman puhuttelua, esimerkiksi "Uni oli keskimäärin 6,9 h." – ei "nukuit" eikä "sinun"
+
+KIELI (tärkeää):
+- Kirjoita luontevaa, huoliteltua suomen yleiskieltä, kuin kokenut suomalainen toimittaja
+- Lyhyet, selkeät virkkeet. Oikeat sijamuodot ja taivutukset. Ei englannista käännettyjä rakenteita, ei anglismeja, ei keksittyjä sanoja
+- Käytä desimaalipilkkua (108,1 kg) ja suomalaisia lyhenteitä (h, kg, vko, pv)
+- Ei Markdown-muotoilua: ei #, ei **, ei luettelomerkkejä
+- Tarkista ennen vastaamista, että jokainen virke on kieliopillisesti oikein ja kuulostaa suomalaisen kirjoittamalta
+
+ESIMERKKI TYYLISTÄ (keksitty data):
+Jaksolla kirjattiin 26 päivää 28:sta. Painon viikkokeskiarvo laski 107,9 kilosta 107,1 kiloon, eli noin 0,2 kg viikossa. Uni oli keskimäärin 6,8 h, ja tavoite (7,5 h) täyttyi yhdeksänä yönä. Salitreenejä kertyi 18, joista kolme kulki tavallista heikommin; yksi niistä kevennettiin tarkoituksella. Oikean hauiksen kipu jatkui koko jakson tasolla 1–2/5 ennallaan.
 
 JAKSO: ${start} – ${end} (${totalDays} päivää, ${ue.length} kirjausta)
 KÄYTTÄJÄ: ${profStr||"ei profiilia"}
@@ -3256,11 +3033,12 @@ ${dataStr}`;
 
 function initPeriodSummaryCard(start,end,rangeLabel,curr){
   const ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end);
-  if(ue.length<7){
-    const need=7-ue.length;
+  const minN=summaryMinEntries(start,end);
+  if(ue.length<minN){
+    const need=minN-ue.length;
     const msg=ue.length===0
       ?"Ei kirjauksia tällä aikavälillä."
-      :`${ue.length} kirjausta — tarvitaan vähintään 7 ennen kuin yhteyksien löytäminen on mielekästä. Kirjaa vielä ${need} päivää.`;
+      :`${ue.length} kirjausta — yhteenveto tarvitsee vähintään ${minN}. Kirjaa vielä ${need} päivää.`;
     renderPeriodSummaryCard(start,end,"insufficient",msg);
     return;
   }
@@ -3667,8 +3445,7 @@ function renderTrendit() {
     contentEl.innerHTML=buildWeekView(start,range.end)+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+summTgl;
     requestAnimationFrame(()=>{
       runCountUp();
-      initWeeklySummaryCard(start);
-      initCoachCard(start);
+      if(S.trendToggles?.analysis) initPeriodSummaryCard(start,end,"viikko",null);
     });
     return;
   }
@@ -3756,84 +3533,6 @@ function renderTrendit() {
 // (ja yhdisteli erillisiä huomioita virheellisiksi syy-yhteyksiksi). Päivätasolla käytetään vain
 // sääntöpohjaista "Päivän huomiota"; tekoäly on viikko- ja jaksoanalyyseissä, joissa dataa riittää.
 
-function buildWeekDataPayload(weekStart) {
-  const days=[];
-  const mon=new Date(weekStart+"T00:00:00");
-  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);days.push(iso(d));}
-  const t=today();
-
-  const fmt=aiDayLine; // yhteinen, yksiselitteinen päivärivi (ks. aiDayLine)
-
-  const wEntries=days.filter(dt=>dt<=t).map(dt=>S.entries[dt]).filter(Boolean);
-  const thisWeek=wEntries.map(e=>`  ${e.date} (${DAYS[new Date(e.date+"T00:00:00").getDay()]}): ${fmt(e)}`).join("\n")||"  ei kirjauksia";
-
-  // Edellinen viikko
-  const prevMon=new Date(mon); prevMon.setDate(mon.getDate()-7);
-  const prevDays=[];
-  for(let i=0;i<7;i++){const d=new Date(prevMon);d.setDate(prevMon.getDate()+i);prevDays.push(iso(d));}
-  const prevEntries=prevDays.map(dt=>S.entries[dt]).filter(Boolean);
-  const prevWeek=prevEntries.map(e=>`  ${e.date}: ${fmt(e)}`).join("\n")||"  ei kirjauksia";
-
-  // Painotrendi
-  const allW=[...Object.values(S.entries).filter(e=>e.weight).sort((a,b)=>a.date.localeCompare(b.date))];
-  const rate=calcWeightRate(allW.slice(-14).map(e=>({date:e.date,w:e.weight})));
-  const rateStr=rate==null?"":Math.abs(rate)<0.05?"Painotrendi: tasainen (alle 0.05 kg/viikko)":`Painotrendi: ${rate>0?"↑ +":"↓ "}${Math.abs(rate).toFixed(2)} kg/viikko`;
-
-  const prof=S.settings.profile||{};
-  const weekEnd=days.filter(d=>d<=today()).at(-1)||days[days.length-1];
-  const season=getCurrentSeason(weekEnd);
-
-  return {thisWeek, prevWeek, rateStr, prof, season, weekStart, weekEnd, days};
-}
-
-function buildWeeklyPrompt(payload) {
-  const {thisWeek, prevWeek, rateStr, prof, season, weekStart, weekEnd, days}=payload;
-  const profStr=[
-    prof.height?`pituus ${prof.height} cm`:"",
-    prof.targetWeight?`tavoitepaino ${prof.targetWeight} kg`:"",
-    season?`kausi: ${season.name}`:"",
-    rateStr,
-  ].filter(Boolean).join(", ");
-
-  const g=getActiveGoals(weekEnd);
-  const goalsStr=[
-    g.sleepHours?`uni ${g.sleepHours}h/yö`:"",
-    g.workoutsPerWeek?`treeniä ${g.workoutsPerWeek}/vko`:"",
-    g.cardioPerWeek?`cardioa ${g.cardioPerWeek}/vko`:"",
-    prof.targetWeight?`tavoitepaino ${prof.targetWeight}kg`:"",
-  ].filter(Boolean).join(", ");
-
-  const entryCount=Object.values(S.entries).filter(e=>e.date>=days[0]&&e.date<=days[6]).length;
-  const dataQualityHint=entryCount<=1?"Dataa on vasta 1 kirjaus — älä tee trendihavaintoja":
-    entryCount<=3?"Dataa on "+entryCount+" kirjausta — mainitse jos data on niukkaa":"";
-
-  return `Analysoi viikon kirjaukset ja palauta havainto JSON-muodossa (ilman koodilaatikoita).
-
-KÄYTTÄJÄ: ${profStr||"ei profiilia"}
-TAVOITTEET: ${goalsStr||"ei asetettu"}
-${dataQualityHint?`HUOMIO: ${dataQualityHint}`:""}
-
-TÄMÄ VIIKKO (${days[0]}–${days[6]}):
-${thisWeek}
-
-EDELLINEN VIIKKO:
-${prevWeek}
-
-Palauta tämä JSON:
-{
-  "status": "ok",
-  "data_quality": "low|medium|high",
-  "confidence": "low|medium|high",
-  "summary": "1-2 lausetta: mitä viikolla tapahtui konkreettisesti lukuina. Vertaile edelliseen jos mahdollista.",
-  "key_observation": "1-2 lausetta: merkittävin yhteys tai poikkeama. Muoto: tätä kannattaa seurata, ei tee näin. Tyhjä jos ei olennaista.",
-  "question": "Yksi konkreettinen kysymys tai seurattava asia. Tyhjä jos ei relevantti."
-}
-Jos kirjauksia on alle 2, palauta status insufficient_data.`;
-}
-
-// ─── Tekoälyn syöte: yhtenäinen, yksiselitteinen päivärivi ─────────
-// Jokainen tieto omalla nimetyllä kentällään. Kipu kerrotaan AINA kiputasona + suunta + kesto,
-// jotta malli ei tulkitse "Hauis 1/5" toimintakyvyksi eikä pitkää tasaista kipua muutokseksi.
 const AI_OUTCOME_TXT={worse:"heikommin kuin normaalisti",normal:"normaalisti",better:"paremmin kuin normaalisti"};
 const AI_DIR_TXT={paranee:"paranee",sama:"ennallaan",pahenee:"pahenee"};
 function aiLabel(list,id){ const x=list.find(o=>o.id===id); return x?x.l.toLowerCase():id; }
@@ -3893,7 +3592,7 @@ function aiDayLine(e){
 const AI_BASE_RULES = `Olet Järkäle tracking -sovelluksen datatulkinta-assistentti.
 Tehtäväsi on auttaa käyttäjää huomaamaan mitä hänen itse kirjaamassaan datassa tapahtuu.
 Säännöt:
-- Kirjoita aina suomeksi
+- Kirjoita aina luontevaa, kieliopillisesti oikeaa suomea (ei käännösrakenteita eikä anglismeja)
 - Ole lyhyt, tarkka ja käytännöllinen
 - Perusta kaikki VAIN annettuun dataan
 - Älä tee lääketieteellisiä diagnooseja tai hoito-ohjeita
@@ -3915,7 +3614,10 @@ const AI_TEXT_SYSTEM_PROMPT = `${AI_BASE_RULES}
 - Palauta vastaus selkeänä suomenkielisenä leipätekstinä
 - Älä käytä JSONia, Markdownia tai koodilaatikoita`;
 
-async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600) {
+// v2.11.6: kirjallinen yhteenveto käyttää Sonnetia (Haikun suomi oli kömpelöä). Jos malli ei ole avaimen
+// käytettävissä, kutsu tehdään automaattisesti Haikulla.
+const AI_MODEL_TEXT="claude-sonnet-5-5", AI_MODEL_FALLBACK="claude-haiku-4-5-20251001";
+async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600, model=AI_MODEL_FALLBACK) {
   const apiKey=getApiKey();
   if(!apiKey) throw new Error("API-avain puuttuu — lisää se Asetuksista");
   let resp;
@@ -3929,7 +3631,7 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600) {
         "anthropic-dangerous-direct-browser-access":"true"
       },
       body:JSON.stringify({
-        model:"claude-haiku-4-5-20251001",
+        model,
         max_tokens:maxTokens,
         system: systemPrompt,
         messages:[{role:"user",content:userPrompt}]
@@ -3937,6 +3639,9 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600) {
     });
   }catch(e){
     throw new Error("Verkkovirhe — tarkista yhteys");
+  }
+  if((resp.status===404||resp.status===400)&&model!==AI_MODEL_FALLBACK){
+    return callClaudeAI(systemPrompt,userPrompt,maxTokens,AI_MODEL_FALLBACK);
   }
   if(resp.status===401) throw new Error("API-avain virheellinen — tarkista Asetuksista");
   if(resp.status===429) throw new Error("Liikaa pyyntöjä — yritä hetken kuluttua");
@@ -3949,7 +3654,7 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600) {
 
 // Tekstivastaus — valmentajaraportti + jaksoanalyysi käyttävät tätä
 async function callClaudeForText(prompt) {
-  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 1000);
+  return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 1000, AI_MODEL_TEXT);
 }
 async function callClaudeForSummary(prompt) { return callClaudeForText(prompt); } // taaksepäin yhteensopiva nimi
 
@@ -3963,118 +3668,6 @@ async function callClaudeForJSON(userPrompt, maxTokens=500) {
     return { status:"error", summary: text };
   }
 }
-
-function wsumCacheKey(weekStart){return "seuranta-wsummary-"+weekStart;}
-
-function loadCachedSummary(weekStart){
-  try{
-    const raw=localStorage.getItem(wsumCacheKey(weekStart));
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(_){return null;}
-}
-
-function saveSummaryCache(weekStart, result){
-  try{localStorage.setItem(wsumCacheKey(weekStart),JSON.stringify({result,ts:Date.now()}));}catch(_){}
-}
-
-function renderSummaryCard(weekStart, state, text, error){
-  const el=document.getElementById("weekly-summary-card");
-  if(!el) return;
-
-  if(state==="empty"){
-    // Ei omaa käynnistysnappia — buildAnalysisSectionHTML on ainoa käynnistyspaikka
-    el.innerHTML="";
-    return;
-  }
-
-  if(state==="loading"){
-    el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.04)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--orange);animation:dotPulse 1.2s ease-in-out infinite"></div>
-        <span style="color:var(--orange);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Analysoidaan</span>
-      </div>
-      <div style="height:12px;background:rgba(249,115,22,.1);border-radius:8px;margin-bottom:7px;animation:shimmer 1.5s linear infinite;background-size:200% auto;background-image:linear-gradient(90deg,rgba(249,115,22,.08) 0%,rgba(249,115,22,.18) 50%,rgba(249,115,22,.08) 100%)"></div>
-      <div style="height:12px;background:rgba(249,115,22,.1);border-radius:8px;width:80%;animation:shimmer 1.5s linear infinite .2s;background-size:200% auto;background-image:linear-gradient(90deg,rgba(249,115,22,.08) 0%,rgba(249,115,22,.18) 50%,rgba(249,115,22,.08) 100%)"></div>
-    </div>`;
-    return;
-  }
-
-  if(state==="error"){
-    el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Viikkokooste epäonnistui</span>
-        <button onclick="triggerWeeklySummary('${weekStart}')" style="flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
-      </div>
-      ${error?`<div style="color:var(--dim);font-size:11px;line-height:1.5">${error}</div>`:""}
-    </div>`;
-    return;
-  }
-
-  if(state==="done"){
-    const cached=loadCachedSummary(weekStart);
-    const mins=cached?Math.round((Date.now()-cached.ts)/60000):null;
-    const ageStr=mins!==null?(mins<2?"juuri nyt":mins<60?`${mins} min sitten`:`${Math.round(mins/60)}h sitten`):"";
-    const wsOpenEl=document.getElementById(`ws-body-${weekStart}`);
-    const wsOpen=!wsOpenEl||(wsOpenEl.style.display!=="none");
-
-    // Tuki JSON-objektille ja vanhoille tekstituloksille
-    const isJSON = text && typeof text === "object";
-    const summaryText = isJSON ? esc(text.summary||"") : (typeof text==="string" ? esc(text).replace(/\n/g,"<br>") : "");
-    const keyObs = isJSON ? esc(text.key_observation||"") : "";
-    const question = isJSON ? esc(text.question||"") : "";
-    const confidence = isJSON ? text.confidence : "";
-    const insuffData = isJSON && text.status==="insufficient_data";
-
-    el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.03)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Viikkokooste</span>
-          ${confidence&&confidence!=="high"?`<span style="font-size:10px;color:var(--dim)">${confidence==="low"?"Vähän dataa — trendi tarkentuu lisää kirjauksia":"Kohtalainen datamäärä — tulkitse suuntaa-antavana"}</span>`:""}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
-          <button onclick="triggerWeeklySummary('${weekStart}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:8px;border:1px solid var(--bord)">↻</button>
-        </div>
-      </div>
-      <div id="ws-body-${weekStart}" style="display:${wsOpen?"block":"none"}">
-      ${insuffData?`<div style="color:var(--dim);font-size:13px;line-height:1.6">${summaryText||"Dataa ei vielä tarpeeksi tulkintaan."}</div>`:
-      `<div style="color:var(--text);font-size:13px;line-height:1.65;margin-bottom:${keyObs||question?"10px":"0"}">${summaryText}</div>
-      ${keyObs?`<div style="background:rgba(249,115,22,.05);border-left:2px solid var(--orange);border-radius:0 6px 6px 0;padding:8px 10px;margin-bottom:${question?"8px":"0"};font-size:13px;color:var(--text);line-height:1.5">${keyObs}</div>`:""}
-      ${question?`<div style="font-size:13px;color:var(--orange);line-height:1.5;padding-top:2px">› ${question}</div>`:""}`}
-      </div>
-    </div>`;
-  }
-}
-
-
-function initWeeklySummaryCard(weekStart){
-  const cached=loadCachedSummary(weekStart);
-  if(cached){
-    // Tukee sekä uutta JSON-muotoa (result) että vanhaa teksti-muotoa (text)
-    const data = cached.result || cached.text;
-    if(data) { renderSummaryCard(weekStart,"done",data); return; }
-  }
-  renderSummaryCard(weekStart,"empty");
-}
-
-async function triggerWeeklySummary(weekStart){
-  renderSummaryCard(weekStart,"loading");
-  try{
-    const payload=buildWeekDataPayload(weekStart);
-    const prompt=buildWeeklyPrompt(payload);
-    const result=await callClaudeForJSON(prompt, 600);
-    if(result&&result.status==="error"){
-      renderSummaryCard(weekStart,"error",null,"AI-vastausta ei saatu jäsennettyä.");
-      return; // ei tallenneta virhevastausta onnistuneeseen cacheen
-    }
-    saveSummaryCache(weekStart, result);
-    renderSummaryCard(weekStart,"done", result);
-  }catch(e){
-    renderSummaryCard(weekStart,"error",null,String(e).replace("Error: ",""));
-  }
-}
-
 
 function buildWeekScoreHTML(days, wEntries){
   const t=today();
@@ -4168,12 +3761,10 @@ function buildWeekView(start, fullEnd) {
     h+=buildWeekScoreHTML(days,wEntries);
     h+=buildAnalysisSectionHTML(wEntries,start,"vko",wEntries.length,start,days.filter(dt=>dt<=t).at(-1)||t);
     h+=buildLoadBalanceHTML(days.filter(dt=>dt<=t).at(-1)||t);
-    h+=`<div id="weekly-summary-card" style="margin-bottom:4px"></div>`;
-    h+=`<div id="coach-report-card" style="margin-bottom:4px"></div>`;
+    h+=`<div id="period-summary-card" style="margin-bottom:12px"></div>`;
   } else {
     // Placeholderit aina DOM:issa AI-kutsuille
-    h+=`<div id="weekly-summary-card" style="display:none"></div>`;
-    h+=`<div id="coach-report-card" style="display:none"></div>`;
+    h+=`<div id="period-summary-card" style="display:none"></div>`;
   }
 
   return h;
@@ -4909,8 +4500,8 @@ function renderApiKeySection(){
     <div style="padding:10px 12px;background:var(--surf2);border-radius:12px;border:1px solid var(--bord)">
       <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">${ico("coin",13)} Kustannus</div>
       <div style="font-size:11px;color:var(--dim);line-height:1.7">
-        Käyttää Anthropicin halvinta mallia (Claude Haiku).<br>
-        Arvioitu kulutus <strong style="color:var(--text)">0,50–2 € vuodessa</strong>.<br>
+        Kirjallinen yhteenveto käyttää Claude Sonnet -mallia, koska sen suomi on selvästi parempaa.<br>
+        Yksi yhteenveto maksaa arviolta muutaman sentin; kulut syntyvät vain, kun painat nappia.<br>
         <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue);text-decoration:none">console.anthropic.com</a> → käyttö ja laskutus
       </div>
     </div>`;
@@ -4935,8 +4526,8 @@ function renderApiKeySection(){
     <div style="margin-top:10px;padding:10px 12px;background:var(--surf2);border-radius:12px;border:1px solid var(--bord)">
       <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">${ico("coin",13)} Kustannus</div>
       <div style="font-size:11px;color:var(--dim);line-height:1.7">
-        Järkäle käyttää Anthropicin halvinta mallia (Claude Haiku).<br>
-        Päivittäinen käyttö maksaa arviolta <strong style="color:var(--text)">0,50–2 € vuodessa</strong>.<br>
+        Kirjallinen yhteenveto käyttää Claude Sonnet -mallia, koska sen suomi on selvästi parempaa.<br>
+        Yksi yhteenveto maksaa arviolta muutaman sentin; kulut syntyvät vain, kun painat nappia.<br>
         Anthropic veloittaa suoraan käytön mukaan — ei kuukausimaksua.
       </div>
     </div>`;
@@ -6553,7 +6144,7 @@ function renderSaveInsight(insight){
 // ═══ INIT ═══════════════════════════════════════════════════════
 loadAll();
 // v2.9.1: poistetun tekoälyn päivähavainnon välimuistirivit pois (kertaluonteinen siivous, vaaraton toistaa)
-try{ for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith("jarkale-daily-")) localStorage.removeItem(k); } }catch(_){}
+try{ for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith("jarkale-daily-")||k.startsWith("seuranta-coach-")||k.startsWith("seuranta-wsummary-"))) localStorage.removeItem(k); } }catch(_){} // v2.11.6: poistettujen viikkokoosteen ja valmentajaraportin välimuistit
 // Trendit-näkymän muistetut valinnat (jakso + avatut osiot). Vapaa-jaksoa ei palauteta, koska sen päivämäärät eivät säily.
 try{
   const tu=JSON.parse(localStorage.getItem("jarkale-trend-ui")||"null");
