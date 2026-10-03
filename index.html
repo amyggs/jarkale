@@ -406,6 +406,22 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .tr-lb-row span:first-child{flex:1;}
 .tr-lb-row span:last-child{white-space:nowrap;}
 .tr-lb-info{font-size:11px;color:var(--dim);line-height:1.6;padding-bottom:6px;}
+.inj-card{background:var(--surf);border-radius:16px;padding:12px 14px 10px;margin-bottom:10px;}
+.inj-card.res{opacity:.85;}
+.inj-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.inj-name{display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px;flex:1;min-width:0;}
+.inj-name .ico{color:var(--orange);}
+.inj-lv{font-size:13px;font-weight:700;color:var(--dim);}
+.inj-ok{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--green);}
+.inj-head .pc-x{margin:-8px -10px -8px 0;}
+.inj-res{display:flex;align-items:center;gap:6px;min-height:40px;margin-top:6px;border:none;background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;padding:0;}
+.inj-select{width:100%;min-height:44px;background:var(--surf2);border:none;border-radius:12px;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;padding:0 12px;outline:none;box-sizing:border-box;}
+.inj-notes{width:100%;background:var(--surf2);border:none;border-radius:12px;color:var(--text);font:500 13px Manrope,system-ui,sans-serif;padding:10px 12px;resize:none;outline:none;box-sizing:border-box;margin-top:4px;}
+.td-chips .chip{padding:6px 2px;}
+.wr-backup{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 12px;background:var(--surf2);border-radius:12px;font-size:13px;font-weight:600;}
+.wr-backup .ico{color:var(--orange);}
+.wr-backup span{flex:1;}
+.wr-backup .chip{min-height:36px;padding:4px 12px;}
 .wr{margin-bottom:12px;}
 .wr-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
 .wr-title{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
@@ -808,7 +824,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.9</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.10</span>
       </div>
     </div>
   </div>
@@ -838,6 +854,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.10", d:"lokakuu 2026", items:[
+    "Suunniteltu vs. toteutunut treeni: aseta kerran viikkorytmi (Asetukset → Tavoitteet → Treenipäivät), niin viikkoyhteenveto näyttää, montako suunniteltua treeniä toteutui, muuttui tai jäi väliin, sekä ylimääräiset treenit. Mitään ei kysytä päivittäin. Kirjaamaton päivä näytetään erikseen, eikä sitä lasketa väliin jääneeksi.",
+    "Viikkoyhteenvedossa muistutus varmuuskopiosta, jos edellisestä on yli viikko",
+    "Kipuosio uudessa ulkoasussa: taso ja suunta samoilla painikkeilla kuin muualla, ei punaisia reunoja",
+  ]},
   {v:"2.11.9", d:"lokakuu 2026", items:[
     "Viikkoyhteenveto kertoo, montako treeniä kevennettiin tarkoituksella, ja miten Päivän tila jakautui treenipäivinä",
     "Viikkoyhteenvedosta poistettu unen vertailu heikommin kulkeneiden ja muiden treenien välillä. Yhden viikon otos on liian pieni vertailuun, joten yhteenveto vain kuvaa viikon.",
@@ -2514,6 +2535,41 @@ function goDate(ds){
   loadDayIntoForm(ds);
   renderLog();
 }
+// ═══ SUUNNITELTU VS. TOTEUTUNUT TREENI (v2.11.10) ═══
+// Viikkorytmi asetetaan kerran (Tavoitteet → Treenipäivät, kausikohtainen kuten muut tavoitteet).
+// Mitään ei kysytä eikä tallenneta päivittäin: tila päätellään nykyisistä kirjauksista.
+//   suunniteltu + treeni tehty ilman muutoksia → toteutui · muutoksilla → muuttui
+//   suunniteltu + päivä kirjattu ilman treeniä → jäi väliin · päivää ei kirjattu → ei tietoa (puuttuva ≠ väliin jäänyt)
+//   ei suunniteltu + treeni tehty → ylimääräinen
+function plannedTrainingDays(ds){ const t=getActiveGoals(ds).trainingDays; const v=Array.isArray(t)?t.filter(x=>Number.isInteger(x)&&x>=0&&x<=6):[]; return v.length?v:null; }
+function planStatusForRange(a,b){
+  if(!trk("training")) return null;
+  const t=today(); const out={planned:0,completed:0,modified:0,skipped:0,unknown:0,extra:0,anyPlan:false};
+  const d=new Date(a+"T00:00:00");
+  while(iso(d)<=b&&iso(d)<=t){
+    const ds=iso(d), plan=plannedTrainingDays(ds), e=S.entries[ds];
+    if(plan){ out.anyPlan=true;
+      const isPlanned=plan.includes(d.getDay()), done=!!(e&&e.training_done);
+      if(isPlanned){ out.planned++;
+        if(done) ((e.training_modifications||[]).length?out.modified++:out.completed++);
+        else if(e&&hasMeaningfulEntry(e)) out.skipped++;
+        else out.unknown++;
+      } else if(done) out.extra++;
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return out.anyPlan?out:null;
+}
+function toggleTrainingDay(dow,seasonId){
+  clearAllAnalysisCaches();
+  const season=seasonId?(S.settings.seasons||[]).find(s=>String(s.id)===String(seasonId)):null;
+  const tgt=season?(season.goals=season.goals||{}):(S.settings.goals=S.settings.goals||{});
+  const cur=Array.isArray(tgt.trainingDays)?tgt.trainingDays:(season&&Array.isArray(S.settings.goals?.trainingDays)?[...S.settings.goals.trainingDays]:[]);
+  const next=cur.includes(dow)?cur.filter(x=>x!==dow):[...cur,dow].sort((x,y)=>((x+6)%7)-((y+6)%7));
+  tgt.trainingDays=next.length?next:null;
+  saveAll(); renderGoals();
+}
+
 // ═══ VIIKKOYHTEENVETO (v2.11, sääntöpohjainen, offline) ═══════════
 // Laskee viikon (ma–su) tiedot S.entries:stä lennossa; ei tallenna mitään eikä keksi puuttuvia arvoja.
 // Kieli on kuvailevaa: havainto kertoo mitä kirjauksissa näkyy, ei syy-yhteyksiä.
@@ -2555,6 +2611,7 @@ function buildWeekRecap(weekStart){
     const r=ents.map(e=>e.recovery).filter(v=>v!=null);
     R.recovery={avg:r.length>=3?r1(avg(r)):null, n:r.length, low:r.filter(v=>v<=2).length};
   }
+  R.plan=planStatusForRange(weekStart,days[6]);
   // Päivän tila: lukittujen tallenteiden jakauma (vain kuvaus, ei yhteyttä treenin kulkuun)
   const ds={loaded:0,normal:0,recovered:0}; ents.forEach(e=>{ const b=e.day_state_snapshot&&e.day_state_snapshot.body_state; if(b&&ds[b]!=null) ds[b]++; });
   R.dayState={...ds, n:ds.loaded+ds.normal+ds.recovered};
@@ -2602,6 +2659,11 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
     const light=R.training.lightened?`<div class="wr-ctx">Kevennettiin tarkoituksella <b>${R.training.lightened}</b> ${R.training.lightened===1?"treeni":"treeniä"}</div>`:"";
     secs.push(sec("activity","Treenin kulku",`<div class="wr-ocl">${it(o.worse,"heikommin")}${it(o.normal,"normaalisti")}${it(o.better,"paremmin")}</div>${light}`));
   }
+  if(R.plan&&R.plan.planned+R.plan.extra){
+    const p=R.plan, it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
+    const ctx=[p.extra?(p.extra===1?"1 ylimääräinen treeni":`${p.extra} ylimääräistä treeniä`):"",p.unknown?(p.unknown===1?"1 suunniteltu päivä ilman kirjausta":`${p.unknown} suunniteltua päivää ilman kirjausta`):""].filter(Boolean).join(" · ");
+    secs.push(sec("calendar","Suunnitellut treenit",`<div class="wr-ocl">${it(p.completed,"toteutui")}${it(p.modified,"muuttui")}${it(p.skipped,"jäi väliin")}</div><div class="wr-ctx">Suunniteltuja ${R.complete?"":"tähän mennessä "}<b>${p.planned}</b>${ctx?` · ${ctx}`:""}</div>`));
+  }
   if(R.pains&&R.pains.length){
     const list=compact?R.pains.slice(0,3):R.pains;
     const dirTxt={paranee:"paranee",sama:"ennallaan",pahenee:"pahenee"};
@@ -2618,6 +2680,9 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   return `<div class="card wr">${head}
     ${tiles.length?`<div class="ws-stats wr-tiles">${tiles.join("")}</div>`:""}
     ${secs.join("")}
+    ${compact?(()=>{ let last=0; try{ last=parseInt(localStorage.getItem("lastExport")||"0"); }catch(_){}
+      const d=last?Math.floor((Date.now()-last)/864e5):null;
+      return (d===null||d>=7)?`<div class="wr-backup">${ico("save",16)}<span>${d===null?"Varmuuskopiota ei ole vielä tehty":`Varmuuskopiosta ${d} pv`}</span><button class="chip on" onclick="exportData().then(()=>renderWeekRecapCard())">Tee nyt</button></div>`:""; })():""}
     ${compact?`<button class="wr-link" onclick="openWeekInTrends('${R.weekStart}')">Avaa viikko Trendeissä ›</button>`:""}
   </div>`;
 }
@@ -3050,6 +3115,8 @@ function summaryFacts(start,end){
       L.push(`Rinnakkaisvertailu heikommin kulkeneiden (${W.length}) ja muiden arvioitujen treenien (${O.length}) välillä — ${parts.join("; ")}. ${W.length<20?"Alustava: otos on pieni. ":""}Kyse on samanaikaisuudesta, ei syystä.`);
     }
   }
+  const PL=planStatusForRange(start,end);
+  if(PL&&PL.planned) L.push(`Suunnitellut treenipäivät (viikkorytmi): ${PL.planned}, joista toteutui ${PL.completed}, muuttui ${PL.modified}, jäi väliin ${PL.skipped} ja ei kirjausta ${PL.unknown}. Ylimääräisiä treenejä ${PL.extra}.`);
   // Poikkeamat ja seuraavan päivän palautuminen
   const fac={}; C.ue.forEach(e=>(e.day_factors||[]).forEach(f=>{(fac[f]=fac[f]||[]).push(e.date);}));
   if(Object.keys(fac).length){
@@ -4509,6 +4576,11 @@ function renderGoals() {
     seasonBanner + targetRow +
     row('sleepHours',       'Unitavoite',          'h',   '7') +
     row('workoutsPerWeek',  'Treeniä viikossa',    'krt', '4') +
+    (()=>{ const td=Array.isArray(g.trainingDays)?g.trainingDays:[]; const DL=[[1,"ma"],[2,"ti"],[3,"ke"],[4,"to"],[5,"pe"],[6,"la"],[0,"su"]];
+      return `<div style="padding:9px 0;border-bottom:1px solid var(--bord)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="color:var(--dim);font-size:13px">Treenipäivät (viikkorytmi)</span><span style="color:var(--dim);font-size:11px">${td.length?`${td.length} pv/vko`:"ei asetettu"}</span></div>
+        <div class="chips td-chips" style="flex-wrap:nowrap">${DL.map(([d,l])=>`<button class="chip grow${td.includes(d)?" on":""}" aria-pressed="${td.includes(d)}" onclick="toggleTrainingDay(${d},'${season?.id||""}')">${l}</button>`).join("")}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5">Valinnainen. Viikkoyhteenveto näyttää, toteutuivatko suunnitellut treenit. Mitään ei kysytä päivittäin.</div></div>`; })() +
     row('cardioPerWeek',    'Cardiota viikossa',   'krt', '2') +
     row('measurementIntervalDays', 'Mittausväli',  'pv',  '28');
 }
@@ -5604,30 +5676,23 @@ function renderInjurySelector(){
   const el=document.getElementById("injury-selector"); if(!el) return;
   const items=S.injury_items;
 
-  // Olemassa olevat kipukohteet
+  // Olemassa olevat kipukohteet (v2.11.10: A-ulkoasu — neutraali kortti, segmenttitaso, suunta chipeinä)
+  const DIR_TXT={paranee:"Paranee",sama:"Ennallaan",pahenee:"Pahenee"};
   const existingHTML=items.map((item,idx)=>{
     const part=INJURY_PARTS.find(p=>p.id===item.bodyPart);
-    const dir=item.direction?INJURY_DIRS.find(d=>d.id===item.direction):null;
-    return `<div style="background:var(--surf2);border:1.5px solid ${item.resolved?"var(--green)":"rgba(248,113,113,.3)"};border-radius:12px;padding:10px 12px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="color:${item.resolved?"var(--green)":"var(--red)"};font-size:13px;font-weight:600">${part?part.l:"Tuntematon"}${item.painLevel?" · "+item.painLevel+"/5":""}</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          ${item.resolved?`<span style="font-size:11px;color:var(--green)">✓ Ohi</span>`:`<button onclick="toggleInjuryResolved(${idx})" style="height:26px;padding:0 10px;border-radius:8px;border:1.5px solid var(--green);background:rgba(94,209,138,.1);color:var(--green);font-size:11px;cursor:pointer">Kipu ohi</button>`}
-          <button onclick="removeInjuryItem(${idx})" style="background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0 2px">×</button>
-        </div>
+    const name=part?part.l:(INJURY_LEGACY[item.bodyPart]||"Tuntematon");
+    return `<div class="inj-card${item.resolved?" res":""}">
+      <div class="inj-head">
+        <span class="inj-name">${ico("bandage",16)}${esc(name)}</span>
+        ${item.resolved?`<span class="inj-ok">${ico("check",14)} Ohi</span>`:(item.painLevel?`<span class="inj-lv">${item.painLevel}/5</span>`:"")}
+        <button class="pc-x" aria-label="Poista ${esc(name)}" onclick="removeInjuryItem(${idx})">×</button>
       </div>
-      ${!item.resolved?`<div style="display:flex;gap:5px;margin-bottom:5px">
-        ${[1,2,3,4,5].map(n=>`<button onclick="setInjuryPainLevel(${idx},${n})"
-          style="flex:1;height:30px;border-radius:8px;border:1.5px solid ${item.painLevel===n?"var(--orange)":"var(--bord)"};
-            background:${item.painLevel===n?"rgba(249,115,22,.15)":"var(--surf)"};
-            color:${item.painLevel===n?"var(--orange)":"var(--dim)"};font-size:13px;font-weight:700">${n}</button>`).join("")}
-      </div>
-      <div style="display:flex;gap:5px">
-        ${INJURY_DIRS.map(d=>`<button onclick="setInjuryDir(${idx},'${d.id}')"
-          style="flex:1;height:28px;border-radius:8px;border:1.5px solid ${item.direction===d.id?d.col:"var(--bord)"};
-            background:${item.direction===d.id?`color-mix(in srgb,${d.col} 12%,transparent)`:"var(--surf)"};
-            color:${item.direction===d.id?d.col:"var(--dim)"};font-size:10px;font-weight:${item.direction===d.id?700:400}">${d.l}</button>`).join("")}
-      </div>`:``}
+      ${!item.resolved?`<span class="lbl-small">Taso</span>
+      <div class="stars inj-lvl">${[1,2,3,4,5].map(n=>`<button class="${item.painLevel===n?"active":""}" aria-pressed="${item.painLevel===n}" onclick="setInjuryPainLevel(${idx},${n})">${n}</button>`).join("")}</div>
+      <span class="lbl-small" style="margin-top:10px">Suunta</span>
+      <div class="chips" style="flex-wrap:nowrap">${INJURY_DIRS.map(d=>`<button class="chip grow${item.direction===d.id?" on":""}" aria-pressed="${item.direction===d.id}" onclick="setInjuryDir(${idx},'${d.id}')">${DIR_TXT[d.id]||d.l}</button>`).join("")}</div>
+      <button class="inj-res" onclick="toggleInjuryResolved(${idx})">${ico("check",15)} Kipu ohi</button>`
+      :`<button class="inj-res" onclick="toggleInjuryResolved(${idx})">Kumoa ohi-merkintä</button>`}
     </div>`;
   }).join("");
 
@@ -5647,13 +5712,10 @@ function renderInjurySelector(){
     ${INJURY_PARTS.filter(p=>p.g===g&&!activeParts.has(p.id)).map(p=>`<option value="${p.id}">${p.l}</option>`).join("")}
   </optgroup>`).join("");
   const addHTML=`<div style="margin-bottom:8px">
-    ${quick.length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">
-      ${quick.map(p=>`<button onclick="addInjuryItem('${p.id}')"
-        style="height:28px;padding:0 10px;border-radius:8px;border:1.5px solid var(--bord);
-          background:var(--surf2);color:var(--dim);font-size:11px">+ ${p.l}</button>`).join("")}
+    ${quick.length?`<div class="chips" style="margin-bottom:8px">
+      ${quick.map(p=>`<button class="chip" onclick="addInjuryItem('${p.id}')">+ ${p.l}</button>`).join("")}
     </div>`:""}
-    <select onchange="if(this.value){addInjuryItem(this.value);}"
-      style="width:100%;height:40px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--dim);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
+    <select class="inj-select" onchange="if(this.value){addInjuryItem(this.value);}">
       <option value="">+ Lisää kipupaikka…</option>
       ${optionsHTML}
     </select>
@@ -5661,7 +5723,7 @@ function renderInjurySelector(){
 
   el.innerHTML=existingHTML+addHTML+`<textarea id="inp-injury" placeholder="Lisätietoja (valinnainen)…" rows="2"
     oninput="S.injury_notes=this.value;saveDraft();scheduleAutoSave()"
-    style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:9px 12px;resize:none;outline:none;box-sizing:border-box;margin-top:6px">${esc(S.injury_notes)}</textarea>`;
+    class="inj-notes">${esc(S.injury_notes)}</textarea>`;
 }
 
 function injuryChanged(){
