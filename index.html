@@ -9,7 +9,8 @@
 <meta name="theme-color" content="#0a0a0a">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <title>Järkäle tracking</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -804,7 +805,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.3</span>
       </div>
     </div>
   </div>
@@ -834,6 +835,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.3", d:"lokakuu 2026", items:[
+    "Uusi kuvake uuden ulkoasun mukaisesti: tumma viiva-J ja piste kultaisella pohjalla. Androidin pyöreä kuvake ja iPhonen kotinäyttö saavat omat versionsa. Jos kotinäytön kuvake ei vaihdu, poista pikakuvake ja lisää se uudelleen (tiedot säilyvät).",
+  ]},
   {v:"2.11.2", d:"lokakuu 2026", items:[
     "Viikkoyhteenveto: korostettu havaintolaatikko poistettu (se toisti näkyvää tietoa). Treenin kulku yhdellä rivillä, ja sen alla rinnakkainen vertailu: kuinka usein uni jäi alle tavoitteen heikommin kulkeneina vs. muina treenipäivinä. Kivuissa \"jatkunut N pv\".",
   ]},
