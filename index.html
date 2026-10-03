@@ -378,6 +378,11 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .df-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;min-height:32px;}
 .df-close{width:44px;height:44px;margin:-6px -10px -6px 0;border:none;background:transparent;color:var(--dim);font-size:20px;}
 .ws-stat .s{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ico{flex:none;vertical-align:-0.22em;}
+.ico.dim{color:var(--dim);}
+.ico-tile{width:34px;height:34px;border-radius:10px;background:var(--surf2);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;flex:none;}
+.ttl-ico{display:flex;align-items:center;gap:9px;}
+.ttl-ico .ico{color:var(--orange);}
 .ch-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:11px;color:var(--dim);font-weight:600;}
 .ch-legend span{display:inline-flex;align-items:center;gap:6px;}
 .ch-legend .ln{width:16px;height:0;border-top:2.2px solid var(--text);display:inline-block;}
@@ -398,17 +403,37 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .tr-lb-row span:last-child{white-space:nowrap;}
 .tr-lb-info{font-size:11px;color:var(--dim);line-height:1.6;padding-bottom:6px;}
 .wr{margin-bottom:12px;}
-.wr-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:28px;}
-.wr-meta{font-size:12px;color:var(--dim);margin-left:auto;}
-.wr-head .pc-x{margin-left:0;}
-.wr-tiles{margin-top:0;margin-bottom:4px;}
-.wr-rows{margin-top:8px;}
-.wr-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--bord);font-size:13px;}
-.wr-row span:first-child{color:var(--dim);font-weight:600;flex:none;}
-.wr-row span:last-child{text-align:right;font-weight:600;line-height:1.5;}
-.wr-insight{margin-top:10px;padding:10px 12px;background:var(--surf2);border-radius:12px;font-size:13px;line-height:1.5;font-weight:600;}
+.wr-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
+.wr-title{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
+.wr-kicker{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);}
+.wr-week{font-size:17px;font-weight:800;color:var(--text);}
+.wr-week span{font-size:13px;font-weight:600;color:var(--dim);margin-left:4px;}
+.wr-meta{font-size:12px;font-weight:600;color:var(--dim);background:var(--surf2);border-radius:8px;padding:4px 8px;margin-top:2px;white-space:nowrap;}
+.wr-head .pc-x{margin:-4px -10px 0 -4px;}
+.ws-stat .k .ico{vertical-align:-2px;margin-right:2px;}
+.wr-tiles{margin-top:0;}
+.wr-sec{margin-top:14px;}
+.wr-sec-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--dim);margin-bottom:8px;}
+.wr-sec-h .ico{color:var(--orange);}
+.wr-oc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.wr-oc-c{background:var(--surf2);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;}
+.wr-oc-c b{font-size:18px;font-weight:800;line-height:1.2;}
+.wr-oc-c span{font-size:12px;font-weight:600;color:var(--dim);}
+.wr-oc-c.zero b{color:var(--dim);}
+.wr-pain{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--bord);font-size:14px;}
+.wr-sec-h + .wr-pain{border-top:none;padding-top:2px;}
+.wr-pain .n{font-weight:700;}
+.wr-pain .m{color:var(--dim);font-weight:600;font-size:13px;white-space:nowrap;}
+.wr-pain .m b{color:var(--text);}
+.wr-pain .m.ok{color:var(--green);display:inline-flex;align-items:center;gap:4px;}
+.wr-more{font-size:12px;color:var(--dim);font-weight:600;padding-top:4px;}
+.wr-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.wr-tag{display:inline-flex;align-items:center;gap:6px;background:var(--surf2);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;}
+.wr-tag b{color:var(--dim);font-weight:700;}
+.wr-insight{margin-top:14px;padding:12px;background:var(--surf2);border-radius:14px;font-size:14px;line-height:1.5;font-weight:600;display:flex;gap:10px;align-items:flex-start;}
+.wr-insight .ico-tile{background:var(--surf);}
 .wr-note{font-size:13px;color:var(--dim);line-height:1.5;}
-.wr-link{border:none;background:transparent;color:var(--orange);font:700 13px Manrope,system-ui,sans-serif;padding:10px 0 0;min-height:36px;}
+.wr-link{border:none;background:transparent;color:var(--orange);font:700 13px Manrope,system-ui,sans-serif;padding:12px 0 0;min-height:40px;}
 .mo-add{width:100%;min-height:46px;border-radius:12px;border:1.5px dashed var(--bord);background:transparent;color:var(--orange);font:700 14px Manrope,system-ui,sans-serif;margin-bottom:12px;}
 .mo-kpi{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bord);}
 .mo-kpi:first-of-type{border-top:none;}
@@ -460,10 +485,10 @@ span.mo-date{background:transparent;color:var(--dim);}
         <span style="color:var(--green);font-size:11px;font-weight:600">Kirjattu</span>
       </div>
       <div id="streak-display" style="display:none;align-items:center;gap:3px">
-        <span style="font-size:15px">🔥</span>
+        <span style="color:var(--orange);display:inline-flex"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z"/><path d="M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z"/></svg></span>
         <span id="streak-count" style="color:var(--orange);font-size:15px;font-weight:800;letter-spacing:-.5px"></span>
       </div>
-      <button id="theme-toggle-btn" onclick="toggleThemeBtn()" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--bord);background:var(--surf2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Vaihda teema">☀️</button>
+      <button id="theme-toggle-btn" onclick="toggleThemeBtn()" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--bord);background:var(--surf2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text)" title="Vaihda teema" aria-label="Vaihda teema"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3"/></svg></button>
       <div id="med-badge" style="display:none"></div>
     </div>
   </div>
@@ -495,7 +520,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="evening-note" style="display:none"></div>
       <div id="backup-reminder" style="display:none;margin-bottom:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:7px 12px;align-items:center;justify-content:space-between;cursor:pointer" onclick="exportData();this.style.display='none'">
         <div style="display:flex;align-items:center;gap:7px;min-width:0">
-          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap">💾 Tee varmuuskopio</span>
+          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg> Tee varmuuskopio</span>
           <span id="backup-days-text" style="color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
         </div>
         <button onclick="event.stopPropagation();document.getElementById('backup-reminder').style.display='none'" aria-label="Sulje muistutus" style="background:none;border:none;color:var(--dim);font-size:15px;line-height:1;padding:2px 6px;cursor:pointer">×</button>
@@ -503,7 +528,7 @@ span.mo-date{background:transparent;color:var(--dim);}
 
       <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">📏</span>
+          <span style="display:inline-flex;color:var(--purple)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="1.6"/><path d="M6.5 8v3M10 8v4M13.5 8v3M17 8v4"/></svg></span>
           <div>
             <div style="color:var(--purple);font-size:13px;font-weight:600">Kehon mittaus</div>
             <div id="meas-reminder-text" style="color:var(--dim);font-size:11px"></div>
@@ -655,7 +680,7 @@ span.mo-date{background:transparent;color:var(--dim);}
         <div id="med-cards"></div>
 
         <!-- Ryhmä: Huomio -->
-        <div id="track-notes-wrap"><div style="color:var(--dim);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 8px">📝 Huomio</div>
+        <div id="track-notes-wrap"><div style="color:var(--dim);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 8px">Huomio</div>
         <div style="margin-bottom:12px">
           <textarea id="inp-notes" placeholder="Vapaaehtoinen huomio…" rows="2" oninput="S.notes=this.value;updateSaveBtn(S.date,new Date(S.date+'T00:00:00').getDay())" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:11px 13px;resize:none;outline:none"></textarea>
         </div></div><!-- /track-notes-wrap -->
@@ -689,7 +714,7 @@ span.mo-date{background:transparent;color:var(--dim);}
 
       <!-- Profiili — aina näkyvissä -->
       <div class="card">
-        <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">👤 Profiili</div>
+        <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="4"/><path d="M4.6 20.5a7.4 7.4 0 0 1 14.8 0"/></svg>Profiili</div>
         <div id="prof-section"></div>
         <div id="gender-section"></div>
       </div>
@@ -707,7 +732,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="stgl-goals" style="margin-bottom:8px"></div>
       <div id="stgl-content-goals" style="display:none;margin-bottom:4px">
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">🎯 Tavoitteet</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r=".9"/></svg>Tavoitteet</div>
           <div id="goals-section"></div>
         </div>
       </div>
@@ -715,19 +740,19 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="stgl-training" style="margin-bottom:8px"></div>
       <div id="stgl-content-training" style="display:none;margin-bottom:4px">
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">🏋️ Treenityypit</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>Treenityypit</div>
           <div id="training-types-section"></div>
         </div>
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">🚴 Kardiolajit</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.8" cy="16.2" r="3.3"/><circle cx="18.2" cy="16.2" r="3.3"/><path d="M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8"/></svg>Kardiolajit</div>
           <div id="cardio-types-section"></div>
         </div>
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">❤️ Cardio-vyöhykkeet</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z"/><path d="M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2"/></svg>Cardio-vyöhykkeet</div>
           <div id="cardio-zone-settings"></div>
         </div>
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">📅 Kaudet</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Kaudet</div>
           <div id="seasons-section"></div>
         </div>
         <div class="card">
@@ -739,11 +764,11 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="stgl-technical" style="margin-bottom:8px"></div>
       <div id="stgl-content-technical" style="display:none;margin-bottom:4px">
         <div class="card" id="theme-card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">🎨 Teema</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z"/><circle cx="7.6" cy="11.2" r=".9"/><circle cx="10" cy="7.4" r=".9"/><circle cx="14.6" cy="7.4" r=".9"/></svg>Teema</div>
           <div id="theme-section"></div>
         </div>
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">🤖 Claude API</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z"/><path d="M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>Claude API</div>
           <div id="api-key-section"></div>
         </div>
       </div>
@@ -752,7 +777,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="stgl-data" style="margin-bottom:8px"></div>
       <div id="stgl-content-data" style="display:none;margin-bottom:4px">
         <div class="card">
-          <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:14px">💾 Varmuuskopiot ja tuonti</div>
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg>Varmuuskopiot ja tuonti</div>
           <button onclick="exportData()" class="btn-primary" style="width:100%;margin-bottom:8px">↓ Varmuuskopio (koko data)</button>
           <button onclick="exportCSV()" style="width:100%;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font-size:13px;font-weight:600;margin-bottom:10px">↓ CSV (Excel / Sheets)</button>
           <button onclick="exportForPT()" style="width:100%;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font-size:13px;font-weight:600;margin-bottom:10px">↓ Mittaukset Järkäle PT:lle</button>
@@ -774,7 +799,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.1</span>
       </div>
     </div>
   </div>
@@ -804,6 +829,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.1", d:"lokakuu 2026", items:[
+    "Oma ikonisarja emojien tilalle koko sovelluksessa (seurantavalinnat, asetukset, Päivän huomio, tekoälykortit, teemanappi)",
+    "Viikkoyhteenveto selkeämmäksi: treenin kulku omina laatikoinaan, kivut riveittäin (taso, suunta, kesto), poikkeamat tageina ja havainto omana korostettuna kohtanaan",
+    "Kuukautiskierron mielialavalinnat sanoina hymiöiden sijaan",
+  ]},
   {v:"2.11.0", d:"lokakuu 2026", items:[
     "Viikkoyhteenveto: maanantaina ja tiistaina Kirjaa-näkymän ylälaidassa edellisen viikon yhteenveto (painon viikkokeskiarvo ja muutos, treenit tavoitteeseen nähden, uni, palautuminen, treenin kulku, kivut, poikkeamat ja yksi havainto). Toimii ilman nettiä. Sama yhteenveto näkyy Trendien Vko-näkymässä.",
     "Trendit ja treeniosio uudessa ulkoasussa: ei emojeja, yksi korostusväri. Unen ja palautumisen kaaviot näyttävät 7 päivän liukuvan keskiarvon ja päiväarvot haaleina pisteinä.",
@@ -890,7 +920,7 @@ const CHANGELOG=[
     "Yhdeksän eri kokoista/pyöristettyä tallennuspainiketta yhtenäistetty samaan tyyliin",
     "Poistonappien väri korjattu käyttämään teemamuuttujaa — näkyi liian himmeänä tummassa teemassa",
     "Muokkaus- ja poistokuvakkeiden koot yhtenäistetty kaikkialla (kynä 15px, × 20px)",
-    "Kaksi eri \"tähti\"-symbolia (✦/✨) AI-ominaisuuksien merkkinä yhtenäistetty samaksi",
+    "Kaksi eri tähtisymbolia AI-ominaisuuksien merkkinä yhtenäistetty samaksi",
     "Korttien sisämarginaalit yhtenäistetty kahteen selkeään tyyliin (peruskortti / korostuskortti)",
   ]},
   {v:"2.5", d:"heinäkuu 2026", items:[
@@ -978,6 +1008,10 @@ const TRAINING_TYPES=[
 const CARDIO_TYPES=[
   "Kävely","Juoksu","Pyöräily","Uinti","HIIT","Soutu","Muu",
 ];
+// ═══ IKONIT (v2.11.1): oma viivaikonisarja emojien tilalle, väri currentColor ═══
+const ICONS={"scale": "<rect x=\"3.5\" y=\"4\" width=\"17\" height=\"16\" rx=\"4\"/><path d=\"M8 10.5a4.6 4.6 0 0 1 8 0\"/><path d=\"M12 11.5l1.8-2.6\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z\"/>", "steps": "<path d=\"M8.2 3.5c1.6 0 2.6 1.9 2.6 4.4 0 2.2-.9 3.6-2.4 3.6S5.8 10 5.8 7.8c0-2.4.9-4.3 2.4-4.3z\"/><path d=\"M6.4 14.5h3.9v1.6a1.95 1.95 0 0 1-3.9 0z\"/><path d=\"M15.8 7.5c1.5 0 2.4 1.9 2.4 4.3 0 2.2-1.1 3.7-2.6 3.7s-2.4-1.4-2.4-3.6c0-2.5 1-4.4 2.6-4.4z\"/><path d=\"M13.7 18.5h3.9v.6a1.95 1.95 0 0 1-3.9 0z\"/>", "ruler": "<rect x=\"2.5\" y=\"8\" width=\"19\" height=\"8\" rx=\"1.6\"/><path d=\"M6.5 8v3M10 8v4M13.5 8v3M17 8v4\"/>", "battery": "<rect x=\"2.5\" y=\"7\" width=\"16.5\" height=\"10\" rx=\"2.5\"/><path d=\"M21.5 10.5v3\"/><path d=\"M6 10.5v3M9.5 10.5v3M13 10.5v3\"/>", "bolt": "<path d=\"M13 2.8 5 13.4h6.6l-1 7.8 8-10.7h-6.7z\"/>", "dumbbell": "<path d=\"M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11\"/>", "bike": "<circle cx=\"5.8\" cy=\"16.2\" r=\"3.3\"/><circle cx=\"18.2\" cy=\"16.2\" r=\"3.3\"/><path d=\"M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8\"/>", "bandage": "<rect x=\"2.6\" y=\"8.4\" width=\"18.8\" height=\"7.2\" rx=\"3.6\" transform=\"rotate(-45 12 12)\"/><path d=\"M10.2 10.2h.01M13.8 13.8h.01M10.2 13.8h.01M13.8 10.2h.01\"/>", "heart": "<path d=\"M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z\"/><path d=\"M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2\"/>", "drop": "<path d=\"M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.6 12 3.2 12 3.2z\"/><path d=\"M9.3 14.4a2.8 2.8 0 0 0 2.4 2.6\"/>", "head": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M7.4 10.6 9.6 8.8l2 2.8 2.3-2.8 2.7 1.8\"/><path d=\"M9.2 15.6h5.6\"/>", "flower": "<circle cx=\"12\" cy=\"12\" r=\"2.3\"/><path d=\"M12 9.7c-1.6-2.6-1.6-4.6 0-6.2 1.6 1.6 1.6 3.6 0 6.2M14.3 12c2.6-1.6 4.6-1.6 6.2 0-1.6 1.6-3.6 1.6-6.2 0M12 14.3c1.6 2.6 1.6 4.6 0 6.2-1.6-1.6-1.6-3.6 0-6.2M9.7 12c-2.6 1.6-4.6 1.6-6.2 0 1.6-1.6 3.6-1.6 6.2 0\"/>", "pill": "<rect x=\"2.5\" y=\"9\" width=\"11.5\" height=\"6\" rx=\"3\"/><path d=\"M8.25 9v6\"/><circle cx=\"17.5\" cy=\"12\" r=\"3.8\"/><path d=\"M14.9 14.6l5.2-5.2\"/>", "note": "<path d=\"M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z\"/><path d=\"M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5\"/>", "sparkle": "<path d=\"M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z\"/><path d=\"M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 4.5v-.8a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 3.7v.8M8.8 10.5h6.4M8.8 14.5h4.2\"/>", "save": "<path d=\"M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z\"/><path d=\"M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.6\"/><circle cx=\"12\" cy=\"12\" r=\".9\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "user": "<circle cx=\"12\" cy=\"8.2\" r=\"4\"/><path d=\"M4.6 20.5a7.4 7.4 0 0 1 14.8 0\"/>", "palette": "<path d=\"M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z\"/><circle cx=\"7.6\" cy=\"11.2\" r=\".9\"/><circle cx=\"10\" cy=\"7.4\" r=\".9\"/><circle cx=\"14.6\" cy=\"7.4\" r=\".9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3\"/>", "phone": "<rect x=\"6.5\" y=\"2.8\" width=\"11\" height=\"18.4\" rx=\"2.5\"/><path d=\"M11 17.6h2\"/>", "sliders": "<path d=\"M4 6h10M4 12h4M12 12h8M4 18h12\"/><circle cx=\"17\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>", "flame": "<path d=\"M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z\"/><path d=\"M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z\"/>", "trophy": "<path d=\"M7.5 4.5h9v5a4.5 4.5 0 0 1-9 0z\"/><path d=\"M7.5 6.3H4.6a3 3 0 0 0 3.2 3.8M16.5 6.3h2.9a3 3 0 0 1-3.2 3.8M12 14v3.4M8.5 20.5h7M9.6 17.4h4.8\"/>", "trend_down": "<path d=\"M3 7.5l6 6 4-4 8 8\"/><path d=\"M15.2 17.5H21v-5.8\"/>", "trend_up": "<path d=\"M3 16.5l6-6 4 4 8-8\"/><path d=\"M15.2 6.5H21v5.8\"/>", "chart": "<path d=\"M3.5 20.5h17\"/><path d=\"M7 16.5V11M12 16.5V6.5M17 16.5v-4.5\"/>", "alert": "<path d=\"M10.3 4.3 2.9 17.6A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-2.9L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.2M12 16.8h.01\"/>", "bulb": "<path d=\"M9.2 18h5.6M10.2 21h3.6\"/><path d=\"M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/><path d=\"M13.5 6.5l4 4\"/>", "coin": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M15.2 8.8a4.1 4.1 0 1 0 0 6.4M7.6 11h5.6M7.6 13.4h5.6\"/>", "check": "<path d=\"M4.5 12.5l4.6 4.5L19.5 7\"/>", "activity": "<path d=\"M3 12h4l2.5-6.5 5 13L17 12h4\"/>", "nav_log": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/>"};
+function ico(n,s=18,cls=""){ const p=ICONS[n]; if(!p) return ""; return `<svg class="ico${cls?" "+cls:""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`; }
+function icoTile(n){ return `<span class="ico-tile">${ico(n,18)}</span>`; }
 const MEAS_FIELDS = [
   {k:"wn",    l:"Vyötärö napa"},
   {k:"wa",    l:"Vyötärö +5cm"},
@@ -1298,29 +1332,29 @@ function getTrackingGroups(){
   const isMale = S.settings.gender === "male";
   return [
     {label:"Mittaukset", items:[
-      {key:"weight",   lbl:"⚖️ Paino"},
-      {key:"sleep",    lbl:"🌙 Uni"},
-      {key:"steps",    lbl:"👟 Askeleet"},
-      {key:"body",     lbl:"📏 Kehon mitat ja rasvaprosentti"},
+      {key:"weight",   lbl:"Paino", icon:"scale"},
+      {key:"sleep",    lbl:"Uni", icon:"moon"},
+      {key:"steps",    lbl:"Askeleet", icon:"steps"},
+      {key:"body",     lbl:"Kehon mitat ja rasvaprosentti", icon:"ruler"},
     ]},
     {label:"Päivittäinen fiilis", items:[
-      {key:"recovery",   lbl:"🔋 Palautuminen (1–5)"},
-      {key:"motivation", lbl:"⚡ Yleinen vire (1–5)"},
+      {key:"recovery",   lbl:"Palautuminen (1–5)", icon:"battery"},
+      {key:"motivation", lbl:"Yleinen vire (1–5)", icon:"bolt"},
     ]},
     {label:"Treeni", items:[
-      {key:"training", lbl:"🏋️ Salitreeni"},
-      {key:"cardio",   lbl:"🚴 Cardio"},
+      {key:"training", lbl:"Salitreeni", icon:"dumbbell"},
+      {key:"cardio",   lbl:"Cardio", icon:"bike"},
     ]},
     {label:"Terveysseurannat", items:[
-      {key:"injury",    lbl:"🩹 Loukkaantumiset / kivut"},
-      {key:"bp",        lbl:"🩺 Verenpaine"},
-      {key:"bloodSugar",lbl:"🩸 Verensokeri"},
-      {key:"migraine",  lbl:"🤕 Migreeni"},
-      ...(!isMale ? [{key:"menstrual", lbl:"🌸 Kuukautiskierto"}] : []),
+      {key:"injury",    lbl:"Loukkaantumiset / kivut", icon:"bandage"},
+      {key:"bp",        lbl:"Verenpaine", icon:"heart"},
+      {key:"bloodSugar",lbl:"Verensokeri", icon:"drop"},
+      {key:"migraine",  lbl:"Migreeni", icon:"head"},
+      ...(!isMale ? [{key:"menstrual", lbl:"Kuukautiskierto", icon:"flower"}] : []),
     ]},
     {label:"Muut", items:[
-      {key:"medications", lbl:"💊 Lääkkeet"},
-      {key:"notes",       lbl:"📝 Vapaa huomio"},
+      {key:"medications", lbl:"Lääkkeet", icon:"pill"},
+      {key:"notes",       lbl:"Vapaa huomio", icon:"note"},
     ]},
   ];
 }
@@ -1407,7 +1441,7 @@ function renderTrackingSection(){
     g.items.forEach(item=>{
       const on=t[item.key]===true;
       h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid color-mix(in srgb,var(--bord) 50%,transparent)">
-        <span style="font-size:13px;color:${on?"var(--text)":"var(--dim)"}">${item.lbl}</span>
+        <span class="ttl-ico" style="font-size:13px;color:${on?"var(--text)":"var(--dim)"}">${ico(item.icon,18)}${item.lbl}</span>
         <button onclick="toggleTracking('${item.key}')"
           style="width:44px;height:26px;border-radius:12px;border:none;cursor:pointer;
             background:${on?"var(--orange)":"var(--surf2)"};position:relative;transition:background .2s;flex-shrink:0">
@@ -1419,7 +1453,7 @@ function renderTrackingSection(){
   const allKeys=getTrackingGroups().flatMap(g=>g.items.map(i=>i.key));
   const allOn=allKeys.every(k=>t[k]===true);
   if(!allOn) h+=`<button onclick="selectAllTracking()" style="width:100%;height:38px;border-radius:8px;border:1.5px solid var(--bord);background:transparent;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;margin-top:12px">Valitse kaikki</button>`;
-  if(!allKeys.some(k=>t[k]===true)) h+=`<div style="margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border-radius:8px;font-size:13px;color:var(--red)">⚠ Valitse ainakin yksi seuranta</div>`;
+  if(!allKeys.some(k=>t[k]===true)) h+=`<div style="margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border-radius:8px;font-size:13px;color:var(--red)">${ico("alert",15)} Valitse ainakin yksi seuranta</div>`;
   h+=`<button onclick="saveTrackingSettings(this)" class="btn-primary" style="width:100%;margin-top:14px">Tallenna valinnat</button>`;
   el.innerHTML=h;
 }
@@ -1470,7 +1504,7 @@ function renderSetupScreen(){
     g.items.forEach(item=>{
       const on=t[item.key]===true;
       h+=`<div onclick="toggleTrackingSetup('${item.key}')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:12px;border:1.5px solid ${on?"var(--orange)":"var(--bord)"};background:${on?"var(--orange-glow,rgba(201,162,39,.06))":"var(--surf)"};margin-bottom:6px;cursor:pointer;transition:all .15s">
-        <span style="font-size:13px;color:${on?"var(--text)":"var(--dim)"}">${item.lbl}</span>
+        <span class="ttl-ico" style="font-size:13px;color:${on?"var(--text)":"var(--dim)"}">${ico(item.icon,18)}${item.lbl}</span>
         <div style="width:22px;height:22px;border-radius:8px;border:1.5px solid ${on?"var(--orange)":"var(--bord)"};background:${on?"var(--orange)":"transparent"};display:flex;align-items:center;justify-content:center;flex-shrink:0">
           ${on?`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 5,9.5 10.5,2.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}
         </div>
@@ -1494,7 +1528,7 @@ function renderSetupScreen(){
   });
   if(activeHints.length>0){
     h+=`<div style="margin-top:16px;padding:12px 14px;background:var(--surf2);border-radius:12px;border:1px solid var(--bord)">
-      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">💡 Ehdotuksia</div>
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Ehdotuksia</div>
       ${activeHints.map(a=>`<div style="font-size:13px;color:var(--dim);line-height:1.6;padding:4px 0;border-bottom:1px solid color-mix(in srgb,var(--bord) 50%,transparent)">${a.hint}</div>`).join("")}
     </div>`;
   }
@@ -1666,7 +1700,7 @@ function updateThemeBtn(){
   const resolved=S.settings.theme==="system"
     ?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")
     :S.settings.theme;
-  btn.textContent=resolved==="dark"?"☀️":"🌙";
+  btn.innerHTML=ico(resolved==="dark"?"sun":"moon",17);
 }
 function applyTheme(theme){
   S.settings.theme=theme||"dark";
@@ -2488,7 +2522,7 @@ function buildWeekRecap(weekStart){
     R.pains=Object.values(last).map(it=>{
       const pt=INJURY_PARTS.find(x=>x.id===it.bodyPart);
       return {name:pt?pt.l:(INJURY_LEGACY[it.bodyPart]||it.bodyPart), resolved:!!it.resolved, level:it.painLevel??null,
-        dir:it.direction?(INJURY_DIRS.find(x=>x.id===it.direction)||{}).l?.replace(/^[↑→↓]\s*/,"")||null:null,
+        dirId:it.direction||null,
         days:it.resolved?null:painEpisodeDays(it.bodyPart,it.date)};
     }).sort((a,b)=>(a.resolved-b.resolved)||((b.level||0)-(a.level||0)));
   }
@@ -2527,29 +2561,42 @@ function weekRecapInsight(R,ents){
 function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   const wk=isoWeekNo(new Date(R.weekStart+"T00:00:00"));
   const fd=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.`;};
-  const head=`<div class="wr-head"><span class="lbl-small" style="margin:0">Viikko ${wk} · ${fd(R.weekStart)}–${fd(R.weekEnd)}</span>
-    <span class="wr-meta">${R.logged}/${R.passed} pv kirjattu</span>
-    ${dismissable?`<button class="pc-x" aria-label="Piilota viikkoyhteenveto" onclick="dismissWeekRecap('${R.weekStart}')">×</button>`:""}</div>`;
-  if(!R.enough) return `<div class="card wr">${head}<div class="wr-note">Yhteenveto tarvitsee vähintään ${WEEK_RECAP_MIN_LOGGED} kirjattua päivää. ${R.complete?"":"Viikko on vielä kesken."}</div></div>`;
-  const tile=(k,v,unit,s)=>`<div class="ws-stat"><div class="k">${k}</div><div class="v">${v}${unit&&v!=="–"?`<small> ${unit}</small>`:""}</div><div class="s">${s}</div></div>`;
+  const head=`<div class="wr-head">
+      <div class="wr-title"><span class="wr-kicker">${compact?"Viime viikko":"Viikko"}</span><span class="wr-week">Viikko ${wk} <span>${fd(R.weekStart)}–${fd(R.weekEnd)}</span></span></div>
+      <span class="wr-meta">${R.logged}/${R.passed} pv</span>
+      ${dismissable?`<button class="pc-x" aria-label="Piilota viikkoyhteenveto" onclick="dismissWeekRecap('${R.weekStart}')">×</button>`:""}
+    </div>`;
+  if(!R.enough) return `<div class="card wr">${head}<div class="wr-note">Yhteenveto tarvitsee vähintään ${WEEK_RECAP_MIN_LOGGED} kirjattua päivää.${R.complete?"":" Viikko on vielä kesken."}</div></div>`;
+  const tile=(icon,k,v,unit,sub)=>`<div class="ws-stat"><div class="k">${ico(icon,14,"dim")} ${k}</div><div class="v">${v}${unit&&v!=="–"?`<small> ${unit}</small>`:""}</div><div class="s">${sub}</div></div>`;
   const tiles=[];
-  if(R.weight) tiles.push(tile("Paino ka",R.weight.avg??"–","kg",R.weight.delta!=null?(R.weight.delta===0?"±0 edelliseen viikkoon":`${R.weight.delta>0?"+":"−"}${Math.abs(R.weight.delta)} kg edelliseen`):(R.weight.avg==null?`${R.weight.n} punnitusta`:"ei vertailuviikkoa")));
-  if(R.training) tiles.push(tile("Treenit",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`tavoite ${R.training.goal}`):"kirjattu"));
-  if(R.sleep) tiles.push(tile("Uni ka",R.sleep.avg??"–","h",R.sleep.n?`${R.sleep.below}/${R.sleep.n} alle ${R.sleep.goal} h`:"ei kirjattu"));
-  if(R.recovery) tiles.push(tile("Palautuminen",R.recovery.avg??"–","/ 5",R.recovery.n?(R.recovery.low?`matala ${R.recovery.low} pv`:"ei matalia päiviä"):"ei kirjattu"));
-  const rows=[];
+  if(R.weight){
+    const d=R.weight.delta;
+    const sub=d!=null?(d===0?"±0 edelliseen":`${d>0?"+":"−"}${Math.abs(d)} kg edelliseen`):(R.weight.avg==null?`${R.weight.n} punnitusta`:"ei vertailuviikkoa");
+    tiles.push(tile("scale","Paino ka",R.weight.avg??"–","kg",sub));
+  }
+  if(R.training) tiles.push(tile("dumbbell","Treenit",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`tavoite ${R.training.goal}`):"kirjattu"));
+  if(R.sleep) tiles.push(tile("moon","Uni ka",R.sleep.avg??"–","h",R.sleep.n?`${R.sleep.below}/${R.sleep.n} alle ${R.sleep.goal} h`:"ei kirjattu"));
+  if(R.recovery) tiles.push(tile("battery","Palautuminen",R.recovery.avg??"–","/ 5",R.recovery.n?(R.recovery.low?`matala ${R.recovery.low} pv`:"ei matalia päiviä"):"ei kirjattu"));
+  const sec=(icon,title,body)=>`<div class="wr-sec"><div class="wr-sec-h">${ico(icon,15)}<span>${title}</span></div>${body}</div>`;
+  const secs=[];
   if(R.training&&R.training.outcomeN){
     const o=R.training.outcomes;
-    rows.push(["Treenin kulku",[o.worse?`heikommin ${o.worse}`:"",o.normal?`normaalisti ${o.normal}`:"",o.better?`paremmin ${o.better}`:""].filter(Boolean).join(" · ")]);
+    const cell=(n,l)=>`<div class="wr-oc-c${n?"":" zero"}"><b>${n}</b><span>${l}</span></div>`;
+    secs.push(sec("activity","Treenin kulku",`<div class="wr-oc">${cell(o.worse,"heikommin")}${cell(o.normal,"normaalisti")}${cell(o.better,"paremmin")}</div>`));
   }
   if(R.pains&&R.pains.length){
-    rows.push(["Kivut",R.pains.slice(0,compact?2:6).map(p=>p.resolved?`${esc(p.name)}: ohi`:`${esc(p.name)} ${p.level?p.level+"/5":""}${p.dir?" · "+p.dir.toLowerCase():""}${p.days>1?` · ${p.days} pv`:""}`).join("<br>")+(compact&&R.pains.length>2?`<br>+${R.pains.length-2} muuta`:"")]);
+    const list=compact?R.pains.slice(0,3):R.pains;
+    const dirTxt={paranee:"paranee",sama:"ennallaan",pahenee:"pahenee"};
+    const rows=list.map(p=>`<div class="wr-pain"><span class="n">${esc(p.name)}</span>${p.resolved
+      ?`<span class="m ok">${ico("check",14)} ohi</span>`
+      :`<span class="m">${[p.level?`<b>${p.level}/5</b>`:"",p.dirId?dirTxt[p.dirId]:"",p.days>1?`${p.days} pv`:""].filter(Boolean).join(" · ")}</span>`}</div>`).join("");
+    secs.push(sec("bandage","Kivut",rows+(compact&&R.pains.length>3?`<div class="wr-more">+${R.pains.length-3} muuta</div>`:"")));
   }
-  if(R.factors.length) rows.push(["Poikkeamat",R.factors.map(f=>`${f.l} ${f.n} pv`).join(" · ")]);
+  if(R.factors.length) secs.push(sec("calendar","Poikkeamat",`<div class="wr-tags">${R.factors.map(f=>`<span class="wr-tag">${f.l}<b>${f.n} pv</b></span>`).join("")}</div>`));
   return `<div class="card wr">${head}
     ${tiles.length?`<div class="ws-stats wr-tiles">${tiles.join("")}</div>`:""}
-    ${rows.length?`<div class="wr-rows">${rows.map(([k,v])=>`<div class="wr-row"><span>${k}</span><span>${v}</span></div>`).join("")}</div>`:""}
-    ${R.insight?`<div class="wr-insight">${R.insight}</div>`:""}
+    ${secs.join("")}
+    ${R.insight?`<div class="wr-insight">${icoTile("bulb")}<span>${R.insight}</span></div>`:""}
     ${compact?`<button class="wr-link" onclick="openWeekInTrends('${R.weekStart}')">Avaa viikko Trendeissä ›</button>`:""}
   </div>`;
 }
@@ -2845,9 +2892,9 @@ function buildAnalysisSectionHTML(wEntries, weekStart, rangeId, entryCount, star
   return `<div style="background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:14px 15px;margin-bottom:12px">
     <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">Analyysi</div>
     ${rangeId==="vko"?`
-      ${row("✨","Viikkokooste",summaryHint,summaryReady,"Laadi",`triggerWeeklySummary('${weekStart}')`,summaryDone)}
-      ${row("📋","Valmentajalle",coachHint,coachReady,"Laadi",`triggerCoachReport('${weekStart||""}')`,coachDone)}
-    `:row("✨","Jaksoanalyysi",periodHint,periodReady,"Laadi",`triggerPeriodSummary('${start||""}','${end||""}')`,periodDone)}
+      ${row(ico("sparkle",16),"Viikkokooste",summaryHint,summaryReady,"Laadi",`triggerWeeklySummary('${weekStart}')`,summaryDone)}
+      ${row(ico("clipboard",16),"Valmentajalle",coachHint,coachReady,"Laadi",`triggerCoachReport('${weekStart||""}')`,coachDone)}
+    `:row(ico("sparkle",16),"Jaksoanalyysi",periodHint,periodReady,"Laadi",`triggerPeriodSummary('${start||""}','${end||""}')`,periodDone)}
   </div>`;
 }
 
@@ -2967,7 +3014,7 @@ function renderCoachCard(weekStart, state, text, error){
   if(state==="error"){
     el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">⚠ Raportti epäonnistui</span>
+        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Raportti epäonnistui</span>
         <button onclick="triggerCoachReport('${weekStart}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
       </div>
       ${error?`<div style="color:var(--dim);font-size:11px">${error}</div>`:""}
@@ -3007,7 +3054,7 @@ function renderCoachCard(weekStart, state, text, error){
 
     el.innerHTML=`<div style="border:1px solid rgba(96,165,250,.2);border-radius:16px;overflow:hidden">
       <div style="padding:12px 16px;background:rgba(96,165,250,.05);border-bottom:1px solid rgba(96,165,250,.12);display:flex;align-items:center;justify-content:space-between">
-        <span style="color:var(--blue);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">📋 Valmentajaraportti</span>
+        <span style="color:var(--blue);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${ico("clipboard",14)} Valmentajaraportti</span>
         <div style="display:flex;align-items:center;gap:6px">
           ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
           <button onclick="triggerCoachReport('${weekStart}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 5px;border-radius:5px;border:1px solid var(--bord)" title="Hae uudelleen">↻</button>
@@ -3019,7 +3066,7 @@ function renderCoachCard(weekStart, state, text, error){
         ${formatted}
       </div>
       <div style="padding:12px 16px;border-top:1px solid var(--bord)">
-        <button onclick="copyCoachReport('${weekStart}')" id="copy-coach-btn" style="width:100%;height:42px;border-radius:12px;border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:700;cursor:pointer">📋 Kopioi raportti</button>
+        <button onclick="copyCoachReport('${weekStart}')" id="copy-coach-btn" style="width:100%;height:42px;border-radius:12px;border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Kopioi raportti</button>
       </div>
     </div>`;
   }
@@ -3059,7 +3106,7 @@ async function copyCoachReport(weekStart){
     const {text}=JSON.parse(raw);
     await navigator.clipboard.writeText(text);
     const btn=document.getElementById("copy-coach-btn");
-    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="📋 Kopioi raportti";btn.style.background="var(--blue)";},2000);}
+    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="Kopioi raportti";btn.style.background="var(--blue)";},2000);}
   }catch(_){
     // Fallback vanhemmille selaimille
     const raw=localStorage.getItem(coachCacheKey(weekStart));
@@ -3070,7 +3117,7 @@ async function copyCoachReport(weekStart){
     document.body.appendChild(ta); ta.select(); document.execCommand("copy");
     document.body.removeChild(ta);
     const btn=document.getElementById("copy-coach-btn");
-    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="📋 Kopioi raportti";btn.style.background="var(--blue)";},2000);}
+    if(btn){btn.textContent="✓ Kopioitu!";btn.style.background="var(--green)";setTimeout(()=>{btn.textContent="Kopioi raportti";btn.style.background="var(--blue)";},2000);}
   }
 }
 
@@ -3084,7 +3131,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
 
   if(state==="insufficient"){
     el.innerHTML=`<div style="border:1px dashed rgba(255,255,255,.1);border-radius:16px;padding:14px 16px;text-align:center">
-      <div style="color:var(--dim);font-size:13px;margin-bottom:4px">✨ Jaksoanalyysi</div>
+      <div style="color:var(--dim);font-size:13px;margin-bottom:4px">${ico("sparkle",15)} Jaksoanalyysi</div>
       <div style="color:var(--dim);font-size:11px">${text||"Ei tarpeeksi dataa — kirjaa vähintään 7 päivää"}</div>
     </div>`;
     return;
@@ -3111,7 +3158,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
   if(state==="error"){
     el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">⚠ Jaksoanalyysi epäonnistui</span>
+        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Jaksoanalyysi epäonnistui</span>
         <button onclick="triggerPeriodSummary('${start}','${end}')" style="flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
       </div>
       ${error?`<div style="color:var(--dim);font-size:11px;line-height:1.5">${error}</div>`:""}
@@ -3125,7 +3172,7 @@ function renderPeriodSummaryCard(start,end,state,text,error){
     const ageStr=mins!==null?(mins<2?"juuri nyt":mins<60?`${mins} min sitten`:`${Math.round(mins/60)}h sitten`):"";
     el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.03)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">✨ Jaksoanalyysi</span>
+        <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Jaksoanalyysi</span>
         <div style="display:flex;align-items:center;gap:8px">
           ${ageStr?`<span style="color:var(--dim);font-size:10px">${ageStr}</span>`:""}
           <button onclick="triggerPeriodSummary('${start}','${end}')" style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:8px;border:1px solid var(--bord)">↻</button>
@@ -3951,7 +3998,7 @@ function renderSummaryCard(weekStart, state, text, error){
   if(state==="error"){
     el.innerHTML=`<div style="border:1px solid rgba(248,113,113,.2);border-radius:16px;padding:12px 16px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:${error?"8px":"0"}">
-        <span style="color:var(--red);font-size:13px;font-weight:600">⚠ Viikkokooste epäonnistui</span>
+        <span style="color:var(--red);font-size:13px;font-weight:600">${ico("alert",15)} Viikkokooste epäonnistui</span>
         <button onclick="triggerWeeklySummary('${weekStart}')" style="flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:11px;cursor:pointer">Uudelleen</button>
       </div>
       ${error?`<div style="color:var(--dim);font-size:11px;line-height:1.5">${error}</div>`:""}
@@ -3977,7 +4024,7 @@ function renderSummaryCard(weekStart, state, text, error){
     el.innerHTML=`<div style="border:1px solid rgba(249,115,22,.2);border-radius:16px;padding:14px 16px;background:rgba(249,115,22,.03)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">✨ Viikkokooste</span>
+          <span style="color:var(--orange);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">${ico("sparkle",14)} Viikkokooste</span>
           ${confidence&&confidence!=="high"?`<span style="font-size:10px;color:var(--dim)">${confidence==="low"?"Vähän dataa — trendi tarkentuu lisää kirjauksia":"Kohtalainen datamäärä — tulkitse suuntaa-antavana"}</span>`:""}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -4075,7 +4122,7 @@ function buildWeekView(start, fullEnd) {
   };
 
   // Päiväkohtaiset tiedot
-  h+=tgl("days","Päiväkohtaiset tiedot","📅");
+  h+=tgl("days","Päiväkohtaiset tiedot","");
   if(S.trendToggles?.days){
     // Vain menneet päivät, uusin ensin — tulevat poistettu
     const pastDays=[...days.filter(dt=>dt<=t).reverse()];
@@ -4111,7 +4158,7 @@ function buildWeekView(start, fullEnd) {
   }
 
   // Analyysi ja koosteet
-  h+=tgl("analysis","Analyysi ja koosteet","✨");
+  h+=tgl("analysis","Analyysi ja koosteet","");
   if(S.trendToggles?.analysis){
     h+=buildWeekScoreHTML(days,wEntries);
     h+=buildAnalysisSectionHTML(wEntries,start,"vko",wEntries.length,start,days.filter(dt=>dt<=t).at(-1)||t);
@@ -4167,7 +4214,7 @@ function renderMeasurements(){
   const all=[...HIST_MEAS,...(S.measurements||[])].sort((a,b)=>a.date.localeCompare(b.date));
   const el=document.getElementById("historia-content");
   if(!all.length && !MEAS_FORM.show){
-    el.innerHTML=`<div style="text-align:center;padding:50px 0"><div style="font-size:24px;margin-bottom:10px">📏</div><div style="color:var(--text);font-size:15px;font-weight:500">Ei mittauksia vielä</div><div style="color:var(--dim);font-size:13px;margin-top:6px;margin-bottom:18px">Lisää ensimmäinen mittauksesi</div><button onclick="showMeasForm()" class="btn-primary" style="padding:0 22px">+ Lisää mittaus</button></div>`;
+    el.innerHTML=`<div style="text-align:center;padding:50px 0"><div style="margin-bottom:12px"><span class="ico-tile" style="width:52px;height:52px;border-radius:16px">${ico("ruler",26)}</span></div><div style="color:var(--text);font-size:15px;font-weight:500">Ei mittauksia vielä</div><div style="color:var(--dim);font-size:13px;margin-top:6px;margin-bottom:18px">Lisää ensimmäinen mittauksesi</div><button onclick="showMeasForm()" class="btn-primary" style="padding:0 22px">+ Lisää mittaus</button></div>`;
     return;
   }
   const der=all.map(measDerived);
@@ -4269,8 +4316,8 @@ function buildMeasFormHTML(){
   const isFemale=(S.settings.gender==="female");
   const genderSet=(S.settings.gender==="male"||S.settings.gender==="female");
   const bfHint=!genderSet
-    ? `⚠ Valitse sukupuoli Asetuksista (Profiili) laskeaksesi rasvaprosentti- ja FFMI-arvion. Mittaukset tallentuvat silti normaalisti.`
-    : `💡 Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>💪 FFMI: lasketaan automaattisesti painosta, Navy-rasvaprosentista ja pituudesta. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
+    ? `${ico("alert",13)} Valitse sukupuoli Asetuksista (Profiili) laskeaksesi rasvaprosentti- ja FFMI-arvion. Mittaukset tallentuvat silti normaalisti.`
+    : `${ico("bulb",13)} Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>${ico("dumbbell",13)} FFMI: lasketaan automaattisesti painosta, Navy-rasvaprosentista ja pituudesta. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
   return `<div class="card" style="margin-bottom:14px;border-color:rgba(249,115,22,.4)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <span style="color:var(--text);font-weight:600">${f.editing?"Muokkaa mittausta":"Uusi mittaus"}</span>
@@ -4292,10 +4339,10 @@ function buildMeasFormHTML(){
     </div>
     ${(()=>{
       const sfFields=skinfoldFields();
-      if(!sfFields) return `<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px">⚠ Valitse sukupuoli Asetuksista, jotta voit kirjata ihopoimumittauksen (Jackson-Pollock).</div>`;
+      if(!sfFields) return `<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px">${ico("alert",13)} Valitse sukupuoli Asetuksista, jotta voit kirjata ihopoimumittauksen (Jackson-Pollock).</div>`;
       const ageOk=!!S.settings.profile?.age;
       return `<div style="margin-bottom:14px">
-        <div style="font-size:12px;color:var(--dim);margin-bottom:4px">📐 Ihopoimu (Jackson-Pollock 3-kohta) — vaihtoehtoinen rasvaprosenttiarvio, ei korvaa Navya${ageOk?"":". Aseta ikä Profiilissa, jotta tulos lasketaan."}</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:4px">${ico("ruler",14)} Ihopoimu (Jackson-Pollock 3-kohta) — vaihtoehtoinen rasvaprosenttiarvio, ei korvaa Navya${ageOk?"":". Aseta ikä Profiilissa, jotta tulos lasketaan."}</div>
         <div style="font-size:10px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:7px 9px;margin-bottom:9px;line-height:1.5">
           Lähde: Jackson & Pollock 1978 (miehet) / Jackson, Pollock & Ward 1980 (naiset), ACSM-protokolla.
           Mittaa aina kehon oikealta puolelta, mittari 1 cm sormista poimun puolivälistä, kohtisuoraan poimuun nähden.
@@ -4493,7 +4540,7 @@ function renderSeasons(){
         <div style="color:var(--text);font-size:13px;font-weight:600">${esc(s.name)}</div>
         <div style="color:var(--dim);font-size:11px">${s.startDate}${endDate?` – ${endDate}`:""}${s.durationWeeks?` · ${s.durationWeeks} vko`:""}</div>
       </div>
-      <button onclick="startEditSeason(${s.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 6px">✎</button>
+      <button onclick="startEditSeason(${s.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteSeason(${s.id})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
     </div>`;
   }).join("");
@@ -4570,9 +4617,9 @@ function deleteSeason(id){
 function renderTheme(){
   const el=document.getElementById("theme-section"); if(!el) return;
   const cur=S.settings.theme||"dark";
-  const opts=[{id:"dark",l:"🌙 Tumma"},{id:"light",l:"☀️ Vaalea"},{id:"system",l:"📱 Järjestelmä"}];
+  const opts=[{id:"dark",l:"Tumma",i:"moon"},{id:"light",l:"Vaalea",i:"sun"},{id:"system",l:"Järjestelmä",i:"phone"}];
   el.innerHTML=`<div style="display:flex;gap:8px">
-    ${opts.map(o=>`<button onclick="applyTheme('${o.id}')" style="flex:1;height:42px;border-radius:12px;border:1.5px solid ${cur===o.id?"var(--orange)":"var(--bord)"};background:${cur===o.id?"rgba(249,115,22,.12)":"var(--surf2)"};color:${cur===o.id?"var(--orange)":"var(--dim)"};font-size:13px;font-weight:${cur===o.id?700:400};transition:all .15s">${o.l}</button>`).join("")}
+    ${opts.map(o=>`<button onclick="applyTheme('${o.id}')" style="flex:1;height:42px;border-radius:12px;border:1.5px solid ${cur===o.id?"var(--orange)":"var(--bord)"};background:${cur===o.id?"rgba(249,115,22,.12)":"var(--surf2)"};color:${cur===o.id?"var(--orange)":"var(--dim)"};font-size:13px;font-weight:${cur===o.id?700:400};transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px">${ico(o.i,16)}${o.l}</button>`).join("")}
   </div>`;
 }
 
@@ -4585,7 +4632,7 @@ function renderSettingsToggle(key, lbl, icon){
   const el = document.getElementById("stgl-"+key);
   if(!el) return;
   el.innerHTML=`<button onclick="SETTINGS_TOGGLES['${key}']=!SETTINGS_TOGGLES['${key}'];renderAsetukset()" style="width:100%;height:44px;border-radius:12px;border:1.5px solid ${open?"var(--orange)":"var(--bord)"};background:${open?"rgba(249,115,22,.06)":"transparent"};color:${open?"var(--orange)":"var(--dim)"};font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;cursor:pointer;margin-bottom:0">
-    <span>${icon} ${lbl}</span><span style="font-size:11px">${open?"▴":"▾"}</span>
+    <span class="ttl-ico">${ICONS[icon]?ico(icon,18):icon}${lbl}</span><span style="font-size:11px">${open?"▴":"▾"}</span>
   </button>`;
   const contentEl = document.getElementById("stgl-content-"+key);
   if(contentEl) contentEl.style.display = open ? "block" : "none";
@@ -4597,11 +4644,11 @@ function renderSettingsToggles(){
   const trackingTotal=getTrackingGroups().flatMap(g=>g.items).length;
   const trackingLbl=`Mitä seuraat ${trackingCount>0?"("+trackingCount+"/"+trackingTotal+")":"— ei valintoja"}`;
   renderSettingsToggle("tracking",trackingLbl,"✓");
-  renderSettingsToggle("goals","Tavoitteet","🎯");
-  renderSettingsToggle("training","Treeni- ja kausiasetukset","🏋️");
-  renderSettingsToggle("technical","Tekniset asetukset","⚙️");
-  renderSettingsToggle("data","Varmuuskopiot ja tuonti","💾");
-  renderSettingsToggle("changelog","Mitä uutta","✨");
+  renderSettingsToggle("goals","Tavoitteet","target");
+  renderSettingsToggle("training","Treeni- ja kausiasetukset","dumbbell");
+  renderSettingsToggle("technical","Tekniset asetukset","sliders");
+  renderSettingsToggle("data","Varmuuskopiot ja tuonti","save");
+  renderSettingsToggle("changelog","Mitä uutta","sparkle");
   renderChangelog();
 }
 
@@ -4613,7 +4660,7 @@ function renderCardioTypes(){
   let h=types.map((t,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bord)">
       <span style="flex:1;color:var(--text);font-size:13px">${t}</span>
-      <button onclick="editCardioType(${i})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 6px">✎</button>
+      <button onclick="editCardioType(${i})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteCardioType(${i})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
     </div>`).join("");
   if(!CTYPE_FORM.show){
@@ -4653,7 +4700,7 @@ function renderTrainingTypes(){
   let h=types.map((t,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bord)">
       <span style="flex:1;color:var(--text);font-size:13px">${t}</span>
-      <button onclick="editTrainingType(${i})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 6px">✎</button>
+      <button onclick="editTrainingType(${i})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteTrainingType(${i})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
     </div>`).join("");
 
@@ -4855,7 +4902,7 @@ function renderApiKeySection(){
       </div>
     </div>
     <div style="padding:10px 12px;background:var(--surf2);border-radius:12px;border:1px solid var(--bord)">
-      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">💰 Kustannus</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">${ico("coin",13)} Kustannus</div>
       <div style="font-size:11px;color:var(--dim);line-height:1.7">
         Käyttää Anthropicin halvinta mallia (Claude Haiku).<br>
         Arvioitu kulutus <strong style="color:var(--text)">0,50–2 € vuodessa</strong>.<br>
@@ -4881,7 +4928,7 @@ function renderApiKeySection(){
       Avain tallennetaan vain tähän selaimeen.
     </div>
     <div style="margin-top:10px;padding:10px 12px;background:var(--surf2);border-radius:12px;border:1px solid var(--bord)">
-      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">💰 Kustannus</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">${ico("coin",13)} Kustannus</div>
       <div style="font-size:11px;color:var(--dim);line-height:1.7">
         Järkäle käyttää Anthropicin halvinta mallia (Claude Haiku).<br>
         Päivittäinen käyttö maksaa arviolta <strong style="color:var(--text)">0,50–2 € vuodessa</strong>.<br>
@@ -5732,7 +5779,7 @@ function renderMenstrualSection(){
   const pain=S.menstrual_pain, mood=S.menstrual_mood, bloat=S.menstrual_bloating, start=S.menstrual_start;
   el.innerHTML=`<div style="border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-bottom:12px">
     <div style="padding:10px 14px;background:var(--surf2);border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:13px;font-weight:600;color:var(--text)">🌸 Kuukautiskierto</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">${ico("flower",16)} Kuukautiskierto</span>
       <button onclick="S.menstrual_start=!S.menstrual_start;saveDraft();scheduleAutoSave();renderMenstrualSection()"
         style="height:28px;padding:0 12px;border-radius:8px;border:1.5px solid ${start?"var(--red)":"var(--bord)"};
           background:${start?"rgba(248,113,113,.12)":"var(--surf)"};
@@ -5757,7 +5804,7 @@ function renderMenstrualSection(){
             title="${MENSTRUAL_MOOD_LABELS[i]}"
             style="flex:1;height:38px;border-radius:8px;border:1.5px solid ${mood===i?"rgba(167,139,250,.6)":"var(--bord)"};
               background:${mood===i?"rgba(167,139,250,.12)":"var(--surf2)"};
-              font-size:18px">${em}</button>`).join("")}
+              font-size:11px;font-weight:600;color:${mood===i?"var(--text)":"var(--dim)"};padding:0 2px">${MENSTRUAL_MOOD_LABELS[i]}</button>`).join("")}
         </div>
       </div>
       <div>
@@ -5778,7 +5825,7 @@ function renderMigraineSection(){
   const mig=S.migraine, sev=S.migraine_severity;
   el.innerHTML=`<div style="border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-bottom:12px">
     <div style="padding:10px 14px;background:var(--surf2);border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:13px;font-weight:600;color:var(--text)">🧠 Migreeni</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">${ico("head",16)} Migreeni</span>
       <button onclick="S.migraine=!S.migraine;if(!S.migraine)S.migraine_severity=null;saveDraft();scheduleAutoSave();renderMigraineSection()"
         style="height:28px;padding:0 12px;border-radius:8px;border:1.5px solid ${mig?"var(--red)":"var(--bord)"};
           background:${mig?"rgba(248,113,113,.12)":"var(--surf)"};
@@ -6192,10 +6239,10 @@ function renderMedSettings(){
   meds.forEach(med=>{
     h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bord)">
       <div style="flex:1">
-        <div style="color:var(--text);font-size:13px;font-weight:600">💊 ${esc(med.name)}</div>
+        <div style="color:var(--text);font-size:13px;font-weight:600">${ico("pill",15)} ${esc(med.name)}</div>
         <div style="color:var(--dim);font-size:11px;margin-top:2px">${med.dose!=null?`${med.dose} ${med.unit||"mg"} · `:""}${med.days.map(d=>DAY_LBL[d]).join(", ")}</div>
       </div>
-      <button onclick="startEditMed(${med.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 6px">✎</button>
+      <button onclick="startEditMed(${med.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteMed(${med.id})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
     </div>`;
   });
@@ -6451,7 +6498,7 @@ function renderEveningNote(text){
   if(!text){ el.style.display="none"; el.innerHTML=""; return; }
   el.style.display="block";
   el.innerHTML=`<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:var(--surf);border:1px solid var(--bord);border-radius:12px;margin-top:8px">
-    <span style="font-size:15px;flex-shrink:0;margin-top:1px">🌙</span>
+    ${icoTile("moon")}
     <div>
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:3px">Illan huomio</div>
       <div style="font-size:13px;color:var(--text);line-height:1.5">${esc(text)}</div>
@@ -6462,11 +6509,11 @@ function renderEveningNote(text){
 function renderSaveInsight(insight){
   const el=document.getElementById("save-insight"); if(!el) return;
   if(!insight){el.style.display="none";return;}
-  const icons={start:"📊",overreach:"⚡",recovery:"⚠️",injury_resolved:"✓",injury_streak:"🩹",sleep:"🌙",sleep2:"🌙",sleep_good:"🌙",steps_low:"👟",recovery_drop:"📉",weight_low:"🏆",weight_down:"↓",weight_up:"↑",streak:"🔥",fallback:"●"};
-  const icon=icons[insight.type]||"●";
+  const icons={start:"chart",overreach:"bolt",recovery:"battery",injury_resolved:"check",injury_streak:"bandage",sleep:"moon",sleep2:"moon",sleep_good:"moon",steps_low:"steps",recovery_drop:"trend_down",weight_low:"trophy",weight_down:"trend_down",weight_up:"trend_up",streak:"flame",fallback:"activity"};
+  const icon=icoTile(icons[insight.type]||"activity");
   el.style.display="block";
   el.innerHTML=`<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:var(--surf);border:1px solid var(--bord);border-radius:12px;margin-top:10px">
-    <span style="font-size:15px;flex-shrink:0;margin-top:1px">${icon}</span>
+    ${icon}
     <div style="flex:1">
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:3px">Päivän huomio</div>
       <div style="font-size:13px;color:var(--text);line-height:1.5">${insight.text}</div>
