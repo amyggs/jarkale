@@ -808,7 +808,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.8</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.9</span>
       </div>
     </div>
   </div>
@@ -838,6 +838,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.9", d:"lokakuu 2026", items:[
+    "Viikkoyhteenveto kertoo, montako treeniä kevennettiin tarkoituksella, ja miten Päivän tila jakautui treenipäivinä",
+    "Viikkoyhteenvedosta poistettu unen vertailu heikommin kulkeneiden ja muiden treenien välillä. Yhden viikon otos on liian pieni vertailuun, joten yhteenveto vain kuvaa viikon.",
+    "Kirjallinen yhteenveto vertailee heikommin kulkeneita treenejä muihin vasta, kun niitä on vähintään 10",
+  ]},
   {v:"2.11.8", d:"lokakuu 2026", items:[
     "Korjattu: kirjallinen yhteenveto saattoi palata tyhjänä. Vastaukselle varataan nyt enemmän pituutta, ja tyhjän vastauksen jälkeen sovellus yrittää automaattisesti varamallilla.",
   ]},
@@ -2539,13 +2544,8 @@ function buildWeekRecap(weekStart){
     const tr=ents.filter(e=>e.training_done);
     const oc={worse:0,normal:0,better:0}; tr.forEach(e=>{ if(e.training_outcome&&oc[e.training_outcome]!=null) oc[e.training_outcome]++; });
     R.training={n:tr.length, goal:g.workoutsPerWeek||null, outcomes:oc, outcomeN:oc.worse+oc.normal+oc.better};
-    // Rinnakkainen vertailu (ei johtopäätöstä): kuinka usein uni jäi alle tavoitteen heikommin kulkeneina
-    // treenipäivinä vs. muina treenipäivinä, joilla kulku on kirjattu. Nimittäjänä vain päivät, joilta uni on kirjattu.
-    if(trk("sleep")&&oc.worse>0){
-      const goalS=g.sleepHours||7, rated=tr.filter(e=>e.training_outcome&&e.sleep!=null);
-      const w=rated.filter(e=>e.training_outcome==="worse"), o=rated.filter(e=>e.training_outcome!=="worse");
-      if(w.length) R.training.sleepCtx={goal:goalS, worseN:w.length, worseLow:w.filter(e=>e.sleep<goalS).length, otherN:o.length, otherLow:o.filter(e=>e.sleep<goalS).length};
-    }
+    // v2.11.9: viikkoyhteenveto on kuvaileva tilannekuva — ei ryhmien välisiä vertailuja (ks. analyysisuunnitelma).
+    R.training.lightened=tr.filter(e=>(e.training_modifications||[]).includes("deliberate_lightening")).length;
   }
   if(trk("sleep")){
     const s=ents.map(e=>e.sleep).filter(v=>v!=null), goal=g.sleepHours||7;
@@ -2555,6 +2555,9 @@ function buildWeekRecap(weekStart){
     const r=ents.map(e=>e.recovery).filter(v=>v!=null);
     R.recovery={avg:r.length>=3?r1(avg(r)):null, n:r.length, low:r.filter(v=>v<=2).length};
   }
+  // Päivän tila: lukittujen tallenteiden jakauma (vain kuvaus, ei yhteyttä treenin kulkuun)
+  const ds={loaded:0,normal:0,recovered:0}; ents.forEach(e=>{ const b=e.day_state_snapshot&&e.day_state_snapshot.body_state; if(b&&ds[b]!=null) ds[b]++; });
+  R.dayState={...ds, n:ds.loaded+ds.normal+ds.recovered};
   // Poikkeamat: tagien päivämäärät
   const fc={}; ents.forEach(e=>(e.day_factors||[]).forEach(f=>{fc[f]=(fc[f]||0)+1;}));
   R.factors=Object.entries(fc).map(([id,n])=>({id,n,l:(DAY_FACTORS.find(f=>f.id===id)||{l:id}).l}));
@@ -2596,9 +2599,8 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   if(R.training&&R.training.outcomeN){
     const o=R.training.outcomes;
     const it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
-    const c=R.training.sleepCtx;
-    const ctx=c?`<div class="wr-ctx">Uni alle ${c.goal} h: heikommin kulkeneet <b>${c.worseLow}/${c.worseN}</b>${c.otherN?` · muut <b>${c.otherLow}/${c.otherN}</b>`:""}</div>`:"";
-    secs.push(sec("activity","Treenin kulku",`<div class="wr-ocl">${it(o.worse,"heikommin")}${it(o.normal,"normaalisti")}${it(o.better,"paremmin")}</div>${ctx}`));
+    const light=R.training.lightened?`<div class="wr-ctx">Kevennettiin tarkoituksella <b>${R.training.lightened}</b> ${R.training.lightened===1?"treeni":"treeniä"}</div>`:"";
+    secs.push(sec("activity","Treenin kulku",`<div class="wr-ocl">${it(o.worse,"heikommin")}${it(o.normal,"normaalisti")}${it(o.better,"paremmin")}</div>${light}`));
   }
   if(R.pains&&R.pains.length){
     const list=compact?R.pains.slice(0,3):R.pains;
@@ -2607,6 +2609,10 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
       ?`<span class="m ok">${ico("check",14)} ohi</span>`
       :`<span class="m">${[p.level?`<b>${p.level}/5</b>`:"",p.dirId?dirTxt[p.dirId]:"",p.days>1?`jatkunut ${p.days} pv`:""].filter(Boolean).join(" · ")}</span>`}</div>`).join("");
     secs.push(sec("bandage","Kivut",rows+(compact&&R.pains.length>3?`<div class="wr-more">+${R.pains.length-3} muuta</div>`:"")));
+  }
+  if(R.dayState&&R.dayState.n){
+    const d=R.dayState, it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
+    secs.push(sec("battery","Päivän tila treenipäivinä",`<div class="wr-ocl">${it(d.loaded,"kuormittunut")}${it(d.normal,"tavanomainen")}${it(d.recovered,"palautunut")}</div>`));
   }
   if(R.factors.length) secs.push(sec("calendar","Poikkeamat",`<div class="wr-tags">${R.factors.map(f=>`<span class="wr-tag">${f.l}<b>${f.n} pv</b></span>`).join("")}</div>`));
   return `<div class="card wr">${head}
@@ -3029,8 +3035,9 @@ function summaryFacts(start,end){
     if(Object.keys(mods).length) t+=` Treenin muutokset: ${Object.entries(mods).map(([m,n])=>`${aiLabel(TRAINING_MODIFICATIONS,m).toLowerCase()} ${n}`).join(", ")}.`;
     const planned=C.tr.filter(e=>e.planned_lightening===true).length; if(planned) t+=` Näistä etukäteen suunniteltuja kevennyksiä ${planned}.`;
     L.push(t);
-    // Rinnakkaisvertailu: heikommin kulkeneet vs. muut (vain jos heikommin ≥2)
-    if(oc.worse>=2){
+    // Rinnakkaisvertailu: heikommin kulkeneet vs. muut. Analyysisuunnitelman otosraja: alle 10 heikommin kulkenutta
+    // treeniä = vain kuvaus, ei ryhmävertailua (v2.11.9). 10–19 = alustava.
+    if(oc.worse>=10){
       const rated=C.tr.filter(e=>e.training_outcome);
       const W=rated.filter(e=>e.training_outcome==="worse"), O=rated.filter(e=>e.training_outcome!=="worse");
       const prevOf=e=>{const d=new Date(e.date+"T00:00:00");d.setDate(d.getDate()-1);return S.entries[iso(d)];};
@@ -3040,7 +3047,7 @@ function summaryFacts(start,end){
       if(trk("recovery")) parts.push(`palautuminen 1–2: heikommin ${share(W,e=>e.recovery<=2,e=>e.recovery!=null)}, muut ${share(O,e=>e.recovery<=2,e=>e.recovery!=null)}`);
       if(trk("injury")) parts.push(`aktiivinen kipu ≥2/5: heikommin ${share(W,e=>getInjuryItems(e).some(i=>!i.resolved&&i.painLevel>=2),()=>true)}, muut ${share(O,e=>getInjuryItems(e).some(i=>!i.resolved&&i.painLevel>=2),()=>true)}`);
       parts.push(`edellisenä päivänä rasitus ≥4: heikommin ${share(W,e=>{const p=prevOf(e);return !!(p&&p.training_done&&p.training_load>=4);},()=>true)}, muut ${share(O,e=>{const p=prevOf(e);return !!(p&&p.training_done&&p.training_load>=4);},()=>true)}`);
-      L.push(`Rinnakkaisvertailu heikommin kulkeneiden (${W.length}) ja muiden arvioitujen treenien (${O.length}) välillä — ${parts.join("; ")}. Otos on pieni; kyse on samanaikaisuudesta, ei syystä.`);
+      L.push(`Rinnakkaisvertailu heikommin kulkeneiden (${W.length}) ja muiden arvioitujen treenien (${O.length}) välillä — ${parts.join("; ")}. ${W.length<20?"Alustava: otos on pieni. ":""}Kyse on samanaikaisuudesta, ei syystä.`);
     }
   }
   // Poikkeamat ja seuraavan päivän palautuminen
