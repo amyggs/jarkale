@@ -322,6 +322,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .stepper input{height:44px;border:none;background:transparent;color:var(--text);font-size:22px;font-weight:800;padding:0 0 8px;border-radius:10px;}
 .stepper input:focus{background:var(--surf);}
 .stepper input.empty{color:var(--dim);}
+.stepper input::placeholder{color:var(--dim);opacity:.45;}
 .stepper-row>div>span{top:auto!important;bottom:1px;right:50%!important;transform:translateX(50%)!important;font-size:10px!important;white-space:nowrap;}
 #track-steps-wrap .stepper input{padding:0;}
 
@@ -740,7 +741,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.10.3</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.10.4</span>
       </div>
     </div>
   </div>
@@ -770,6 +771,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.10.4", d:"lokakuu 2026", items:[
+    "Painon + ja − lähtevät nyt edellisestä kirjatusta painosta (aiemmin 80 kg). Edellinen paino näkyy kentässä harmaana vihjeenä, mutta mitään ei tallennu ennen kuin painat nappia.",
+  ]},
   {v:"2.10.3", d:"lokakuu 2026", items:[
     "Mittausvienti Järkäle PT:lle tallentuu nyt .txt-päätteellä, jotta sen voi jakaa suoraan Driveen. Sisältö ja rakenne ovat täsmälleen ennallaan.",
   ]},
@@ -2370,6 +2374,7 @@ function renderSteppers() {
     }
     el.className=val!=null?"":"empty";
     el.style.color=val!=null?"var(--text)":"var(--dim)";
+    if(field==="weight"){ const lw=lastKnownWeight(S.date); el.placeholder=lw!=null?(+lw).toFixed(1):"—"; }
   });
   // Näytä 7 vrk liukuva ka weight-kentän yläpuolella
   const maEl=document.getElementById("weight-ma-hint");
@@ -5099,10 +5104,19 @@ function setField(field,val){
   if(field==="sleep"||field==="recovery"||field==="motivation") renderReadiness();
 }
 
+// Painon lähtöarvo stepperille: viimeisin kirjattu paino ennen valittua päivää (tai lähin sen jälkeen).
+// Käytetään VAIN napin lähtökohtana ja harmaana vihjeenä — mitään ei tallenneta ennen kuin käyttäjä painaa nappia.
+function lastKnownWeight(ds){
+  const dates=Object.keys(S.entries).filter(d=>S.entries[d]&&S.entries[d].weight!=null).sort();
+  const before=dates.filter(d=>d<ds);
+  if(before.length) return S.entries[before[before.length-1]].weight;
+  const after=dates.filter(d=>d>ds);
+  return after.length?S.entries[after[0]].weight:null;
+}
 function adj(field,delta){
   const limits={weight:[30,300],sleep:[0,24],steps:[0,80000]};
   const [mn,mx]=limits[field]||[0,Infinity];
-  const cur=S[field]??(field==="weight"?80:field==="sleep"?7:0);
+  const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?7:0);
   const next=Math.round((cur+delta)*100)/100;
   S[field]=Math.max(mn,Math.min(mx,next));
   renderSteppers();
