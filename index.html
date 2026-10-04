@@ -422,6 +422,12 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .wr-backup .ico{color:var(--orange);}
 .wr-backup span{flex:1;}
 .wr-backup .chip{min-height:36px;padding:4px 12px;}
+.wr-banner{display:flex;align-items:center;gap:4px;background:var(--surf);border-radius:14px;padding:4px 4px 4px 14px;margin-bottom:12px;}
+.wr-banner-main{flex:1;display:flex;align-items:center;gap:9px;min-height:44px;border:none;background:transparent;color:var(--text);font:700 14px Manrope,system-ui,sans-serif;text-align:left;padding:0;}
+.wr-banner-main .ico{color:var(--orange);}
+.wr-banner-main b{margin-left:auto;color:var(--dim);font-size:18px;}
+.wr-banner .pc-x{margin:0;}
+#week-status{padding-bottom:12px;}
 .wr{margin-bottom:12px;}
 .wr-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
 .wr-title{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
@@ -536,31 +542,9 @@ span.mo-date{background:transparent;color:var(--dim);}
       </div>
 
       <!-- Viikon tilannekortti: kokonaiskuva heti avattaessa (renderWeekStatus) -->
+      <div id="week-status" class="card" style="display:none"></div>
       <div id="week-recap" style="display:none"></div>
       <div id="body-only-note" class="card" style="display:none"></div>
-      <div id="week-status" class="card" style="display:none"></div>
-
-      <div id="logged-badge" class="badge" style="display:none">● Kirjattu</div>
-      <div id="save-insight" style="display:none"></div>
-      <div id="evening-note" style="display:none"></div>
-      <div id="backup-reminder" style="display:none;margin-bottom:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:7px 12px;align-items:center;justify-content:space-between;cursor:pointer" onclick="exportData();this.style.display='none'">
-        <div style="display:flex;align-items:center;gap:7px;min-width:0">
-          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg> Tee varmuuskopio</span>
-          <span id="backup-days-text" style="color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-        </div>
-        <button onclick="event.stopPropagation();document.getElementById('backup-reminder').style.display='none'" aria-label="Sulje muistutus" style="background:none;border:none;color:var(--dim);font-size:15px;line-height:1;padding:2px 6px;cursor:pointer">×</button>
-      </div>
-
-      <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="display:inline-flex;color:var(--purple)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="1.6"/><path d="M6.5 8v3M10 8v4M13.5 8v3M17 8v4"/></svg></span>
-          <div>
-            <div style="color:var(--purple);font-size:13px;font-weight:600">Kehon mittaus</div>
-            <div id="meas-reminder-text" style="color:var(--dim);font-size:11px"></div>
-          </div>
-        </div>
-        <span style="color:var(--purple);font-size:11px;font-weight:600">→</span>
-      </div>
 
       <!-- Setup-näkymä uudelle käyttäjälle -->
       <div id="setup-screen" style="display:none"></div>
@@ -653,6 +637,29 @@ span.mo-date{background:transparent;color:var(--dim);}
 
       <!-- Julkaisu 1: päivän poikkeamat (renderDayFactors). Ei vaadi napautusta tavallisena päivänä. -->
       <div id="day-factors" style="display:none;margin-bottom:12px"></div>
+
+      <!-- v2.11.12: tieto kirjauskenttien jälkeen — Kirjaa-näkymässä kirjaaminen ensin -->
+      <div id="logged-badge" class="badge" style="display:none">● Kirjattu</div>
+      <div id="save-insight" style="display:none"></div>
+      <div id="evening-note" style="display:none"></div>
+      <div id="backup-reminder" style="display:none;margin-bottom:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:7px 12px;align-items:center;justify-content:space-between;cursor:pointer" onclick="exportData();this.style.display='none'">
+        <div style="display:flex;align-items:center;gap:7px;min-width:0">
+          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg> Tee varmuuskopio</span>
+          <span id="backup-days-text" style="color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+        </div>
+        <button onclick="event.stopPropagation();document.getElementById('backup-reminder').style.display='none'" aria-label="Sulje muistutus" style="background:none;border:none;color:var(--dim);font-size:15px;line-height:1;padding:2px 6px;cursor:pointer">×</button>
+      </div>
+
+      <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-flex;color:var(--purple)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="1.6"/><path d="M6.5 8v3M10 8v4M13.5 8v3M17 8v4"/></svg></span>
+          <div>
+            <div style="color:var(--purple);font-size:13px;font-weight:600">Kehon mittaus</div>
+            <div id="meas-reminder-text" style="color:var(--dim);font-size:11px"></div>
+          </div>
+        </div>
+        <span style="color:var(--purple);font-size:11px;font-weight:600">→</span>
+      </div>
 
       <button id="extra-toggle" onclick="toggleExtra()" style="width:100%;height:42px;margin-bottom:14px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px">
         <span id="extra-arrow">▾</span>
@@ -824,7 +831,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.11</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.12.0</span>
       </div>
     </div>
   </div>
@@ -854,6 +861,13 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.12.0", d:"lokakuu 2026", items:[
+    "Kirjaa-näkymä kevyemmäksi: kirjauskentät heti päivämäärän ja viikon päiväpallojen alla. Päivän huomio, varmuuskopio- ja mittausmuistutus siirtyivät kenttien alapuolelle.",
+    "Viikkokortista poistettu paino- ja unilaatikot (samat tiedot näkyvät kenttien alla ja Trendeissä)",
+    "Maanantain viikkoyhteenveto näkyy Kirjaa-näkymässä yhtenä rivinä, josta koko yhteenveto avautuu Trendeihin",
+    "Pitkään (yli 14 pv) ennallaan jatkunut kipu kysytään yhdellä napilla \"Ennallaan\"; muut vaihtoehdot \"Muuttui…\"-napin takana",
+    "Päivän huomio ei enää näytä täytetekstiä, kun huomattavaa ei ole",
+  ]},
   {v:"2.11.11", d:"lokakuu 2026", items:[
     "Päivän huomio ei enää toista \"sama kipumerkintä kolmatta päivää\" pitkään jatkuneesta kivusta. Huomio tulee vain, kun uusi kipu on jatkunut kolme päivää.",
     "Korjattu: viikkokortin painoluku ja yksikkö eivät enää jakaudu kahdelle riville kapealla näytöllä",
@@ -2684,9 +2698,6 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   return `<div class="card wr">${head}
     ${tiles.length?`<div class="ws-stats wr-tiles">${tiles.join("")}</div>`:""}
     ${secs.join("")}
-    ${compact?(()=>{ let last=0; try{ last=parseInt(localStorage.getItem("lastExport")||"0"); }catch(_){}
-      const d=last?Math.floor((Date.now()-last)/864e5):null;
-      return (d===null||d>=7)?`<div class="wr-backup">${ico("save",16)}<span>${d===null?"Varmuuskopiota ei ole vielä tehty":`Varmuuskopiosta ${d} pv`}</span><button class="chip on" onclick="exportData().then(()=>renderWeekRecapCard())">Tee nyt</button></div>`:""; })():""}
     ${compact?`<button class="wr-link" onclick="openWeekInTrends('${R.weekStart}')">Avaa viikko Trendeissä ›</button>`:""}
   </div>`;
 }
@@ -2701,8 +2712,10 @@ function renderWeekRecapCard(){
   if(!show||weekRecapDismissed(prevWs)){ el.style.display="none"; el.innerHTML=""; return; }
   const R=buildWeekRecap(prevWs);
   if(!R.logged){ el.style.display="none"; el.innerHTML=""; return; }
+  // v2.11.12: Kirjaa-näkymässä vain yksi rivi; koko yhteenveto avautuu Trendien Vko-näkymään
+  const wk=isoWeekNo(new Date(prevWs+"T00:00:00"));
   el.style.display="block";
-  el.innerHTML=weekRecapHTML(R,{compact:true,dismissable:true});
+  el.innerHTML=`<div class="wr-banner"><button class="wr-banner-main" onclick="openWeekInTrends('${prevWs}')">${ico("calendar",17)}<span>Viikon ${wk} yhteenveto valmis</span><b>›</b></button><button class="pc-x" aria-label="Piilota viikkoyhteenveto" onclick="dismissWeekRecap('${prevWs}')">×</button></div>`;
 }
 function openWeekInTrends(ws){
   // Vko-näkymän jakso määräytyy S.periodOffset-viikkoina nykyisestä viikosta taaksepäin
@@ -2760,8 +2773,8 @@ function renderWeekStatus(ds){
   const sSub=sAvg==null?"Ei unikirjauksia":(sGoal?`tavoite ${sGoal} h · ${s1.filter(v=>v>=sGoal).length}/${s1.length} yli`:`${s1.length} yötä`);
 
   const stats=[];
-  if(trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;min-width:0"><div class="v" style="white-space:nowrap;flex:none">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
-  if(trk("sleep")) stats.push(`<div class="ws-stat"><div class="k">Uni · 7 pv ka</div><div class="v">${sAvg!=null?sAvg:"—"}${sAvg!=null?"<small> h</small>":""}</div><div class="s">${sSub}</div></div>`);
+  if(false&&trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;min-width:0"><div class="v" style="white-space:nowrap;flex:none">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
+  if(false&&trk("sleep")) stats.push(`<div class="ws-stat"><div class="k">Uni · 7 pv ka</div><div class="v">${sAvg!=null?sAvg:"—"}${sAvg!=null?"<small> h</small>":""}</div><div class="s">${sSub}</div></div>`);
 
   el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Viikko ${isoWeekNo(d)}</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt} kirjattu</span></div>
     <div class="ws-days">${days}</div>
@@ -5430,6 +5443,12 @@ function renderPainCarry(){
     const pt=INJURY_PARTS.find(x=>x.id===p.bodyPart);
     const name=pt?pt.l:(INJURY_LEGACY[p.bodyPart]||p.bodyPart);
     const days=painEpisodeDays(p.bodyPart,p.from);
+    // v2.11.12: yli 14 pv ennallaan jatkunut kipu tiiviinä rivinä — yksi napautus "Ennallaan", muut vaihtoehdot pyydettäessä
+    const stable=days>=14&&(p.direction==="sama"||!p.direction)&&!(window._pcExpand||{})[p.bodyPart];
+    if(stable) return `<div class="pc-row pc-compact">
+      <div class="pc-head"><span class="pc-name">${esc(name)}</span><span class="pc-meta">${p.painLevel?p.painLevel+"/5 · ":""}ennallaan ${days} pv</span>
+        <button class="pc-x" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">×</button></div>
+      <div class="chips" style="flex-wrap:nowrap"><button class="chip grow" onclick="carryPain('${p.bodyPart}','ennallaan')">Ennallaan</button><button class="chip grow" onclick="(window._pcExpand=window._pcExpand||{})['${p.bodyPart}']=true;renderPainCarry()">Muuttui…</button></div></div>`;
     return `<div class="pc-row">
       <div class="pc-head"><span class="pc-name">${esc(name)}</span>
         <span class="pc-meta">${p.painLevel?p.painLevel+"/5 · ":""}${when(p.daysAgo)}${days>1?` · ${days} pv`:""}</span>
@@ -6267,8 +6286,8 @@ function buildRuleBasedSaveInsight(savedEntry, entries) {
     }
   }
 
-  // 9. Fallback
-  return {type:"fallback", text:"Päivä kirjattu. Kokonaisuus näyttää toistaiseksi tasaiselta."};
+  // 9. Ei mitään huomionarvoista → ei huomiota (v2.11.12: täyteteksti poistettu)
+  return null;
 }
 
 // Erillinen ilta-huomio: treeni + matala palautuminen samana päivänä.
