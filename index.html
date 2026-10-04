@@ -638,29 +638,6 @@ span.mo-date{background:transparent;color:var(--dim);}
       <!-- Julkaisu 1: päivän poikkeamat (renderDayFactors). Ei vaadi napautusta tavallisena päivänä. -->
       <div id="day-factors" style="display:none;margin-bottom:12px"></div>
 
-      <!-- v2.11.12: tieto kirjauskenttien jälkeen — Kirjaa-näkymässä kirjaaminen ensin -->
-      <div id="logged-badge" class="badge" style="display:none">● Kirjattu</div>
-      <div id="save-insight" style="display:none"></div>
-      <div id="evening-note" style="display:none"></div>
-      <div id="backup-reminder" style="display:none;margin-bottom:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:7px 12px;align-items:center;justify-content:space-between;cursor:pointer" onclick="exportData();this.style.display='none'">
-        <div style="display:flex;align-items:center;gap:7px;min-width:0">
-          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg> Tee varmuuskopio</span>
-          <span id="backup-days-text" style="color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-        </div>
-        <button onclick="event.stopPropagation();document.getElementById('backup-reminder').style.display='none'" aria-label="Sulje muistutus" style="background:none;border:none;color:var(--dim);font-size:15px;line-height:1;padding:2px 6px;cursor:pointer">×</button>
-      </div>
-
-      <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="display:inline-flex;color:var(--purple)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="1.6"/><path d="M6.5 8v3M10 8v4M13.5 8v3M17 8v4"/></svg></span>
-          <div>
-            <div style="color:var(--purple);font-size:13px;font-weight:600">Kehon mittaus</div>
-            <div id="meas-reminder-text" style="color:var(--dim);font-size:11px"></div>
-          </div>
-        </div>
-        <span style="color:var(--purple);font-size:11px;font-weight:600">→</span>
-      </div>
-
       <button id="extra-toggle" onclick="toggleExtra()" style="width:100%;height:42px;margin-bottom:14px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px">
         <span id="extra-arrow">▾</span>
         <span id="extra-label">Näytä lisäseurannat</span>
@@ -718,6 +695,30 @@ span.mo-date{background:transparent;color:var(--dim);}
         </div></div><!-- /track-notes-wrap -->
 
       </div>
+
+      <!-- v2.12.1: huomio ja ylläpitomuistutukset vasta kaiken kirjaamisen (myös lisäseurantojen) jälkeen -->
+      <div id="logged-badge" class="badge" style="display:none">● Kirjattu</div>
+      <div id="save-insight" style="display:none"></div>
+      <div id="evening-note" style="display:none"></div>
+      <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-flex;color:var(--purple)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="1.6"/><path d="M6.5 8v3M10 8v4M13.5 8v3M17 8v4"/></svg></span>
+          <div>
+            <div style="color:var(--purple);font-size:13px;font-weight:600">Kehon mittaus</div>
+            <div id="meas-reminder-text" style="color:var(--dim);font-size:11px"></div>
+          </div>
+        </div>
+        <span style="color:var(--purple);font-size:11px;font-weight:600">→</span>
+      </div>
+
+      <div id="backup-reminder" style="display:none;margin-bottom:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:7px 12px;align-items:center;justify-content:space-between;cursor:pointer" onclick="exportData();this.style.display='none'">
+        <div style="display:flex;align-items:center;gap:7px;min-width:0">
+          <span style="color:var(--yellow);font-size:13px;font-weight:600;white-space:nowrap"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg> Tee varmuuskopio</span>
+          <span id="backup-days-text" style="color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+        </div>
+        <button onclick="event.stopPropagation();document.getElementById('backup-reminder').style.display='none'" aria-label="Sulje muistutus" style="background:none;border:none;color:var(--dim);font-size:15px;line-height:1;padding:2px 6px;cursor:pointer">×</button>
+      </div>
+
 
     </div>
 
@@ -831,7 +832,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.12.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.12.1</span>
       </div>
     </div>
   </div>
@@ -861,6 +862,9 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.12.1", d:"lokakuu 2026", items:[
+    "Päivän huomio, mittausmuistutus ja varmuuskopiomuistutus näkyvät nyt vasta lisäseurantojen jälkeen: kaikki kirjaaminen ensin, ylläpito lopuksi",
+  ]},
   {v:"2.12.0", d:"lokakuu 2026", items:[
     "Kirjaa-näkymä kevyemmäksi: kirjauskentät heti päivämäärän ja viikon päiväpallojen alla. Päivän huomio, varmuuskopio- ja mittausmuistutus siirtyivät kenttien alapuolelle.",
     "Viikkokortista poistettu paino- ja unilaatikot (samat tiedot näkyvät kenttien alla ja Trendeissä)",
