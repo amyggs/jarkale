@@ -824,7 +824,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.11.10</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.11.11</span>
       </div>
     </div>
   </div>
@@ -854,6 +854,10 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.11.11", d:"lokakuu 2026", items:[
+    "Päivän huomio ei enää toista \"sama kipumerkintä kolmatta päivää\" pitkään jatkuneesta kivusta. Huomio tulee vain, kun uusi kipu on jatkunut kolme päivää.",
+    "Korjattu: viikkokortin painoluku ja yksikkö eivät enää jakaudu kahdelle riville kapealla näytöllä",
+  ]},
   {v:"2.11.10", d:"lokakuu 2026", items:[
     "Suunniteltu vs. toteutunut treeni: aseta kerran viikkorytmi (Asetukset → Tavoitteet → Treenipäivät), niin viikkoyhteenveto näyttää, montako suunniteltua treeniä toteutui, muuttui tai jäi väliin, sekä ylimääräiset treenit. Mitään ei kysytä päivittäin. Kirjaamaton päivä näytetään erikseen, eikä sitä lasketa väliin jääneeksi.",
     "Viikkoyhteenvedossa muistutus varmuuskopiosta, jos edellisestä on yli viikko",
@@ -2739,7 +2743,7 @@ function renderWeekStatus(ds){
       const tgt=getActiveTargetWeight(ds);
       const toward=tgt!=null&&diff!==0&&Math.sign(tgt-wAvg)===Math.sign(diff);
       const col=toward?"var(--green)":"var(--dim)";
-      wSub=diff===0?`±0 kg edelliseen viikkoon`:`<span style="color:${col}">${diff>0?"↑ +":"↓ "}${Math.abs(diff)} kg / vko</span>`;
+      wSub=diff===0?`±0 kg / vko`:`<span style="color:${col}">${diff>0?"↑ +":"↓ "}${Math.abs(diff)} kg / vko</span>`;
     } else wSub=`${w1.length} punnitusta`;
   }
   // Sparkline: 14 pv päiväpainot
@@ -2748,7 +2752,7 @@ function renderWeekStatus(ds){
   if(sp.length>=3){
     const lo=Math.min(...sp),hi=Math.max(...sp),rg=(hi-lo)||1;
     const pts=sp.map((v,i)=>`${(2+i*(50/(sp.length-1))).toFixed(1)},${(3+(hi-v)/rg*16).toFixed(1)}`).join(" ");
-    spark=`<svg width="54" height="22" viewBox="0 0 54 22" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${pts}"></polyline></svg>`;
+    spark=`<svg width="54" height="22" viewBox="0 0 54 22" preserveAspectRatio="none" style="flex:0 1 54px;min-width:22px;height:22px" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${pts}"></polyline></svg>`;
   }
   const s1=win(0,7).map(e=>e.sleep).filter(v=>v!=null);
   const sGoal=getActiveGoals(ds).sleepHours||null;
@@ -2756,7 +2760,7 @@ function renderWeekStatus(ds){
   const sSub=sAvg==null?"Ei unikirjauksia":(sGoal?`tavoite ${sGoal} h · ${s1.filter(v=>v>=sGoal).length}/${s1.length} yli`:`${s1.length} yötä`);
 
   const stats=[];
-  if(trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px"><div class="v">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
+  if(trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;min-width:0"><div class="v" style="white-space:nowrap;flex:none">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
   if(trk("sleep")) stats.push(`<div class="ws-stat"><div class="k">Uni · 7 pv ka</div><div class="v">${sAvg!=null?sAvg:"—"}${sAvg!=null?"<small> h</small>":""}</div><div class="s">${sSub}</div></div>`);
 
   el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Viikko ${isoWeekNo(d)}</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt} kirjattu</span></div>
@@ -6152,13 +6156,18 @@ function buildRuleBasedSaveInsight(savedEntry, entries) {
       : "Aiemmin seurattu kipu on tänään merkitty poistuneeksi."};
   }
 
-  // 4. Sama kipu kolmena peräkkäisenä kalenteripäivänä
+  // 4. UUSI kipu kolmatta päivää peräkkäin (v2.11.11: vain uuden kipujakson alussa — pitkään jatkunut, jo tiedossa
+  // oleva kipu ei tuota huomiota joka päivä)
   const todayParts = getInjuryItems(savedEntry).filter(i=>!i.resolved&&i.painLevel>=1).map(i=>i.bodyPart);
   if(todayParts.length>0 && last3cal.every(e=>e)){
-    const sameStreak = todayParts.some(bp =>
-      last3cal.every(e=>getInjuryItems(e).some(i=>i.bodyPart===bp&&!i.resolved&&i.painLevel>=1))
+    const newStreak = todayParts.find(bp =>
+      last3cal.every(e=>getInjuryItems(e).some(i=>i.bodyPart===bp&&!i.resolved&&i.painLevel>=1)) &&
+      painEpisodeDays(bp,savedEntry.date)<=3
     );
-    if(sameStreak) return {type:"injury_streak", text:"Sama kipumerkintä kolmatta päivää peräkkäin — kannattaa huomioida."};
+    if(newStreak){
+      const pt=INJURY_PARTS.find(p=>p.id===newStreak); const nm=pt?pt.l:(INJURY_LEGACY[newStreak]||"Kipu");
+      return {type:"injury_streak", text:`${nm}: uusi kipu on jatkunut kolme päivää.`};
+    }
   }
 
   // 5. Uni suhteessa OMAAN normaaliin (28 pv ka) — jos dataa tarpeeksi
