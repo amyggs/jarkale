@@ -183,12 +183,12 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);}
 
 .btn-primary{
   height:44px;border-radius:12px;border:none;
-  background:var(--orange);color:#fff;font-size:13px;font-weight:700;cursor:pointer;
+  background:var(--seg-on);color:var(--on-accent);font-size:13px;font-weight:700;cursor:pointer;
 }
 .btn-primary:active{opacity:.85;}
 .btn-primary-lg{
   height:52px;border-radius:12px;border:none;
-  background:var(--orange);color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  background:var(--seg-on);color:var(--on-accent);font-size:15px;font-weight:700;cursor:pointer;
   box-shadow:0 2px 14px color-mix(in srgb,var(--orange) 35%,transparent);
 }
 .btn-primary-lg:active{opacity:.85;}
@@ -336,7 +336,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 
 /* Painikkeet ja pillerit */
 .pill-btn{border:none;background:var(--surf);color:var(--dim);font-weight:600;height:36px;}
-.pill-btn.active{background:var(--orange);color:var(--on-accent);box-shadow:none;}
+.pill-btn.active{background:var(--seg-on);color:var(--on-accent);box-shadow:none;}
 .btn-primary,.btn-primary-lg{color:var(--on-accent);box-shadow:none;}
 .save-btn{color:var(--on-accent);}
 .save-btn.saved{background:var(--green);animation:none;box-shadow:none;}
@@ -948,7 +948,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.1</span>
       </div>
     </div>
   </div>
@@ -978,6 +978,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.1", d:"lokakuu 2026", items:[
+    "Claude API -kohdan teksti korjattu: avainta tarvitaan vain Trendien kirjalliseen yhteenvetoon",
+    "Täytettyjen painikkeiden (esim. Tallenna) teksti luettava kaikissa teemoissa",
+  ]},
   {v:"2.14.0", d:"lokakuu 2026", items:[
     "Teemat: Kaurapuuro (alkuperäinen lämmin), Magnesium (viileä ja kliininen) ja Ampiainen (keltainen). Valitaan Asetukset → Tekniset asetukset; jokaisessa vaalea, tumma ja järjestelmän mukainen tila",
     "Ampiainen tummana: keltainen vain valinnoissa ja ohuina reunoina, ettei näyttö häikäise pimeässä",
@@ -4010,7 +4014,7 @@ async function callClaudeAI(systemPrompt, userPrompt, maxTokens=600, model=AI_MO
   return text;
 }
 
-// Tekstivastaus — valmentajaraportti + jaksoanalyysi käyttävät tätä
+// Tekstivastaus — kirjallinen yhteenveto käyttää tätä
 async function callClaudeForText(prompt) {
   return callClaudeAI(AI_TEXT_SYSTEM_PROMPT, prompt, 4000, AI_MODEL_TEXT);
 }
@@ -4883,13 +4887,13 @@ function renderApiKeySection(){
         <input type="password" id="api-key-input" placeholder="sk-ant-api03-..."
           style="flex:1;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 12px;outline:none;font-family:monospace">
         <button onclick="saveApiKey(document.getElementById('api-key-input').value);API_KEY_EDITING=false;"
-          style="height:42px;padding:0 16px;border-radius:12px;border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Tallenna</button>
+          style="height:42px;padding:0 16px;border-radius:12px;border:none;background:var(--seg-on);color:var(--on-accent);font-size:13px;font-weight:700;cursor:pointer">Tallenna</button>
         ${API_KEY_EDITING?`<button onclick="API_KEY_EDITING=false;renderApiKeySection()"
           style="height:42px;padding:0 14px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;cursor:pointer">Peruuta</button>`:""}
       </div>
     </div>
     <div style="color:var(--dim);font-size:11px;line-height:1.7">
-      Tarvitaan viikkokoosteisiin, valmentajaraporttiin ja jaksoanalyysiin.<br>
+      Tarvitaan vain Trendien kirjalliseen yhteenvetoon. Kaikki muu toimii ilman avainta ja ilman nettiä.<br>
       Hae avain: <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue);text-decoration:none">console.anthropic.com</a> → API Keys → Create Key<br>
       Avain tallennetaan vain tähän selaimeen.
     </div>
