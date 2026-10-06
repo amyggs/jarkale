@@ -526,6 +526,94 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ds-tbl tr.f td.v{color:var(--orange);}
 .ds-tbl tr.f td:first-child::after{content:" •";color:var(--orange);}
 .ds-note{font-size:11px;color:var(--dim);margin-top:6px;}
+
+/* ═══ ULKOASU v2.14: TEEMAT + RUUDUKKO ════════════════════════════
+   Teema (data-palette) × tila (data-theme). Ruudukko ja valintatyyli yhteisiä kaikille teemoille.
+   Kaurapuuro = alkuperäinen lämmin (ks. ulkoasu A yllä), Magnesium = kliininen, Ampiainen = keltainen. */
+:root[data-palette="magnesium"]{
+  --bg:#0B0C0E; --surf:#1B1D21; --surf2:#2C2F35; --bord:#33373E;
+  --text:#F6F7F8; --dim:#B9BEC6; --orange:#F2B705; --yellow:#F2B705;
+  --blue:#9DB7E8; --green:#5FD38D; --red:#FF8A70; --purple:#C4B8E0;
+  --nav-bg:#0B0C0E; --seg-on:#F2B705; --on-accent:#111214;
+}
+:root[data-palette="magnesium"][data-theme="light"]{
+  --bg:#F0F1F3; --surf:#FFFFFF; --surf2:#EBEDF0; --bord:#E2E4E8;
+  --text:#15171A; --dim:#585E66; --orange:#946F00; --yellow:#946F00;
+  --blue:#2F5C9E; --green:#1E7F4A; --red:#C2410C; --purple:#6B5B95;
+  --nav-bg:#FFFFFF; --seg-on:#15171A; --on-accent:#FFFFFF;
+}
+.stars button.active,.chip.on{background:var(--seg-on)!important;color:var(--on-accent)!important;box-shadow:none!important;}
+.ds-card{border:none;}
+.pill-btn.active{background:var(--seg-on)!important;color:var(--on-accent)!important;border-color:var(--seg-on)!important;}
+#view-log.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:10px;align-content:start;}
+#view-log>*{grid-column:1/-1;min-width:0;}
+#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-steps-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{background:var(--surf);border-radius:16px;padding:12px;margin-bottom:10px;}
+#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:auto;}
+#view-log .lbl-small{font-size:13px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;}
+/* paino ja uni: iso luku, napit alla */
+#track-weight-wrap .stepper,#track-sleep-wrap .stepper{display:block;border:none;min-height:0;}
+#track-weight-wrap .stepper>div:first-child,#track-sleep-wrap .stepper>div:first-child{display:flex!important;flex-direction:column;align-items:flex-start!important;gap:1px;min-height:34px;margin:0!important;}
+#view-log .ghost-hint,#weight-ma-hint{font-size:11.5px!important;}
+#track-weight-wrap .stepper-row,#track-sleep-wrap .stepper-row{display:grid!important;grid-template-columns:1fr 1fr;gap:6px;flex:none!important;margin-top:2px;}
+#track-weight-wrap .stepper-row>div,#track-sleep-wrap .stepper-row>div{grid-column:1/-1;grid-row:1;position:relative;}
+#track-weight-wrap .stepper-row>.stepper-btn:first-child,#track-sleep-wrap .stepper-row>.stepper-btn:first-child{grid-row:2;grid-column:1;}
+#track-weight-wrap .stepper-row>.stepper-btn:last-child,#track-sleep-wrap .stepper-row>.stepper-btn:last-child{grid-row:2;grid-column:2;}
+#view-log .stepper-btn{width:100%;height:42px;border-radius:10px;background:var(--surf2);color:var(--text);}
+#track-weight-wrap .stepper input,#track-sleep-wrap .stepper input{text-align:left;font-size:38px;font-weight:800;letter-spacing:-.03em;height:54px;padding:0;background:transparent;color:var(--text);}
+#view-log .stepper input.empty{color:var(--dim);}
+#track-weight-wrap .stepper-row>div>span,#track-sleep-wrap .stepper-row>div>span{left:auto!important;right:4px!important;top:auto!important;bottom:12px!important;transform:none!important;font-size:13px!important;font-weight:600;}
+/* askeleet: koko leveä rivi */
+#track-steps-wrap .stepper{border:none;min-height:0;}
+#track-steps-wrap .stepper-row{flex:0 0 210px;}
+#track-steps-wrap .stepper-btn{width:44px;}
+#track-steps-wrap .stepper input{font-size:24px;font-weight:800;}
+/* asteikot laatikossa */
+#view-log .stars{gap:4px;background:transparent;padding:0;margin:8px 0;}
+#view-log .stars button{height:42px;border-radius:9px;background:var(--surf2);color:var(--dim);font-size:16px;}
+#view-log .scale-lbl{margin:0;font-size:12px;line-height:1.35;}
+
+/* Kaurapuuro: alkuperäiset sävyt, tummaan selvempi valinta ja korttien erottuvuus */
+:root[data-palette="kaurapuuro"]{--surf:#1D1C18;--surf2:#2A2823;--dim:#B3AFA4;--seg-on:#C9A227;--on-accent:#0E0E0C;}
+:root[data-palette="kaurapuuro"][data-theme="light"]{--surf:#FFFFFF;--surf2:#EFECE4;--dim:#66625A;--seg-on:#E9E1C8;--on-accent:#1B1A17;}
+:root[data-palette="kaurapuuro"][data-theme="light"] .stars button.active,:root[data-palette="kaurapuuro"][data-theme="light"] .chip.on{box-shadow:inset 0 0 0 1.5px var(--orange)!important;}
+
+/* Ampiainen: keltainen korostus. Vaalea: keltainen yläpalkki ja perustietolaatikot.
+   Tumma: keltainen vain valinnoissa ja ohuina reunoina, jotta näyttö ei häikäise pimeässä. */
+:root[data-palette="ampiainen"]{--bg:#111312;--surf:#1C1F1E;--surf2:#2C302E;--bord:#3A3F3C;--text:#F4F5F0;--dim:#BCC0B8;
+  --orange:#FFD23B;--yellow:#FFD23B;--blue:#9DB7E8;--green:#5FD38D;--red:#FF8A70;--nav-bg:#111312;
+  --seg-on:#FFD23B;--on-accent:#181C1B;--hi:#FFD23B;--hi2:#EBC137;--hi-ink:#181C1B;--ol:#3A3F3C;--olbg:transparent;}
+:root[data-palette="ampiainen"][data-theme="light"]{--bg:#F1F2EC;--surf:#FFFFFF;--surf2:#E6E8E1;--bord:#CCCFC8;--text:#181C1B;--dim:#5E625C;
+  --orange:#8A6A00;--yellow:#8A6A00;--blue:#2F5C9E;--green:#1E7F4A;--red:#C2410C;--nav-bg:#F1F2EC;
+  --seg-on:#181C1B;--on-accent:#FFD23B;--ol:#CCCFC8;--olbg:#FFFFFF;}
+[data-palette="ampiainen"] #view-log .stars button{background:var(--olbg);border:1.5px solid var(--ol);border-radius:4px;color:var(--text);}
+[data-palette="ampiainen"] #view-log .stars button.active{border-color:var(--seg-on);}
+[data-palette="ampiainen"] .chip{border-radius:4px;}
+[data-palette="ampiainen"] .card,[data-palette="ampiainen"] .wr-banner,[data-palette="ampiainen"] #view-log>#track-weight-wrap,[data-palette="ampiainen"] #view-log>#track-sleep-wrap,[data-palette="ampiainen"] #view-log>#track-steps-wrap{border-radius:6px!important;}
+[data-palette="ampiainen"] .ws-dot,[data-palette="ampiainen"] .pill-btn{border-radius:4px!important;}
+[data-palette="ampiainen"] .ws-day.logged .ws-dot{background:var(--text)!important;}
+[data-palette="ampiainen"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--text)!important;}
+[data-palette="ampiainen"] #view-log>#track-recovery-wrap,[data-palette="ampiainen"] #view-log>#track-motivation-wrap{background:transparent;padding:10px 0 4px;border-radius:0;border-top:1.5px solid var(--ol);}
+[data-palette="ampiainen"] #pain-carry{background:transparent!important;border-radius:0!important;border-left:4px solid var(--text);padding:4px 0 4px 14px!important;}
+[data-palette="ampiainen"] .ds-card{background:transparent;border-radius:0;border-top:1.5px solid var(--ol);padding:12px 0;}
+[data-palette="ampiainen"] .ds-state{color:var(--text)!important;}
+[data-palette="ampiainen"] #nav button.active,[data-palette="ampiainen"] #nav button.active *{color:var(--text)!important;}
+/* vaalea: keltaiset pinnat */
+[data-palette="ampiainen"][data-theme="light"] #header{background:var(--hi);--green:#17603A;}
+[data-palette="ampiainen"][data-theme="light"] #header .brand,[data-palette="ampiainen"][data-theme="light"] #streak-count,[data-palette="ampiainen"][data-theme="light"] #streak-display svg{color:var(--hi-ink)!important;}
+[data-palette="ampiainen"][data-theme="light"] #theme-toggle-btn{background:var(--hi2)!important;border-color:var(--hi2)!important;color:var(--hi-ink)!important;}
+[data-palette="ampiainen"] #header img{box-shadow:0 0 0 2px var(--hi-ink);}
+[data-palette="ampiainen"][data-theme="light"] #view-log>#track-weight-wrap,[data-palette="ampiainen"][data-theme="light"] #view-log>#track-sleep-wrap,[data-palette="ampiainen"][data-theme="light"] #view-log>#track-steps-wrap{background:var(--hi);}
+[data-palette="ampiainen"][data-theme="light"] #track-weight-wrap *,[data-palette="ampiainen"][data-theme="light"] #track-sleep-wrap *,[data-palette="ampiainen"][data-theme="light"] #track-steps-wrap *{color:var(--hi-ink)!important;}
+[data-palette="ampiainen"][data-theme="light"] #view-log .stepper-btn{background:var(--hi2);border-radius:4px;}
+[data-palette="ampiainen"][data-theme="light"] #track-weight-wrap input::placeholder,[data-palette="ampiainen"][data-theme="light"] #track-sleep-wrap input::placeholder{color:rgba(24,28,27,.4)!important;}
+/* tumma: tummat laatikot, keltainen reuna */
+[data-palette="ampiainen"]:not([data-theme="light"]) #header{box-shadow:inset 0 -3px 0 var(--hi);}
+[data-palette="ampiainen"]:not([data-theme="light"]) #view-log>#track-weight-wrap,[data-palette="ampiainen"]:not([data-theme="light"]) #view-log>#track-sleep-wrap,[data-palette="ampiainen"]:not([data-theme="light"]) #view-log>#track-steps-wrap{box-shadow:inset 4px 0 0 var(--hi);}
+/* Viikkonumero päivämäärän vieressä */
+.vko-badge{display:inline-block;margin-left:8px;padding:2px 7px;border:1.5px solid currentColor;border-radius:5px;font-size:11.5px;font-weight:800;letter-spacing:.04em;vertical-align:2px;}
+[data-palette="ampiainen"] .vko-badge{border-radius:3px;}
+/* kapea näyttö: laatikot allekkain */
+@media (max-width:359px){#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:1/-1;}}
 </style>
 </head>
 <body>
@@ -860,7 +948,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.13.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.0</span>
       </div>
     </div>
   </div>
@@ -890,6 +978,13 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.0", d:"lokakuu 2026", items:[
+    "Teemat: Kaurapuuro (alkuperäinen lämmin), Magnesium (viileä ja kliininen) ja Ampiainen (keltainen). Valitaan Asetukset → Tekniset asetukset; jokaisessa vaalea, tumma ja järjestelmän mukainen tila",
+    "Ampiainen tummana: keltainen vain valinnoissa ja ohuina reunoina, ettei näyttö häikäise pimeässä",
+    "Kirjaa-näkymässä paino ja uni sekä palautuminen ja vire vierekkäisinä laatikoina; askeleet koko leveänä rivinä",
+    "Valinnat täytettynä kaikissa teemoissa; tummassa tilassa korttien pohja ja toissijainen teksti selvemmiksi",
+    "Viikkonumero (VKO) päivämäärän vieressä",
+  ]},
   {v:"2.13.0", d:"lokakuu 2026", items:[
     "Päivän tila tiiviimmäksi ja informatiivisemmaksi: tämän päivän uni, palautuminen ja vire rinnakkain oman tason (28 pv keskiarvo) kanssa; luokitukseen vaikuttavat tekijät merkitty",
     "Unen harmaana näkyy edellinen kirjattu uni kuten painossa; säädin lähtee siitä. Kentän vieressä kerrotaan, mistä harmaa arvo on",
@@ -1821,14 +1916,31 @@ function updateThemeBtn(){
     :S.settings.theme;
   btn.innerHTML=ico(resolved==="dark"?"sun":"moon",17);
 }
+// v2.14: teema (väripaletti) erikseen vaalea/tumma-tilasta
+const PALETTES=[
+  {id:"kaurapuuro",l:"Kaurapuuro",d:"Lämmin ja rauhallinen, alkuperäinen",sw:["#F4F2EC","#E9E1C8","#8C6A0A"]},
+  {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
+  {id:"ampiainen",l:"Ampiainen",d:"Keltainen ja musta",sw:["#FFD23B","#F1F2EC","#181C1B"]}
+];
+function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
+function applyPalette(p){
+  S.settings.palette=PALETTES.some(x=>x.id===p)?p:"kaurapuuro";
+  document.documentElement.setAttribute("data-palette",S.settings.palette);
+  updateMetaThemeColor();
+  saveAll(); renderAsetukset(); renderLog();
+}
+function updateMetaThemeColor(){
+  const m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
+  const light=document.documentElement.getAttribute("data-theme")==="light";
+  m.content=getComputedStyle(document.getElementById("header")||document.body).backgroundColor||(light?"#f2f2f7":"#0a0a0a");
+}
 function applyTheme(theme){
   S.settings.theme=theme||"dark";
   const resolved=theme==="system"
     ?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")
     :theme;
   document.documentElement.setAttribute("data-theme",resolved);
-  const metaTheme=document.querySelector('meta[name="theme-color"]');
-  if(metaTheme) metaTheme.content = resolved==="light" ? "#f2f2f7" : "#0a0a0a";
+  updateMetaThemeColor();
   saveAll();
   renderAsetukset();
   updateThemeBtn();
@@ -2271,7 +2383,7 @@ function renderLog() {
   dsEl.textContent="Mennyt päivä — muokkaus";
   dsEl.style.display=isToday?"none":"block";
   dsEl.style.color="var(--orange)";
-  document.getElementById("date-display").textContent=fmtDate(ds);
+  document.getElementById("date-display").innerHTML=`${esc(fmtDate(ds))}<span class="vko-badge" aria-label="Viikko ${isoWeekNo(new Date(ds+"T00:00:00"))}">VKO ${isoWeekNo(new Date(ds+"T00:00:00"))}</span>`;
   document.getElementById("date-display").style.color=isToday?"var(--text)":"var(--orange)";
   document.getElementById("next-btn").disabled=isToday;
   document.getElementById("date-picker").style.display=S.showDatePicker?"block":"none";
@@ -2597,7 +2709,7 @@ function renderStars(field,value,accent) {
   let lbl=document.getElementById("scale-lbl-"+field);
   if(!lbl){ lbl=document.createElement("div"); lbl.id="scale-lbl-"+field; lbl.className="scale-lbl"; container.after(lbl); }
   lbl.style.display=value?"block":"none";
-  lbl.innerHTML=value?`<b>${value}</b> · ${L[value]}`:"";
+  lbl.textContent=value?L[value]:"";
 }
 
 
@@ -2840,7 +2952,7 @@ function renderWeekStatus(ds){
   if(false&&trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;min-width:0"><div class="v" style="white-space:nowrap;flex:none">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
   if(false&&trk("sleep")) stats.push(`<div class="ws-stat"><div class="k">Uni · 7 pv ka</div><div class="v">${sAvg!=null?sAvg:"—"}${sAvg!=null?"<small> h</small>":""}</div><div class="s">${sSub}</div></div>`);
 
-  el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Viikko ${isoWeekNo(d)}</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt} kirjattu</span></div>
+  el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Kirjatut päivät</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt}</span></div>
     <div class="ws-days">${days}</div>
     ${stats.length?`<div class="ws-stats" style="${stats.length===1?"grid-template-columns:1fr":""}">${stats.join("")}</div>`:""}`;
   el.style.display="block";
@@ -4459,10 +4571,17 @@ function deleteSeason(id){
 function renderTheme(){
   const el=document.getElementById("theme-section"); if(!el) return;
   const cur=S.settings.theme||"dark";
+  const pal=curPalette();
+  const palHTML=`<div style="display:grid;gap:8px;margin-bottom:14px">${PALETTES.map(p=>`<button onclick="applyPalette('${p.id}')" aria-pressed="${pal===p.id}" style="display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border-radius:12px;border:1.5px solid ${pal===p.id?"var(--text)":"var(--bord)"};background:var(--surf2);color:var(--text);text-align:left">
+      <span style="display:flex;flex:none">${p.sw.map((c,i)=>`<i style="width:18px;height:28px;background:${c};${i===0?"border-radius:6px 0 0 6px;":""}${i===2?"border-radius:0 6px 6px 0;":""}box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"></i>`).join("")}</span>
+      <span style="flex:1"><b style="display:block;font-size:14px">${p.l}</b><span style="font-size:12px;color:var(--dim)">${p.d}</span></span>
+      ${pal===p.id?`<span style="font-weight:800">✓</span>`:""}</button>`).join("")}</div>
+    <div class="lbl-small" style="margin:0 0 8px">Tila</div>`;
   const opts=[{id:"dark",l:"Tumma",i:"moon"},{id:"light",l:"Vaalea",i:"sun"},{id:"system",l:"Järjestelmä",i:"phone"}];
-  el.innerHTML=`<div style="display:flex;gap:8px">
+  el.innerHTML=palHTML+`<div style="display:flex;gap:8px">
     ${opts.map(o=>`<button onclick="applyTheme('${o.id}')" style="flex:1;height:42px;border-radius:12px;border:1.5px solid ${cur===o.id?"var(--orange)":"var(--bord)"};background:${cur===o.id?"rgba(249,115,22,.12)":"var(--surf2)"};color:${cur===o.id?"var(--orange)":"var(--dim)"};font-size:13px;font-weight:${cur===o.id?700:400};transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px">${ico(o.i,16)}${o.l}</button>`).join("")}
-  </div>`;
+  </div>
+    <div style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5">Järjestelmä seuraa puhelimen asetusta: jos puhelin vaihtaa illalla tummaan tilaan, sovellus vaihtaa mukana.</div>`;
 }
 
 
@@ -6428,7 +6547,7 @@ try{
   }
 }catch(_){}
 // Apply saved theme
-(()=>{const t=S.settings.theme||"dark";const r=t==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):t;document.documentElement.setAttribute("data-theme",r);})();
+(()=>{document.documentElement.setAttribute("data-palette",curPalette());const t=S.settings.theme||"dark";const r=t==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):t;document.documentElement.setAttribute("data-theme",r);})();
 window.matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(S.settings.theme==="system") applyTheme("system");});
 loadDayIntoForm(S.date);
 renderAll();
