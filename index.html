@@ -602,6 +602,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"][data-theme="light"] #header .brand,[data-palette="ampiainen"][data-theme="light"] #streak-count,[data-palette="ampiainen"][data-theme="light"] #streak-display svg{color:var(--hi-ink)!important;}
 [data-palette="ampiainen"][data-theme="light"] #theme-toggle-btn{background:var(--hi2)!important;border-color:var(--hi2)!important;color:var(--hi-ink)!important;}
 [data-palette="ampiainen"] #header img{box-shadow:0 0 0 2px var(--hi-ink);}
+/* v2.14.4: päiväysrivi osaksi keltaista yläosaa (vaalea) */
+[data-palette="ampiainen"][data-theme="light"] #date-nav{background:var(--hi);margin:-9px -16px 14px!important;padding:3px 16px 12px;}
+[data-palette="ampiainen"][data-theme="light"] #header{box-shadow:0 1px 0 var(--hi);position:relative;z-index:2;}
+[data-palette="ampiainen"][data-theme="light"] #date-nav #date-display,[data-palette="ampiainen"][data-theme="light"] #date-nav #date-status,[data-palette="ampiainen"][data-theme="light"] #date-nav .date-nav-btn{color:var(--hi-ink)!important;}
+[data-palette="ampiainen"][data-theme="light"] #date-nav .date-nav-btn:disabled{opacity:.35;}
+[data-palette="ampiainen"][data-theme="light"] #date-nav .date-nav-btn:active{background:var(--hi2);}
 [data-palette="ampiainen"][data-theme="light"] #view-log>#track-weight-wrap,[data-palette="ampiainen"][data-theme="light"] #view-log>#track-sleep-wrap,[data-palette="ampiainen"][data-theme="light"] #view-log>#track-steps-wrap{background:var(--hi);}
 [data-palette="ampiainen"][data-theme="light"] #track-weight-wrap *,[data-palette="ampiainen"][data-theme="light"] #track-sleep-wrap *,[data-palette="ampiainen"][data-theme="light"] #track-steps-wrap *{color:var(--hi-ink)!important;}
 [data-palette="ampiainen"][data-theme="light"] #view-log .stepper-btn{background:var(--hi2);border-radius:4px;}
@@ -950,7 +956,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.3</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.4</span>
       </div>
     </div>
   </div>
@@ -980,6 +986,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.4", d:"lokakuu 2026", items:[
+    "Ampiainen (vaalea): päiväysrivi ja viikkonumero osaksi keltaista yläosaa",
+  ]},
   {v:"2.14.3", d:"lokakuu 2026", items:[
     "Puhelimen tilarivi saa teeman värin myös sovelluksen käynnistyessä ja siihen palatessa (esim. Ampiaisen keltainen)",
   ]},
