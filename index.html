@@ -950,7 +950,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.3</span>
       </div>
     </div>
   </div>
@@ -980,6 +980,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.3", d:"lokakuu 2026", items:[
+    "Puhelimen tilarivi saa teeman värin myös sovelluksen käynnistyessä ja siihen palatessa (esim. Ampiaisen keltainen)",
+  ]},
   {v:"2.14.2", d:"lokakuu 2026", items:[
     "Päiväys ja VKO-merkki samalle riville: vuosi näytetään vain, jos päivä on eri vuodelta",
   ]},
@@ -1941,8 +1944,14 @@ function applyPalette(p){
 function updateMetaThemeColor(){
   const m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
   const light=document.documentElement.getAttribute("data-theme")==="light";
-  m.content=getComputedStyle(document.getElementById("header")||document.body).backgroundColor||(light?"#f2f2f7":"#0a0a0a");
+  let c=getComputedStyle(document.getElementById("header")||document.body).backgroundColor;
+  if(!c||/rgba\(.*,\s*0\)$/.test(c)||c==="transparent") c=getComputedStyle(document.body).backgroundColor;
+  m.content=c||(light?"#f2f2f7":"#0a0a0a");
 }
+// v2.14.3: Androidin tilarivin väri teeman mukaan myös käynnistyksessä ja sovellukseen palatessa
+window.addEventListener("load",()=>setTimeout(updateMetaThemeColor,0));
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) updateMetaThemeColor(); });
+window.addEventListener("pageshow",()=>updateMetaThemeColor());
 function applyTheme(theme){
   S.settings.theme=theme||"dark";
   const resolved=theme==="system"
