@@ -498,6 +498,34 @@ span.mo-date{background:transparent;color:var(--dim);}
 .mo-notes{padding:10px 15px 0;font-size:12px;color:var(--dim);line-height:1.5;border-top:1px solid var(--bord);margin-top:4px;}
 .mo-notes b{color:var(--text);margin-right:4px;}
 .mo-notes div+div{margin-top:4px;}
+
+/* v2.13.0: luettavuus, valintojen tyyli, kosketusalueet */
+.stepper-row>div>span{font-size:11px!important;}
+.stars button.active{box-shadow:inset 0 0 0 1.5px var(--orange);color:var(--text);}
+.scale-lbl{font-size:12px;color:var(--dim);margin:-8px 0 14px 2px;}
+.scale-lbl b{color:var(--text);font-weight:700;}
+.pc-meta{font-size:13px;}
+.pc-sub{font-size:13px;color:var(--dim);margin:-2px 0 8px;}
+.pc-sub b{color:var(--text);}
+.pc-x.txt{width:auto;height:40px;margin:-8px -6px -8px 0;padding:0 6px 0 10px;font:600 12px Manrope,system-ui,sans-serif;white-space:nowrap;}
+.ghost-hint{color:var(--dim);font-size:11px;}
+button[onclick^="toggleFieldHint"]{position:relative;}
+button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10px -8px;}
+.wr-banner{background:transparent;padding:0 0 0 2px;margin:-4px 0 6px;}
+.wr-banner-main{font:600 13px Manrope,system-ui,sans-serif;min-height:40px;color:var(--dim);}
+.wr-banner-main b{font-size:16px;}
+.ds-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:12px 14px;}
+.ds-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ds-ttl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;}
+.ds-state{margin-left:auto;font-size:14px;font-weight:800;}
+.ds-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.ds-tbl th{font-size:11px;font-weight:600;color:var(--dim);text-align:right;padding:0 0 4px 8px;}
+.ds-tbl td{padding:5px 0;border-top:1px solid var(--bord);color:var(--dim);}
+.ds-tbl td.v{text-align:right;color:var(--text);font-weight:700;white-space:nowrap;padding-left:8px;}
+.ds-tbl td.b{text-align:right;white-space:nowrap;padding-left:8px;}
+.ds-tbl tr.f td.v{color:var(--orange);}
+.ds-tbl tr.f td:first-child::after{content:" •";color:var(--orange);}
+.ds-note{font-size:11px;color:var(--dim);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -553,7 +581,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div id="track-weight-wrap"><div class="stepper">
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
           <span class="lbl-small" style="margin:0">Aamupaino</span>
-          <span id="weight-ma-hint" style="display:none;color:var(--dim);font-size:10px"></span>
+          <span id="weight-ma-hint" style="display:none;color:var(--dim);font-size:11px"></span><span id="weight-ghost-hint" class="ghost-hint" style="display:none"></span>
         </div>
         <div class="stepper-row">
           <button class="stepper-btn" onclick="adj('weight',-0.1)">−</button>
@@ -567,11 +595,11 @@ span.mo-date{background:transparent;color:var(--dim);}
 
       <!-- Sleep -->
       <div id="track-sleep-wrap"><div class="stepper">
-        <span class="lbl-small">Uni</span>
+        <div style="display:flex"><span class="lbl-small" style="margin:0">Uni</span><span id="sleep-ghost-hint" class="ghost-hint" style="display:none"></span></div>
         <div class="stepper-row">
           <button class="stepper-btn" onclick="adj('sleep',-0.25)">−</button>
           <div style="flex:1;position:relative">
-            <input type="text" id="inp-sleep" class="empty" inputmode="decimal" placeholder="—" oninput="setField('sleep',parseNum(this.value))" onblur="renderSteppers()">
+            <input type="text" id="inp-sleep" class="empty" inputmode="decimal" placeholder="—" oninput="setField('sleep',parseSleep(this.value))" onblur="renderSteppers()">
             <span id="sleep-min-hint" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:11px;pointer-events:none">h</span>
           </div>
           <button class="stepper-btn" onclick="adj('sleep',0.25)">+</button>
@@ -832,7 +860,7 @@ span.mo-date{background:transparent;color:var(--dim);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.12.1</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.13.0</span>
       </div>
     </div>
   </div>
@@ -862,6 +890,15 @@ span.mo-date{background:transparent;color:var(--dim);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.13.0", d:"lokakuu 2026", items:[
+    "Päivän tila tiiviimmäksi ja informatiivisemmaksi: tämän päivän uni, palautuminen ja vire rinnakkain oman tason (28 pv keskiarvo) kanssa; luokitukseen vaikuttavat tekijät merkitty",
+    "Unen harmaana näkyy edellinen kirjattu uni kuten painossa; säädin lähtee siitä. Kentän vieressä kerrotaan, mistä harmaa arvo on",
+    "Uni näytetään muodossa h:mm (esim. 6:12). Syötteeksi käy myös 6,2 tai 6:12",
+    "Asteikon valinta korostetaan reunuksella ja valitun arvon merkitys näytetään (esim. 2 · melko kuormittunut)",
+    "Kipurivillä kirjausajankohta ja jakson kesto selvästi erikseen; × korvattu tekstillä Ei tänään",
+    "Kuormitusvertailu poistettu Kirjaa-näkymän treeniosiosta (näkyy edelleen Trendeissä)",
+    "Viikkoyhteenvedon ilmoitus kevyemmäksi linkkiriviksi",
+  ]},
   {v:"2.12.1", d:"lokakuu 2026", items:[
     "Päivän huomio, mittausmuistutus ja varmuuskopiomuistutus näkyvät nyt vasta lisäseurantojen jälkeen: kaikki kirjaaminen ensin, ylläpito lopuksi",
   ]},
@@ -1805,6 +1842,20 @@ function parseNum(s){
   const n=parseFloat(String(s).replace(",","."));
   return isNaN(n)?null:n;
 }
+// v2.13.0: uni yhtenä esitysmuotona h:mm; syötteeksi käy myös desimaali (6,2) tai h:mm (6:12)
+function fmtSleepHM(h){
+  if(h==null) return "";
+  let hh=Math.floor(h), mm=Math.round((h-hh)*60);
+  if(mm===60){hh++;mm=0;}
+  return `${hh}:${String(mm).padStart(2,"0")}`;
+}
+function parseSleep(s){
+  if(s==null) return null;
+  const t=String(s).trim().toLowerCase(); if(!t) return null;
+  const m=t.match(/^(\d{1,2})\s*(?::|h)\s*(\d{1,2})\s*(?:min)?$/);
+  if(m){ const mins=+m[2]; if(mins>=60) return null; return Math.round((+m[1]+mins/60)*100)/100; }
+  return parseNum(t.replace(/\s*h$/,""));
+}
 function formatSleep(h){
   if(h==null) return "";
   const hours=Math.floor(h);
@@ -2490,11 +2541,17 @@ function renderSteppers() {
     const val=S[field];
     // Don't overwrite the input value while user is typing in it
     if(document.activeElement!==el){
-      el.value=val===null||val===undefined?"":val;
+      el.value=val===null||val===undefined?"":(field==="sleep"?fmtSleepHM(val):val);
     }
     el.className=val!=null?"":"empty";
     el.style.color=val!=null?"var(--text)":"var(--dim)";
-    if(field==="weight"){ const lw=lastKnownWeight(S.date); el.placeholder=lw!=null?(+lw).toFixed(1):"—"; }
+    if(field==="weight"||field==="sleep"){
+      const k=lastKnown(field,S.date);
+      el.placeholder=k?(field==="sleep"?fmtSleepHM(k.v):(+k.v).toFixed(1)):"—";
+      // harmaa arvo on vain säätimen lähtökohta: kerrotaan, mistä se tulee (ei tallennu ennen muutosta)
+      const gh=document.getElementById(field==="sleep"?"sleep-ghost-hint":"weight-ghost-hint");
+      if(gh){ const show=val==null&&!!k; gh.style.display=show?"inline":"none"; gh.textContent=show?`harmaa = ${relDay(k.d)} kirjattu`:""; }
+    }
   });
   // Näytä 7 vrk liukuva ka weight-kentän yläpuolella
   const maEl=document.getElementById("weight-ma-hint");
@@ -2521,23 +2578,26 @@ function renderSteppers() {
   }
   // Show sleep as "Xh Ymin" hint if non-integer
   const sleepHint=document.getElementById("sleep-min-hint");
-  if(sleepHint){
-    if(S.sleep!=null&&S.sleep%1!==0){
-      sleepHint.textContent=formatSleep(S.sleep);
-      sleepHint.style.fontSize="10px";
-    } else {
-      sleepHint.textContent="h";
-      sleepHint.style.fontSize="11px";
-    }
-  }
+  if(sleepHint){ sleepHint.textContent="h"; }
 }
 
+// v2.13.0: valitun arvon sanallinen merkitys (samat määritelmät kuin ℹ-ohjeissa)
+const SCALE_LABELS={
+  recovery:{1:"hyvin kuormittunut",2:"melko kuormittunut",3:"tavanomainen",4:"hyvin palautunut",5:"erittäin hyvin palautunut"},
+  motivation:{1:"matala vire",2:"matala vire",3:"tavanomainen vire",4:"korkea vire",5:"korkea vire"}
+};
 function renderStars(field,value,accent) {
   const container=document.getElementById("stars-"+field); if(!container)return;
   container.style.setProperty("--accent",accent);
   container.querySelectorAll("button").forEach((btn,i)=>{
     btn.className=value===(i+1)?"active":"";
+    btn.setAttribute("aria-pressed",value===(i+1)?"true":"false");
   });
+  const L=SCALE_LABELS[field]; if(!L) return;
+  let lbl=document.getElementById("scale-lbl-"+field);
+  if(!lbl){ lbl=document.createElement("div"); lbl.id="scale-lbl-"+field; lbl.className="scale-lbl"; container.after(lbl); }
+  lbl.style.display=value?"block":"none";
+  lbl.innerHTML=value?`<b>${value}</b> · ${L[value]}`:"";
 }
 
 
@@ -5076,17 +5136,27 @@ function setField(field,val){
 
 // Painon lähtöarvo stepperille: viimeisin kirjattu paino ennen valittua päivää (tai lähin sen jälkeen).
 // Käytetään VAIN napin lähtökohtana ja harmaana vihjeenä — mitään ei tallenneta ennen kuin käyttäjä painaa nappia.
-function lastKnownWeight(ds){
-  const dates=Object.keys(S.entries).filter(d=>S.entries[d]&&S.entries[d].weight!=null).sort();
+function lastKnown(field,ds){
+  const dates=Object.keys(S.entries).filter(d=>S.entries[d]&&S.entries[d][field]!=null).sort();
   const before=dates.filter(d=>d<ds);
-  if(before.length) return S.entries[before[before.length-1]].weight;
+  if(before.length){ const d=before[before.length-1]; return {v:S.entries[d][field],d}; }
   const after=dates.filter(d=>d>ds);
-  return after.length?S.entries[after[0]].weight:null;
+  return after.length?{v:S.entries[after[0]][field],d:after[0]}:null;
+}
+function lastKnownWeight(ds){ const k=lastKnown("weight",ds); return k?k.v:null; }
+// v2.13.0: lyhyt päiväys suhteessa valittuun päivään ("eilen", "la 3.10.")
+const WD_SHORT=["su","ma","ti","ke","to","pe","la"];
+function relDay(d,ref){
+  const a=new Date(d+"T00:00:00"), b=new Date((ref||S.date)+"T00:00:00");
+  const diff=Math.round((b-a)/864e5);
+  if(diff===1) return "eilen";
+  if(diff===0) return "tänään";
+  return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`;
 }
 function adj(field,delta){
   const limits={weight:[30,300],sleep:[0,24],steps:[0,80000]};
   const [mn,mx]=limits[field]||[0,Infinity];
-  const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?7:0);
+  const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?(lastKnown("sleep",S.date)?.v??7):0);
   const next=Math.round((cur+delta)*100)/100;
   S[field]=Math.max(mn,Math.min(mx,next));
   renderSteppers();
@@ -5441,7 +5511,7 @@ function renderPainCarry(){
   const el=document.getElementById("pain-carry"); if(!el) return;
   const list=pendingPainCarry(S.date);
   if(!list.length||localStorage.getItem("seuranta-setup-done")!=="1"){ el.style.display="none"; el.innerHTML=""; return; }
-  const when=k=>k===1?"eilen":`${k} pv sitten`;
+  const when=p=>relDay(p.from);
   el.style.display="block";
   el.innerHTML=`<div class="lbl-small" style="margin:0 0 8px">Jatkuuko kipu?</div>`+list.map(p=>{
     const pt=INJURY_PARTS.find(x=>x.id===p.bodyPart);
@@ -5450,20 +5520,21 @@ function renderPainCarry(){
     // v2.11.12: yli 14 pv ennallaan jatkunut kipu tiiviinä rivinä — yksi napautus "Ennallaan", muut vaihtoehdot pyydettäessä
     const stable=days>=14&&(p.direction==="sama"||!p.direction)&&!(window._pcExpand||{})[p.bodyPart];
     if(stable) return `<div class="pc-row pc-compact">
-      <div class="pc-head"><span class="pc-name">${esc(name)}</span><span class="pc-meta">${p.painLevel?p.painLevel+"/5 · ":""}ennallaan ${days} pv</span>
-        <button class="pc-x" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">×</button></div>
+      <div class="pc-head"><span class="pc-name">${esc(name)}</span><span class="pc-meta"></span>
+        <button class="pc-x txt" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">Ei tänään</button></div>
+      <div class="pc-sub">${p.painLevel?`<b>${p.painLevel}/5</b> · `:""}kirjattu ${when(p)} · jakso ${days} pv</div>
       <div class="chips" style="flex-wrap:nowrap"><button class="chip grow" onclick="carryPain('${p.bodyPart}','ennallaan')">Ennallaan</button><button class="chip grow" onclick="(window._pcExpand=window._pcExpand||{})['${p.bodyPart}']=true;renderPainCarry()">Muuttui…</button></div></div>`;
     return `<div class="pc-row">
-      <div class="pc-head"><span class="pc-name">${esc(name)}</span>
-        <span class="pc-meta">${p.painLevel?p.painLevel+"/5 · ":""}${when(p.daysAgo)}${days>1?` · ${days} pv`:""}</span>
-        <button class="pc-x" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">×</button></div>
+      <div class="pc-head"><span class="pc-name">${esc(name)}</span><span class="pc-meta"></span>
+        <button class="pc-x txt" aria-label="Ei tänään: ${esc(name)}" onclick="dismissPainCarry('${p.bodyPart}')">Ei tänään</button></div>
+      <div class="pc-sub">${p.painLevel?`<b>${p.painLevel}/5</b> · `:""}kirjattu ${when(p)}${days>1?` · jakso ${days} pv`:""}</div>
       <div class="chips" style="flex-wrap:nowrap">
         <button class="chip grow" onclick="carryPain('${p.bodyPart}','parempi')">Parempi</button>
         <button class="chip grow" onclick="carryPain('${p.bodyPart}','ennallaan')">Ennallaan</button>
         <button class="chip grow" onclick="carryPain('${p.bodyPart}','huonompi')">Huonompi</button>
         <button class="chip grow" onclick="carryPain('${p.bodyPart}','ohi')">Ohi</button>
       </div></div>`;
-  }).join("")+`<div style="font-size:11px;color:var(--dim);margin-top:8px">Taso säilyy edellisestä, tarkenna tarvittaessa lisäseurannoissa.</div>`;
+  }).join("")+`<div style="font-size:12px;color:var(--dim);margin-top:8px">Valinta kirjaa tämän päivän havainnon. Taso säilyy edellisestä, tarkenna tarvittaessa lisäseurannoissa.</div>`;
 }
 
 function shouldShowDayStateCard(){
@@ -5506,6 +5577,19 @@ function getVireState(value){
   return {level:"high", label:"Korkea"};
 }
 
+// v2.13.0: Päivän tila tiiviinä taulukkona. Luokitus (model v1) ennallaan; lisäksi näytetään
+// tämän päivän arvot rinnakkain oman tason kanssa (edelliset 28 pv, sairaspäivät pois, väh. 7 arvoa).
+// Kuvailevaa tietoa: ei uusia asteikkoja, ei johtopäätöksiä. Puuttuva oma taso = "–".
+function ownLevel(field,ds){
+  const vals=[]; const d=new Date(ds+"T00:00:00");
+  for(let i=1;i<=28;i++){
+    d.setDate(d.getDate()-1); const e=S.entries[iso(d)];
+    if(!e||e[field]==null) continue;
+    if((e.day_factors||[]).includes("illness")) continue;
+    vals.push(+e[field]);
+  }
+  return vals.length>=7?vals.reduce((x,y)=>x+y,0)/vals.length:null;
+}
 function renderReadiness(){
   const el=document.getElementById("readiness-card"); if(!el) return;
   if(!shouldShowDayStateCard()){
@@ -5514,43 +5598,41 @@ function renderReadiness(){
     return;
   }
   const body=calculateBodyState(S.date);
-  const showVire=trk("motivation")&&S.motivation!=null;
-  const vire=showVire?getVireState(S.motivation):null;
   const colFor={recovered:"var(--green)",normal:"var(--text)",loaded:"var(--orange)"};
-  const vireColFor={low:"var(--blue)",normal:"var(--text)",high:"var(--green)"};
-  const bodyCol=colFor[body.level];
-  const defaultText={
-    recovered:"Uni ja palautumisen tunne ovat hyvällä tasolla.",
-    normal:"Fyysisissä tiedoissa ei näy selvää poikkeamaa.",
-    loaded:"Kirjatuissa tiedoissa näkyy kuormitustekijöitä."
-  };
-
-  const reasonsHTML=body.reasons.length
-    ? body.reasons.map(r=>`<span style="display:inline-flex;align-items:center;background:color-mix(in srgb,${bodyCol} 10%,var(--surf2));border:1px solid color-mix(in srgb,${bodyCol} 25%,transparent);border-radius:8px;padding:3px 8px;font-size:11px;color:${bodyCol};white-space:nowrap">${esc(r)}</span>`).join("")
-    : `<span style="font-size:11px;color:var(--dim)">${defaultText[body.level]}</span>`;
+  const codes=new Set((body.reasonCodes||[]).map(r=>r.code));
+  const n1=v=>v==null?"–":(Math.round(v*10)/10).toLocaleString("fi-FI",{minimumFractionDigits:1,maximumFractionDigits:1});
+  const g=getActiveGoals(S.date), sleepGoal=g.sleepHours||7;
+  const rows=[];
+  const sl=ownLevel("sleep",S.date);
+  rows.push({k:"Uni",v:fmtSleepHM(S.sleep),b:sl==null?"–":fmtSleepHM(sl),f:codes.has("sleep_below_goal"),note:`tavoite ${fmtSleepHM(sleepGoal)}`});
+  rows.push({k:"Palautuminen",v:String(S.recovery),b:n1(ownLevel("recovery",S.date)),f:codes.has("low_recovery")});
+  if(trk("motivation")&&S.motivation!=null) rows.push({k:"Vire",v:String(S.motivation),b:n1(ownLevel("motivation",S.date))});
+  const inj=trk("injury")?(S.injury_items||[]).filter(i=>!i.resolved&&i.painLevel>=1):[];
+  if(inj.length){
+    const top=inj.reduce((m,i)=>i.painLevel>m.painLevel?i:m,inj[0]);
+    const pt=INJURY_PARTS.find(x=>x.id===top.bodyPart);
+    rows.push({k:"Kipu"+(pt?` (${pt.l.toLowerCase()})`:""),v:top.painLevel+"/5",b:"",f:codes.has("active_pain")});
+  }
+  const pl=body.inputs&&body.inputs.prev_day_load;
+  if(pl!=null) rows.push({k:"Eilen treeni, rasitus",v:pl+"/5",b:"",f:codes.has("hard_training_yesterday")});
 
   el.style.display="block";
-  el.innerHTML=`<div style="background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:13px 14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600">Päivän tila</span>
-      <button onclick="toggleFieldHint('daystate-hint')" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
+  el.innerHTML=`<div class="ds-card">
+    <div class="ds-head">
+      <span class="ds-ttl">Päivän tila</span>
+      <span class="ds-state" style="color:${colFor[body.level]}">${body.label}</span>
+      <button onclick="toggleFieldHint('daystate-hint')" aria-label="Mistä Päivän tila muodostuu" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
     </div>
-    <div id="daystate-hint" style="display:none;margin-bottom:12px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord);font-size:11px;color:var(--dim);line-height:1.6">
-      Päivän tila kuvaa tämän päivän kokonaisuutta kahdesta näkökulmasta.<br><br>
-      <b style="color:var(--text)">Kehon tila</b> muodostuu unesta, palautumisen tunteesta sekä mahdollisista aktiivisista kivuista ja viimeaikaisesta treenikuormasta.<br><br>
-      <b style="color:var(--text)">Yleinen vire</b> on oma arviosi siitä, kuinka energiseltä ja käynnistyneeltä olo tuntuu.<br><br>
-      Kehon tila ja vire voivat olla eri suuntaisia. Kortti ei arvioi, pystytkö treenaamaan tai tekemään päivän työt, eikä anna toimintaohjetta.
+    <div id="daystate-hint" style="display:none;margin:4px 0 10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord);font-size:12px;color:var(--dim);line-height:1.6">
+      <b style="color:var(--text)">Kehon tila</b> muodostuu unesta, palautumisen tunteesta, aktiivisesta kivusta ja eilisestä treenikuormasta. Kuormittunut = vähintään kaksi kuormitustekijää tai yksi vahva (esim. uni vähintään 2 h alle tavoitteen, palautuminen 1, kipu 4/5 tai enemmän). Palautunut = uni vähintään tavoite, palautuminen vähintään 4 eikä merkittävää kipua.<br><br>
+      <b style="color:var(--text)">Oma taso</b> = edellisten 28 päivän keskiarvo, sairauspäivät pois. Näytetään, kun arvoja on vähintään 7.<br><br>
+      • = tekijä, joka vaikuttaa luokitukseen. Kortti kuvaa kirjauksia, se ei arvioi treenikykyä eikä anna toimintaohjetta.
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0${showVire?';border-bottom:1px solid var(--bord)':''}">
-      <span style="font-size:13px;color:var(--dim)">Kehon tila</span>
-      <span style="font-size:13px;font-weight:700;color:${bodyCol}">${body.label}</span>
-    </div>
-    ${showVire?`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px">
-      <span style="font-size:13px;color:var(--dim)">Yleinen vire</span>
-      <span style="font-size:13px;font-weight:700;color:${vireColFor[vire.level]}">${vire.label}</span>
-    </div>`:""}
-    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">${reasonsHTML}</div>
-    <div style="font-size:10px;color:var(--dim);margin-top:8px;padding-top:8px;border-top:1px solid var(--bord)">Suuntaa-antava yhteenveto kirjauksista — ei toimintaohje.</div>
+    <table class="ds-tbl">
+      <tr><th style="text-align:left;padding-left:0"></th><th>tänään</th><th>oma taso</th></tr>
+      ${rows.map(r=>`<tr class="${r.f?"f":""}"><td>${r.k}</td><td class="v">${r.v}</td><td class="b">${r.b}</td></tr>`).join("")}
+    </table>
+    ${codes.has("sleep_below_goal")||S.sleep<sleepGoal?`<div class="ds-note">Unitavoite ${fmtSleepHM(sleepGoal)}</div>`:""}
   </div>`;
 }
 
@@ -5919,7 +6001,7 @@ function renderTrainingSection(){
       <textarea oninput="S.training_notes=this.value;saveDraft();scheduleAutoSave()" placeholder="Miten treeni meni..." rows="2" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:10px 13px;resize:none;outline:none">${esc(S.training_notes)}</textarea>
     </div>`;
   }
-  h+=buildLoadBalanceHTML(S.date);
+  // v2.13.0: kuormitusvertailu ei kuulu kirjaamiseen (näkyy Trendeissä)
   h+=`</div>`;
   el.innerHTML=h;
 }
