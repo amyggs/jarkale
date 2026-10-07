@@ -956,7 +956,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.4</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.5</span>
       </div>
     </div>
   </div>
@@ -986,6 +986,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.5", d:"lokakuu 2026", items:[
+    "Unen kirjoittaminen: 6.55 tai 6,55 tarkoittaa 6 h 55 min, ja numeronäppäimistöltä voi kirjoittaa myös 655. Yksi desimaali (6,5) on edelleen tunnin osa eli 6 h 30 min",
+  ]},
   {v:"2.14.4", d:"lokakuu 2026", items:[
     "Ampiainen (vaalea): päiväysrivi ja viikkonumero osaksi keltaista yläosaa",
   ]},
@@ -1989,10 +1992,17 @@ function fmtSleepHM(h){
   return `${hh}:${String(mm).padStart(2,"0")}`;
 }
 function parseSleep(s){
+  // v2.14.5: uni syötetään tunteina ja minuutteina. Hyväksytyt muodot:
+  //   6:55 · 6h 55min · 6.55 / 6,55 (kaksi numeroa = minuutit) · 655 (numeronäppäimistöltä) · 6,5 (yksi desimaali = tunnin osa) · 7
   if(s==null) return null;
   const t=String(s).trim().toLowerCase(); if(!t) return null;
-  const m=t.match(/^(\d{1,2})\s*(?::|h)\s*(\d{1,2})\s*(?:min)?$/);
-  if(m){ const mins=+m[2]; if(mins>=60) return null; return Math.round((+m[1]+mins/60)*100)/100; }
+  const hm=v=>Math.round(v*100)/100;
+  let m=t.match(/^(\d{1,2})\s*(?::|h)\s*(\d{1,2})\s*(?:min)?$/);
+  if(m){ const mins=+m[2]; if(mins>=60) return null; return hm(+m[1]+mins/60); }
+  m=t.match(/^(\d{1,2})[.,](\d{2})$/);
+  if(m&&+m[2]<60) return hm(+m[1]+(+m[2])/60);
+  m=t.match(/^(\d{1,2})(\d{2})$/);
+  if(m&&+m[2]<60&&+m[1]<=24) return hm(+m[1]+(+m[2])/60);
   return parseNum(t.replace(/\s*h$/,""));
 }
 function formatSleep(h){
