@@ -960,13 +960,13 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <!-- Mitä uutta -->
       <div id="stgl-changelog" style="margin-bottom:8px"></div>
       <div id="stgl-content-changelog" style="display:none;margin-bottom:4px">
-        <div class="card" id="changelog-content"></div>
+        <div class="card" id="changelog-content" data-raw></div>
       </div>
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.7</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.15.0</span>
       </div>
     </div>
   </div>
@@ -996,6 +996,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.15.0", d:"lokakuu 2026", items:[
+    "Luvut suomalaisittain: desimaalipilkku kaikkialla (108,5 kg, 3,7/5) ja askeleissa välilyönti (8 400). Kirjoittaessa käy sekä piste että pilkku. Tallennettu data ja viennit ennallaan",
+  ]},
   {v:"2.14.7", d:"lokakuu 2026", items:[
     "Uni näytetään muodossa 6 h 50 min kuten puhelimen terveyssovelluksessa (myös Päivän tilassa)",
   ]},
@@ -1997,7 +2000,7 @@ function esc(s){
 }
 function parseNum(s){
   if(s==null||s==="") return null;
-  const n=parseFloat(String(s).replace(",","."));
+  const n=parseFloat(String(s).replace(/[\s\u00a0\u202f]/g,"").replace(",","."));
   return isNaN(n)?null:n;
 }
 // v2.13.0: uni yhtenä esitysmuotona h:mm; syötteeksi käy myös desimaali (6,2) tai h:mm (6:12)
@@ -2719,13 +2722,13 @@ function renderSteppers() {
     const val=S[field];
     // Don't overwrite the input value while user is typing in it
     if(document.activeElement!==el){
-      el.value=val===null||val===undefined?"":(field==="sleep"?fmtSleepHM(val):val);
+      el.value=val===null||val===undefined?"":(field==="sleep"?fmtSleepHM(val):field==="steps"?Math.round(val).toLocaleString("fi-FI"):String(val).replace(".",","));
     }
     el.className=val!=null?"":"empty";
     el.style.color=val!=null?"var(--text)":"var(--dim)";
     if(field==="weight"||field==="sleep"){
       const k=lastKnown(field,S.date);
-      el.placeholder=k?(field==="sleep"?fmtSleepHM(k.v):(+k.v).toFixed(1)):"—";
+      el.placeholder=k?(field==="sleep"?fmtSleepHM(k.v):(+k.v).toFixed(1).replace(".",",")):"—";
       // harmaa arvo on vain säätimen lähtökohta: kerrotaan, mistä se tulee (ei tallennu ennen muutosta)
       const gh=document.getElementById(field==="sleep"?"sleep-ghost-hint":"weight-ghost-hint");
       if(gh){ const show=val==null&&!!k; gh.style.display=show?"inline":"none"; gh.textContent=show?`harmaa = ${relDay(k.d)} kirjattu`:""; }
@@ -5393,7 +5396,7 @@ function runCountUp(){
     const anim=now=>{
       const p=Math.min((now-start)/dur,1);
       const ease=1-Math.pow(1-p,3);
-      el.textContent=(target*ease).toFixed(decs)+suffix;
+      { const x=target*ease; el.textContent=(decs===0?Math.round(x).toLocaleString("fi-FI"):x.toFixed(decs).replace(".",","))+suffix; }
       if(p<1) requestAnimationFrame(anim);
     };
     requestAnimationFrame(anim);
@@ -6623,6 +6626,25 @@ try{
   }
 }catch(_){}
 // Apply saved theme
+
+// ═══ v2.15.0: SUOMALAINEN DESIMAALIPILKKU NÄKYVÄÄN TEKSTIIN ══════════════
+// Kaikki näkyvä teksti käy läpi yhden muuntimen: 108.5 → 108,5. Päiväykset (6.10.) ja versionumerot (2.14.7)
+// jäävät ennalleen, koska niissä luvun perässä on piste. Tallennettu data, viennit ja syötekentät eivät muutu.
+const FI_DEC_RE=/(^|[^\d.,])(\d+)\.(\d+)(?![\d.])/g;
+function fiDec(t){ return t.replace(FI_DEC_RE,"$1$2,$3"); }
+function fiDecNode(root){
+  if(!root) return;
+  if(root.nodeType===3){ const p=root.parentNode; if(!p||p.closest&&p.closest("script,style,textarea,input,[data-raw]")) return; const v=root.nodeValue; if(v&&/\d\.\d/.test(v)){ const n=fiDec(v); if(n!==v) root.nodeValue=n; } return; }
+  if(root.nodeType!==1||root.closest("script,style,textarea,input,[data-raw]")) return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n;
+  while((n=w.nextNode())){ const v=n.nodeValue; if(v&&/\d\.\d/.test(v)){ const p=n.parentNode; if(p&&p.closest("script,style,textarea,input,[data-raw]")) continue; const x=fiDec(v); if(x!==v) n.nodeValue=x; } }
+}
+(()=>{ try{
+  const run=()=>fiDecNode(document.body);
+  const mo=new MutationObserver(ms=>{ for(const m of ms){ if(m.type==="characterData") fiDecNode(m.target); else m.addedNodes.forEach(fiDecNode); } });
+  const start=()=>{ run(); mo.observe(document.body,{subtree:true,childList:true,characterData:true}); };
+  if(document.body) start(); else document.addEventListener("DOMContentLoaded",start);
+}catch(_){} })();
 (()=>{document.documentElement.setAttribute("data-palette",curPalette());const t=S.settings.theme||"dark";const r=t==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):t;document.documentElement.setAttribute("data-theme",r);})();
 window.matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(S.settings.theme==="system") applyTheme("system");});
 loadDayIntoForm(S.date);
