@@ -956,7 +956,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.5</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.6</span>
       </div>
     </div>
   </div>
@@ -986,6 +986,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.6", d:"lokakuu 2026", items:[
+    "Unen + ja − muuttavat 5 minuuttia kerrallaan (aiemmin 15 min)",
+  ]},
   {v:"2.14.5", d:"lokakuu 2026", items:[
     "Unen kirjoittaminen: 6.55 tai 6,55 tarkoittaa 6 h 55 min, ja numeronäppäimistöltä voi kirjoittaa myös 655. Yksi desimaali (6,5) on edelleen tunnin osa eli 6 h 30 min",
   ]},
@@ -5316,7 +5319,13 @@ function adj(field,delta){
   const limits={weight:[30,300],sleep:[0,24],steps:[0,80000]};
   const [mn,mx]=limits[field]||[0,Infinity];
   const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?(lastKnown("sleep",S.date)?.v??7):0);
-  const next=Math.round((cur+delta)*100)/100;
+  let next=Math.round((cur+delta)*100)/100;
+  if(field==="sleep"){
+    // v2.14.6: uni 5 minuutin askelin, tasattuna 5 minuutin ruudukkoon (esim. 6:52 → + → 6:55)
+    const m=Math.round(cur*60);
+    const nm=delta>0?Math.floor(m/5)*5+5:Math.ceil(m/5)*5-5;
+    next=Math.round(nm/60*100)/100;
+  }
   S[field]=Math.max(mn,Math.min(mx,next));
   renderSteppers();
   updateSaveBtn(S.date,new Date(S.date+"T00:00:00").getDay());
