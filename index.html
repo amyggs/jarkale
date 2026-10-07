@@ -981,7 +981,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.15.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.15.3</span>
       </div>
     </div>
   </div>
@@ -1011,6 +1011,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.15.3", d:"lokakuu 2026", items:[
+    "Trendien viikkokortista poistettu toistuva päivämääräväli ja \"Viikko\"-yläotsikko (sama tieto näkyy jakson selaimessa)",
+  ]},
   {v:"2.15.2", d:"lokakuu 2026", items:[
     "Sivuotsikot poistettu (alapalkki kertoo jo sivun). Mitoissa \"Lisää mittaus\" nostettu sivun yläosaan",
   ]},
@@ -2924,7 +2927,7 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
   const wk=isoWeekNo(new Date(R.weekStart+"T00:00:00"));
   const fd=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.`;};
   const head=`<div class="wr-head">
-      <div class="wr-title"><span class="wr-kicker">${compact?"Viime viikko":"Viikko"}</span><span class="wr-week">Viikko ${wk} <span>${fd(R.weekStart)}–${fd(R.weekEnd)}</span></span></div>
+      <div class="wr-title">${compact?`<span class="wr-kicker">Viime viikko</span>`:""}<span class="wr-week">Viikko ${wk}${compact?` <span>${fd(R.weekStart)}–${fd(R.weekEnd)}</span>`:""}</span></div>
       <span class="wr-meta">kirjattu ${R.logged}/${R.passed}</span>
       ${dismissable?`<button class="pc-x" aria-label="Piilota viikkoyhteenveto" onclick="dismissWeekRecap('${R.weekStart}')">×</button>`:""}
     </div>`;
