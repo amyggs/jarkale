@@ -620,6 +620,16 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 #date-nav>div>div{min-width:0;}
 .vko-badge{display:inline-block;margin-left:8px;padding:2px 7px;border:1.5px solid currentColor;border-radius:5px;font-size:11.5px;font-weight:800;letter-spacing:.04em;vertical-align:2px;}
 [data-palette="ampiainen"] .vko-badge{border-radius:3px;}
+
+/* v2.14.7: uni "6 h 50 min" -muodossa; kenttä näkyy vain muokatessa */
+#track-sleep-wrap .stepper-row>div>span{display:none!important;}
+#track-sleep-wrap .stepper-row>div:not(.editing) input,#track-sleep-wrap .stepper-row>div:not(.editing) input::placeholder{color:transparent!important;}
+.sleep-hm{position:absolute;left:0;top:0;height:54px;display:flex;align-items:baseline;gap:3px;padding-top:6px;pointer-events:none;color:var(--text);white-space:nowrap;}
+.sleep-hm b{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1;}
+.sleep-hm small{font-size:15px;font-weight:700;margin-right:5px;color:inherit;opacity:.75;}
+.sleep-hm.ghost{color:var(--dim);opacity:.6;}
+.editing .sleep-hm{display:none;}
+@media (max-width:400px){.sleep-hm b{font-size:33px;}.sleep-hm small{font-size:13px;margin-right:3px;}}
 /* kapea näyttö: laatikot allekkain */
 @media (max-width:359px){#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:1/-1;}}
 </style>
@@ -695,7 +705,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
         <div class="stepper-row">
           <button class="stepper-btn" onclick="adj('sleep',-0.25)">−</button>
           <div style="flex:1;position:relative">
-            <input type="text" id="inp-sleep" class="empty" inputmode="decimal" placeholder="—" oninput="setField('sleep',parseSleep(this.value))" onblur="renderSteppers()">
+            <input type="text" id="inp-sleep" class="empty" inputmode="decimal" placeholder="—" aria-label="Uni, esim. 655 = 6 h 55 min" oninput="setField('sleep',parseSleep(this.value))" onfocus="this.parentNode.classList.add('editing');this.select()" onblur="this.parentNode.classList.remove('editing');renderSteppers()"><div id="sleep-hm" class="sleep-hm" aria-hidden="true"></div>
             <span id="sleep-min-hint" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:11px;pointer-events:none">h</span>
           </div>
           <button class="stepper-btn" onclick="adj('sleep',0.25)">+</button>
@@ -956,7 +966,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.14.6</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.14.7</span>
       </div>
     </div>
   </div>
@@ -986,6 +996,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.14.7", d:"lokakuu 2026", items:[
+    "Uni näytetään muodossa 6 h 50 min kuten puhelimen terveyssovelluksessa (myös Päivän tilassa)",
+  ]},
   {v:"2.14.6", d:"lokakuu 2026", items:[
     "Unen + ja − muuttavat 5 minuuttia kerrallaan (aiemmin 15 min)",
   ]},
@@ -1988,6 +2001,16 @@ function parseNum(s){
   return isNaN(n)?null:n;
 }
 // v2.13.0: uni yhtenä esitysmuotona h:mm; syötteeksi käy myös desimaali (6,2) tai h:mm (6:12)
+// v2.14.7: uni muodossa "6 h 50 min" kuten puhelimen terveyssovelluksissa
+function fmtSleepText(h){
+  if(h==null) return "–";
+  const t=fmtSleepHM(h).split(":"); const hh=+t[0], mm=+t[1];
+  return mm?`${hh} h ${mm} min`:`${hh} h`;
+}
+function sleepHMHtml(h){
+  const t=fmtSleepHM(h).split(":"); const hh=+t[0], mm=+t[1];
+  return `<b>${hh}</b><small>h</small>${mm?`<b>${mm}</b><small>min</small>`:""}`;
+}
 function fmtSleepHM(h){
   if(h==null) return "";
   let hh=Math.floor(h), mm=Math.round((h-hh)*60);
@@ -2706,6 +2729,10 @@ function renderSteppers() {
       // harmaa arvo on vain säätimen lähtökohta: kerrotaan, mistä se tulee (ei tallennu ennen muutosta)
       const gh=document.getElementById(field==="sleep"?"sleep-ghost-hint":"weight-ghost-hint");
       if(gh){ const show=val==null&&!!k; gh.style.display=show?"inline":"none"; gh.textContent=show?`harmaa = ${relDay(k.d)} kirjattu`:""; }
+      if(field==="sleep"){
+        const ov=document.getElementById("sleep-hm");
+        if(ov){ const v=val!=null?val:(k?k.v:null); ov.innerHTML=v!=null?sleepHMHtml(v):"<b>—</b>"; ov.classList.toggle("ghost",val==null); }
+      }
     }
   });
   // Näytä 7 vrk liukuva ka weight-kentän yläpuolella
@@ -5772,7 +5799,7 @@ function renderReadiness(){
   const g=getActiveGoals(S.date), sleepGoal=g.sleepHours||7;
   const rows=[];
   const sl=ownLevel("sleep",S.date);
-  rows.push({k:"Uni",v:fmtSleepHM(S.sleep),b:sl==null?"–":fmtSleepHM(sl),f:codes.has("sleep_below_goal"),note:`tavoite ${fmtSleepHM(sleepGoal)}`});
+  rows.push({k:"Uni",v:fmtSleepText(S.sleep),b:sl==null?"–":fmtSleepText(sl),f:codes.has("sleep_below_goal"),note:`tavoite ${fmtSleepHM(sleepGoal)}`});
   rows.push({k:"Palautuminen",v:String(S.recovery),b:n1(ownLevel("recovery",S.date)),f:codes.has("low_recovery")});
   if(trk("motivation")&&S.motivation!=null) rows.push({k:"Vire",v:String(S.motivation),b:n1(ownLevel("motivation",S.date))});
   const inj=trk("injury")?(S.injury_items||[]).filter(i=>!i.resolved&&i.painLevel>=1):[];
@@ -5800,7 +5827,7 @@ function renderReadiness(){
       <tr><th style="text-align:left;padding-left:0"></th><th>tänään</th><th>oma taso</th></tr>
       ${rows.map(r=>`<tr class="${r.f?"f":""}"><td>${r.k}</td><td class="v">${r.v}</td><td class="b">${r.b}</td></tr>`).join("")}
     </table>
-    ${codes.has("sleep_below_goal")||S.sleep<sleepGoal?`<div class="ds-note">Unitavoite ${fmtSleepHM(sleepGoal)}</div>`:""}
+    ${codes.has("sleep_below_goal")||S.sleep<sleepGoal?`<div class="ds-note">Unitavoite ${fmtSleepText(sleepGoal)}</div>`:""}
   </div>`;
 }
 
