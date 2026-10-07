@@ -618,7 +618,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 
 /* v2.15.1: Ampiaisen keltainen yläosa kaikille sivuille (sivun otsikko + sivun ohjaimet) */
 .hero-title{display:none;}
-[data-palette="ampiainen"] .hero-title{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:2px 0 12px;color:var(--text);}
+.view-hero:empty{display:none;}
+[data-palette="ampiainen"][data-theme="light"] #mitat-hero{padding:6px 16px 14px;}
+[data-palette="ampiainen"][data-theme="light"] #mitat-hero .mo-add{background:var(--hi-ink)!important;color:var(--hi)!important;border:none!important;margin:0!important;}
 [data-palette="ampiainen"][data-theme="light"] .view-hero{background:var(--hi);margin:-9px -16px 14px;padding:3px 16px 6px;}
 [data-palette="ampiainen"][data-theme="light"] .view-hero .hero-title{color:var(--hi-ink);}
 [data-palette="ampiainen"][data-theme="light"] .view-hero #period-label,[data-palette="ampiainen"][data-theme="light"] .view-hero .date-nav-btn,[data-palette="ampiainen"][data-theme="light"] .view-hero .lbl-small{color:var(--hi-ink)!important;}
@@ -868,7 +870,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 
     <!-- TRENDIT VIEW -->
     <div id="view-trendit" class="view">
-      <div class="view-hero"><div class="hero-title">Trendit</div>
+      <div class="view-hero">
       <div id="range-pills" style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none"></div>
       <div id="period-nav" style="display:none;align-items:center;gap:10px;margin-bottom:10px">
         <button class="date-nav-btn" style="width:38px;height:38px;" onclick="S.periodOffset--;renderTrendit()">‹</button>
@@ -885,13 +887,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 
     <!-- MITAT VIEW -->
     <div id="view-historia" class="view">
-      <div class="view-hero"><div class="hero-title">Mitat</div></div>
+      <div class="view-hero" id="mitat-hero"></div>
       <div id="historia-content"></div>
     </div>
 
     <!-- ASETUKSET VIEW -->
     <div id="view-asetukset" class="view">
-      <div class="view-hero"><div class="hero-title">Asetukset</div></div>
 
       <!-- Profiili — aina näkyvissä -->
       <div class="card">
@@ -980,7 +981,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.15.1</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.15.2</span>
       </div>
     </div>
   </div>
@@ -1010,6 +1011,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.15.2", d:"lokakuu 2026", items:[
+    "Sivuotsikot poistettu (alapalkki kertoo jo sivun). Mitoissa \"Lisää mittaus\" nostettu sivun yläosaan",
+  ]},
   {v:"2.15.1", d:"lokakuu 2026", items:[
     "Ampiainen: keltainen yläosa myös Trendeissä, Mitoissa ja Asetuksissa (sivun otsikko ja ohjaimet). Muissa teemoissa ulkoasu ennallaan",
   ]},
@@ -4254,7 +4258,14 @@ function measSpark(vals){
   const last=xy[xy.length-1].split(",");
   return `<svg class="mo-spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${xy.join(" ")}" fill="none" stroke="var(--dim)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity=".6"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="var(--orange)"/></svg>`;
 }
+// v2.15.2: "Lisää mittaus" sivun yläosaan (Ampiaisessa keltaiselle pohjalle); lomakkeen ollessa auki yläosa on tyhjä
 function renderMeasurements(){
+  const r=renderMeasurementsInner();
+  const hero=document.getElementById("mitat-hero"), btn=document.querySelector("#historia-content .mo-add");
+  if(hero){ hero.replaceChildren(); if(btn) hero.appendChild(btn); }
+  return r;
+}
+function renderMeasurementsInner(){
   const all=[...HIST_MEAS,...(S.measurements||[])].sort((a,b)=>a.date.localeCompare(b.date));
   const el=document.getElementById("historia-content");
   if(!all.length && !MEAS_FORM.show){
