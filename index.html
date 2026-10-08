@@ -988,7 +988,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.1</span>
       </div>
     </div>
   </div>
@@ -1018,6 +1018,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.1", d:"lokakuu 2026", items:[
+    "Päivän vaihdon animaatio 30 % nopeampi",
+  ]},
   {v:"2.16.0", d:"lokakuu 2026", items:[
     "Päivän vaihto selkeämmäksi: sivu seuraa sormea pyyhkäistessä, ja päivä vaihtuu kuin sivua kääntäisi. Vanha päivä liukuu ulos ja uusi sisään. Sama animaatio nuolinapeista",
   ]},
@@ -6722,6 +6725,7 @@ function showDatePill(ds, note){
 // - Ei käynnisty syöttökentistä (tekstin valinta / kursorin siirto ei saa vaihtaa päivää)
 // - Ei käynnisty ruudun reunoilta (Androidin eleohjauksen takaisin-ele asuu siellä)
 // - Hidas veto (>600 ms) ei laukaise, ellei vetoa ole viety yli kolmannekseen ruudusta
+// - v2.16.1: animaatio 30 % nopeampi (ulos 115 ms, sisään 200 ms)
 // - v2.16.0: sivu seuraa sormea ja päivä vaihtuu "sivunkääntönä": vanha päivä liukuu ulos,
 //   uusi sisään vastakkaiselta puolelta, ja päiväys vaihtuu omana animaationaan. Sama nuolinapeille.
 // - Tänään eteenpäin: selkeä palaute tyhjän no-opin sijaan
@@ -6739,14 +6743,14 @@ function dayTurn(delta,fromX){
   if(_reduceMotion||!zone||!zone.animate){ setPartsX(0); swap(); return; }
   DAY_TURN.busy=true;
   const W=zone.clientWidth||400, x0=fromX||0;
-  const outs=dayParts().map(el=>el.animate([{transform:`translateX(${x0}px)`,opacity:Math.max(.35,1-Math.abs(x0)/W)},{transform:`translateX(${-delta*W*0.9}px)`,opacity:0}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}));
+  const outs=dayParts().map(el=>el.animate([{transform:`translateX(${x0}px)`,opacity:Math.max(.35,1-Math.abs(x0)/W)},{transform:`translateX(${-delta*W*0.9}px)`,opacity:0}],{duration:115,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}));
   Promise.all(outs.map(a=>a.finished.catch(()=>{}))).then(()=>{
     swap();
     outs.forEach(a=>a.cancel()); setPartsX(0);
-    dayParts().forEach(el=>el.animate([{transform:`translateX(${delta*W*0.6}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:260,easing:"cubic-bezier(.15,.85,.25,1)"}));
+    dayParts().forEach(el=>el.animate([{transform:`translateX(${delta*W*0.6}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"}));
     const dd=document.getElementById("date-display");
-    if(dd) dd.animate([{transform:`translateX(${delta*40}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:260,easing:"cubic-bezier(.15,.85,.25,1)"});
-    setTimeout(()=>{DAY_TURN.busy=false;},120);
+    if(dd) dd.animate([{transform:`translateX(${delta*40}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"});
+    setTimeout(()=>{DAY_TURN.busy=false;},90);
   });
 }
 function dayStep(delta){
@@ -6762,7 +6766,7 @@ function dayStep(delta){
   const nudge=(dir)=>{
     if(_reduceMotion) { setPartsX(0); return; }
     const x=lastDx;
-    dayParts().forEach(el=>el.animate([{transform:`translateX(${x}px)`},{transform:`translateX(${dir*-14}px)`},{transform:"translateX(0)"}],{duration:260,easing:"ease-out"}));
+    dayParts().forEach(el=>el.animate([{transform:`translateX(${x}px)`},{transform:`translateX(${dir*-14}px)`},{transform:"translateX(0)"}],{duration:200,easing:"ease-out"}));
     setPartsX(0);
   };
   zone.addEventListener("touchstart",e=>{
