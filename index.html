@@ -880,9 +880,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div class="view-hero">
       <div id="range-pills" style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none"></div>
       <div id="period-nav" style="display:none;align-items:center;gap:10px;margin-bottom:10px">
-        <button class="date-nav-btn" style="width:38px;height:38px;" onclick="S.periodOffset--;renderTrendit()">‹</button>
+        <button class="date-nav-btn" style="width:38px;height:38px;" onclick="periodStep(-1)" aria-label="Edellinen jakso">‹</button>
         <div id="period-label" style="flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--text)"></div>
-        <button class="date-nav-btn" style="width:38px;height:38px;" id="period-next-btn" onclick="S.periodOffset=Math.min(0,S.periodOffset+1);renderTrendit()">›</button>
+        <button class="date-nav-btn" style="width:38px;height:38px;" id="period-next-btn" onclick="periodStep(1)" aria-label="Seuraava jakso">›</button>
       </div>
       <div id="free-range" style="display:none;gap:10px;margin-bottom:10px">
         <div style="flex:1"><span class="lbl-small">Alku</span><input type="date" id="free-start" onchange="S.freeStart=this.value;renderTrendit()" style="width:100%;height:38px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 10px;outline:none"></div>
@@ -988,7 +988,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.1</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.2</span>
       </div>
     </div>
   </div>
@@ -1018,6 +1018,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.2", d:"lokakuu 2026", items:[
+    "Trendeissä viikkoja ja kuukausia voi selata pyyhkäisemällä, samalla sivunkääntöanimaatiolla kuin Kirjaa-näkymässä",
+  ]},
   {v:"2.16.1", d:"lokakuu 2026", items:[
     "Päivän vaihdon animaatio 30 % nopeampi",
   ]},
@@ -6731,59 +6734,72 @@ function showDatePill(ds, note){
 // - Tänään eteenpäin: selkeä palaute tyhjän no-opin sijaan
 const DAY_TURN={busy:false};
 const _reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-function dayParts(){
-  const zone=document.getElementById("view-log"); if(!zone) return [];
-  return [...zone.children].filter(el=>el.id!=="date-nav"&&el.offsetParent!==null);
+// v2.16.2: yhteinen sivunkääntö Kirjaa-näkymän päiville ja Trendien viikoille/kuukausille.
+// Yläosa (päiväys / jaksovalinta) pysyy paikallaan; sen alla oleva sisältö liikkuu.
+function turnParts(zoneId){
+  const zone=document.getElementById(zoneId); if(!zone) return [];
+  return [...zone.children].filter(el=>el.id!=="date-nav"&&!el.classList.contains("view-hero")&&el.offsetParent!==null);
 }
-function setPartsX(x,op){ dayParts().forEach(el=>{ el.style.transform=x?`translateX(${x}px)`:""; el.style.opacity=op==null?"":String(op); }); }
-function dayTurn(delta,fromX){
-  // delta: +1 = seuraava päivä (sisältö menee vasemmalle), -1 = edellinen
-  const zone=document.getElementById("view-log");
-  const swap=()=>moveDate(delta);
-  if(_reduceMotion||!zone||!zone.animate){ setPartsX(0); swap(); return; }
+function dayParts(){ return turnParts("view-log"); }
+function setPartsX(x,op,zoneId){ turnParts(zoneId||"view-log").forEach(el=>{ el.style.transform=x?`translateX(${x}px)`:""; el.style.opacity=op==null?"":String(op); }); }
+function pageTurn(zoneId,labelId,delta,fromX,swap){
+  // delta: +1 = seuraava (sisältö menee vasemmalle), -1 = edellinen
+  const zone=document.getElementById(zoneId);
+  if(_reduceMotion||!zone||!zone.animate){ setPartsX(0,null,zoneId); swap(); return; }
   DAY_TURN.busy=true;
   const W=zone.clientWidth||400, x0=fromX||0;
-  const outs=dayParts().map(el=>el.animate([{transform:`translateX(${x0}px)`,opacity:Math.max(.35,1-Math.abs(x0)/W)},{transform:`translateX(${-delta*W*0.9}px)`,opacity:0}],{duration:115,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}));
+  const outs=turnParts(zoneId).map(el=>el.animate([{transform:`translateX(${x0}px)`,opacity:Math.max(.35,1-Math.abs(x0)/W)},{transform:`translateX(${-delta*W*0.9}px)`,opacity:0}],{duration:115,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}));
   Promise.all(outs.map(a=>a.finished.catch(()=>{}))).then(()=>{
     swap();
-    outs.forEach(a=>a.cancel()); setPartsX(0);
-    dayParts().forEach(el=>el.animate([{transform:`translateX(${delta*W*0.6}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"}));
-    const dd=document.getElementById("date-display");
-    if(dd) dd.animate([{transform:`translateX(${delta*40}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"});
+    outs.forEach(a=>a.cancel()); setPartsX(0,null,zoneId);
+    turnParts(zoneId).forEach(el=>el.animate([{transform:`translateX(${delta*W*0.6}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"}));
+    const lb=document.getElementById(labelId);
+    if(lb) lb.animate([{transform:`translateX(${delta*40}px)`,opacity:0},{transform:"translateX(0)",opacity:1}],{duration:200,easing:"cubic-bezier(.15,.85,.25,1)"});
     setTimeout(()=>{DAY_TURN.busy=false;},90);
   });
 }
+function dayTurn(delta,fromX){ pageTurn("view-log","date-display",delta,fromX,()=>moveDate(delta)); }
 function dayStep(delta){
   if(DAY_TURN.busy) return;
   if(delta>0&&S.date>=today()) return;
   haptic(8);
   dayTurn(delta,0);
 }
-(()=>{
-  const zone=document.getElementById("view-log");
+function periodHasNav(){ return S.rangeId==="vko"||S.rangeId==="kk"; }
+function periodTurn(delta,fromX){ pageTurn("view-trendit","period-label",delta,fromX,()=>{ S.periodOffset=Math.min(0,S.periodOffset+delta); renderTrendit(); }); }
+function periodStep(delta){
+  if(DAY_TURN.busy||!periodHasNav()) return;
+  if(delta>0&&S.periodOffset>=0) return;
+  haptic(8);
+  periodTurn(delta,0);
+}
+// Pyyhkäisy: sisältö seuraa sormea; riittävä veto kääntää sivun. Ei käynnisty syöttökentistä,
+// ruudun reunoilta (Androidin takaisin-ele) eikä vaakasuunnassa vieritettävistä elementeistä.
+function attachTurnSwipe(zoneId,o){
+  const zone=document.getElementById(zoneId); if(!zone) return;
   const EDGE=28;
   let sx=null,sy=null,st=0,dragging=false,lastDx=0;
+  const hScroll=el=>{ for(let n=el;n&&n!==zone;n=n.parentElement){ if(n.scrollWidth>n.clientWidth+4){ const ox=getComputedStyle(n).overflowX; if(ox==="auto"||ox==="scroll") return true; } } return false; };
   const nudge=(dir)=>{
-    if(_reduceMotion) { setPartsX(0); return; }
     const x=lastDx;
-    dayParts().forEach(el=>el.animate([{transform:`translateX(${x}px)`},{transform:`translateX(${dir*-14}px)`},{transform:"translateX(0)"}],{duration:200,easing:"ease-out"}));
-    setPartsX(0);
+    if(!_reduceMotion) turnParts(zoneId).forEach(el=>el.animate([{transform:`translateX(${x}px)`},{transform:`translateX(${dir*-14}px)`},{transform:"translateX(0)"}],{duration:200,easing:"ease-out"}));
+    setPartsX(0,null,zoneId);
   };
   zone.addEventListener("touchstart",e=>{
     const t=e.touches[0];
-    if(DAY_TURN.busy||e.touches.length>1
+    if(!o.enabled()||DAY_TURN.busy||e.touches.length>1
       || t.clientX<EDGE || t.clientX>window.innerWidth-EDGE
-      || (e.target.closest&&e.target.closest("input,textarea,select,[contenteditable]"))){ sx=null; return; }
+      || (e.target.closest&&e.target.closest("input,textarea,select,[contenteditable]"))
+      || hScroll(e.target)){ sx=null; return; }
     sx=t.clientX; sy=t.clientY; st=Date.now(); dragging=false; lastDx=0;
   },{passive:true});
   zone.addEventListener("touchmove",e=>{
     if(sx===null||_reduceMotion) return;
     const t=e.touches[0], dx=t.clientX-sx, dy=t.clientY-sy;
     if(!dragging){ if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.3) dragging=true; else if(Math.abs(dy)>12){ sx=null; return; } else return; }
-    // tänään eteenpäin: vastus
-    const atEnd=dx<0&&S.date>=today();
+    const atEnd=dx<0&&o.atEnd();
     lastDx=atEnd?dx*0.15:dx*0.85;
-    setPartsX(lastDx, Math.max(.4,1-Math.abs(lastDx)/(zone.clientWidth*1.4)));
+    setPartsX(lastDx, Math.max(.4,1-Math.abs(lastDx)/(zone.clientWidth*1.4)), zoneId);
   },{passive:true});
   zone.addEventListener("touchcancel",()=>{ if(sx!==null&&dragging) nudge(0); sx=null; },{passive:true});
   zone.addEventListener("touchend",e=>{
@@ -6794,19 +6810,25 @@ function dayStep(delta){
     const wasDragging=dragging; sx=null; sy=null; dragging=false;
     const far=Math.abs(dx)>zone.clientWidth/3;
     if(Math.abs(dx)<60 || Math.abs(dy)>Math.abs(dx)*0.6 || (dt>600&&!far)){ if(wasDragging) nudge(0); return; }
-    const delta=dx<0?1:-1; // vasemmalle = seuraava päivä, oikealle = edellinen
-    if(delta>0 && S.date>=today()){
-      haptic(20);
-      nudge(1);
-      showDatePill(today(),"Olet jo tämän päivän kohdalla");
-      return;
-    }
+    const delta=dx<0?1:-1; // vasemmalle = seuraava, oikealle = edellinen
+    if(delta>0 && o.atEnd()){ haptic(20); nudge(1); o.onEnd&&o.onEnd(); return; }
     haptic(8);
-    dayTurn(delta,lastDx);
-    const nav=document.getElementById("date-nav");
-    setTimeout(()=>{ if(nav && nav.getBoundingClientRect().bottom < zone.getBoundingClientRect().top+8) showDatePill(S.date); },160);
+    o.turn(delta,lastDx);
+    o.after&&setTimeout(o.after,160);
   },{passive:true});
-})();
+}
+attachTurnSwipe("view-log",{
+  enabled:()=>true,
+  atEnd:()=>S.date>=today(),
+  onEnd:()=>showDatePill(today(),"Olet jo tämän päivän kohdalla"),
+  turn:(d,x)=>dayTurn(d,x),
+  after:()=>{ const zone=document.getElementById("view-log"), nav=document.getElementById("date-nav"); if(nav && nav.getBoundingClientRect().bottom < zone.getBoundingClientRect().top+8) showDatePill(S.date); }
+});
+attachTurnSwipe("view-trendit",{
+  enabled:()=>periodHasNav(),
+  atEnd:()=>S.periodOffset>=0,
+  turn:(d,x)=>periodTurn(d,x)
+});
 
 // ═══ SERVICE WORKER ══════════════════════════════════════════════
 if('serviceWorker' in navigator){
