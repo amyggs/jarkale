@@ -358,8 +358,14 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--orange);}
 .ws-day.future{color:color-mix(in srgb,var(--dim) 55%,transparent);}
 .ws-day.future .ws-dot{background:transparent;border:1.5px dashed var(--bord);}
-.ws-tr{width:4px;height:4px;border-radius:50%;background:transparent;}
-.ws-day.tr .ws-tr{background:var(--text);}
+.ws-tr{display:flex;align-items:center;justify-content:center;height:12px;color:var(--text);}
+.ws-dot{display:flex;align-items:center;justify-content:center;}
+.ws-day.logged .ws-dot{color:#fff;}
+:root:not([data-theme="light"]) .ws-day.logged .ws-dot{color:#111;}
+[data-palette="ampiainen"][data-theme="light"] .ws-day.logged .ws-dot{color:#FFD23B;}
+.ws-dot .ico{stroke-width:3;}
+.ws-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:11.5px;color:var(--dim);}
+.ws-legend span{display:inline-flex;align-items:center;gap:4px;}
 .ws-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;}
 .ws-stat{background:var(--surf2);border-radius:12px;padding:9px 12px;min-width:0;}
 .ws-stat .k{font-size:11px;color:var(--dim);font-weight:600;}
@@ -988,7 +994,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.3</span>
       </div>
     </div>
   </div>
@@ -1018,6 +1024,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.3", d:"lokakuu 2026", items:[
+    "Viikon päivissä kirjattu päivä näkyy ruksina, ja tämän päivän ruksi napsahtaa esiin kirjatessa",
+    "Treenipäivän merkki on nyt käsipainon kuva pelkän pisteen sijaan, ja selite näkyy päivien alla",
+  ]},
   {v:"2.16.2", d:"lokakuu 2026", items:[
     "Trendeissä viikkoja ja kuukausia voi selata pyyhkäisemällä, samalla sivunkääntöanimaatiolla kuin Kirjaa-näkymässä",
   ]},
@@ -3036,8 +3046,13 @@ function renderWeekStatus(ds){
     const tr=!!(e&&(e.training_done||e.cardio_done));
     const cls=["ws-day",logged?"logged":"",xs===ds?"sel":"",future?"future":"",tr?"tr":""].filter(Boolean).join(" ");
     const aria=`${lbl} ${x.getDate()}.${x.getMonth()+1}.${logged?", kirjattu":""}${tr?", treeni":""}`;
-    return `<button class="${cls}" ${future?"disabled":""} aria-label="${aria}" onclick="goDate('${xs}')">${lbl}<span class="ws-dot"></span><span class="ws-tr"></span></button>`;
+    return `<button class="${cls}" ${future?"disabled":""} aria-label="${aria}" onclick="goDate('${xs}')">${lbl}<span class="ws-dot">${logged?ico("check",15,"ws-ck"):""}</span><span class="ws-tr">${tr?ico("dumbbell",12):""}</span></button>`;
   }).join("");
+  // v2.16.3: tämän päivän kirjautuminen "napsahtaa" kerran näkyviin
+  const todayLogged=!!(S.entries[t]&&hasMeaningfulEntry(S.entries[t]));
+  const pop=todayLogged&&window._wsTodayLogged===false&&ds>=weekMonday(t)&&ds<=t;
+  window._wsTodayLogged=todayLogged;
+  const anyTr=DN.some((_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);const e=S.entries[iso(x)];return !!(e&&(e.training_done||e.cardio_done));});
 
   // 7 pv ikkunat valitusta päivästä taaksepäin
   const win=(endOff,len)=>{const out=[];for(let i=0;i<len;i++){const x=new Date(d);x.setDate(d.getDate()-endOff-i);out.push(S.entries[iso(x)]);}return out.filter(Boolean);};
@@ -3074,8 +3089,10 @@ function renderWeekStatus(ds){
 
   el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Kirjatut päivät</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt}</span></div>
     <div class="ws-days">${days}</div>
+    <div class="ws-legend"><span>${ico("check",12)} kirjattu</span>${anyTr?`<span>${ico("dumbbell",12)} treeni</span>`:""}</div>
     ${stats.length?`<div class="ws-stats" style="${stats.length===1?"grid-template-columns:1fr":""}">${stats.join("")}</div>`:""}`;
   el.style.display="block";
+  if(pop&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){ const d=el.querySelector(`.ws-day:nth-child(${((new Date(t+"T00:00:00").getDay()+6)%7)+1}) .ws-dot`); if(d&&d.animate) d.animate([{transform:"scale(.6)"},{transform:"scale(1.18)"},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1.4)"}); }
 }
 
 // ═══ 7 VRK LIUKUVA KESKIARVO ════════════════════════════════════
