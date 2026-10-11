@@ -466,7 +466,9 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .wr-more{font-size:12px;color:var(--dim);font-weight:600;padding-top:4px;}
 .wr-tags{display:flex;flex-wrap:wrap;gap:6px;}
 .wr-tag{display:inline-flex;align-items:center;gap:6px;background:var(--surf2);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;}
-.wr-tag b{color:var(--dim);font-weight:700;}
+.wr-tag b{color:var(--text);font-weight:800;}
+.wr-tag.zero{color:var(--dim);}
+.wr-tag.zero b{color:var(--dim);font-weight:700;}
 .wr-insight{margin-top:14px;padding:12px;background:var(--surf2);border-radius:14px;font-size:14px;line-height:1.5;font-weight:600;display:flex;gap:10px;align-items:flex-start;}
 .wr-insight .ico-tile{background:var(--surf);}
 .wr-note{font-size:13px;color:var(--dim);line-height:1.5;}
@@ -1034,7 +1036,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.5</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.6</span>
       </div>
     </div>
   </div>
@@ -1064,6 +1066,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.6", d:"lokakuu 2026", items:[
+    "Trendien havainnot huoliteltuun suomeen: esim. \"Treenejä 2 viikossa, tavoite 4\" ja uni muodossa 6 h 30 min",
+    "Viikkoyhteenvedossa lukumäärät muodossa \"Normaalisti 1\", \"Kuormittunut 0\" (aiemmin \"1 normaalisti\"), uni h min ja treeneissä \"2 alle tavoitteen\"",
+  ]},
   {v:"2.16.5", d:"lokakuu 2026", items:[
     "Kirjallinen yhteenveto: tulkitsee painon muutoksen käynnissä olevan kauden tavoitetta vasten (esim. kehityskaudella nousu on tavoitteen suuntainen)",
     "Kirjallinen yhteenveto: lyhyempi ja selkeämpi suomi, uni muodossa h min, ei pieniin otoksiin perustuvia sivuhuomioita",
@@ -3021,21 +3027,22 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
     const sub=d!=null?(d===0?"±0 edelliseen":`${d>0?"+":"−"}${Math.abs(d)} kg edelliseen`):(R.weight.avg==null?`${R.weight.n} punnitusta`:"ei vertailuviikkoa");
     tiles.push(tile("scale","Paino ka",R.weight.avg??"–","kg",sub));
   }
-  if(R.training) tiles.push(tile("dumbbell","Treenit",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`tavoite ${R.training.goal}`):"kirjattu"));
-  if(R.sleep) tiles.push(tile("moon","Uni ka",R.sleep.avg??"–","h",R.sleep.n?`${R.sleep.below}/${R.sleep.n} alle ${R.sleep.goal} h`:"ei kirjattu"));
+  if(R.training) tiles.push(tile("dumbbell","Treenit",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`${R.training.goal-R.training.n} alle tavoitteen`):"kirjattu"));
+  if(R.sleep) tiles.push(tile("moon","Uni ka",R.sleep.avg!=null?fmtSleepText(R.sleep.avg):"–","",R.sleep.n?`${R.sleep.below}/${R.sleep.n} yötä alle ${fmtSleepText(R.sleep.goal)}`:"ei kirjattu"));
   if(R.recovery) tiles.push(tile("battery","Palautuminen",R.recovery.avg??"–","/ 5",R.recovery.n?(R.recovery.low?`matala ${R.recovery.low} pv`:"ei matalia päiviä"):"ei kirjattu"));
   const sec=(icon,title,body)=>`<div class="wr-sec"><div class="wr-sec-h">${ico(icon,15)}<span>${title}</span></div>${body}</div>`;
+  // v2.16.6: lukumäärät nimi + luku -muodossa (kuten Poikkeamat), ei "1 normaalisti"
+  const chips=list=>`<div class="wr-tags">${list.map(([l,n])=>`<span class="wr-tag${n?"":" zero"}">${l}<b>${n}</b></span>`).join("")}</div>`;
   const secs=[];
   if(R.training&&R.training.outcomeN){
     const o=R.training.outcomes;
-    const it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
     const light=R.training.lightened?`<div class="wr-ctx">Kevennettiin tarkoituksella <b>${R.training.lightened}</b> ${R.training.lightened===1?"treeni":"treeniä"}</div>`:"";
-    secs.push(sec("activity","Treenin kulku",`<div class="wr-ocl">${it(o.worse,"heikommin")}${it(o.normal,"normaalisti")}${it(o.better,"paremmin")}</div>${light}`));
+    secs.push(sec("activity","Treenien kulku omaan normaaliin nähden",`${chips([["Heikommin",o.worse],["Normaalisti",o.normal],["Paremmin",o.better]])}${light}`));
   }
   if(R.plan&&R.plan.planned+R.plan.extra){
-    const p=R.plan, it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
+    const p=R.plan;
     const ctx=[p.extra?(p.extra===1?"1 ylimääräinen treeni":`${p.extra} ylimääräistä treeniä`):"",p.unknown?(p.unknown===1?"1 suunniteltu päivä ilman kirjausta":`${p.unknown} suunniteltua päivää ilman kirjausta`):""].filter(Boolean).join(" · ");
-    secs.push(sec("calendar","Suunnitellut treenit",`<div class="wr-ocl">${it(p.completed,"toteutui")}${it(p.modified,"muuttui")}${it(p.skipped,"jäi väliin")}</div><div class="wr-ctx">Suunniteltuja ${R.complete?"":"tähän mennessä "}<b>${p.planned}</b>${ctx?` · ${ctx}`:""}</div>`));
+    secs.push(sec("calendar","Suunnitellut treenit",`${chips([["Toteutui",p.completed],["Muuttui",p.modified],["Jäi väliin",p.skipped]])}<div class="wr-ctx">Suunniteltuja ${R.complete?"":"tähän mennessä "}<b>${p.planned}</b>${ctx?` · ${ctx}`:""}</div>`));
   }
   if(R.pains&&R.pains.length){
     const list=compact?R.pains.slice(0,3):R.pains;
@@ -3046,8 +3053,8 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
     secs.push(sec("bandage","Kivut",rows+(compact&&R.pains.length>3?`<div class="wr-more">+${R.pains.length-3} muuta</div>`:"")));
   }
   if(R.dayState&&R.dayState.n){
-    const d=R.dayState, it=(n,l)=>`<span class="${n?"":"zero"}"><b>${n}</b> ${l}</span>`;
-    secs.push(sec("battery","Päivän tila treenipäivinä",`<div class="wr-ocl">${it(d.loaded,"kuormittunut")}${it(d.normal,"tavanomainen")}${it(d.recovered,"palautunut")}</div>`));
+    const d=R.dayState;
+    secs.push(sec("battery","Päivän tila treenipäivinä",chips([["Kuormittunut",d.loaded],["Tavanomainen",d.normal],["Palautunut",d.recovered]])));
   }
   if(R.factors.length) secs.push(sec("calendar","Poikkeamat",`<div class="wr-tags">${R.factors.map(f=>`<span class="wr-tag">${f.l}<b>${f.n} pv</b></span>`).join("")}</div>`));
   return `<div class="card wr">${head}
@@ -3897,10 +3904,11 @@ function buildInsightsHTML(start, effEnd, curr) {
 
   // 1. Painotrendi
   if(curr.weightRate!=null){
+    // v2.16.6: havaintolauseet huoliteltuun suomeen
     const abs=Math.abs(curr.weightRate).toFixed(2);
-    if(curr.weightRate<-0.05)      insights.push(`Paino laskee ${abs} kg/viikko tällä jaksolla.`);
-    else if(curr.weightRate>0.05)  insights.push(`Paino nousee ${abs} kg/viikko tällä jaksolla.`);
-    else                           insights.push(`Paino on pysynyt vakaana (${curr.weightRate>=0?"+":""}${curr.weightRate.toFixed(2)} kg/vko).`);
+    if(curr.weightRate<-0.05)      insights.push(`Paino on laskenut keskimäärin ${abs} kg viikossa.`);
+    else if(curr.weightRate>0.05)  insights.push(`Paino on noussut keskimäärin ${abs} kg viikossa.`);
+    else                           insights.push(`Paino on pysynyt vakaana (${curr.weightRate>=0?"+":"−"}${Math.abs(curr.weightRate).toFixed(2)} kg viikossa).`);
   }
 
   // 2. Uni vs tavoite
@@ -3909,9 +3917,9 @@ function buildInsightsHTML(start, effEnd, curr) {
     const belowTarget=ue.filter(e=>e.sleep!=null&&e.sleep<target).length;
     const totalSleep=ue.filter(e=>e.sleep!=null).length;
     if(belowTarget>0&&totalSleep>=3)
-      insights.push(`Uni jäi alle ${target}h tavoitteen ${belowTarget}/${totalSleep} päivänä — keskiarvo ${curr.avgSleep.toFixed(1)}h.`);
+      insights.push(`Uni jäi alle tavoitteen (${fmtSleepText(target)}) ${belowTarget}/${totalSleep} yönä. Keskimäärin ${fmtSleepText(curr.avgSleep)}.`);
     else if(totalSleep>=3)
-      insights.push(`Uni ylitti ${target}h tavoitteen joka kirjauspäivänä — keskiarvo ${curr.avgSleep.toFixed(1)}h.`);
+      insights.push(`Unitavoite (${fmtSleepText(target)}) täyttyi joka yö. Keskimäärin ${fmtSleepText(curr.avgSleep)}.`);
   }
 
   // 3. Palautuminen — matalat päivät
@@ -3923,21 +3931,21 @@ function buildInsightsHTML(start, effEnd, curr) {
   // 4. Treeni vs tavoite
   if(curr.trainingDays>0&&g.workoutsPerWeek){
     const weeks=Math.max(1,Math.round(curr.totalDays/7));
-    const avg=(curr.trainingDays/weeks).toFixed(1);
+    const pw=curr.trainingDays/weeks, avg=Number.isInteger(pw)?String(pw):pw.toFixed(1);
     const target=g.workoutsPerWeek;
-    if(curr.trainingDays/weeks<target*0.75)
-      insights.push(`Treeniä ${avg}/vko — tavoite ${target}/vko.`);
+    if(pw<target*0.75)
+      insights.push(`Treenejä ${avg} viikossa, tavoite ${target}.`);
     else
-      insights.push(`Treeniä ${avg}/vko — tavoitteen (${target}/vko) mukainen tahti.`);
+      insights.push(`Treenejä ${avg} viikossa, tavoitteen (${target}) mukaisesti.`);
   }
 
   // 5. Cardio vs tavoite
   if(curr.cardioDays>0&&g.cardioPerWeek){
     const weeks=Math.max(1,Math.round(curr.totalDays/7));
-    const avg=(curr.cardioDays/weeks).toFixed(1);
+    const pw=curr.cardioDays/weeks, avg=Number.isInteger(pw)?String(pw):pw.toFixed(1);
     const target=g.cardioPerWeek;
-    if(curr.cardioDays/weeks<target*0.75)
-      insights.push(`Cardioa ${avg}/vko — tavoite ${target}/vko.`);
+    if(pw<target*0.75)
+      insights.push(`Cardiota ${avg} kertaa viikossa, tavoite ${target}.`);
   }
 
   // 6. Mittausväli
@@ -3947,7 +3955,7 @@ function buildInsightsHTML(start, effEnd, curr) {
   if(lastMeas){
     const daysSince=Math.floor((Date.now()-new Date(lastMeas.date+"T00:00:00"))/864e5);
     if(daysSince>=intervalDays)
-      insights.push(`Kehon mittauksesta on ${daysSince} päivää — väli on ${intervalDays} pv.`);
+      insights.push(`Edellisestä kehon mittauksesta on ${daysSince} päivää (mittausväli ${intervalDays} pv).`);
   }
 
   // 6b. Mittausmuistutus jo lisätty, varmuuskopio vasta viimeisenä
