@@ -1034,7 +1034,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.4</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.5</span>
       </div>
     </div>
   </div>
@@ -1064,6 +1064,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.5", d:"lokakuu 2026", items:[
+    "Kirjallinen yhteenveto: tulkitsee painon muutoksen käynnissä olevan kauden tavoitetta vasten (esim. kehityskaudella nousu on tavoitteen suuntainen)",
+    "Kirjallinen yhteenveto: lyhyempi ja selkeämpi suomi, uni muodossa h min, ei pieniin otoksiin perustuvia sivuhuomioita",
+  ]},
   {v:"2.16.4", d:"lokakuu 2026", items:[
     "Tasapainoisempi Kirjaa-näkymä: viikon päivät siirretty päiväyksen alle osaksi yläosaa (Ampiaisessa keltaiselle pohjalle), yläpalkki ja päiväys isommiksi, paino- ja uniluvut maltillisemmiksi",
     "\"Päivässä jotain poikkeavaa?\" on nyt selvästi näkyvä rivi, jossa on kuvake ja esimerkit",
@@ -3428,6 +3432,31 @@ function renderPeriodSummaryCard(start,end,state,text,error){
 // ═══ KIRJALLISEN YHTEENVEDON LASKETUT FAKTAT (v2.11.7) ═══
 // Kaikki vertailut lasketaan tässä valmiiksi, jotta tekoäly tulkitsee oikeita lukuja eikä laske tai keksi itse.
 // Puuttuvaa ei korvata: jos vertailuun ei ole dataa, riviä ei synny.
+// v2.16.5: kauden tavoitesuunta tekoälyn yhteenvetoon. Päätellään kauden tavoitepainosta tai nimestä;
+// jos kumpaakaan ei voi tulkita, kerrotaan vain kauden nimi.
+function seasonDirection(se,curW){
+  if(!se) return null;
+  const tw=se.targetWeight!=null?+se.targetWeight:null;
+  if(tw!=null&&curW!=null&&Math.abs(tw-curW)>=0.5) return tw>curW?"up":"down";
+  const n=(se.name||"").toLowerCase();
+  if(/kehity|massa|bulk|kasva|lihasmass|nosto/.test(n)) return "up";
+  if(/dieet|cut|rasvanpudot|pudotus|kiinteyt|laihd|keven/.test(n)) return "down";
+  if(/ylläpi|maint|tasa/.test(n)) return "hold";
+  return null;
+}
+function seasonFacts(end,C){
+  const se=getCurrentSeason(end); if(!se) return null;
+  const wk=Math.floor((new Date(end+"T00:00:00")-new Date(se.startDate+"T00:00:00"))/(7*864e5))+1;
+  const dir=seasonDirection(se,C.wLast);
+  const fi=v=>String(v).replace(".",",");
+  let t=`Käynnissä oleva kausi: ${se.name} (alkoi ${se.startDate.slice(8,10)}.${se.startDate.slice(5,7)}., menossa viikko ${wk}${se.durationWeeks?`/${se.durationWeeks}`:""}).`;
+  if(dir==="up") t+=` Kauden tavoite on painon nousu, joten nouseva trendi on tavoitteen suuntainen ja laskeva tai tasainen ei ole.`;
+  else if(dir==="down") t+=` Kauden tavoite on painon lasku, joten laskeva trendi on tavoitteen suuntainen ja nouseva tai tasainen ei ole.`;
+  else if(dir==="hold") t+=` Kauden tavoite on pitää paino ennallaan.`;
+  if(se.targetWeight!=null) t+=` Kauden tavoitepaino ${fi(se.targetWeight)} kg.`;
+  if(C.rate!=null&&dir) t+=` Jakson trendi ${C.rate>0?"+":""}${fi(C.rate)} kg/vko on ${dir==="up"?(C.rate>0.05?"tavoitteen suuntainen":"ei tavoitteen suuntainen"):dir==="down"?(C.rate<-0.05?"tavoitteen suuntainen":"ei tavoitteen suuntainen"):(Math.abs(C.rate)<=0.15?"tavoitteen mukainen":"ei tavoitteen mukainen")}.`;
+  return t;
+}
 function summaryFacts(start,end){
   const r1=v=>v==null?null:+v.toFixed(1), r2=v=>v==null?null:+v.toFixed(2);
   const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
@@ -3458,11 +3487,12 @@ function summaryFacts(start,end){
     if(P.wAvg!=null) t+=` Edellisellä jaksolla keskiarvo ${fi(P.wAvg)} kg${P.rate!=null?` ja trendi ${P.rate>0?"+":""}${fi(P.rate)} kg/vko`:""}.`;
     const tgt=getActiveTargetWeight(end);
     if(tgt!=null&&C.wLast!=null){ const left=r1(tgt-C.wLast); t+=` Tavoitepaino ${fi(tgt)} kg, matkaa ${fi(Math.abs(left))} kg${C.rate!=null&&Math.sign(C.rate)===Math.sign(left)&&Math.abs(C.rate)>0.02?`, nykyvauhdilla noin ${Math.ceil(Math.abs(left)/Math.abs(C.rate))} viikkoa`:C.rate!=null&&Math.abs(C.rate)>0.02?", mutta trendi on tavoitteeseen nähden väärään suuntaan":""}.`; }
-    const se=getCurrentSeason(end); if(se) t+=` Käynnissä oleva kausi: ${se.name}.`;
     L.push(t);
+    const SE=seasonFacts(end,C);
+    if(SE) L.push(SE);
   }
   // Uni, palautuminen, vire
-  if(trk("sleep")&&C.sleep!=null) L.push(`Uni: keskimäärin ${fi(C.sleep)} h, tavoite ${fi(sleepGoal)} h täyttyi ${C.sleepHit}/${C.sleepN} yönä${P.sleep!=null?` (edellinen jakso ${fi(P.sleep)} h, ${P.sleepHit}/${P.sleepN})`:""}.`);
+  if(trk("sleep")&&C.sleep!=null) L.push(`Uni: keskimäärin ${fmtSleepText(C.sleep)}, tavoite ${fmtSleepText(sleepGoal)} täyttyi ${C.sleepHit}/${C.sleepN} yönä${P.sleep!=null?` (edellinen jakso ${fmtSleepText(P.sleep)}, ${P.sleepHit}/${P.sleepN})`:""}.`);
   if(trk("recovery")&&C.rec!=null) L.push(`Palautuminen: keskimäärin ${fi(C.rec)}/5, matala (1–2) ${C.recLow} päivänä${P.rec!=null?` (edellinen jakso ${fi(P.rec)}/5, matala ${P.recLow} pv)`:""}.`);
   if(trk("motivation")&&C.mot!=null) L.push(`Yleinen vire: keskimäärin ${fi(C.mot)}/5${P.mot!=null?` (edellinen jakso ${fi(P.mot)}/5)`:""}.`);
   // Treeni
@@ -3497,9 +3527,10 @@ function summaryFacts(start,end){
   if(Object.keys(fac).length){
     const t=Object.entries(fac).map(([f,ds])=>{
       const nxt=ds.map(d=>{const x=new Date(d+"T00:00:00");x.setDate(x.getDate()+1);return S.entries[iso(x)]?.recovery;}).filter(v=>v!=null);
-      return `${aiLabel(DAY_FACTORS,f).toLowerCase()} ${ds.length} pv${trk("recovery")&&nxt.length?` (seuraavan päivän palautuminen keskimäärin ${fi(r1(avg(nxt)))}/5, n=${nxt.length})`:""}`;
+      const showNext=trk("recovery")&&nxt.length>=3&&C.rec!=null&&Math.abs(avg(nxt)-C.rec)>=0.5;
+      return `${aiLabel(DAY_FACTORS,f).toLowerCase()} ${ds.length} pv${showNext?` (seuraavan päivän palautuminen keskimäärin ${fi(r1(avg(nxt)))}/5, n=${nxt.length})`:""}`;
     });
-    L.push(`Poikkeavat päivät: ${t.join("; ")}${trk("recovery")&&C.rec!=null?`. Jakson palautuminen keskimäärin ${fi(C.rec)}/5`:""}.`);
+    L.push(`Poikkeavat päivät: ${t.join("; ")}.`);
   }
   // Kivut: kehonosittain ensimmäinen ja viimeinen tila jaksolla
   if(trk("injury")){
@@ -3534,27 +3565,29 @@ function buildPeriodPrompt(start,end,rangeLabel,curr){
   return `Kirjoita käyttäjälle kirjallinen yhteenveto hänen omasta seurantajaksostaan. Tavoite on, että hän näkee kokonaiskuvan ja oppii jotain, mitä ei huomaisi vain lukuja selaamalla. Pelkkä lukujen toistaminen lauseina ei riitä.
 
 RAKENNE (kolme kappaletta, kukin alkaa otsikkosanalla ja kaksoispisteellä, ei muuta muotoilua):
-Kokonaiskuva: 2–3 virkettä. Miten jakso meni suhteessa tavoitteisiin ja edelliseen vastaavaan jaksoon. Sano selvästi, mikä parani, mikä heikkeni ja mikä pysyi ennallaan.
-Huomionarvoista: 2–4 asiaa, jotka erottuvat. Esimerkiksi selvä muutos edelliseen jaksoon, tavoitteesta jääminen tai sen ylittäminen, viikko joka poikkeaa muista, kivun kehitys tai rinnakkaisvertailun ero. Kerro aina luvut, joihin havainto perustuu. Jos ero perustuu pieneen otokseen, sano se.
-Seurattavaa: 1–2 konkreettista asiaa, joita kannattaa seurata seuraavalla jaksolla, esimerkiksi "jatkuuko painon lasku samaa tahtia" tai "toistuuko matala palautuminen kovan treenin jälkeisinä päivinä". Muotoile seurattavaksi asiaksi, älä käskyksi tai treeni- tai terveysneuvoksi.
+Kokonaiskuva: 2–3 lyhyttä virkettä. Aloita tärkeimmästä: miten jakso meni suhteessa tavoitteisiin ja käynnissä olevaan kauteen. Jos kausi on annettu, tulkitse painon muutos sen tavoitetta vasten (esim. kehityskaudella nouseva paino on tavoitteen suuntainen). Enintään 3 lukua. Älä luettele kaikkia mittareita.
+Huomionarvoista: 2–3 asiaa, jotka erottuvat selvästi: muutos edelliseen jaksoon, tavoitteesta jääminen tai sen ylittäminen, poikkeava viikko, kivun kehitys. Kerro luvut, joihin havainto perustuu. Älä mainitse asioita, joissa ei ole eroa tai joiden otos on alle 3.
+Seurattavaa: 1–2 konkreettista asiaa seuraavalle jaksolle, muotoiltuna seurattavaksi asiaksi, ei käskyksi eikä treeni- tai terveysneuvoksi.
 
 SÄÄNNÖT:
 - Käytä vain alla olevia lukuja. Älä laske itse uusia keskiarvoja, äläkä keksi lukuja tai tapahtumia.
-- Älä väitä syy-yhteyksiä. Samanaikaisuuden saa kertoa ("heikommin kulkeneista treeneistä 3/4 osui päiviin, joina uni jäi alle tavoitteen, muista 2/10"), mutta ei "koska" tai "johtui".
-- Jos jokin tieto puuttuu tai kirjauksia on vähän, sano se lyhyesti, älä täytä aukkoa arvaamalla.
+- Älä toista samaa lukua eri kappaleissa.
+- Älä väitä syy-yhteyksiä. Samanaikaisuuden saa kertoa, mutta ei "koska" tai "johtui".
+- Jos jokin tieto puuttuu tai kirjauksia on vähän, sano se lyhyesti.
 - Ei lääketieteellisiä tulkintoja, ei tsemppaamista, ei geneerisiä hyvinvointineuvoja.
-- Kirjoita neutraalisti ilman puhuttelua ("Uni oli keskimäärin 6,9 h"), jotta tekstin voi jakaa sellaisenaan.
-- Pituus noin 120–220 sanaa.
+- Kirjoita neutraalisti ilman puhuttelua, jotta tekstin voi jakaa sellaisenaan.
+- Pituus 90–160 sanaa. Lyhyempi on parempi kuin täytetty.
 
 KIELI:
-- Luontevaa, huoliteltua suomen yleiskieltä, kuin kokenut suomalainen toimittaja kirjoittaisi. Lyhyet virkkeet, oikeat sijamuodot, ei käännösrakenteita, ei anglismeja, ei keksittyjä sanoja.
-- Desimaalipilkku (108,1 kg) ja suomalaiset lyhenteet (h, kg, vko, pv).
-- Tarkista ennen vastaamista, että jokainen virke on kieliopillisesti oikein.
+- Huoliteltua, luontevaa suomen yleiskieltä. Yksi asia per virke. Subjekti ja verbi alkuun: "Treenejä oli viisi", ei "Jakso jäi treenien osalta tavoitteista".
+- Vältä rakenteita "jäi … osalta", "mitä tulee", "suhteutuu", "on merkitty" ja passiivin kasautumista.
+- Uni aina muodossa "6 h 45 min", ei desimaalitunteina. Muissa luvuissa desimaalipilkku (108,1 kg). Lyhenteet h, min, kg, vko, pv.
+- Tarkista ennen vastaamista, että jokainen virke on kieliopillisesti oikein ja ymmärrettävä ensimmäisellä lukukerralla.
 
 ESIMERKKI TYYLISTÄ (keksitty data, älä käytä sen lukuja):
-Kokonaiskuva: Jakso meni treenien osalta tavoitteen mukaan, 4,8 treeniä viikossa, mutta uni jäi edelleen tavoitteesta. Paino laski 0,3 kg viikossa, mikä on nopeampaa kuin edellisellä jaksolla (0,1 kg/vko). Palautuminen pysyi lähes ennallaan.
-Huomionarvoista: Kolmannella viikolla treenejä oli vain kaksi ja uni keskimäärin 6,1 h, selvästi muita viikkoja vähemmän. Heikommin kulkeneista treeneistä kolme neljästä osui päiviin, joina uni jäi alle tavoitteen, muista treeneistä kaksi kymmenestä; otos on vielä pieni. Oikean hauiksen kipu on pysynyt tasolla 1/5 jo 62 päivää.
-Seurattavaa: Toistuuko heikompi treeni lyhyiden öiden jälkeen myös seuraavalla jaksolla. Jatkuuko painon lasku nykytahtia, kun tavoitteeseen on matkaa 4,2 kg.
+Kokonaiskuva: Kehityskauden viidennellä viikolla paino nousi tavoitteen suuntaisesti, 0,3 kg viikossa. Treenejä oli 4,5 viikossa, eli tavoite täyttyi. Uni jäi tavoitteesta.
+Huomionarvoista: Uni oli keskimäärin 6 h 40 min, ja tavoite 7 h täyttyi vain kolmena yönä kymmenestä. Palautuminen heikkeni edellisestä jaksosta 3,6:sta 3,2:een. Oikean hauiksen kipu on pysynyt tasolla 1/5 jo 19 päivää.
+Seurattavaa: Pysyykö painon nousu nykytahdissa. Toistuuko lyhyt uni myös seuraavalla jaksolla.
 
 JAKSO: ${start} – ${end} (${F.totalDays} päivää)
 TAVOITTEET: ${goalsStr||"ei asetettu"}${prof.height?`\nPITUUS: ${prof.height} cm`:""}
@@ -4099,7 +4132,7 @@ function aiPainText(e){
 function aiDayLine(e){
   const p=[];
   if(trk("weight")&&e.weight!=null) p.push(`paino ${e.weight} kg`);
-  if(trk("sleep")&&e.sleep!=null) p.push(`uni ${e.sleep} h`);
+  if(trk("sleep")&&e.sleep!=null) p.push(`uni ${fmtSleepText(e.sleep)}`);
   if(trk("recovery")&&e.recovery!=null) p.push(`palautuminen ${e.recovery}/5`);
   if(trk("motivation")&&e.motivation!=null) p.push(`yleinen vire ${e.motivation}/5`);
   if(trk("steps")&&e.steps) p.push(`askeleet ${e.steps}`);
