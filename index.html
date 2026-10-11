@@ -422,6 +422,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .inj-head .pc-x{margin:-8px -10px -8px 0;}
 .inj-res{display:flex;align-items:center;gap:6px;min-height:40px;margin-top:6px;border:none;background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;padding:0;}
 .inj-addbtn{display:block;width:100%;min-height:44px;margin-bottom:8px;background:transparent;border:1.5px dashed var(--bord);border-radius:12px;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;text-align:left;padding:0 14px;}
+.inj-addbtn.open{border-style:solid;}
 .inj-select{width:100%;min-height:44px;background:var(--surf2);border:none;border-radius:12px;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;padding:0 12px;outline:none;box-sizing:border-box;}
 .inj-notes{width:100%;background:var(--surf2);border:none;border-radius:12px;color:var(--text);font:500 13px Manrope,system-ui,sans-serif;padding:10px 12px;resize:none;outline:none;box-sizing:border-box;margin-top:4px;}
 .td-chips .chip{padding:6px 2px;}
@@ -1037,7 +1038,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.7</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.16.8</span>
       </div>
     </div>
   </div>
@@ -1067,6 +1068,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.16.8", d:"lokakuu 2026", items:[
+    "Kivut: avatun kipupaikan lisäyksen saa suljettua \"× Sulje lisäys\" -napista"
+  ]},
   {v:"2.16.7", d:"lokakuu 2026", items:[
     "Kivut: kun kipua seurataan, uusien kipupaikkojen pikavalinnat piilossa \"+ Lisää kipupaikka\" -napin takana"
   ]},
@@ -6183,6 +6187,7 @@ function renderInjurySelector(){
   const addOpen=!items.length||S.injuryAddOpen;
   const addHTML=!addOpen?`<button class="inj-addbtn" onclick="S.injuryAddOpen=true;renderInjurySelector()">+ Lisää kipupaikka</button>`
   :`<div style="margin-bottom:8px">
+    ${items.length?`<button class="inj-addbtn open" onclick="S.injuryAddOpen=false;renderInjurySelector()">× Sulje lisäys</button>`:""}
     ${quick.length?`<div class="chips" style="margin-bottom:8px">
       ${quick.map(p=>`<button class="chip" onclick="addInjuryItem('${p.id}')">+ ${p.l}</button>`).join("")}
     </div>`:""}
