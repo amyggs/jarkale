@@ -1298,7 +1298,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.14</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.15</span>
       </div>
     </div>
   </div>
@@ -1332,6 +1332,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.15", d:"lokakuu 2026", items:[
+    "Drive-yhdistämisen kohdalla kerrotaan etukäteen, että Googlen ikkunassa näkyy osoite amyggs.github.io, ja linkki tietosuojaan."
+  ]},
   {v:"2.18.14", d:"lokakuu 2026", items:[
     "Pilotti: isot uutiset näkyvät kerran Kirjaa-näkymän yläosassa. Ensimmäisinä Google Drive -varmuuskopio ja saliohjelma."
   ]},
@@ -8476,7 +8479,7 @@ function renderSyncUI(){
         <button class="btn-primary" style="width:100%;margin-bottom:8px" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Synkronoidaan…":"Synkronoi nyt"}</button>
         <button onclick="syncDisable()" style="width:100%;min-height:40px;border:none;background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif">Lopeta synkronointi tällä laitteella</button>`
       :`<div style="font-size:14px;font-weight:700;color:var(--text)">Varmuuskopio automaattisesti Google Driveen</div>
-        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Kaikki data tallentuu omaan Driveesi piilotettuun sovelluskansioon, ja sen saa uuteen puhelimeen kirjautumalla. Sovellus ei näe Driven muita tiedostoja.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
+        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Kaikki data tallentuu omaan Driveesi piilotettuun sovelluskansioon, ja sen saa uuteen puhelimeen kirjautumalla. Sovellus ei näe Driven muita tiedostoja.<br>Googlen ikkunassa sovelluksen nimenä näkyy <b>amyggs.github.io</b>. Se on Järkäleen osoite. <a href="tietosuoja.html" target="_blank" rel="noopener" style="color:inherit">Tietosuoja</a>${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
         <button class="btn-primary" style="width:100%" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Yhdistetään…":"Yhdistä Google Driveen"}</button>`;
     }
   }
