@@ -1245,7 +1245,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.3</span>
       </div>
     </div>
   </div>
@@ -1279,6 +1279,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.3", d:"lokakuu 2026", items:[
+    "Järkäle PT:n kopiotiedoston voi siirtää mihin tahansa Drive-kansioon ja nimetä uudelleen, ja se päivittyy silti samaan tiedostoon"
+  ]},
   {v:"2.18.2", d:"lokakuu 2026", items:[
     "Drive-synkronoinnin virheilmoitukset kertovat syyn selkokielellä (rajapinta pois käytöstä tai lupa puuttuu)"
   ]},
@@ -8260,10 +8263,15 @@ function ptBackupData(){
 }
 async function writePtCopy(){
   const st=syncState();
-  const q=encodeURIComponent(`name='${PT_FILE}' and trashed=false`);
-  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,parents)&pageSize=5`);
-  const found=((await r.json()).files||[])[0];
   const body=JSON.stringify(ptBackupData());
+  // v2.18.3: tunnistetaan ensin tallennetulla tunnisteella, joten tiedoston voi siirtää ja nimetä uudelleen Drivessa
+  let found=null;
+  if(st.ptFileId){ try{ const mr=await driveFetch(`https://www.googleapis.com/drive/v3/files/${st.ptFileId}?fields=id,trashed`); const mj=await mr.json(); if(mj&&mj.id&&!mj.trashed) found={id:mj.id}; }catch(e){ if(e.auth) throw e; } }
+  if(!found){
+    const q=encodeURIComponent(`name='${PT_FILE}' and trashed=false`);
+    const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,parents)&pageSize=5`);
+    found=((await r.json()).files||[])[0]||null;
+  }
   if(found){
     await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${found.id}?uploadType=media&fields=id`,{method:"PATCH",headers:{"Content-Type":"application/json"},body});
     setSyncState({ptFileId:found.id,ptLastAt:Date.now(),ptErr:null}); return;
