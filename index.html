@@ -865,10 +865,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-src{margin-top:16px;font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);}
 .g-src pre{white-space:pre-wrap;font:500 12.5px/1.5 Manrope,system-ui,sans-serif;color:var(--text);background:var(--surf);border-radius:12px;padding:12px;}
 /* Liikkeen kehitys */
-.g-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:4px;}
-.g-stats>div{background:var(--surf);border-radius:14px;padding:10px 12px;}
-.g-stats b{display:block;font:800 16px Manrope,system-ui,sans-serif;color:var(--text);}
-.g-stats>div>span:last-child{font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);}
+.g-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:4px;}
+.g-stats>div{background:var(--surf);border-radius:14px;padding:12px 6px 10px;text-align:center;min-width:0;}
+.g-stats b{display:block;font:800 clamp(16px,5vw,22px)/1.1 Manrope,system-ui,sans-serif;color:var(--text);white-space:nowrap;letter-spacing:-.01em;}
+.g-stats span{display:block;font:700 12.5px Manrope,system-ui,sans-serif;color:var(--text);margin-top:4px;white-space:nowrap;}
+.g-stats small{display:block;font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.g-stats-note{font:500 11.5px Manrope,system-ui,sans-serif;color:var(--dim);margin:6px 2px 0;text-align:center;}
 .g-chart{background:var(--surf);border-radius:16px;padding:12px 14px;margin-top:10px;}
 .g-chart-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
 .g-chart-sum{font:600 12.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:6px;}
@@ -1229,7 +1231,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.11</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.12</span>
       </div>
     </div>
   </div>
@@ -1263,6 +1265,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.12", d:"lokakuu 2026", items:[
+    "Liikkeen sivun tunnusluvut (paras sarja, viimeksi, arvioitu 1RM) isommalla ja keskitettyinä",
+    "Trendien Salitreenit-kortti näyttää enintään viisi liikettä ryhmää kohden"
+  ]},
   {v:"2.17.11", d:"lokakuu 2026", items:[
     "Yhteenvedon luvut isommalla ja keskitettyinä"
   ]},
@@ -7968,9 +7974,14 @@ function gymExerciseHTML(key){
   if(!H.length) return h+`<div class="g-hint">Ei kirjattuja sarjoja.</div>`;
   const withKg=H.filter(x=>x.top.kg!=null);
   const best=H.reduce((b,x)=>x.e1>b.e1?x:b,H[0]);
-  h+=`<div class="g-stats"><div><span class="lbl-small">Paras sarja</span><b>${best.top.kg!=null?fmtKg(best.top.kg)+" kg × "+best.top.reps:best.top.reps+" toistoa"}</b><span>${gDay(best.s.date)}</span></div>
-    <div><span class="lbl-small">Viimeksi</span><b>${H[H.length-1].top.kg!=null?fmtKg(H[H.length-1].top.kg)+" kg × "+H[H.length-1].top.reps:H[H.length-1].top.reps+" toistoa"}</b><span>${gDay(H[H.length-1].s.date)}</span></div>
-    ${best.top.kg!=null?`<div><span class="lbl-small">Arvioitu 1RM</span><b>${fmtKg(Math.round(best.e1*2)/2)} kg</b><span>suuntaa antava</span></div>`:""}</div>`;
+  // v2.17.12: tunnuslukulaatikot keskitettyinä kuten treenin yhteenvedossa (luku ensin, selite alla)
+  const kgx=r=>r.kg!=null?`${fmtKg(r.kg)} × ${r.reps}`:`${r.reps}`;
+  const unit=best.top.kg!=null?"kg × toistot":"toistoa";
+  const lastT=H[H.length-1];
+  h+=`<div class="g-stats"><div><b>${kgx(best.top)}</b><span>Paras sarja</span><small>${gDay(best.s.date)}</small></div>
+    <div><b>${kgx(lastT.top)}</b><span>Viimeksi</span><small>${gDay(lastT.s.date)}</small></div>
+    ${best.top.kg!=null?`<div><b>${fmtKg(Math.round(best.e1*2)/2)}</b><span>Arvioitu 1RM</span><small>kg · arvio</small></div>`:""}</div>
+    <div class="g-stats-note">Sarjat muodossa ${unit}.</div>`;
   h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
   h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
@@ -7998,7 +8009,7 @@ function gymTrendHTML(start,end){
   const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0);
   let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
     <div style="font-size:13px;color:var(--dim);margin-bottom:${up.length||same.length||down.length?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
-  const grp=(t,a)=>a.length?`<div class="lbl-small" style="margin-top:8px">${t}</div>${a.map(x=>`<div style="font-size:13.5px;color:var(--text);padding:3px 0">${x}</div>`).join("")}`:"";
+  const grp=(t,a)=>a.length?`<div class="lbl-small" style="margin-top:8px">${t} (${a.length})</div>${a.slice(0,5).map(x=>`<div style="font-size:13.5px;color:var(--text);padding:3px 0">${x}</div>`).join("")}${a.length>5?`<div style="font-size:12.5px;color:var(--dim);padding:3px 0">+ ${a.length-5} muuta. Kaikki liikkeet: Treeni → Liikkeiden kehitys</div>`:""}`:"";
   h+=grp("Nousi",up)+grp("Ennallaan",same)+grp("Laski",down);
   if(!up.length&&!same.length&&!down.length) h+=`<div style="font-size:12.5px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty jaksolla vähintään kahdesti.</div>`;
   return h+`</div>`;
