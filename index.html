@@ -1205,7 +1205,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.6</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.7</span>
       </div>
     </div>
   </div>
@@ -1239,6 +1239,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.7", d:"lokakuu 2026", items:[
+    "\"Pisimpään tekemättä\" -merkki näkyy vasta, kun ohjelman jokainen treenipäivä on tehty kerran",
+    "Uusi versio latautuu myös, kun sovellus palaa taustalta, eikä vain uudelleen avattaessa"
+  ]},
   {v:"2.17.6", d:"lokakuu 2026", items:[
     "Ohjelman muokkauksessa on Peruuta / Peru muutokset: uusi ohjelma poistuu ja vanhan muutokset palautuvat",
     "Kaikissa treeninäkymissä on paluulinkki \"‹ Treeni\". Käynnissä oleva treeni jatkuu taustalla.",
@@ -7551,7 +7555,8 @@ function gymHomeHTML(){
   } else {
     // Seuraavaksi: treenipäivä, joka on tehty pisimpään sitten (vain vihje)
     const lasts=p.days.map(d=>({d,l:lastDoneOfDay(d.id)}));
-    const next=p.days.length>1?lasts.slice().sort((a,b)=>(a.l?a.l.startedAt:0)-(b.l?b.l.startedAt:0))[0].d.id:null;
+    // Merkki vasta kun jokainen päivä on tehty kerran: ensimmäisellä kierroksella ohjelman järjestys on ohje, eikä vertailtavaa ole
+    const next=p.days.length>1&&lasts.every(x=>x.l)?lasts.slice().sort((a,b)=>a.l.startedAt-b.l.startedAt)[0].d.id:null;
     h+=`<div class="tr-sec">Valitse treenipäivä</div><div class="tr-list">`;
     h+=lasts.map(({d,l})=>`<div class="tr-row"><div class="t"><div class="n">${esc(d.name)}${d.id===next?`<span class="tr-tag">Pisimpään tekemättä</span>`:""}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:""}</div></div>
       <button class="tr-go${d.id===next||p.days.length===1?"":" ghost"}" ${d.exercises.length?"":"disabled"} onclick="startSession('${p.id}','${d.id}')">Aloita</button></div>`).join("");
@@ -8075,6 +8080,8 @@ if('serviceWorker' in navigator){
           }
         });
       });
+      // v2.17.7: tarkista uusi versio myös, kun sovellus palaa taustalta (kotinäytön sovellus voi olla auki päiviä)
+      document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') reg.update().catch(()=>{}); });
     }).catch(err=>console.warn('SW rekisteröinti epäonnistui:',err));
     // Lataa sivu uudelleen kun uusi SW ottaa hallinnan
     let refreshing=false;
