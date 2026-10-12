@@ -922,6 +922,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .sync-bar .tr-go{min-height:36px;}
 /* kapea näyttö: laatikot allekkain */
 @media (max-width:359px){#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:1/-1;}}
+/* v2.18.10: iPhonen kotivalikkosovellus (standalone + viewport-fit=cover). Yläpalkki tilarivin alle,
+   sovellus täyttää koko näytön (height:100% jätti iOS:ssä tyhjän kaistaleen alapalkin alle). */
+#header{padding-top:calc(12px + env(safe-area-inset-top,0px));}
+#app{position:fixed;top:0;bottom:0;left:0;right:0;height:auto;}
 </style>
 </head>
 <body>
@@ -1267,7 +1271,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.9</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.10</span>
       </div>
     </div>
   </div>
@@ -1301,6 +1305,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.10", d:"lokakuu 2026", items:[
+    "iPhone: kotivalikkoon lisätyssä sovelluksessa yläpalkki ei enää jää kellon ja tilarivin alle, ja alapalkki pysyy näytön alareunassa."
+  ]},
   {v:"2.18.9", d:"lokakuu 2026", items:[
     "Päivän tila näkyy Kirjaa-näkymässä yhtenä rivinä. Luokitukseen vaikuttavat tekijät näkyvät tilan perässä, ja taulukko aukeaa napauttamalla. Valinta muistetaan."
   ]},
