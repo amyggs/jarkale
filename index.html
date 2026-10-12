@@ -1245,7 +1245,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.1</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.2</span>
       </div>
     </div>
   </div>
@@ -1279,6 +1279,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.2", d:"lokakuu 2026", items:[
+    "Drive-synkronoinnin virheilmoitukset kertovat syyn selkokielellä (rajapinta pois käytöstä tai lupa puuttuu)"
+  ]},
   {v:"2.18.1", d:"lokakuu 2026", items:[
     "Kopio Järkäle PT:lle: synkronointi päivittää halutessa myös näkyvän tiedoston Drive-kansioon Järkäle/jarkale-pt.json, jonka ChatGPT voi lukea. Muoto on sama kuin varmuuskopiossa."
   ]},
@@ -8129,7 +8132,18 @@ async function driveFetch(url,opt={}){
   const at=syncToken(); if(!at) throw Object.assign(new Error("Kirjaudu uudelleen"),{auth:true});
   const r=await fetch(url,{...opt,cache:"no-store",headers:{...(opt.headers||{}),Authorization:"Bearer "+at}});
   if(r.status===401){ try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){} throw Object.assign(new Error("Kirjaudu uudelleen"),{auth:true}); }
-  if(!r.ok) throw new Error(`Drive vastasi ${r.status}`);
+  if(!r.ok){
+    // v2.18.2: selkokielinen syy Googlen virhevastauksesta
+    let reason="", msg="";
+    try{ const j=await r.clone().json(); const e=j&&j.error||{}; reason=String((e.errors&&e.errors[0]&&e.errors[0].reason)||(e.details&&e.details[0]&&e.details[0].reason)||e.status||""); msg=String(e.message||""); }catch(_){}
+    if(r.status===403&&/accessNotConfigured|SERVICE_DISABLED|has not been used|is disabled/i.test(reason+" "+msg))
+      throw new Error("Google Drive API ei ole käytössä Cloud-projektissa. Ota se käyttöön: APIs & Services → Library → Google Drive API → Enable. Odota pari minuuttia ja yritä uudelleen.");
+    if(r.status===403&&/insufficient|SCOPE|PERMISSION/i.test(reason+" "+msg)){
+      try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
+      throw new Error("Järkäle ei saanut lupaa Driveen. Paina nappia uudelleen ja rastita kirjautumisessa Google Drive -lupa.");
+    }
+    throw new Error(`Drive vastasi ${r.status}${msg?": "+msg.slice(0,140):""}`);
+  }
   return r;
 }
 async function driveFind(){
@@ -8210,6 +8224,7 @@ async function syncNow(opts={}){
     if(opts.silent) { renderSyncUI(); return; }
     try{ await syncSignIn(!st.enabled||needPtScope); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
   }
+  if(!syncHasScope(SYNC_SCOPE)){ try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){} SYNC_ERR="Järkäle ei saanut lupaa Driveen. Paina nappia uudelleen ja rastita kirjautumisessa Google Drive -lupa."; renderSyncUI(); return; }
   SYNC_BUSY=true; SYNC_ERR=null; renderSyncUI();
   try{
     const local=syncSnapshot();
