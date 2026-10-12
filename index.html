@@ -1245,7 +1245,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.1</span>
       </div>
     </div>
   </div>
@@ -1279,6 +1279,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.1", d:"lokakuu 2026", items:[
+    "Kopio Järkäle PT:lle: synkronointi päivittää halutessa myös näkyvän tiedoston Drive-kansioon Järkäle/jarkale-pt.json, jonka ChatGPT voi lukea. Muoto on sama kuin varmuuskopiossa."
+  ]},
   {v:"2.18.0", d:"lokakuu 2026", items:[
     "Google Drive -synkronointi (Asetukset → Varmuuskopiot ja tuonti): kaikki data tallentuu automaattisesti omaan Driveesi piilotettuun sovelluskansioon, ja sen saa uuteen puhelimeen kirjautumalla",
     "Kahden laitteen muutokset yhdistetään päivä, treeni ja ohjelma kerrallaan, ja uudempi muutos voittaa. Poistettu ei palaa.",
@@ -8076,6 +8079,9 @@ function gymTrendHTML(start,end){
 // kohde kerrallaan, uudempi voittaa. Poistot välitetään poistomerkinnöillä (tomb), jotta poistettu ei palaa.
 const SYNC_CLIENT_ID="1059222735837-uvla0hh0h8gmhn4kihm661bbtj16urda.apps.googleusercontent.com";
 const SYNC_SCOPE="https://www.googleapis.com/auth/drive.appdata";
+// v2.18.1: näkyvä kopio Järkäle PT:lle. drive.file = sovellus voi luoda ja päivittää vain omia tiedostojaan.
+const SYNC_SCOPE_PT="https://www.googleapis.com/auth/drive.file";
+const PT_FILE="jarkale-pt.json", PT_FOLDER="Järkäle";
 const SYNC_FILE="jarkale-data.json";
 const SYNC_KEY="jarkale-sync", SYNC_TOMB_KEY="jarkale-sync-tomb", SYNC_TOKEN_KEY="jarkale-sync-token";
 // Ensin vain omaan versioon (pilotin käyttäjät eivät ole vielä Googlen testikäyttäjiä)
@@ -8097,6 +8103,7 @@ function syncMarkDirty(){
   },20000);
 }
 function syncToken(){ try{ const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return t&&t.exp>Date.now()+60000?t.at:null; }catch(_){ return null; } }
+function syncHasScope(sc){ try{ const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return !!(t&&t.exp>Date.now()+60000&&String(t.scope||"").split(" ").includes(sc)); }catch(_){ return false; } }
 function syncTokenValid(){ return !!syncToken(); }
 
 function loadGis(){
@@ -8109,9 +8116,10 @@ function loadGis(){
 }
 // Pyydä tokeni. Kutsutaan vain napautuksesta (selaimet estävät ponnahdusikkunan muuten).
 function syncSignIn(consent){
+  const scope=syncState().ptCopy?`${SYNC_SCOPE} ${SYNC_SCOPE_PT}`:SYNC_SCOPE;
   return loadGis().then(()=>new Promise((res,rej)=>{
-    SYNC_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:SYNC_CLIENT_ID,scope:SYNC_SCOPE,
-      callback:r=>{ if(r&&r.access_token){ try{ localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({at:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000})); }catch(_){} res(r.access_token); } else rej(new Error(r&&r.error||"Kirjautuminen keskeytyi")); },
+    SYNC_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:SYNC_CLIENT_ID,scope,
+      callback:r=>{ if(r&&r.access_token){ try{ localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({at:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000,scope:r.scope||scope})); }catch(_){} res(r.access_token); } else rej(new Error(r&&r.error||"Kirjautuminen keskeytyi")); },
       error_callback:e=>rej(new Error(e&&e.type==="popup_closed"?"Kirjautuminen suljettiin":"Kirjautuminen epäonnistui"))});
     SYNC_TOKEN_CLIENT.requestAccessToken({prompt:consent?"consent":""});
   }));
@@ -8197,9 +8205,10 @@ function syncApply(m){
 async function syncNow(opts={}){
   if(SYNC_BUSY) return;
   const st=syncState();
-  if(!syncTokenValid()){
+  const needPtScope=st.ptCopy&&!syncHasScope(SYNC_SCOPE_PT);
+  if(!syncTokenValid()||(needPtScope&&!opts.silent)){
     if(opts.silent) { renderSyncUI(); return; }
-    try{ await syncSignIn(!st.enabled); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
+    try{ await syncSignIn(!st.enabled||needPtScope); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
   }
   SYNC_BUSY=true; SYNC_ERR=null; renderSyncUI();
   try{
@@ -8219,10 +8228,45 @@ async function syncNow(opts={}){
     }
     const up=await driveUpload(fileId,out);
     setSyncState({enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:0});
+    if(syncState().ptCopy){
+      if(syncHasScope(SYNC_SCOPE_PT)){ try{ await writePtCopy(); }catch(e){ setSyncState({ptErr:e.auth?"Kirjaudu uudelleen":"PT-kopion päivitys epäonnistui"}); } }
+      else setSyncState({ptErr:"Odottaa lupaa: paina Synkronoi nyt"});
+    }
     if(!opts.silent) showSavedToast("Synkronoitu Driveen");
   }catch(e){
     SYNC_ERR=e.auth?"Kirjaudu uudelleen synkronoidaksesi":(e.message||"Synkronointi epäonnistui");
   }finally{ SYNC_BUSY=false; renderSyncUI(); }
+}
+// Näkyvä kopio tavalliseen Drive-kansioon (Järkäle/jarkale-pt.json), samassa muodossa kuin varmuuskopio (versio 6),
+// jotta ChatGPT:n Drive-yhteys voi lukea sen. Yksisuuntainen: tiedostoon tehtyjä muutoksia ei lueta takaisin.
+function ptBackupData(){
+  return {version:6,exported:new Date().toISOString(),source:"Järkäle tracking, päivittyy automaattisesti synkronoinnin yhteydessä",
+    entryCount:Object.keys(S.entries).length,entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym:G};
+}
+async function writePtCopy(){
+  const st=syncState();
+  const q=encodeURIComponent(`name='${PT_FILE}' and trashed=false`);
+  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,parents)&pageSize=5`);
+  const found=((await r.json()).files||[])[0];
+  const body=JSON.stringify(ptBackupData());
+  if(found){
+    await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${found.id}?uploadType=media&fields=id`,{method:"PATCH",headers:{"Content-Type":"application/json"},body});
+    setSyncState({ptFileId:found.id,ptLastAt:Date.now(),ptErr:null}); return;
+  }
+  let folder=st.ptFolderId;
+  if(folder){ const fr=await driveFetch(`https://www.googleapis.com/drive/v3/files/${folder}?fields=id,trashed`).catch(()=>null); const fj=fr&&await fr.json(); if(!fj||fj.trashed) folder=null; }
+  if(!folder){
+    const fr=await driveFetch(`https://www.googleapis.com/drive/v3/files?fields=id`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:PT_FOLDER,mimeType:"application/vnd.google-apps.folder"})});
+    folder=(await fr.json()).id;
+  }
+  const b="jarkalept"+Date.now();
+  const multi=`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:PT_FILE,parents:[folder],description:"Järkäle tracking -varmuuskopio Järkäle PT:lle"})}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`;
+  const cr=await driveFetch(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`,{method:"POST",headers:{"Content-Type":`multipart/related; boundary=${b}`},body:multi});
+  setSyncState({ptFolderId:folder,ptFileId:(await cr.json()).id,ptLastAt:Date.now(),ptErr:null});
+}
+function setPtCopy(on){
+  setSyncState({ptCopy:!!on,ptErr:null});
+  if(on) syncNow(); else renderSyncUI();
 }
 function syncDisable(){
   if(!confirm("Lopetetaanko synkronointi tällä laitteella? Data säilyy puhelimessa ja Drivessa.")) return;
@@ -8240,6 +8284,8 @@ function renderSyncUI(){
       el.style.display="";
       el.innerHTML=st.enabled?`<div style="font-size:14px;font-weight:700;color:var(--text)">Google Drive -synkronointi päällä</div>
         <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Viimeksi synkronoitu ${syncAgo(st.lastSyncAt)}${st.dirtyAt>st.lastSyncAt?" · muutoksia odottaa":""}.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
+        <div class="g-set-row" style="border-top:1px solid var(--surf2);margin-bottom:10px"><span><span style="font-size:14px;color:var(--text);font-weight:600">Kopio Järkäle PT:lle</span><span style="display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.45">${st.ptCopy?(st.ptErr?`<span style="color:var(--red)">${esc(st.ptErr)}</span>`:st.ptLastAt?`Drive → ${PT_FOLDER}/${PT_FILE} · päivitetty ${syncAgo(st.ptLastAt)}`:"Luodaan seuraavassa synkronoinnissa"):"Näkyvä tiedosto Driveen, jonka ChatGPT voi lukea. Sisältää kaiken datan."}</span></span>
+          <button onclick="setPtCopy(${!st.ptCopy})" role="switch" aria-checked="${!!st.ptCopy}" class="g-sw${st.ptCopy?" on":""}"><span></span></button></div>
         <button class="btn-primary" style="width:100%;margin-bottom:8px" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Synkronoidaan…":"Synkronoi nyt"}</button>
         <button onclick="syncDisable()" style="width:100%;min-height:40px;border:none;background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif">Lopeta synkronointi tällä laitteella</button>`
       :`<div style="font-size:14px;font-weight:700;color:var(--text)">Varmuuskopio automaattisesti Google Driveen</div>
