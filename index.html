@@ -1262,7 +1262,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.7</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.8</span>
       </div>
     </div>
   </div>
@@ -1296,6 +1296,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.8", d:"lokakuu 2026", items:[
+    "Päivän tila: \"Eilen treeni, rasitus\" on nyt \"Eilisen treenin rasitus\".",
+    "Drive-kirjautuminen uusitaan vain Tallenna treeni -painalluksesta, ja onnistuminen kuitataan ilmoituksella. Kirjaa-näkymän napit eivät enää avaa Googlen ikkunaa. Siellä synkronointi tehdään Synkronoi-palkista kuten ennenkin."
+  ]},
   {v:"2.18.7", d:"lokakuu 2026", items:[
     "Drive-synkronointi: kun Google-kirjautuminen on vanhentunut, se uusitaan automaattisesti seuraavasta Kirjaa-näkymän napautuksesta tai Tallenna treeni -painalluksesta. Googlen ikkuna voi välähtää hetken. Erillistä Synkronoi-painallusta tarvitaan harvemmin."
   ]},
@@ -6333,7 +6337,7 @@ function renderReadiness(){
     rows.push({k:"Kipu"+(pt?` (${pt.l.toLowerCase()})`:""),v:top.painLevel+"/5",b:"",f:codes.has("active_pain")});
   }
   const pl=body.inputs&&body.inputs.prev_day_load;
-  if(pl!=null) rows.push({k:"Eilen treeni, rasitus",v:pl+"/5",b:"",f:codes.has("hard_training_yesterday")});
+  if(pl!=null) rows.push({k:"Eilisen treenin rasitus",v:pl+"/5",b:"",f:codes.has("hard_training_yesterday")});
 
   el.style.display="block";
   el.innerHTML=`<div class="ds-card">
@@ -8346,7 +8350,7 @@ async function syncNow(opts={}){
       if(syncHasScope(SYNC_SCOPE_PT)){ try{ await writePtCopy(); }catch(e){ setSyncState({ptErr:e.auth?"Kirjaudu uudelleen":"PT-kopion päivitys epäonnistui"}); } }
       else setSyncState({ptErr:"Odottaa lupaa: paina Synkronoi nyt"});
     }
-    if(!opts.silent) showSavedToast("Synkronoitu Driveen");
+    if(!opts.silent||opts.toast) showSavedToast("Synkronoitu Driveen");
   }catch(e){
     SYNC_ERR=e.auth?"Kirjaudu uudelleen synkronoidaksesi":(e.message||"Synkronointi epäonnistui");
   }finally{ SYNC_BUSY=false; renderSyncUI(); }
@@ -8422,20 +8426,21 @@ function renderSyncUI(){
 }
 // Käynnistys ja taustalle siirtyminen: synkronoi hiljaa, jos tokeni on voimassa
 function syncOnStart(){ renderSyncUI(); if(SYNC_AVAILABLE&&syncState().enabled){ loadGis().catch(()=>{}); if(syncTokenValid()) syncNow({silent:true}); } }
-// v2.18.7: vanhentunut kirjautuminen uusitaan napautuksesta, jonka käyttäjä tekee muutenkin:
-// Kirjaa-näkymän napit (arvot, valinnat, tallennus) ja Tallenna treeni. Ei tekstikentistä (näppäimistö ei sulkeudu kesken
-// kirjoituksen). Googlen ikkuna voi välähtää. Epäonnistuneen yrityksen jälkeen 10 min tauko, ettei jokainen napautus yritä.
+// v2.18.8: vanhentunut kirjautuminen uusitaan vain Tallenna treeni -painalluksesta (data-synctap).
+// v2.18.7 uusi myös Kirjaa-napeista, mutta Googlen ikkunan välähdys keskellä kirjaamista näytti virheeltä.
+// Tallennuksessa jotain odotetaankin tapahtuvan, ja onnistuminen kuitataan ilmoituksella.
+// Epäonnistuneen yrityksen jälkeen 10 min tauko.
 let SYNC_RENEW_AT=0;
 function syncRenewOnTap(ev){
   if(!SYNC_AVAILABLE||SYNC_BUSY||syncTokenValid()) return;
   const st=syncState(); if(!st.enabled) return;
   const t=ev.target&&ev.target.closest&&ev.target.closest("button"); if(!t) return;
   if(t.closest(".sync-bar")||t.closest("#sync-section")) return;
-  if(!(t.closest("#view-log")||t.hasAttribute("data-synctap"))) return;
+  if(!t.hasAttribute("data-synctap")) return;
   if(Date.now()-SYNC_RENEW_AT<600e3) return;
   if(!(window.google&&google.accounts&&google.accounts.oauth2)){ loadGis().catch(()=>{}); return; }
   SYNC_RENEW_AT=Date.now();
-  syncSignIn(false).then(()=>{ SYNC_ERR=null; setTimeout(()=>syncNow({silent:true}),300); }).catch(()=>renderSyncUI());
+  syncSignIn(false).then(()=>{ SYNC_ERR=null; setTimeout(()=>syncNow({silent:true,toast:true}),300); }).catch(()=>renderSyncUI());
 }
 document.addEventListener("click",syncRenewOnTap,true);
 document.addEventListener("visibilitychange",()=>{
