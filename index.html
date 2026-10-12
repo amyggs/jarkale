@@ -721,11 +721,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-sum-h{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .g-share{min-height:36px;padding:0 14px;}
 .g-sum-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;margin:10px 0 4px;}
-@media (max-width:380px){ .g-sum-kpi{grid-template-columns:1fr 1fr;} .gt.run .gt-l{display:none;} }
+.g-sum-prh{margin:12px 0 0;}
+@media (max-width:380px){ .gt.run .gt-l{display:none;} }
 .g-sum-kpi div{background:var(--surf2);border-radius:12px;padding:8px 8px;min-width:0;}
 .g-sum-kpi b{display:block;font:800 clamp(14px,4.3vw,18px)/1.15 Manrope,system-ui,sans-serif;color:var(--text);white-space:nowrap;}
 .g-sum-kpi span{display:block;font:600 11px Manrope,system-ui,sans-serif;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.g-sum-pr{margin-top:10px;display:grid;gap:8px;}
+.g-sum-pr{margin-top:6px;display:grid;gap:8px;}
 .g-sum-pr>div{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.35 Manrope,system-ui,sans-serif;color:var(--text);}
 .g-sum-pr b{font-weight:800;}
 .g-sum-pr small{display:block;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:1px;}
@@ -1228,7 +1229,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.9</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.10</span>
       </div>
     </div>
   </div>
@@ -1262,6 +1263,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.10", d:"lokakuu 2026", items:[
+    "Yhteenvedon kolme lukua (liikkeet, sarjat, kesto) ovat aina yhdellä rivillä, ja ennätysten määrä näkyy ennätyslistan otsikossa"
+  ]},
   {v:"2.17.9", d:"lokakuu 2026", items:[
     "Yhteenvedon luvut mahtuvat laatikoihin myös kapealla näytöllä: kesto minuutteina, kapealla näytöllä kaksi saraketta",
     "Treeninäkymien tekstien mahtuminen tarkistettu 340, 360 ja 412 pikselin leveydellä"
@@ -7701,7 +7705,8 @@ function gymSummaryHTML(s,fresh){
   const durOk=S2.dur>60000&&S2.dur<6*3600000;
   let h=`<div class="g-sum${fresh?" fresh":""}">
     <div class="g-sum-h"><span class="lbl-small" style="margin:0">${fresh?"Treeni tallennettu":"Yhteenveto"}</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
-    <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}<div><b>${S2.prs.length}</b><span>${S2.prs.length===1?"ennätys":"ennätystä"}</span></div></div>`;
+    <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
+  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:"Ei ennätyksiä tällä kertaa"}</div>`;
   if(S2.prs.length) h+=`<div class="g-sum-pr">${S2.prs.map(p=>`<div><span class="pr-tag">Ennätys</span><span><b>${esc(p.ex.name)}</b> ${setOneTxt(p.set)}${p.was?`<small>${p.was}</small>`:""}</span></div>`).join("")}</div>`;
   h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span>${esc(r.ex.name)}</span><span>${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
     :`<div><span class="nm">${esc(r.ex.name)}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</span></div>`).join("")}</div>
