@@ -721,6 +721,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .tr-row .n{font:700 15px Manrope,system-ui,sans-serif;color:var(--text);}
 .tr-row .s{font:500 12.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
 .tr-row .chev{color:var(--dim);font-size:20px;}
+.g-trend{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:800 16px Manrope,system-ui,sans-serif;flex-shrink:0;background:var(--surf2);color:var(--dim);}
+.g-trend.up{background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));}
+.g-trend.down{background:transparent;box-shadow:inset 0 0 0 1.5px var(--red);color:var(--red);}
+.g-stall{color:var(--text);font-weight:700;}
 .tr-tag{display:inline-block;font:700 10.5px Manrope,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:2px;}
 .tr-go{border:none;border-radius:12px;background:var(--seg-on);color:var(--on-accent);font:700 13.5px Manrope,system-ui,sans-serif;padding:0 16px;min-height:42px;flex-shrink:0;}
 .tr-go.ghost{background:var(--surf2);color:var(--text);}
@@ -1191,7 +1195,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.2</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.3</span>
       </div>
     </div>
   </div>
@@ -1225,6 +1229,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.3", d:"lokakuu 2026", items:[
+    "Liikkeiden kehitys -listassa näkyy jokaisen liikkeen suunta (nousi, ennallaan tai laski edelliseen kertaan verrattuna) ja maininta, jos ennätyksestä on kulunut kolme kertaa tai enemmän"
+  ]},
   {v:"2.17.2", d:"lokakuu 2026", items:[
     "Taukoajastimen napit reagoivat varmemmin, koska palkkia ei enää piirretä uudelleen neljästi sekunnissa",
     "Treeni ilman yhtään kuitattua sarjaa ei jää historiaan",
@@ -6976,7 +6983,7 @@ function renderSaveInsight(insight){
 // treeni tallentaa aloitushetken ohjelmarakenteen (ohjelman myöhempi muokkaus ei muuta historiaa).
 const GYM_KEY="jarkale-gym";
 let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
-const GU={mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,importText:null,importPreview:null,histN:8,exSearch:""};
+const GU={exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
 function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
 function gymLoad(){
@@ -7536,7 +7543,33 @@ function gymExListHTML(){
   const q=exKey(GU.exSearch);
   const list=exerciseIndex().filter(o=>!q||o.key.includes(q));
   if(!list.length) return `<div class="tr-row"><div class="t"><div class="s">Ei osumia</div></div></div>`;
-  return list.slice(0,q?50:8).map(o=>`<button class="tr-row tr-btn" onclick="GU.mode='exercise';GU.exKey=${esc(JSON.stringify(o.key))};renderGym();gTop()"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${o.n} kertaa · viimeksi ${gDay(o.last)}</div></div><span class="chev">›</span></button>`).join("");
+  const shown=q||GU.exAll?list:list.slice(0,12);
+  let h=shown.map(o=>{
+    const tr=exerciseTrend(o.key);
+    const top=tr.last?setOneTxt(tr.last.top):"";
+    const badge=tr.dir?`<span class="g-trend ${tr.dir}" aria-label="${tr.dirTxt}">${tr.dir==="up"?"↑":tr.dir==="down"?"↓":"→"}</span>`:"";
+    const stall=tr.sinceBest>=3?` · <span class="g-stall">ennätys ${tr.sinceBest} kertaa sitten</span>`:"";
+    return `<button class="tr-row tr-btn" onclick="GU.mode='exercise';GU.exKey=${esc(JSON.stringify(o.key))};renderGym();gTop()"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${gDay(o.last)}${top?` · ${top}`:""}${tr.dir?` · ${tr.dirTxt}`:` · ${o.n} ${o.n===1?"kerta":"kertaa"}`}${stall}</div></div>${badge}<span class="chev">›</span></button>`;
+  }).join("");
+  if(shown.length<list.length) h+=`<button class="tr-row tr-btn" onclick="GU.exAll=true;document.getElementById('g-exlist').innerHTML=gymExListHTML()"><div class="t"><div class="n" style="font-weight:600;color:var(--dim)">Näytä kaikki (${list.length})</div></div></button>`;
+  return h;
+}
+// Liikkeen suunta: viimeisin kerta vs. edellinen (paras sarja, arvioitu 1RM tai kehonpainossa toistot).
+// sinceBest = montako kertaa on tehty parhaan kerran jälkeen (0 = viimeisin on paras).
+const setOneTxt=r=>r.kg!=null?`${fmtKg(r.kg)} × ${r.reps}`:`${r.reps} toistoa`;
+function exerciseTrend(key){
+  const H=exerciseHistory(key);
+  if(!H.length) return {dir:null,last:null,sinceBest:0};
+  const last=H[H.length-1];
+  let bi=0; H.forEach((x,i)=>{ if(x.e1>=H[bi].e1-1e-9) bi=i; });
+  const r={dir:null,dirTxt:"",last,sinceBest:H.length-1-bi};
+  if(H.length>=2){
+    const a=H[H.length-2].e1, b=last.e1;
+    if(b>a*1.005){ r.dir="up"; r.dirTxt="nousi"; }
+    else if(b<a*0.995){ r.dir="down"; r.dirTxt="laski"; }
+    else { r.dir="same"; r.dirTxt="ennallaan"; }
+  }
+  return r;
 }
 
 const FEELS=[{id:"light",l:"Kevyt"},{id:"ok",l:"Sopiva"},{id:"hard",l:"Raskas"}];
@@ -7722,8 +7755,8 @@ function gymExerciseHTML(key){
   if(!H.length) return h+`<div class="g-hint">Ei kirjattuja sarjoja.</div>`;
   const withKg=H.filter(x=>x.top.kg!=null);
   const best=H.reduce((b,x)=>x.e1>b.e1?x:b,H[0]);
-  h+=`<div class="g-stats"><div><span class="lbl-small">Paras sarja</span><b>${best.top.kg!=null?fmtKg(best.top.kg)+" kg × ":""}${best.top.reps}</b><span>${gDay(best.s.date)}</span></div>
-    <div><span class="lbl-small">Viimeksi</span><b>${H[H.length-1].top.kg!=null?fmtKg(H[H.length-1].top.kg)+" kg × ":""}${H[H.length-1].top.reps}</b><span>${gDay(H[H.length-1].s.date)}</span></div>
+  h+=`<div class="g-stats"><div><span class="lbl-small">Paras sarja</span><b>${best.top.kg!=null?fmtKg(best.top.kg)+" kg × "+best.top.reps:best.top.reps+" toistoa"}</b><span>${gDay(best.s.date)}</span></div>
+    <div><span class="lbl-small">Viimeksi</span><b>${H[H.length-1].top.kg!=null?fmtKg(H[H.length-1].top.kg)+" kg × "+H[H.length-1].top.reps:H[H.length-1].top.reps+" toistoa"}</b><span>${gDay(H[H.length-1].s.date)}</span></div>
     ${best.top.kg!=null?`<div><span class="lbl-small">Arvioitu 1RM</span><b>${fmtKg(Math.round(best.e1*2)/2)} kg</b><span>suuntaa antava</span></div>`:""}</div>`;
   if(withKg.length>=2){
     const pts=withKg.slice(-24), W=340, Hh=120, pad=8;
