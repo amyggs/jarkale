@@ -1245,7 +1245,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.3</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.4</span>
       </div>
     </div>
   </div>
@@ -1279,6 +1279,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.4", d:"lokakuu 2026", items:[
+    "Puhelimen takaisin-ele ei enää sulje sovellusta: se palaa treenin alanäkymästä Treeni-etusivulle ja muilta välilehdiltä Kirjaa-näkymään. Kirjaa-näkymässä takaisin sulkee sovelluksen kuten ennenkin."
+  ]},
   {v:"2.18.3", d:"lokakuu 2026", items:[
     "Järkäle PT:n kopiotiedoston voi siirtää mihin tahansa Drive-kansioon ja nimetä uudelleen, ja se päivittyy silti samaan tiedostoon"
   ]},
@@ -5701,6 +5704,7 @@ function setTab(tab){
   if(tab==="treeni")   renderGym();
   if(tab==="log")      renderLogGymCard();
   renderTimer();
+  if(typeof navUpdate==="function") navUpdate();
 
   // Clean up animation and run card entrance
   setTimeout(()=>{
@@ -7633,6 +7637,7 @@ function renderGym(){
     :GU.mode==="import"?gymImportHTML()
     :gymHomeHTML(); } finally { PREV_MEMO=null; }
   renderTimer(); timerLoop();
+  navUpdate();
 }
 function gBack(){ GU.justFinished=null; GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym(); gTop(); }
 const gBackLink=(txt)=>`<button class="g-back" onclick="gBack()">‹ ${txt||"Treeni"}</button>`;
@@ -8333,6 +8338,31 @@ document.addEventListener("visibilitychange",()=>{
 });
 
 
+// ═══ PUHELIMEN TAKAISIN-ELE (v2.18.4) ═══════════════════════════════
+// Ennen: takaisin sulki koko sovelluksen. Nyt selainhistoriassa on yksi merkintä jokaista tasoa kohden:
+// Kirjaa = juuri (takaisin sulkee sovelluksen), muu välilehti = 1, Treenin alanäkymä = 2.
+// Takaisin nousee tason ylöspäin: alanäkymä → Treeni-etusivu → Kirjaa.
+let NAV_LEN=0, NAV_PENDING=false, NAV_READY=false;
+function navDepth(){ return (S.tab==="log"?0:1)+(S.tab==="treeni"&&GU.mode!=="home"?1:0); }
+// Historiaa siirretään yksi askel kerrallaan: kun paluu (history.go) on kesken, uusia merkintöjä ei lisätä
+// ennen kuin selain on ilmoittanut siirron valmistuneen. Muuten nopeat vaihdot jättäisivät historian väärään kohtaan.
+function navUpdate(){
+  if(!NAV_READY||NAV_PENDING) return;
+  const d=navDepth();
+  if(NAV_LEN>d){ const n=NAV_LEN-d; NAV_PENDING=true; try{ history.go(-n); }catch(_){ NAV_PENDING=false; NAV_LEN=d; } return; }
+  while(NAV_LEN<d){ NAV_LEN++; try{ history.pushState({jk:NAV_LEN},""); }catch(_){} }
+}
+window.addEventListener("popstate",e=>{
+  const jk=(e.state&&e.state.jk)||0;
+  if(NAV_PENDING){ NAV_PENDING=false; NAV_LEN=jk; navUpdate(); return; }
+  // Käyttäjän takaisin-ele: noustaan taso ylöspäin
+  NAV_LEN=jk;
+  if(S.tab==="treeni"&&GU.mode!=="home"){ GU.mode="home"; GU.menu=null; GU.finishing=false; GU.justFinished=null; renderGym(); gTop(); }
+  else if(S.tab!=="log") setTab("log");
+  navUpdate();
+});
+function navInit(){ try{ history.replaceState({jk:0},""); }catch(_){} NAV_LEN=0; NAV_READY=true; navUpdate(); }
+
 // ═══ INIT ═══════════════════════════════════════════════════════
 loadAll();
 gymLoad();
@@ -8373,6 +8403,7 @@ renderAll();
 applyGymVisibility();
 ensurePersistentStorage();
 syncOnStart();
+navInit();
 updateThemeBtn();
 if(localStorage.getItem("seuranta-setup-done")==="1"&&isBodyOnly()) setTab("historia"); // v2.11: vain mittoja seuraava aloittaa Mitoista
 
