@@ -529,6 +529,11 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ds-ttl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;}
 .ds-state{margin-left:auto;font-size:14px;font-weight:800;}
 .ds-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+/* v2.18.9: Päivän tila tiivistettynä yhdeksi riviksi */
+.ds-row{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:0;font:inherit;color:inherit;text-align:left;min-height:32px;cursor:pointer;}
+.ds-row .ds-why{font-size:12px;color:var(--dim);font-weight:500;}
+.ds-row .ds-chev{color:var(--dim);font-size:18px;line-height:1;transition:transform .15s;margin-left:2px;}
+.ds-row.open .ds-chev{transform:rotate(90deg);}
 .ds-tbl th{font-size:11px;font-weight:600;color:var(--dim);text-align:right;padding:0 0 4px 8px;}
 .ds-tbl td{padding:5px 0;border-top:1px solid var(--bord);color:var(--dim);}
 .ds-tbl td.v{text-align:right;color:var(--text);font-weight:700;white-space:nowrap;padding-left:8px;}
@@ -1262,7 +1267,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.8</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.9</span>
       </div>
     </div>
   </div>
@@ -1296,6 +1301,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.9", d:"lokakuu 2026", items:[
+    "Päivän tila näkyy Kirjaa-näkymässä yhtenä rivinä. Luokitukseen vaikuttavat tekijät näkyvät tilan perässä, ja taulukko aukeaa napauttamalla. Valinta muistetaan."
+  ]},
   {v:"2.18.8", d:"lokakuu 2026", items:[
     "Päivän tila: \"Eilen treeni, rasitus\" on nyt \"Eilisen treenin rasitus\".",
     "Drive-kirjautuminen uusitaan vain Tallenna treeni -painalluksesta, ja onnistuminen kuitataan ilmoituksella. Kirjaa-näkymän napit eivät enää avaa Googlen ikkunaa. Siellä synkronointi tehdään Synkronoi-palkista kuten ennenkin."
@@ -6313,6 +6321,8 @@ function ownLevel(field,ds){
   }
   return vals.length>=7?vals.reduce((x,y)=>x+y,0)/vals.length:null;
 }
+let DS_OPEN=(()=>{ try{ return localStorage.getItem("jarkale-ds-open")==="1"; }catch(_){ return false; } })();
+function toggleDayState(){ DS_OPEN=!DS_OPEN; try{ localStorage.setItem("jarkale-ds-open",DS_OPEN?"1":"0"); }catch(_){} haptic(6); renderReadiness(); }
 function renderReadiness(){
   const el=document.getElementById("readiness-card"); if(!el) return;
   if(!shouldShowDayStateCard()){
@@ -6340,10 +6350,16 @@ function renderReadiness(){
   if(pl!=null) rows.push({k:"Eilisen treenin rasitus",v:pl+"/5",b:"",f:codes.has("hard_training_yesterday")});
 
   el.style.display="block";
+  // Kiinni: yksi rivi. Luokitukseen vaikuttavat tekijät näytetään lyhyesti, jotta syy näkyy avaamatta.
+  const why=rows.filter(r=>r.f).map(r=>r.k.split(" (")[0].replace("Eilisen treenin rasitus","eilinen treeni").toLowerCase());
+  const head=`<button class="ds-row${DS_OPEN?" open":""}" aria-expanded="${DS_OPEN}" onclick="toggleDayState()">
+      <span class="ds-ttl">Päivän tila</span>
+      <span class="ds-state" style="color:${colFor[body.level]}">${body.label}${!DS_OPEN&&why.length?` <span class="ds-why">· ${why.join(", ")}</span>`:""}</span>
+      <span class="ds-chev" aria-hidden="true">›</span></button>`;
+  if(!DS_OPEN){ el.innerHTML=`<div class="ds-card">${head}</div>`; return; }
   el.innerHTML=`<div class="ds-card">
     <div class="ds-head">
-      <span class="ds-ttl">Päivän tila</span>
-      <span class="ds-state" style="color:${colFor[body.level]}">${body.label}</span>
+      ${head}
       <button onclick="toggleFieldHint('daystate-hint')" aria-label="Mistä Päivän tila muodostuu" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
     </div>
     <div id="daystate-hint" style="display:none;margin:4px 0 10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord);font-size:12px;color:var(--dim);line-height:1.6">
