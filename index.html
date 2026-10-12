@@ -420,12 +420,6 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 #group-training-hdr,#group-health-hdr{font-size:13px!important;letter-spacing:.01em!important;text-transform:none!important;font-weight:700;}
 .tr-card{margin-bottom:12px;}
 .tr-load{margin-top:0;}
-.tr-load-bal{margin-top:12px;border-top:1px solid var(--bord);padding-top:4px;}
-.tr-lb-row{width:100%;min-height:40px;display:flex;justify-content:space-between;align-items:center;gap:8px;border:none;background:transparent;color:var(--dim);font:600 12px Manrope,system-ui,sans-serif;padding:0;text-align:left;}
-.tr-lb-row b{color:var(--text);}
-.tr-lb-row span:first-child{flex:1;}
-.tr-lb-row span:last-child{white-space:nowrap;}
-.tr-lb-info{font-size:11px;color:var(--dim);line-height:1.6;padding-bottom:6px;}
 .inj-card{background:var(--surf);border-radius:16px;padding:12px 14px 10px;margin-bottom:10px;}
 .inj-card.res{opacity:.85;}
 .inj-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
@@ -1298,7 +1292,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.15</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.16</span>
       </div>
     </div>
   </div>
@@ -1332,6 +1326,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.16", d:"lokakuu 2026", items:[
+    "Trendien kuormitusvertailu (\"7 pv kuorma · oma ka\") poistettu. Se laski kirjaamattomat päivät nollaksi ja treenin ilman rasitusarvoa kevyeksi, joten tulos saattoi olla harhaanjohtava."
+  ]},
   {v:"2.18.15", d:"lokakuu 2026", items:[
     "Drive-yhdistämisen kohdalla kerrotaan etukäteen, että Googlen ikkunassa näkyy osoite amyggs.github.io, ja linkki tietosuojaan."
   ]},
@@ -4737,7 +4734,6 @@ function buildWeekView(start, fullEnd) {
   if(S.trendToggles?.analysis){
     h+=buildWeekScoreHTML(days,wEntries);
     h+=buildAnalysisSectionHTML(wEntries,start,"vko",wEntries.length,start,days.filter(dt=>dt<=t).at(-1)||t);
-    h+=buildLoadBalanceHTML(days.filter(dt=>dt<=t).at(-1)||t);
     h+=`<div id="period-summary-card" style="margin-bottom:12px"></div>`;
   } else {
     // Placeholderit aina DOM:issa AI-kutsuille
@@ -6662,48 +6658,8 @@ function toggleInjuryResolved(idx){
   injuryChanged();
 }
 
-// ═══ KUORMITUS-PALAUTUMINEN ══════════════════════════════════════
-function calcLoadBalance(endDate){
-  if(!trk("training")) return null; // ei arvioida jos treeniseuranta ei ole edes käytössä
-  const end=new Date(endDate+"T00:00:00");
-  const days28=[];
-  for(let i=0;i<28;i++){const d=new Date(end);d.setDate(end.getDate()-i);days28.push(iso(d));}
-  const entries28=days28.map(dt=>S.entries[dt]||null);
-  const daysWithEntry=entries28.filter(Boolean).length;
-  const trainingCount=entries28.filter(e=>e&&e.training_done).length;
-  // Datakattavuusehto: riittävästi kirjattuja päiviä JA treenimerkintöjä koko 28 pv jaksolta,
-  // jotta puuttuvat päivät (nollakuorma) eivät vääristä suhdelukua keinotekoisesti
-  if(daysWithEntry<21||trainingCount<6) return null;
-  const loads=entries28.map(e=>{
-    if(!e) return 0;
-    let l=0;
-    if(e.training_done) l+=e.training_load!=null?e.training_load:2;
-    if(e.cardio_done) l+=1.5;
-    return l;
-  });
-  const acute7=+loads.slice(0,7).reduce((s,v)=>s+v,0).toFixed(1);
-  const chronic28=loads.reduce((s,v)=>s+v,0);
-  const chronicPerWeek=+(chronic28/4).toFixed(1);
-  if(chronicPerWeek<0.5) return null; // liian vähän dataa
-  const ratio=+(acute7/chronicPerWeek).toFixed(2);
-  const status=ratio>=1.5?{lbl:"Kuormitus koholla",col:"var(--yellow)"}
-    :ratio>=1.3?{lbl:"Kuormitus nousussa",col:"var(--yellow)"}
-    :ratio>=0.8?{lbl:"Kuormitus tasainen",col:"var(--dim)"}
-    :{lbl:"Kuormitus matala",col:"var(--dim)"};
-  return {acute7,chronicPerWeek,ratio,status};
-}
-
-function buildLoadBalanceHTML(endDate){
-  const lb=calcLoadBalance(endDate);
-  if(!lb) return "";
-  return `<div class="tr-load-bal">
-    <button class="tr-lb-row" onclick="const t=this.nextElementSibling;t.style.display=t.style.display==='none'?'block':'none'" aria-label="Mitä kuormitus tarkoittaa?">
-      <span>7 pv kuorma <b>${lb.acute7}</b> · oma ka <b>${lb.chronicPerWeek}</b>/vko</span>
-      <span style="color:${lb.status.col};font-weight:700">${lb.status.lbl}</span>
-    </button>
-    <div class="tr-lb-info" style="display:none">Vertaa viimeisen 7 päivän harjoittelua omaan viimeaikaiseen tasoosi (4 viikon ka). Perustuu kirjattuihin rasitustasoihin — karkea suuntaa-antava laskelma, ei mittari.</div>
-  </div>`;
-}
+// v2.18.16: kuormitusvertailu (7 pv / 28 pv) poistettu: laski kirjaamattomat päivät nollaksi ja
+// arvioimattoman treenin kakkoseksi, ja tila ("Kuormitus koholla") oli valmennusarvio. Raakadata riittää PT:lle.
 
 function renderTrainingSection(){
   const el=document.getElementById("training-section"); if(!el) return;
