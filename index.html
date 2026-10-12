@@ -817,6 +817,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ed-l .g{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
 .ed-l.open{border-bottom-color:transparent;font-weight:800;}
 .ed-l.unp .g{color:var(--orange);}
+.ed-note{display:block;font:500 12px/1.35 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
+.ed-day.off{opacity:.55;}
+.ed-day .g-inc{width:20px;height:20px;accent-color:var(--text);flex-shrink:0;}
 .ed-form{display:grid;gap:8px;padding:2px 0 12px;border-bottom:1px solid var(--surf2);}
 .ed-form .ex-menu{margin:0;}
 .ed-addrow{margin-top:10px;}
@@ -1188,7 +1191,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.0</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.1</span>
       </div>
     </div>
   </div>
@@ -1222,6 +1225,11 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.1", d:"lokakuu 2026", items:[
+    "Ohjelman tuonti ymmärtää valmentajan ohjelmatiedoston sellaisenaan. Ohjetekstit ohitetaan, lepopäivät jätetään pois, ja muodot \"2 * 6 - 8 & 1 * 8 - 12\", \"2 * max toistot\" ja supersarjat tunnistetaan.",
+    "Esikatselussa treenipäivät voi valita, ja liikkeen tarkenne tallentuu ohjeeksi. Treenipäivä kytketään samannimiseen treenityyppiin automaattisesti.",
+    "Uusi asetus: Käynnistä tauko automaattisesti sarjan kuittauksesta (oletuksena pois)"
+  ]},
   {v:"2.17.0", d:"lokakuu 2026", items:[
     "Uusi valinnainen ominaisuus: saliohjelmat ja treeniseuranta (Asetukset → Treeni- ja kausiasetukset). Oletuksena pois päältä.",
     "Omat ohjelmat riveinä, esim. \"Penkkipunnerrus 3x8-10 80\". Ohjelman voi liittää tekstinä suoraan Keepistä.",
@@ -6964,7 +6972,7 @@ const GYM_KEY="jarkale-gym";
 let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
 const GU={mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
-function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,vibrate:true,...(S.settings.gym||{})}; }
+function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
 function gymLoad(){
   try{ const r=localStorage.getItem(GYM_KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==="object") G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; } }catch(_){}
   if(!Array.isArray(G.programs)) G.programs=[];
@@ -6985,18 +6993,57 @@ function gDay(ds){ const a=new Date(ds+"T00:00:00"); return `${WD_SHORT[a.getDay
 // Sarjan vertailuluku: painollisille arvioitu 1RM (Epley), kehonpainoliikkeille toistot (pieni luku, ei sekoitu painoihin)
 function e1rm(kg,reps){ if(!reps) return 0; return kg?kg*(1+Math.min(reps,15)/30):reps/1000; }
 
-// ── Liikerivin jäsennin: "Penkkipunnerrus 3x8-10 82,5" / "Leuanveto 3xmax" / "Hauis 3 x 12 @ 14kg" / pelkkä nimi
-const EX_LINE_RE=/^(.*?)[\s:,-]+(\d{1,2})\s*[x×*]\s*(max|\d{1,3}(?:\s*[-–]\s*\d{1,3})?)(?:\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?)?\s*$/i;
+// ── Liikerivin jäsennin (v2.17.1): "Penkkipunnerrus 3x8-10 80" / "Leuanveto 3xmax" / "Hauis 3 x 12 @ 14kg" /
+// "Penkki, pieni stoppi 2 * 6 - 8 & 1 * 8 - 12" / pelkkä nimi. Tavoitteen jälkeinen teksti ja pilkun jälkeinen
+// tarkenne tallentuvat ohjeeksi. Puuttuvia arvoja ei keksitä.
+const GOAL_G="(\\d{1,2})\\s*[x×*]\\s*(max(?:imi)?|\\d{1,3}(?:\\s*[-–]\\s*\\d{1,3})?)";
+const GOAL_START_RE=new RegExp("(^|[\\s:,(])"+GOAL_G,"i");
+const EX_LINE_RE={test:l=>{ const p=parseExLine(l); return !!(p&&p.parsed); }};
+function cleanLine(l){
+  return String(l||"")
+    .replace(/\\([^\w\s])/g,"$1")          // markdown-escapet
+    .replace(/\[([^\]]*)\]\((?:[^)]*)\)/g,"$1")               // [teksti](linkki) → teksti
+    .replace(/https?:\/\/\S+/g,"")                            // irralliset linkit pois
+    .replace(/\*\*|__/g,"")                                   // lihavointi
+    .replace(/^[\s•\-–·*]+(?=\S)/,"")                          // luettelomerkit
+    .replace(/\s+/g," ").trim();
+}
+function parseGroup(m){
+  const isMax=/^max/i.test(m[2]);
+  let a=null,b=null;
+  if(!isMax){ const p=m[2].split(/[-–]/).map(s=>parseInt(s,10)); a=p[0]; b=p[1]!=null&&p[1]!==p[0]?p[1]:null; if(b!=null&&b<a){ const x=a; a=b; b=x; } }
+  return {sets:parseInt(m[1],10),min:a,max:b,isMax};
+}
 function parseExLine(text){
-  const t=String(text||"").replace(/^[\s•*\-–·]+/,"").trim(); if(!t) return null;
-  const m=t.match(EX_LINE_RE);
-  if(!m) return {name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,parsed:false};
-  const name=m[1].trim().replace(/[:,]$/,"");
-  if(!name) return {name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,parsed:false};
-  const isMax=/max/i.test(m[3]);
-  let rMin=null,rMax=null;
-  if(!isMax){ const p=m[3].split(/[-–]/).map(s=>parseInt(s,10)); rMin=p[0]; rMax=p[1]!=null&&p[1]!==p[0]?p[1]:null; if(rMax!=null&&rMax<rMin){ const x=rMin; rMin=rMax; rMax=x; } }
-  return {name,sets:parseInt(m[2],10),repsMin:rMin,repsMax:rMax,max:isMax,weight:m[4]!=null?gNum(m[4]):null,parsed:true};
+  const t=cleanLine(text); if(!t) return null;
+  const blank={name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:"",parsed:false};
+  const m0=t.match(GOAL_START_RE);
+  if(!m0) return blank;
+  const start=m0.index+m0[1].length;
+  let name=t.slice(0,start).trim().replace(/[\s:,(–-]+$/,"");
+  if(!name) return blank;
+  // tavoiteryhmät: "2 * 6-8 & 1 * 8-12"
+  let rest=t.slice(start); const groups=[];
+  const gRe=new RegExp("^"+GOAL_G,"i"), joinRe=/^\s*(?:&|\+|ja|sekä)\s*/i;
+  for(;;){
+    const g=rest.match(gRe); if(!g) break;
+    groups.push(parseGroup(g)); rest=rest.slice(g[0].length);
+    const j=rest.match(joinRe); if(j&&gRe.test(rest.slice(j[0].length))){ rest=rest.slice(j[0].length); continue; }
+    break;
+  }
+  if(!groups.length) return blank;
+  let weight=null;
+  const w=rest.match(/^\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?(?=\s|$|[,;)])/i);
+  if(w){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
+  let note=rest.replace(/^\s*(?:toistot|toistoa|reps|krt)\b/i,"").replace(/^[\s,;:)–—/-]+/,"").replace(/[\s(]+$/,"").trim();
+  if(groups.length>1) note=[groups.map(g=>`${g.sets} × ${g.isMax?"max":(g.max?`${g.min}–${g.max}`:g.min)}`).join(" + "),note].filter(Boolean).join(", ");
+  // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje
+  const ci=name.indexOf(", ");
+  if(ci>0&&name.slice(ci+2).split(" ").length>=2){ note=[name.slice(ci+2).trim(),note].filter(Boolean).join(" · "); name=name.slice(0,ci).trim(); }
+  const isMax=groups.every(g=>g.isMax);
+  const mins=groups.filter(g=>!g.isMax).map(g=>g.min), maxs=groups.filter(g=>!g.isMax).map(g=>g.max??g.min);
+  const rMin=mins.length?Math.min(...mins):null, rMaxV=maxs.length?Math.max(...maxs):null;
+  return {name:name.charAt(0).toUpperCase()+name.slice(1),sets:groups.reduce((n,g)=>n+g.sets,0),repsMin:isMax?null:rMin,repsMax:isMax||rMaxV===rMin?null:rMaxV,max:isMax,weight,note,parsed:true};
 }
 function goalTxt(g){
   if(!g||!g.sets) return "";
@@ -7004,29 +7051,56 @@ function goalTxt(g){
   return `${g.sets} × ${reps}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
 }
 function goalInputTxt(g){ if(!g.sets) return ""; return `${g.sets}x${g.max?"max":(g.repsMax?`${g.repsMin}-${g.repsMax}`:g.repsMin)}${g.weight!=null?" "+fmtKg(g.weight):""}`; }
-function newEx(p){ return {id:gid(),key:exKey(p.name),name:p.name,sets:p.sets,repsMin:p.repsMin,repsMax:p.repsMax,max:!!p.max,weight:p.weight,note:""}; }
+function newEx(p){ return {id:gid(),key:exKey(p.name),name:p.name,sets:p.sets,repsMin:p.repsMin,repsMax:p.repsMax,max:!!p.max,weight:p.weight,note:p.note||""}; }
 
-// Tekstituonti (Keep): otsikkorivit = treenipäivät, muut rivit liikkeitä. Ei keksi puuttuvia arvoja.
+// Tekstituonti (Keep, Docs, .md): otsikkorivit = treenipäivät, liikerivit niiden alle. Ohjeproosa ohitetaan
+// (näytetään esikatselussa), lepopäivät ja tyhjät otsikot pudotetaan, "Supersarja:" merkitään liikkeiden ohjeeseen.
+// Pitkät otsikot (esim. "Vatsalihakset kaksi kertaa viikossa…") tuodaan oletuksena pois valittuina.
 function parseProgramText(text){
-  const lines=String(text||"").split(/\r?\n/).map(l=>l.trim());
-  const days=[]; let cur=null;
+  const lines=String(text||"").split(/\r?\n/).map(cleanLine);
+  const days=[], skipped=[]; let cur=null, superset=null;
+  const isEx=l=>{ const p=parseExLine(l); return !!(p&&p.parsed); };
+  const nextLine=i=>lines.slice(i+1).find(x=>x)||"";
+  const isSuper=l=>/^(super|vuoro|kolmois|jätti)sarja\b|^(superset|circuit)\b/i.test(l.replace(/:$/,""));
   const isHeader=(l,i)=>{
+    if(isEx(l)) return false;
     if(/:$/.test(l)) return true;
-    if(/^(päivä|paiva|treeni|day|ylä|ala|koko|push|pull|legs|jalat)(?![a-zåäö])/i.test(l)&&!EX_LINE_RE.test(l)) return true;
-    if(EX_LINE_RE.test(l)) return false;
+    if(/^\d{1,2}\s*[.)]?\s+\S/.test(l)&&l.split(" ").length<=8) return true;     // "1 Rinta, olkapäät…" / "3 LEPO"
+    if(/^(päivä|paiva|treeni|day|ylä|ala|koko|push|pull|legs|jalat)(?![a-zåäö])/i.test(l)&&l.split(" ").length<=8) return true;
     const prevEmpty=i===0||!lines[i-1];
-    const next=lines.slice(i+1).find(x=>x);
-    return prevEmpty&&!!next&&EX_LINE_RE.test(next);
+    return prevEmpty&&isEx(nextLine(i))&&l.split(" ").length<=8;
   };
+  const tt=S.settings.trainingTypes||[];
   lines.forEach((l,i)=>{
-    if(!l) return;
-    if(isHeader(l,i)){ cur={id:gid(),name:l.replace(/:$/,"").trim(),trainingType:"",exercises:[]}; days.push(cur); return; }
-    const p=parseExLine(l); if(!p) return;
-    if(!cur){ cur={id:gid(),name:"Treenipäivä 1",trainingType:"",exercises:[]}; days.push(cur); }
-    cur.exercises.push({...newEx(p),unparsed:!p.parsed});
+    if(!l){ superset=null; return; }
+    if(isSuper(l)){ superset={label:l.replace(/:$/,""),items:[]}; return; }
+    if(isHeader(l,i)){
+      const name=l.replace(/:$/,"").trim();
+      const bare=name.replace(/^\d{1,2}\s*[.)]?\s+/,"");
+      const rest=/\blepo\b|\brest\b/i.test(bare)&&bare.split(" ").length<=3;
+      const typ=tt.find(t=>t.toLowerCase()===bare.toLowerCase())||"";
+      cur={id:gid(),raw:name,name:bare.charAt(0).toUpperCase()+bare.slice(1),trainingType:typ,exercises:[],rest,include:!rest&&bare.split(" ").length<=6};
+      days.push(cur); superset=null; return;
+    }
+    const p=parseExLine(l);
+    if(!p||!p.parsed){
+      // nimi ilman tavoitetta kelpaa vain treenipäivän sisällä ja lyhyenä; muu on ohjetekstiä
+      if(cur&&!cur.rest&&l.split(" ").length<=5&&!/[.!?]$/.test(l)) cur.exercises.push({...newEx(blankEx(l)),unparsed:true});
+      else skipped.push(l);
+      return;
+    }
+    if(!cur||cur.rest){ skipped.push(l); return; }
+    const ex={...newEx(p),unparsed:false};
+    if(superset){ superset.items.push(ex); const lab=superset.label.charAt(0).toUpperCase()+superset.label.slice(1).toLowerCase();
+      superset.items.forEach(x=>{ const others=superset.items.filter(y=>y!==x).map(y=>y.name).join(" + "); x.note=[`${lab}${others?": "+others:""}`, (x.note||"").replace(/^(Supersarja|Vuorosarja)[^·]*(· )?/,"")].filter(Boolean).join(" · "); }); }
+    cur.exercises.push(ex);
   });
-  return days;
+  days.filter(d=>!d.rest&&!d.exercises.length).forEach(d=>skipped.push(d.raw));
+  const out=days.filter(d=>!d.rest&&d.exercises.length);
+  out.skipped=skipped;
+  return out;
 }
+function blankEx(name){ return {name,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:""}; }
 
 // ── Ohjelmat
 function gProg(id){ return G.programs.find(p=>p.id===id)||null; }
@@ -7115,6 +7189,8 @@ function gToggleSet(sid,ei,ri){
     if(reps==null){ const inp=document.querySelector(`[data-set="${ei}-${ri}"] input[data-f="reps"]`); if(inp){ inp.focus(); } return; }
     r.kg=kg; r.reps=reps; r.done=true; r.at=Date.now();
     haptic(10);
+    // Valinnainen automaattinen tauko: ei liikkeen viimeisen sarjan jälkeen eikä jälkikäteen muokatessa
+    if(gymCfg().autoRest&&!s.endedAt&&G.activeId===s.id&&ex.sets.slice(ri+1).some(x=>!x.done)){ gymSave(); timerStart(); }
   }
   gymSave();
   if(s.endedAt) gymLinkEntry(s);
@@ -7321,6 +7397,7 @@ function renderGymSettings(){
   let h=tg(c.enabled,`setGymEnabled(${!c.enabled})`,"Saliohjelmat ja treeniseuranta","Omat ohjelmat, sarjakirjaus ja taukoajastin. Tuo Treeni-välilehden.");
   if(c.enabled){
     h+=tg(c.wakeLock,`setGymOpt('wakeLock',${!c.wakeLock})`,"Näyttö päällä treenin ajan","Taukoajastin hälyttää vain, kun näyttö on päällä.");
+    h+=tg(c.autoRest,`setGymOpt('autoRest',${!c.autoRest})`,"Käynnistä tauko automaattisesti","Sarjan kuittaus käynnistää viimeksi käytetyn tauon. Ei liikkeen viimeisen sarjan jälkeen.");
     h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
     h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
   } else if(G.programs.length||G.sessions.length){
@@ -7506,7 +7583,7 @@ function gymEditHTML(p){
     h+=`<div class="ed-day"><div class="ed-dn"><input class="g-day-in" value="${esc(d.name)}" aria-label="Treenipäivän nimi" oninput="gEdit(p=>p.days[${di}].name=this.value.trim()||'Treenipäivä')"><span>${d.exercises.length} liikettä</span></div>`;
     d.exercises.forEach((e,xi)=>{
       const open=GU.openEx===e.id;
-      h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
+      h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}${e.note&&!open?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
       if(open){
         h+=`<div class="ed-form">
           <input class="g-in" value="${esc(e.name)}" aria-label="Liikkeen nimi" placeholder="Liikkeen nimi" onchange="gEdit(p=>{const x=p.days[${di}].exercises[${xi}];x.name=this.value.trim()||x.name;x.key=exKey(x.name);});renderGym()">
@@ -7563,29 +7640,34 @@ function gArchiveProg(){
 function gymImportHTML(){
   const pv=GU.importPreview;
   let h=`<div class="view-hero"><div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Esim. suoraan Google Keepistä</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
-    <div class="g-hint">Treenipäivän nimi omalle rivilleen, liikkeet sen alle: <b>Penkkipunnerrus 3x8-10 80</b>. Painot ja toistot voi jättää pois. Puuttuvia arvoja ei keksitä.</div>
-    <textarea class="g-note" id="g-import" rows="10" placeholder="Päivä A — ylävartalo&#10;Penkkipunnerrus 3x8-10 80&#10;Kulmasoutu 3x10-12&#10;&#10;Päivä B — alavartalo&#10;Takakyykky 4x6-8 100" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
+    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Puuttuvia arvoja ei keksitä.</div>
+    <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
     <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=parseProgramText(GU.importText);renderGym()">Esikatsele</button>`;
   if(pv){
     if(!pv.length) h+=`<div class="g-hint" style="margin-top:12px">Tekstistä ei löytynyt liikkeitä.</div>`;
     else{
-      const unp=pv.reduce((n,d)=>n+d.exercises.filter(e=>e.unparsed).length,0);
-      h+=`<div class="tr-sec">Esikatselu</div>`;
+      const inc=pv.filter(d=>d.include);
+      const unp=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.unparsed).length,0);
+      h+=`<div class="tr-sec">Esikatselu · ${inc.length} treenipäivää</div>`;
       if(unp) h+=`<div class="g-hint warn">${ico("alert",15)} ${unp} riviltä ei löytynyt sarjoja ja toistoja. Ne tallentuvat pelkkinä nimiä, ja tavoitteen voi lisätä myöhemmin.</div>`;
-      pv.forEach(d=>{ h+=`<div class="ed-day"><div class="ed-dn"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text)">${esc(d.name)}</span><span>${d.exercises.length} liikettä</span></div>${d.exercises.map(e=>`<div class="ed-l static${e.unparsed?" unp":""}"><span class="x">${esc(e.name)}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>`).join("")}</div>`; });
+      pv.forEach((d,di)=>{ h+=`<div class="ed-day${d.include?"":" off"}"><label class="ed-dn"><span style="display:flex;gap:10px;align-items:center;min-width:0"><input type="checkbox" class="g-inc" ${d.include?"checked":""} onchange="GU.importPreview[${di}].include=this.checked;renderGym()"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text);min-width:0;overflow-wrap:anywhere">${esc(d.name)}</span></span><span>${d.exercises.length} liikettä</span></label>
+        ${d.include?d.exercises.map(e=>`<div class="ed-l static${e.unparsed?" unp":""}"><span class="x">${esc(e.name)}${e.note?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>`).join(""):""}</div>`; });
+      if(pv.skipped&&pv.skipped.length) h+=`<details class="g-src" style="margin:0 0 12px"><summary>Ohitetut rivit (${pv.skipped.length}): ohjetekstiä, ei tuoda</summary><pre data-raw>${esc(pv.skipped.join("\n"))}</pre></details>`;
       const cur=G.programs.find(x=>x.id===G.curProgramId&&!x.archived);
-      h+=`<button class="tr-go" style="width:100%;height:46px" onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
-      if(cur) h+=`<button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="gImportSave(true)">Lisää päivät ohjelmaan ${esc(cur.name)}</button>`;
+      h+=`<button class="tr-go" style="width:100%;height:46px" ${inc.length?"":"disabled"} onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
+      if(cur) h+=`<button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" ${inc.length?"":"disabled"} onclick="gImportSave(true)">Lisää päivät ohjelmaan ${esc(cur.name)}</button>`;
     }
   }
   return h+`<div style="height:30px"></div>`;
 }
 function gImportSave(append){
-  const days=(GU.importPreview||[]).map(d=>({...d,exercises:d.exercises.map(({unparsed,...e})=>e)}));
+  const days=(GU.importPreview||[]).filter(d=>d.include).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,...e})=>e)}));
   if(!days.length) return;
   let p;
   if(append&&(p=curProgram())){ p.days.push(...days); p.sourceText=(p.sourceText?p.sourceText+"\n\n":"")+GU.importText; touchProg(p); }
-  else{ p=newProgram("Tuotu ohjelma"); p.days=days; p.sourceText=GU.importText; touchProg(p); }
+  else{ const sk=(GU.importPreview&&GU.importPreview.skipped)||[];
+    const first=String(GU.importText||"").split(/\r?\n/).map(cleanLine).filter(Boolean).slice(0,2).find(x=>sk.includes(x)&&x.split(" ").length<=6);
+    p=newProgram(first||"Tuotu ohjelma"); p.days=days; p.sourceText=GU.importText; touchProg(p); }
   GU.importPreview=null; GU.importText=null;
   GU.mode="edit"; GU.progId=p.id; GU.openEx=null; renderGym(); gTop();
 }
