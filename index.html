@@ -699,6 +699,151 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .df-plus{font-size:22px;font-weight:700;color:var(--dim);line-height:1;}
 [data-palette="ampiainen"] #day-factors .df-open{border-radius:6px!important;border-style:solid!important;box-shadow:inset 4px 0 0 var(--text);}
 [data-palette="ampiainen"] #day-factors .df-open .df-ico{color:var(--text);}
+/* ═══ v2.17.0: SALIOHJELMAT JA TREENISEURANTA ═══ */
+#view-treeni .view-hero{padding-top:4px;}
+.tr-hero-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 8px;}
+.tr-h1{font:800 20px/1.15 Manrope,system-ui,sans-serif;color:var(--text);letter-spacing:-.01em;overflow-wrap:anywhere;}
+.tr-h2{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:3px;}
+.tr-pill{border:none;border-radius:999px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 16px;min-height:40px;white-space:nowrap;flex-shrink:0;}
+.tr-pill.dark{background:var(--seg-on);color:var(--on-accent);}
+[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h1,[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h2{color:var(--hi-ink);}
+[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h2{opacity:.78;}
+[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-pill:not(.dark){background:rgba(255,255,255,.6);color:var(--hi-ink);}
+.g-prog-sel{max-width:100%;border:none;background:transparent;font:800 20px/1.15 Manrope,system-ui,sans-serif;color:inherit;padding:0 22px 0 0;margin:0;outline:none;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat;color:var(--text);}
+[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .g-prog-sel{color:var(--hi-ink);}
+.g-title-in{flex:1;min-width:0;border:none;border-bottom:1.5px dashed currentColor;background:transparent;font:800 20px Manrope,system-ui,sans-serif;color:var(--text);padding:4px 0;outline:none;}
+[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .g-title-in{color:var(--hi-ink);}
+.tr-sec{font:700 11px Manrope,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:20px 2px 8px;}
+.tr-list{background:var(--surf);border-radius:16px;overflow:hidden;}
+.tr-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-top:1px solid var(--surf2);width:100%;text-align:left;background:transparent;border-left:none;border-right:none;border-bottom:none;font:inherit;color:inherit;}
+.tr-row:first-child{border-top:none;}
+.tr-row .t{flex:1;min-width:0;}
+.tr-row .n{font:700 15px Manrope,system-ui,sans-serif;color:var(--text);}
+.tr-row .s{font:500 12.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
+.tr-row .chev{color:var(--dim);font-size:20px;}
+.tr-tag{display:inline-block;font:700 10.5px Manrope,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:2px;}
+.tr-go{border:none;border-radius:12px;background:var(--seg-on);color:var(--on-accent);font:700 13.5px Manrope,system-ui,sans-serif;padding:0 16px;min-height:42px;flex-shrink:0;}
+.tr-go.ghost{background:var(--surf2);color:var(--text);}
+.tr-go:disabled{opacity:.4;}
+.g-link{display:block;border:none;background:transparent;color:var(--dim);font:700 13px Manrope,system-ui,sans-serif;padding:12px 2px;margin-top:8px;}
+.g-link.danger,.ex-menu .danger,.ed-dayfoot .danger{color:var(--red);}
+.g-empty{background:var(--surf);border-radius:16px;padding:18px 16px;margin-top:6px;}
+.g-empty .n{font:800 17px Manrope,system-ui,sans-serif;color:var(--text);}
+.g-empty .s,.g-hint{font:500 13px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:6px;}
+.g-hint.warn{color:var(--text);display:flex;gap:6px;align-items:flex-start;}
+.g-hint b,.g-empty b{color:var(--text);}
+.g-in{width:100%;box-sizing:border-box;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf);color:var(--text);font:600 14.5px Manrope,system-ui,sans-serif;padding:0 12px;outline:none;}
+.g-in.dashed{border-style:dashed;background:transparent;}
+.g-in:focus{border-color:var(--text);}
+/* Kirjaa-kortti */
+.tw{background:var(--surf);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.tw .ic{width:40px;height:40px;border-radius:12px;background:var(--hi,var(--surf2));display:flex;align-items:center;justify-content:center;color:var(--hi-ink,var(--text));flex-shrink:0;}
+.tw .ic.done{background:var(--seg-on);color:var(--on-accent);}
+.tw .t{flex:1;min-width:0;}
+.tw .n{font:800 15px Manrope,system-ui,sans-serif;color:var(--text);}
+.tw .s{font:600 12.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
+#view-treeni .tw{margin-top:4px;}
+/* Treeni käynnissä */
+.ex{display:block;width:100%;box-sizing:border-box;text-align:left;border:none;font:inherit;background:var(--surf);border-radius:16px;padding:14px 14px 8px;margin-bottom:10px;position:relative;color:var(--text);}
+.ex.active{box-shadow:inset 4px 0 0 var(--hi,var(--seg-on));}
+.ex.mini{display:flex;align-items:center;gap:10px;padding:13px 14px;}
+.ex.mini .ex-n{font-size:15px;flex:1;min-width:0;}
+.ex.mini .st{font:600 12.5px Manrope,system-ui,sans-serif;color:var(--dim);text-align:right;}
+.ex.mini .ok{color:var(--green);display:flex;}
+.ex.skipped{opacity:.6;}
+.ex.skipped .ex-n{text-decoration:line-through;}
+.ex-top{display:flex;align-items:center;gap:8px;}
+.ex-n{font:800 16px Manrope,system-ui,sans-serif;color:var(--text);flex:1;min-width:0;overflow-wrap:anywhere;}
+.ex-more{border:none;background:transparent;color:var(--dim);font:800 20px Manrope,system-ui,sans-serif;min-width:44px;min-height:36px;line-height:1;margin-right:-8px;}
+.ex-menu{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px;}
+.ex-menu button{border:none;border-radius:10px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;min-height:38px;padding:0 12px;}
+.ex-menu button:disabled{opacity:.35;}
+.ex-goal{font:600 12.5px Manrope,system-ui,sans-serif;color:var(--text);margin-top:3px;}
+.ex-prev{font:500 12.5px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
+.ex-prev .nt{display:inline-flex;align-items:center;gap:3px;border:none;background:transparent;color:var(--orange);font:700 12.5px Manrope,system-ui,sans-serif;padding:0 2px;vertical-align:baseline;}
+.ex-pnote{font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--text);background:var(--surf2);border-radius:10px;padding:8px 10px;margin-top:6px;}
+.sets{margin-top:10px;}
+.set-h,.set{display:grid;grid-template-columns:22px 1fr 1fr 48px;gap:8px;align-items:center;}
+.set-h{font:700 10px Manrope,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 0 4px;}
+.set-h span:nth-child(2),.set-h span:nth-child(3){text-align:center;}
+.set{padding:4px 0;position:relative;}
+.set .no{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);text-align:center;}
+.set .f{width:100%;min-width:0;box-sizing:border-box;height:46px;border-radius:10px;border:1.5px solid transparent;background:var(--surf2);text-align:center;font:700 18px Manrope,system-ui,sans-serif;color:var(--text);font-variant-numeric:tabular-nums;outline:none;padding:0 4px;}
+.set .f::placeholder{color:var(--text);opacity:.3;}
+.set .f:focus{border-color:var(--text);}
+.set .ck{width:48px;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;display:flex;align-items:center;justify-content:center;color:var(--dim);padding:0;}
+.set.done .ck{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
+.set.done .f{background:transparent;border-color:var(--surf2);}
+.set.done .no{color:var(--text);}
+.set .pr{position:absolute;right:56px;top:-3px;font:800 9.5px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:1px 5px;}
+.ex-act{display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;}
+.ex-act button{border:none;background:transparent;color:var(--dim);font:700 13px Manrope,system-ui,sans-serif;padding:8px 0;min-height:36px;}
+.ex-feel{display:flex;align-items:center;gap:6px;margin:2px 0 6px;}
+.ex-feel span{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-right:2px;}
+.ex-feel button{flex:1;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 12.5px Manrope,system-ui,sans-serif;min-height:36px;}
+.ex-feel button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
+.g-note{width:100%;box-sizing:border-box;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:500 14px/1.45 Manrope,system-ui,sans-serif;padding:10px 12px;outline:none;resize:vertical;margin:4px 0 6px;}
+.g-addrow,.ed-addrow{display:flex;gap:8px;align-items:center;margin-top:6px;}
+.g-finish{background:var(--surf);border-radius:16px;padding:16px;margin:4px 0 12px;box-shadow:inset 0 0 0 2px var(--text);}
+.g-finish .n{font:800 17px Manrope,system-ui,sans-serif;color:var(--text);}
+.g-finish .s{font:500 13px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:4px;}
+.g-check{display:flex;gap:10px;align-items:center;font:600 13.5px Manrope,system-ui,sans-serif;color:var(--text);margin-top:12px;}
+.g-check input{width:20px;height:20px;accent-color:var(--text);}
+/* Taukoajastin: kiinteä palkki alanavigaation yläpuolella, ei peitä kenttiä (listan lopussa tyhjää tilaa) */
+.gt{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:60;background:#181C1B;color:#F4F5F0;border-radius:16px;padding:8px 8px 8px 14px;display:flex;align-items:center;gap:6px;box-shadow:0 6px 22px rgba(0,0,0,.22);border:1px solid #2C302E;max-width:560px;margin:0 auto;}
+.gt .gt-l{font:600 11px/1.25 Manrope,system-ui,sans-serif;color:#BCC0B8;flex:1;min-width:0;}
+.gt.idle .gt-l{flex:0 0 auto;margin-right:4px;font-size:12px;}
+.gt button{border:none;border-radius:10px;background:#2C302E;color:#F4F5F0;font:700 13px Manrope,system-ui,sans-serif;height:40px;min-width:42px;padding:0 9px;}
+.gt.idle .gt-q{flex:1;padding:0 4px;}
+.gt .gt-q.on{box-shadow:inset 0 0 0 1.5px #FFD23B;}
+.gt button.p{background:#FFD23B;color:#181C1B;min-width:48px;}
+.gt .gt-tm{font:800 26px Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#FFD23B;min-width:68px;}
+.gt.paused .gt-tm{opacity:.55;}
+.gt.over{background:#FFD23B;border-color:#FFD23B;}
+.gt.over .gt-tm,.gt.over .gt-l{color:#181C1B;}
+.gt.over button{background:rgba(24,28,27,.12);color:#181C1B;}
+.gt.over button.p{background:#181C1B;color:#FFD23B;}
+.gt .gt-bar{position:absolute;left:14px;right:14px;bottom:3px;height:3px;border-radius:2px;background:#2C302E;overflow:hidden;}
+.gt .gt-bar i{display:block;height:100%;background:#FFD23B;transition:width .25s linear;}
+.gt.over .gt-bar{display:none;}
+/* Ohjelman muokkaus */
+.ed-day{background:var(--surf);border-radius:16px;padding:10px 14px 12px;margin-bottom:12px;}
+.ed-dn{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:4px 0 8px;border-bottom:1px solid var(--surf2);}
+.ed-dn span{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);white-space:nowrap;}
+.g-day-in{flex:1;min-width:0;border:none;background:transparent;font:800 16px Manrope,system-ui,sans-serif;color:var(--text);padding:6px 0;outline:none;border-bottom:1.5px dashed transparent;}
+.g-day-in:focus{border-bottom-color:var(--bord);}
+.ed-l{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--surf2);padding:12px 0;font:600 14.5px Manrope,system-ui,sans-serif;color:var(--text);}
+.ed-l .x{flex:1;min-width:0;overflow-wrap:anywhere;}
+.ed-l .g{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
+.ed-l.open{border-bottom-color:transparent;font-weight:800;}
+.ed-l.unp .g{color:var(--orange);}
+.ed-form{display:grid;gap:8px;padding:2px 0 12px;border-bottom:1px solid var(--surf2);}
+.ed-form .ex-menu{margin:0;}
+.ed-addrow{margin-top:10px;}
+.ed-parse{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin:6px 2px 0;min-height:0;}
+.ed-parse b{color:var(--text);}
+.ed-dayfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);}
+.ed-dayfoot select{margin-left:4px;height:34px;border-radius:8px;border:1.5px solid var(--bord);background:var(--surf);color:var(--text);font:600 12.5px Manrope,system-ui,sans-serif;padding:0 6px;max-width:150px;}
+.ed-dayfoot span{display:flex;gap:4px;}
+.ed-dayfoot button{border:none;background:var(--surf2);color:var(--text);border-radius:8px;min-height:34px;min-width:34px;font:700 12.5px Manrope,system-ui,sans-serif;padding:0 8px;}
+.ed-dayfoot button:disabled{opacity:.35;}
+.g-src{margin-top:16px;font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);}
+.g-src pre{white-space:pre-wrap;font:500 12.5px/1.5 Manrope,system-ui,sans-serif;color:var(--text);background:var(--surf);border-radius:12px;padding:12px;}
+/* Liikkeen kehitys */
+.g-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:4px;}
+.g-stats>div{background:var(--surf);border-radius:14px;padding:10px 12px;}
+.g-stats b{display:block;font:800 16px Manrope,system-ui,sans-serif;color:var(--text);}
+.g-stats>div>span:last-child{font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);}
+.g-chart{background:var(--surf);border-radius:16px;padding:12px 14px;margin-top:10px;}
+.g-chart-ax{display:flex;justify-content:space-between;font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:4px;}
+/* Asetukset */
+.g-set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--bord) 50%,transparent);}
+.g-set-row:last-child{border-bottom:none;}
+.g-sw{width:44px;height:26px;border-radius:13px;border:none;background:var(--surf2);position:relative;flex-shrink:0;}
+.g-sw span{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .2s;}
+.g-sw.on{background:var(--orange);}
+.g-sw.on span{left:21px;}
+
 /* kapea näyttö: laatikot allekkain */
 @media (max-width:359px){#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:1/-1;}}
 </style>
@@ -832,7 +977,8 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       </div></div><!-- /track-motivation-wrap -->
 
       <!-- Päivän tila -->
-      <div id="readiness-card" style="margin-bottom:12px"></div>
+      <div id="gym-card" style="display:none"></div>
+        <div id="readiness-card" style="margin-bottom:12px"></div>
 
       <!-- Lisäseurannat toggle -->
       <!-- Jatkuvan kivun tarjous (renderPainCarry): edellisten päivien ratkaisemattomat kivut yhdellä napautuksella -->
@@ -942,6 +1088,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div id="trendit-content"></div>
     </div>
 
+    <!-- TREENI VIEW (v2.17.0, valinnainen) -->
+    <div id="view-treeni" class="view"></div>
+
     <!-- MITAT VIEW -->
     <div id="view-historia" class="view">
       <div class="view-hero" id="mitat-hero"></div>
@@ -978,6 +1127,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <!-- Treeni- ja kausiasetukset toggle -->
       <div id="stgl-training" style="margin-bottom:8px"></div>
       <div id="stgl-content-training" style="display:none;margin-bottom:4px">
+        <div class="card"><div id="gym-settings"></div></div>
         <div class="card">
           <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>Treenityypit</div>
           <div id="training-types-section"></div>
@@ -1038,7 +1188,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.16.8</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.0</span>
       </div>
     </div>
   </div>
@@ -1048,6 +1198,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <span id="log-unlogged-dot" style="display:none;position:absolute;top:8px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 6px rgba(249,115,22,.6)"></span>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       <span class="lbl">Kirjaa</span>
+    </button>
+    <button onclick="setTab('treeni')" id="nav-treeni" style="display:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>
+      <span class="lbl">Treeni</span>
     </button>
     <button onclick="setTab('trendit')" id="nav-trendit">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -1068,6 +1222,13 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.0", d:"lokakuu 2026", items:[
+    "Uusi valinnainen ominaisuus: saliohjelmat ja treeniseuranta (Asetukset → Treeni- ja kausiasetukset). Oletuksena pois päältä.",
+    "Omat ohjelmat riveinä, esim. \"Penkkipunnerrus 3x8-10 80\". Ohjelman voi liittää tekstinä suoraan Keepistä.",
+    "Treenin aikana edellisen kerran luvut näkyvät harmaina: ✓ tallentaa sarjan, ja muokata tarvitsee vain muuttuneet luvut",
+    "Taukoajastin, näyttö päällä treenin ajan, liikkeen tuntuma ja huomio",
+    "Liikkeiden kehitys ja ennätykset. Valmis treeni merkitsee päivän treenin tehdyksi korvaamatta käsin kirjattua."
+  ]},
   {v:"2.16.8", d:"lokakuu 2026", items:[
     "Kivut: avatun kipupaikan lisäyksen saa suljettua \"× Sulje lisäys\" -napista"
   ]},
@@ -2643,6 +2804,7 @@ function renderLog() {
     if(bpDiaEl) bpDiaEl.value=S.bp_dia??'';
   }
 
+  renderLogGymCard();
   updateSaveBtn(ds, dow);
 }
 
@@ -4025,7 +4187,7 @@ function renderTrendit() {
       <span>Yhteenveto</span><span>${summOpen?"▴":"▾"}</span>
     </button>
     ${summOpen?summaryHTML:""}`;
-    contentEl.innerHTML=buildWeekView(start,range.end)+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+summTgl;
+    contentEl.innerHTML=buildWeekView(start,range.end)+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+gymTrendHTML(start,end)+summTgl;
     requestAnimationFrame(()=>{
       runCountUp();
       if(S.trendToggles?.analysis) initPeriodSummaryCard(start,end,"viikko",null);
@@ -4102,6 +4264,7 @@ function renderTrendit() {
     <div style="color:var(--dim);font-size:13px">Kirjaa muutama päivä niin suunta alkaa näkyä.</div>
   </div>`;
   html+=buildAnalysisSectionHTML(nonWeekEntries||[], null, S.rangeId, nonWeekEntries?.length||0, start, end);
+  html+=gymTrendHTML(start,end);
   html+=buildCoverageHTML(start,end);
   contentEl.innerHTML=html;
   requestAnimationFrame(runCountUp);
@@ -5196,6 +5359,7 @@ function renderAsetukset(){
     renderGoals();
   }
   if(SETTINGS_TOGGLES.training){
+    renderGymSettings();
     renderTrainingTypes();
     renderCardioTypes();
     renderCardioZoneSettings();
@@ -5356,7 +5520,7 @@ async function exportForPT(){
 }
 
 // ═══ TAB + HEADER ════════════════════════════════════════════════
-const TAB_TITLES={log:"Kirjaa päivä",trendit:"Trendit",historia:"Mitat",asetukset:"Asetukset"};
+const TAB_TITLES={log:"Kirjaa päivä",treeni:"Treeni",trendit:"Trendit",historia:"Mitat",asetukset:"Asetukset"};
 
 function setTab(tab){
   if(S.tab==="log"&&tab!=="log") flushPendingAutoSave(); // varmista uusin data ennen Trendit/Mitat/Asetukset-näkymää
@@ -5382,6 +5546,9 @@ function setTab(tab){
   if(tab==="trendit")  renderTrendit();
   if(tab==="historia") renderHistoria();
   if(tab==="asetukset") renderAsetukset();
+  if(tab==="treeni")   renderGym();
+  if(tab==="log")      renderLogGymCard();
+  renderTimer();
 
   // Clean up animation and run card entrance
   setTimeout(()=>{
@@ -5579,7 +5746,7 @@ function deleteEntry(ds){
 async function exportData(){
   flushPendingAutoSave();
   cleanupEmptyEntries();
-  const data={version:5,exported:new Date().toISOString(),entryCount:Object.keys(S.entries).length,entries:S.entries,measurements:S.measurements||[],settings:S.settings};
+  const data={version:6,exported:new Date().toISOString(),entryCount:Object.keys(S.entries).length,entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym:G};
   // Sisältö on JSONia, mutta pääte on .txt: Chromen Web Share sallii vain tietyt tiedostopäätteet,
   // eikä .json ole listalla (canShare palauttaa false → jakovalikko ei aukea, tiedosto vain ladataan).
   // .txt on sallittu, joten varmuuskopion voi jakaa suoraan Driveen. Palautus hyväksyy .txt- ja .json-tiedostot.
@@ -5628,6 +5795,7 @@ function validateBackup(d){
   }
   if(d.measurements!=null&&!Array.isArray(d.measurements)) return "Varmuuskopion mittaukset ovat väärässä muodossa.";
   if(d.settings!=null&&(typeof d.settings!=="object"||Array.isArray(d.settings))) return "Varmuuskopion asetukset ovat väärässä muodossa.";
+  if(d.gym!=null&&(typeof d.gym!=="object"||!Array.isArray(d.gym.programs)||!Array.isArray(d.gym.sessions))) return "Varmuuskopion salitreenidata on väärässä muodossa.";
   if(d.entries==null&&d.measurements==null&&d.settings==null) return "Tiedostosta ei löytynyt Järkäle-dataa (entries/measurements/settings).";
   return null;
 }
@@ -5703,6 +5871,7 @@ function importData(input){
         const msg=`Varmuuskopio: otettu ${backupDate}${d.version?`, versio ${d.version}`:""}.\n`+
           `Sisältää ${importCount} kirjausta (viimeisin ${importLatest||"—"}).\n`+
           `Sinulla on nyt ${nowCount} kirjausta (viimeisin ${nowLatest||"—"}).\n`+
+          (d.gym?`Salitreenit: ${d.gym.programs.length} ohjelmaa, ${d.gym.sessions.length} treeniä.\n`:``)+
           (isNewer?`⚠ HUOMIO: nykyinen datasi on uudempaa kuin varmuuskopio!\n`:``) +
           `\nHaluatko korvata nykyisen datan varmuuskopiolla?`;
         if(!confirm(msg)) return;
@@ -5710,6 +5879,8 @@ function importData(input){
       if(d.entries) S.entries=d.entries;
       if(d.measurements) S.measurements=d.measurements;
       if(d.settings) S.settings={...S.settings,...d.settings};
+      // v2.17.0: salitreenit palautetaan vain, jos varmuuskopiossa on niitä (versio 6). Vanha varmuuskopio ei koske niihin.
+      if(d.gym){ G={...G,...d.gym,activeId:d.gym.activeId||null,timer:{...G.timer,endsAt:null,pausedLeft:null}}; gymSave(); GU.mode="home"; }
       clearAllAnalysisCaches();
       clearDraft();
       try{localStorage.setItem("seuranta-setup-done","1");}catch(_){}
@@ -5717,7 +5888,7 @@ function importData(input){
       saveAll();
       applyTheme(S.settings.theme||"dark");
       loadDayIntoForm(S.date);
-      renderAll();
+      renderAll(); applyGymVisibility();
       alert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`);
     }catch(_){alert("⚠ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
   };
@@ -6783,8 +6954,703 @@ function renderSaveInsight(insight){
   </div>`;
 }
 
+// ═══ SALIOHJELMAT JA TREENISEURANTA (v2.17.0) ═══════════════════════
+// Valinnainen moduuli (Asetukset → Treeni- ja kausiasetukset). Oma tallennusavain "jarkale-gym", ei S.entries-
+// tietoja: PT-vienti ja CSV eivät näe tätä. Yhteys päiväseurantaan on yksisuuntainen: tallennettu treeni merkitsee
+// päivän treenin tehdyksi (training_done + workout_ids) eikä koskaan korvaa käsin kirjattuja arvoja.
+// Periaatteet: haamuarvot (edellinen kerta) eivät tallennu ilman ✓-kuittausta, puuttuvia sarjoja ei täytetä,
+// treeni tallentaa aloitushetken ohjelmarakenteen (ohjelman myöhempi muokkaus ei muuta historiaa).
+const GYM_KEY="jarkale-gym";
+let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
+const GU={mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,importText:null,importPreview:null,histN:8,exSearch:""};
+function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
+function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,vibrate:true,...(S.settings.gym||{})}; }
+function gymLoad(){
+  try{ const r=localStorage.getItem(GYM_KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==="object") G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; } }catch(_){}
+  if(!Array.isArray(G.programs)) G.programs=[];
+  if(!Array.isArray(G.sessions)) G.sessions=[];
+}
+function gymSave(){
+  try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); }
+  catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
+}
+function gTop(){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=0; }
+const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const exKey=n=>String(n||"").trim().toLowerCase().replace(/\s+/g," ");
+const gNum=v=>{ if(v==null||v==="") return null; const n=parseFloat(String(v).replace(/[\s ]/g,"").replace(",",".")); return Number.isFinite(n)?n:null; };
+const fmtKg=v=>v==null?"":String(Math.round(v*100)/100).replace(".",",");
+const hhmm=ms=>{ const d=new Date(ms); return `${d.getHours()}.${String(d.getMinutes()).padStart(2,"0")}`; };
+function durTxt(ms){ const m=Math.max(0,Math.round(ms/60000)); if(m<60) return `${m} min`; return `${Math.floor(m/60)} h ${m%60} min`; }
+function gDay(ds){ const a=new Date(ds+"T00:00:00"); return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`; }
+// Sarjan vertailuluku: painollisille arvioitu 1RM (Epley), kehonpainoliikkeille toistot (pieni luku, ei sekoitu painoihin)
+function e1rm(kg,reps){ if(!reps) return 0; return kg?kg*(1+Math.min(reps,15)/30):reps/1000; }
+
+// ── Liikerivin jäsennin: "Penkkipunnerrus 3x8-10 82,5" / "Leuanveto 3xmax" / "Hauis 3 x 12 @ 14kg" / pelkkä nimi
+const EX_LINE_RE=/^(.*?)[\s:,-]+(\d{1,2})\s*[x×*]\s*(max|\d{1,3}(?:\s*[-–]\s*\d{1,3})?)(?:\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?)?\s*$/i;
+function parseExLine(text){
+  const t=String(text||"").replace(/^[\s•*\-–·]+/,"").trim(); if(!t) return null;
+  const m=t.match(EX_LINE_RE);
+  if(!m) return {name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,parsed:false};
+  const name=m[1].trim().replace(/[:,]$/,"");
+  if(!name) return {name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,parsed:false};
+  const isMax=/max/i.test(m[3]);
+  let rMin=null,rMax=null;
+  if(!isMax){ const p=m[3].split(/[-–]/).map(s=>parseInt(s,10)); rMin=p[0]; rMax=p[1]!=null&&p[1]!==p[0]?p[1]:null; if(rMax!=null&&rMax<rMin){ const x=rMin; rMin=rMax; rMax=x; } }
+  return {name,sets:parseInt(m[2],10),repsMin:rMin,repsMax:rMax,max:isMax,weight:m[4]!=null?gNum(m[4]):null,parsed:true};
+}
+function goalTxt(g){
+  if(!g||!g.sets) return "";
+  const reps=g.max?"max":(g.repsMax?`${g.repsMin}–${g.repsMax}`:`${g.repsMin}`);
+  return `${g.sets} × ${reps}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
+}
+function goalInputTxt(g){ if(!g.sets) return ""; return `${g.sets}x${g.max?"max":(g.repsMax?`${g.repsMin}-${g.repsMax}`:g.repsMin)}${g.weight!=null?" "+fmtKg(g.weight):""}`; }
+function newEx(p){ return {id:gid(),key:exKey(p.name),name:p.name,sets:p.sets,repsMin:p.repsMin,repsMax:p.repsMax,max:!!p.max,weight:p.weight,note:""}; }
+
+// Tekstituonti (Keep): otsikkorivit = treenipäivät, muut rivit liikkeitä. Ei keksi puuttuvia arvoja.
+function parseProgramText(text){
+  const lines=String(text||"").split(/\r?\n/).map(l=>l.trim());
+  const days=[]; let cur=null;
+  const isHeader=(l,i)=>{
+    if(/:$/.test(l)) return true;
+    if(/^(päivä|paiva|treeni|day|ylä|ala|koko|push|pull|legs|jalat)(?![a-zåäö])/i.test(l)&&!EX_LINE_RE.test(l)) return true;
+    if(EX_LINE_RE.test(l)) return false;
+    const prevEmpty=i===0||!lines[i-1];
+    const next=lines.slice(i+1).find(x=>x);
+    return prevEmpty&&!!next&&EX_LINE_RE.test(next);
+  };
+  lines.forEach((l,i)=>{
+    if(!l) return;
+    if(isHeader(l,i)){ cur={id:gid(),name:l.replace(/:$/,"").trim(),trainingType:"",exercises:[]}; days.push(cur); return; }
+    const p=parseExLine(l); if(!p) return;
+    if(!cur){ cur={id:gid(),name:"Treenipäivä 1",trainingType:"",exercises:[]}; days.push(cur); }
+    cur.exercises.push({...newEx(p),unparsed:!p.parsed});
+  });
+  return days;
+}
+
+// ── Ohjelmat
+function gProg(id){ return G.programs.find(p=>p.id===id)||null; }
+function curProgram(){
+  let p=gProg(G.curProgramId);
+  if(!p||p.archived) p=G.programs.find(x=>!x.archived)||null;
+  if(p) G.curProgramId=p.id;
+  return p;
+}
+function newProgram(name){
+  const p={id:gid(),name:name||"Oma ohjelma",archived:false,createdAt:Date.now(),updatedAt:Date.now(),sourceText:null,
+    days:[{id:gid(),name:"Päivä A",trainingType:"",exercises:[]}]};
+  G.programs.push(p); G.curProgramId=p.id; gymSave(); return p;
+}
+function touchProg(p){ p.updatedAt=Date.now(); gymSave(); }
+
+// ── Treenit (sessiot)
+function gSession(id){ return G.sessions.find(s=>s.id===id)||null; }
+function activeSession(){ const s=gSession(G.activeId); if(!s||s.endedAt){ if(G.activeId){ G.activeId=null; gymSave(); } return null; } return s; }
+function doneSets(ex){ return (ex.sets||[]).filter(r=>r.done); }
+function sessionStats(s){
+  const ex=s.exercises.filter(e=>!e.skipped);
+  const done=ex.filter(e=>doneSets(e).length>0).length;
+  const sets=ex.reduce((n,e)=>n+doneSets(e).length,0);
+  return {exN:ex.length,done,sets};
+}
+// Edellinen tehty kerta samalle liikkeelle (avain), ennen annettua treeniä
+function prevFor(key,sess){
+  const before=sess?sess.startedAt:Infinity;
+  let best=null;
+  G.sessions.forEach(s=>{
+    if(sess&&s.id===sess.id) return;
+    if(!s.endedAt||s.startedAt>=before) return;
+    const ex=s.exercises.find(e=>e.key===key&&doneSets(e).length);
+    if(ex&&(!best||s.startedAt>best.s.startedAt)) best={s,ex};
+  });
+  if(!best) return null;
+  return {date:best.s.date,sets:doneSets(best.ex),feel:best.ex.feel||null,note:best.ex.userNote||""};
+}
+function bestBefore(key,sess){
+  let b=0;
+  G.sessions.forEach(s=>{ if(s.id===sess.id||s.startedAt>=sess.startedAt) return; s.exercises.forEach(e=>{ if(e.key===key) doneSets(e).forEach(r=>{ b=Math.max(b,e1rm(r.kg,r.reps)); }); }); });
+  return b;
+}
+function startSession(progId,dayId){
+  const p=gProg(progId); const d=p&&p.days.find(x=>x.id===dayId); if(!p||!d) return;
+  if(activeSession()&&!confirm("Toinen treeni on kesken. Aloitetaanko uusi? Keskeneräinen treeni tallentuu sellaisenaan.")) return;
+  if(activeSession()) finishSession(true);
+  const now=Date.now();
+  const s={id:gid(),programId:p.id,dayId:d.id,date:today(),startedAt:now,endedAt:null,
+    programName:p.name,dayName:d.name,trainingType:d.trainingType||"",
+    exercises:d.exercises.map(e=>{
+      const prev=prevFor(e.key,null);
+      const n=e.sets||(prev?prev.sets.length:1)||1;
+      return {id:gid(),key:e.key,name:e.name,goal:{sets:e.sets,repsMin:e.repsMin,repsMax:e.repsMax,max:e.max,weight:e.weight},note:e.note||"",
+        skipped:false,added:false,feel:null,userNote:"",sets:[...Array(n)].map(()=>({kg:null,reps:null,done:false}))};
+    })};
+  G.sessions.push(s); G.activeId=s.id; gymSave();
+  GU.mode="session"; GU.sessionId=s.id; GU.finishing=false; GU.expanded={}; GU.menu=null;
+  if(S.tab!=="treeni") setTab("treeni"); else renderGym();
+  gymWakeLock(true);
+  gTop();
+}
+function ghostFor(s,ex,i){
+  const prev=prevFor(ex.key,s);
+  const pr=prev&&prev.sets[Math.min(i,prev.sets.length-1)];
+  if(pr) return {kg:pr.kg,reps:pr.reps};
+  const g=ex.goal||{};
+  return {kg:g.weight??null,reps:g.max?null:(g.repsMin??null)};
+}
+function gSetVal(sid,ei,ri,field,raw){
+  const s=gSession(sid); if(!s) return;
+  const r=s.exercises[ei].sets[ri];
+  const v=field==="reps"?(raw===""?null:parseInt(raw,10)):gNum(raw);
+  r[field]=Number.isFinite(v)?v:null;
+  s.dirtyAt=Date.now(); gymSave();
+  if(s.endedAt) gymLinkEntry(s);
+}
+function gToggleSet(sid,ei,ri){
+  const s=gSession(sid); if(!s) return;
+  const ex=s.exercises[ei], r=ex.sets[ri];
+  if(r.done){ r.done=false; }
+  else{
+    const gh=ghostFor(s,ex,ri);
+    const kg=r.kg!=null?r.kg:gh.kg, reps=r.reps!=null?r.reps:gh.reps;
+    if(reps==null){ const inp=document.querySelector(`[data-set="${ei}-${ri}"] input[data-f="reps"]`); if(inp){ inp.focus(); } return; }
+    r.kg=kg; r.reps=reps; r.done=true; r.at=Date.now();
+    haptic(10);
+  }
+  gymSave();
+  if(s.endedAt) gymLinkEntry(s);
+  renderGym();
+}
+function gAddSet(sid,ei){ const s=gSession(sid); s.exercises[ei].sets.push({kg:null,reps:null,done:false}); gymSave(); renderGym(); }
+function gRemoveSet(sid,ei){ const s=gSession(sid); const a=s.exercises[ei].sets; if(a.length&&!a[a.length-1].done){ a.pop(); gymSave(); renderGym(); } }
+function gFeel(sid,ei,f){ const s=gSession(sid); const ex=s.exercises[ei]; ex.feel=ex.feel===f?null:f; gymSave(); renderGym(); }
+function gNote(sid,ei,v){ const s=gSession(sid); s.exercises[ei].userNote=v; gymSave(); }
+function gSkip(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; ex.skipped=!ex.skipped; GU.menu=null; gymSave(); renderGym(); }
+function gRemoveEx(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; if(doneSets(ex).length&&!confirm(`Poistetaanko ${ex.name} ja sen kirjatut sarjat tästä treenistä?`)) return; s.exercises.splice(ei,1); GU.menu=null; gymSave(); renderGym(); }
+function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=ei+d; if(j<0||j>=a.length) return; [a[ei],a[j]]=[a[j],a[ei]]; GU.menu=null; gymSave(); renderGym(); }
+function gRenameEx(sid,ei){
+  const inp=document.getElementById("g-rename"); const v=inp&&inp.value.trim(); if(!v) return;
+  const s=gSession(sid); const ex=s.exercises[ei];
+  ex.name=v; ex.key=exKey(v); ex.renamed=true; GU.rename=null; GU.menu=null; gymSave(); renderGym();
+}
+function gAddEx(sid){
+  const inp=document.getElementById("g-addex"); const p=parseExLine(inp&&inp.value); if(!p) return;
+  const s=gSession(sid); const prev=prevFor(exKey(p.name),s);
+  const n=p.sets||(prev?prev.sets.length:3);
+  s.exercises.push({id:gid(),key:exKey(p.name),name:p.name,goal:{sets:p.sets,repsMin:p.repsMin,repsMax:p.repsMax,max:p.max,weight:p.weight},note:"",
+    skipped:false,added:true,feel:null,userNote:"",sets:[...Array(n)].map(()=>({kg:null,reps:null,done:false}))});
+  gymSave(); renderGym();
+  setTimeout(()=>document.getElementById("g-addex")?.focus(),0);
+}
+function finishSession(silent){
+  const s=gSession(G.activeId)||gSession(GU.sessionId); if(!s) return;
+  if(!s.endedAt) s.endedAt=Date.now();
+  if(GU.updateTpl&&!silent) updateTemplateFromSession(s);
+  if(G.activeId===s.id) G.activeId=null;
+  G.timer.endsAt=null; G.timer.pausedLeft=null;
+  gymSave();
+  if(sessionStats(s).sets>0) gymLinkEntry(s);
+  gymWakeLock(false);
+  GU.finishing=false; GU.updateTpl=false;
+  if(!silent){ GU.mode="session"; GU.sessionId=s.id; renderGym(); renderLogGymCard(); showSavedToast("Treeni tallennettu"); gTop(); }
+}
+function discardSession(id){
+  const s=gSession(id); if(!s) return;
+  const n=sessionStats(s).sets;
+  if(!confirm(n?`Poistetaanko treeni ${s.dayName} (${gDay(s.date)}) ja sen ${n} sarjaa?`:`Hylätäänkö treeni ${s.dayName}?`)) return;
+  gymUnlinkEntry(s);
+  G.sessions=G.sessions.filter(x=>x.id!==id);
+  if(G.activeId===id){ G.activeId=null; G.timer.endsAt=null; G.timer.pausedLeft=null; gymWakeLock(false); }
+  gymSave(); GU.mode="home"; GU.sessionId=null; GU.finishing=false; renderGym(); renderLogGymCard();
+}
+function sessionDiffersFromTemplate(s){
+  const p=gProg(s.programId); const d=p&&p.days.find(x=>x.id===s.dayId); if(!d) return false;
+  const a=s.exercises.filter(e=>!e.skipped).map(e=>e.key).join("|"), b=d.exercises.map(e=>e.key).join("|");
+  return a!==b;
+}
+function updateTemplateFromSession(s){
+  const p=gProg(s.programId); const d=p&&p.days.find(x=>x.id===s.dayId); if(!d) return;
+  const old=Object.fromEntries(d.exercises.map(e=>[e.key,e]));
+  d.exercises=s.exercises.filter(e=>!e.skipped).map(e=>{
+    const o=old[e.key];
+    return o?{...o,name:e.name}:{id:gid(),key:e.key,name:e.name,sets:e.goal.sets??doneSets(e).length??null,repsMin:e.goal.repsMin??null,repsMax:e.goal.repsMax??null,max:!!e.goal.max,weight:e.goal.weight??null,note:e.note||""};
+  });
+  touchProg(p);
+}
+
+// ── Yhteys päiväseurantaan. Ei korvaa käsin kirjattua: training_type asetetaan vain tyhjään.
+function gymLinkEntry(s){
+  const ds=s.date;
+  flushPendingAutoSave();
+  const nowIso=new Date().toISOString();
+  const e=S.entries[ds]||{date:ds,created_at:nowIso};
+  const ids=new Set(e.workout_ids||[]); const had=ids.has(s.id); ids.add(s.id);
+  const wasDone=!!e.training_done;
+  e.workout_ids=[...ids];
+  e.training_done=true;
+  if(!e.training_type&&s.trainingType) e.training_type=s.trainingType;
+  if(!had||!wasDone) e.updated_at=nowIso;
+  S.entries[ds]=e;
+  saveAll();
+  if(S.date===ds){
+    S.training_done=true;
+    if(!S.training_type&&e.training_type) S.training_type=e.training_type;
+    LAST_SAVED_JSON="";
+    autoSaveEntry(ds);
+    if(S.tab==="log") renderLog();
+  }
+  clearAllAnalysisCaches();
+}
+function gymUnlinkEntry(s){
+  const ds=s.date; const e=S.entries[ds]; if(!e||!e.workout_ids) return;
+  flushPendingAutoSave();
+  e.workout_ids=e.workout_ids.filter(x=>x!==s.id);
+  const manual=e.training_load!=null||e.training_outcome!=null||(e.training_notes||"").trim()||(e.training_modifications||[]).length;
+  if(!e.workout_ids.length){
+    delete e.workout_ids;
+    if(!manual){ e.training_done=false; if(!s.trainingType||e.training_type===s.trainingType) e.training_type=""; }
+  }
+  e.updated_at=new Date().toISOString();
+  saveAll();
+  if(S.date===ds){ loadDayIntoForm(ds); if(S.tab==="log") renderLog(); }
+  clearAllAnalysisCaches();
+}
+
+// ── Taukoajastin: aika lasketaan aina tallennetusta päättymishetkestä (oikein myös sovellukseen palatessa)
+let GT_TICK=null, GT_AUDIO=null;
+function timerLeft(){ const t=G.timer; if(t.pausedLeft!=null) return t.pausedLeft; if(!t.endsAt) return null; return t.endsAt-Date.now(); }
+function timerStart(sec){
+  if(sec) G.timer.dur=sec;
+  G.timer.endsAt=Date.now()+G.timer.dur*1000; G.timer.pausedLeft=null; G.timer.notified=null;
+  try{ if(!GT_AUDIO&&gymCfg().sound){ GT_AUDIO=new (window.AudioContext||window.webkitAudioContext)(); } if(GT_AUDIO&&GT_AUDIO.state==="suspended") GT_AUDIO.resume(); }catch(_){}
+  gymSave(); renderTimer(); timerLoop();
+}
+function timerPause(){
+  const t=G.timer;
+  if(t.pausedLeft!=null){ t.endsAt=Date.now()+t.pausedLeft; t.pausedLeft=null; }
+  else if(t.endsAt){ t.pausedLeft=Math.max(0,t.endsAt-Date.now()); t.endsAt=null; }
+  gymSave(); renderTimer(); timerLoop();
+}
+function timerAdd(sec){
+  const t=G.timer;
+  if(t.pausedLeft!=null) t.pausedLeft=Math.max(0,t.pausedLeft+sec*1000);
+  else if(t.endsAt) t.endsAt=Math.max(Date.now(),t.endsAt+sec*1000);
+  gymSave(); renderTimer();
+}
+function timerReset(){ G.timer.endsAt=null; G.timer.pausedLeft=null; G.timer.notified=null; gymSave(); renderTimer(); }
+function timerCustom(){
+  const v=prompt("Tauon pituus (esim. 90 tai 2:30)",String(G.timer.dur));
+  if(v==null) return;
+  let sec=null; const m=String(v).trim().match(/^(\d+)[:.](\d{1,2})$/);
+  if(m) sec=+m[1]*60+ +m[2]; else if(/^\d+$/.test(v.trim())) sec=+v.trim();
+  if(sec&&sec>=5&&sec<=1800) timerStart(sec);
+}
+function timerAlert(late){
+  const c=gymCfg();
+  if(late>15000) return; // palattiin myöhässä: näytetään vain "päättyi … sitten"
+  try{ if(c.vibrate&&navigator.vibrate) navigator.vibrate([250,120,250,120,250]); }catch(_){}
+  try{
+    if(c.sound&&GT_AUDIO){
+      const now=GT_AUDIO.currentTime;
+      [0,0.32,0.64].forEach(off=>{ const o=GT_AUDIO.createOscillator(), g=GT_AUDIO.createGain(); o.frequency.value=880; o.connect(g); g.connect(GT_AUDIO.destination);
+        g.gain.setValueAtTime(0.0001,now+off); g.gain.exponentialRampToValueAtTime(0.35,now+off+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+off+0.22); o.start(now+off); o.stop(now+off+0.25); });
+    }
+  }catch(_){}
+}
+function timerLoop(){
+  clearInterval(GT_TICK); GT_TICK=null;
+  if(!G.timer.endsAt) return;
+  GT_TICK=setInterval(()=>{
+    if(document.hidden) return;
+    const left=timerLeft();
+    if(left!=null&&left<=0&&G.timer.notified!==G.timer.endsAt){ G.timer.notified=G.timer.endsAt; gymSave(); timerAlert(-left); }
+    renderTimer();
+  },250);
+}
+const mmss=ms=>{ const s=Math.ceil(Math.abs(ms)/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; };
+function renderTimer(){
+  let el=document.getElementById("gym-timer");
+  const show=gymOn()&&S.tab==="treeni"&&GU.mode==="session"&&activeSession()&&GU.sessionId===G.activeId;
+  if(!show){ if(el) el.style.display="none"; return; }
+  if(!el){ el=document.createElement("div"); el.id="gym-timer"; document.body.appendChild(el); }
+  el.style.display="";
+  const t=G.timer, left=timerLeft();
+  if(left==null){
+    el.className="gt idle";
+    el.innerHTML=`<span class="gt-l">Tauko</span>${[60,90,120,180].map(s=>`<button class="gt-q${t.dur===s?" on":""}" onclick="timerStart(${s})">${mmss(s*1000)}</button>`).join("")}<button class="gt-q" aria-label="Oma aika" onclick="timerCustom()">…</button>`;
+    return;
+  }
+  const over=left<=0, paused=t.pausedLeft!=null;
+  const pct=over?100:Math.max(0,Math.min(100,100-left/(t.dur*1000)*100));
+  el.className="gt run"+(over?" over":"")+(paused?" paused":"");
+  el.innerHTML=`<span class="gt-tm" data-raw>${over?"+"+mmss(left):mmss(left)}</span>
+    <span class="gt-l">${over?(-left>15000?`Tauko päättyi<br>${mmss(left)} sitten`:"Tauko<br>päättyi"):(paused?"Tauko<br>pysäytetty":`Tauko<br><span data-raw>${mmss(t.dur*1000)}</span>`)}</span>
+    ${over?"":`<button onclick="timerAdd(-15)" aria-label="15 sekuntia vähemmän">−15</button><button onclick="timerAdd(15)" aria-label="15 sekuntia lisää">+15</button>`}
+    ${over?`<button class="p" onclick="timerStart()">Uusi</button>`:`<button class="p" aria-label="${paused?"Jatka":"Pysäytä"}" onclick="timerPause()">${paused?"▶":"❚❚"}</button>`}
+    <button onclick="timerReset()" aria-label="Nollaa">✕</button>
+    <span class="gt-bar"><i style="width:${pct}%"></i></span>`;
+}
+
+// ── Näyttö päällä treenin ajan (Screen Wake Lock)
+let GYM_WAKE=null;
+async function gymWakeLock(on){
+  try{
+    if(on&&gymCfg().wakeLock&&activeSession()&&"wakeLock" in navigator&&!document.hidden){ if(!GYM_WAKE) { GYM_WAKE=await navigator.wakeLock.request("screen"); GYM_WAKE.addEventListener("release",()=>{GYM_WAKE=null;}); } }
+    else if(!on&&GYM_WAKE){ await GYM_WAKE.release(); GYM_WAKE=null; }
+  }catch(_){ GYM_WAKE=null; }
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&gymOn()){ if(activeSession()) gymWakeLock(true); timerLoop(); renderTimer(); } });
+
+// ── Näkyvyys
+function applyGymVisibility(){
+  const on=gymOn();
+  const nb=document.getElementById("nav-treeni"); if(nb) nb.style.display=on?"":"none";
+  if(!on&&S.tab==="treeni") setTab("log");
+  renderLogGymCard();
+  renderTimer();
+}
+function setGymEnabled(v){
+  S.settings.gym={...gymCfg(),enabled:!!v};
+  saveAll(); applyGymVisibility(); renderGymSettings();
+}
+function setGymOpt(k,v){ S.settings.gym={...gymCfg(),[k]:v}; saveAll(); renderGymSettings(); if(k==="wakeLock") gymWakeLock(!!v); }
+function renderGymSettings(){
+  const el=document.getElementById("gym-settings"); if(!el) return;
+  const c=gymCfg();
+  const tg=(on,fn,lbl,sub)=>`<div class="g-set-row"><span><span style="font-size:14px;color:var(--text);font-weight:600">${lbl}</span>${sub?`<span style="display:block;font-size:12px;color:var(--dim);margin-top:2px">${sub}</span>`:""}</span>
+    <button onclick="${fn}" role="switch" aria-checked="${on}" class="g-sw${on?" on":""}"><span></span></button></div>`;
+  let h=tg(c.enabled,`setGymEnabled(${!c.enabled})`,"Saliohjelmat ja treeniseuranta","Omat ohjelmat, sarjakirjaus ja taukoajastin. Tuo Treeni-välilehden.");
+  if(c.enabled){
+    h+=tg(c.wakeLock,`setGymOpt('wakeLock',${!c.wakeLock})`,"Näyttö päällä treenin ajan","Taukoajastin hälyttää vain, kun näyttö on päällä.");
+    h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
+    h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
+  } else if(G.programs.length||G.sessions.length){
+    h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
+  }
+  el.innerHTML=h;
+}
+
+// ── Kirjaa-näkymän tiivis kortti (vain kun ominaisuus on päällä)
+function renderLogGymCard(){
+  const el=document.getElementById("gym-card"); if(!el) return;
+  if(!gymOn()){ el.innerHTML=""; el.style.display="none"; return; }
+  const act=activeSession();
+  const doneToday=G.sessions.filter(s=>s.endedAt&&s.date===S.date&&sessionStats(s).sets>0);
+  let h="";
+  if(act&&(S.date===today()||act.date===S.date)){
+    const st=sessionStats(act);
+    h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">${esc(act.dayName)}</div><div class="s">Kesken · ${st.done}/${st.exN} liikettä · aloitettu <span data-raw>${hhmm(act.startedAt)}</span></div></div><button class="tr-go" onclick="openSession('${act.id}')">Jatka</button></div>`;
+  } else if(doneToday.length){
+    h=doneToday.map(s=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
+  } else if(S.date===today()){
+    const p=curProgram();
+    h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">Salitreeni</div><div class="s">${p?esc(p.name):"Ei vielä ohjelmaa"}</div></div><button class="tr-go" onclick="GU.mode='home';setTab('treeni')">${p?"Aloita":"Luo ohjelma"}</button></div>`;
+  }
+  el.innerHTML=h; el.style.display=h?"":"none";
+}
+function openSession(id){ GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
+
+// ── Treeni-välilehti
+function renderGym(){
+  const el=document.getElementById("view-treeni"); if(!el) return;
+  if(GU.mode==="session"&&!gSession(GU.sessionId)) GU.mode="home";
+  if(GU.mode==="edit"&&!gProg(GU.progId)) GU.mode="home";
+  el.innerHTML=GU.mode==="session"?gymSessionHTML(gSession(GU.sessionId))
+    :GU.mode==="edit"?gymEditHTML(gProg(GU.progId))
+    :GU.mode==="exercise"?gymExerciseHTML(GU.exKey)
+    :GU.mode==="import"?gymImportHTML()
+    :gymHomeHTML();
+  renderTimer(); timerLoop();
+}
+function gBack(){ GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym(); gTop(); }
+function lastDoneOfDay(dayId){ const s=G.sessions.filter(x=>x.endedAt&&x.dayId===dayId).sort((a,b)=>b.startedAt-a.startedAt)[0]; return s||null; }
+
+function gymHomeHTML(){
+  const act=activeSession();
+  const p=curProgram();
+  const active=G.programs.filter(x=>!x.archived), archived=G.programs.filter(x=>x.archived);
+  let h=`<div class="view-hero"><div class="tr-hero-row"><div style="min-width:0;flex:1">`;
+  if(active.length>1) h+=`<select class="g-prog-sel" onchange="G.curProgramId=this.value;gymSave();renderGym()">${active.map(x=>`<option value="${x.id}" ${p&&x.id===p.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>`;
+  else h+=`<div class="tr-h1">${p?esc(p.name):"Treeni"}</div>`;
+  h+=`<div class="tr-h2">${p?`${p.days.length} treenipäivää`:"Ei vielä ohjelmaa"}</div></div>`;
+  if(p) h+=`<button class="tr-pill" onclick="GU.mode='edit';GU.progId='${p.id}';GU.openEx=null;renderGym();gTop()">Muokkaa</button>`;
+  h+=`</div></div>`;
+  if(act){
+    const st=sessionStats(act);
+    h+=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">${esc(act.dayName)}</div><div class="s">Kesken · ${st.done}/${st.exN} liikettä · ${act.date===today()?`aloitettu <span data-raw>${hhmm(act.startedAt)}</span>`:`aloitettu ${gDay(act.date)}`}</div></div><button class="tr-go" onclick="openSession('${act.id}')">Jatka</button></div>`;
+  }
+  if(!p){
+    h+=`<div class="g-empty"><div class="n">Tee oma ohjelma</div><div class="s">Kirjoita liikkeet riveinä, esim. <b>Penkkipunnerrus 3x8-10 80</b>. Voit myös liittää ohjelman suoraan Keepistä.</div>
+      <button class="tr-go" style="width:100%;height:46px;margin-top:14px" onclick="const p=newProgram();GU.mode='edit';GU.progId=p.id;renderGym()">+ Uusi ohjelma</button>
+      <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä ohjelma tekstinä</button></div>`;
+  } else {
+    // Seuraavaksi: treenipäivä, joka on tehty pisimpään sitten (vain vihje)
+    const lasts=p.days.map(d=>({d,l:lastDoneOfDay(d.id)}));
+    const next=p.days.length>1?lasts.slice().sort((a,b)=>(a.l?a.l.startedAt:0)-(b.l?b.l.startedAt:0))[0].d.id:null;
+    h+=`<div class="tr-sec">Valitse treenipäivä</div><div class="tr-list">`;
+    h+=lasts.map(({d,l})=>`<div class="tr-row"><div class="t"><div class="n">${esc(d.name)}${d.id===next?`<span class="tr-tag">Seuraava</span>`:""}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:""}</div></div>
+      <button class="tr-go${d.id===next||p.days.length===1?"":" ghost"}" ${d.exercises.length?"":"disabled"} onclick="startSession('${p.id}','${d.id}')">Aloita</button></div>`).join("");
+    h+=`</div>`;
+  }
+  const hist=G.sessions.filter(s=>s.endedAt).sort((a,b)=>b.startedAt-a.startedAt);
+  if(hist.length){
+    h+=`<div class="tr-sec">Historia</div><div class="tr-list">`;
+    h+=hist.slice(0,GU.histN).map(s=>{ const st=sessionStats(s); return `<button class="tr-row tr-btn" onclick="openSession('${s.id}')"><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${gDay(s.date)} · ${st.done<st.exN?`${st.done}/${st.exN}`:st.done} liikettä · ${st.sets} sarjaa${s.endedAt-s.startedAt>60000&&s.endedAt-s.startedAt<6*3600000?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><span class="chev">›</span></button>`; }).join("");
+    if(hist.length>GU.histN) h+=`<button class="tr-row tr-btn" onclick="GU.histN+=20;renderGym()"><div class="t"><div class="n" style="font-weight:600;color:var(--dim)">Näytä lisää (${hist.length-GU.histN})</div></div></button>`;
+    h+=`</div>`;
+    const keys=exerciseIndex();
+    if(keys.length){
+      h+=`<div class="tr-sec">Liikkeiden kehitys</div><input class="g-in" id="g-exsearch" placeholder="Hae liike…" value="${esc(GU.exSearch)}" oninput="GU.exSearch=this.value;document.getElementById('g-exlist').innerHTML=gymExListHTML()" style="margin-bottom:8px">
+        <div class="tr-list" id="g-exlist">${gymExListHTML()}</div>`;
+    }
+  }
+  h+=`<div style="display:flex;gap:8px;margin-top:18px">`;
+  if(p) h+=`<button class="tr-go ghost" style="flex:1" onclick="const p=newProgram('Uusi ohjelma');GU.mode='edit';GU.progId=p.id;renderGym();gTop()">+ Uusi ohjelma</button>`;
+  if(p) h+=`<button class="tr-go ghost" style="flex:1" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä tekstinä</button>`;
+  h+=`</div>`;
+  if(archived.length){
+    h+=`<button class="g-link" onclick="GU.showArchived=!GU.showArchived;renderGym()">${GU.showArchived?"▾":"▸"} Arkistoidut ohjelmat (${archived.length})</button>`;
+    if(GU.showArchived) h+=`<div class="tr-list">${archived.map(x=>`<div class="tr-row"><div class="t"><div class="n">${esc(x.name)}</div><div class="s">${x.days.length} treenipäivää</div></div><button class="tr-go ghost" onclick="gProg('${x.id}').archived=false;G.curProgramId='${x.id}';touchProg(gProg('${x.id}'));renderGym()">Palauta</button></div>`).join("")}</div>`;
+  }
+  return h+`<div style="height:24px"></div>`;
+}
+function exerciseIndex(){
+  const m={};
+  G.sessions.filter(s=>s.endedAt).forEach(s=>s.exercises.forEach(e=>{ if(!doneSets(e).length) return; const o=m[e.key]||(m[e.key]={key:e.key,name:e.name,n:0,last:""}); o.n++; if(s.date>=o.last){ o.last=s.date; o.name=e.name; } }));
+  return Object.values(m).sort((a,b)=>b.last.localeCompare(a.last)||a.name.localeCompare(b.name));
+}
+function gymExListHTML(){
+  const q=exKey(GU.exSearch);
+  const list=exerciseIndex().filter(o=>!q||o.key.includes(q));
+  if(!list.length) return `<div class="tr-row"><div class="t"><div class="s">Ei osumia</div></div></div>`;
+  return list.slice(0,q?50:8).map(o=>`<button class="tr-row tr-btn" onclick="GU.mode='exercise';GU.exKey=${esc(JSON.stringify(o.key))};renderGym();gTop()"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${o.n} kertaa · viimeksi ${gDay(o.last)}</div></div><span class="chev">›</span></button>`).join("");
+}
+
+const FEELS=[{id:"light",l:"Kevyt"},{id:"ok",l:"Sopiva"},{id:"hard",l:"Raskas"}];
+const feelTxt=f=>(FEELS.find(x=>x.id===f)||{}).l||"";
+const setsTxt=sets=>{
+  if(!sets.length) return "";
+  const kgs=[...new Set(sets.map(r=>r.kg??null))];
+  if(kgs.length===1) return `${kgs[0]!=null?fmtKg(kgs[0])+" × ":""}${sets.map(r=>r.reps).join(", ")}`;
+  return sets.map(r=>`${r.kg!=null?fmtKg(r.kg)+" × ":""}${r.reps}`).join(", ");
+};
+
+function gymSessionHTML(s){
+  const live=!s.endedAt, st=sessionStats(s);
+  const firstOpen=s.exercises.findIndex(e=>!e.skipped&&e.sets.some(r=>!r.done));
+  let h=`<div class="view-hero"><div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(s.dayName)}</div>
+    <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div></div>
+    ${live?`<button class="tr-pill dark" onclick="GU.finishing=true;GU.updateTpl=false;renderGym();gTop()">Lopeta</button>`:`<button class="tr-pill" onclick="gBack()">Valmis</button>`}</div></div>`;
+  if(live&&GU.finishing){
+    const diff=sessionDiffersFromTemplate(s);
+    h+=`<div class="g-finish"><div class="n">Lopetetaanko treeni?</div>
+      <div class="s">${st.done}/${st.exN} liikettä · ${st.sets} sarjaa · ${durTxt(Date.now()-s.startedAt)}${st.done<st.exN?`<br>Tekemättömiä sarjoja ei tallenneta.`:""}</div>
+      ${diff?`<label class="g-check"><input type="checkbox" ${GU.updateTpl?"checked":""} onchange="GU.updateTpl=this.checked"> Päivitä ohjelmapohja tämän treenin liikkeillä</label>`:""}
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="tr-go" style="flex:1;height:46px" onclick="finishSession()">Tallenna treeni</button><button class="tr-go ghost" style="flex:1;height:46px" onclick="GU.finishing=false;renderGym()">Jatka treeniä</button></div>
+      <button class="g-link danger" onclick="discardSession('${s.id}')">Hylkää treeni</button></div>`;
+  }
+  s.exercises.forEach((ex,ei)=>{
+    const sid=s.id, done=doneSets(ex), allDone=ex.sets.length&&ex.sets.every(r=>r.done);
+    const prev=prevFor(ex.key,s);
+    if(ex.skipped&&GU.menu!==ex.id){
+      h+=`<div class="ex mini skipped"><span class="ex-n">${esc(ex.name)}</span><span class="st">Ohitettu</span><button class="g-link" style="margin:0" onclick="gSkip('${sid}',${ei})">Palauta</button></div>`; return;
+    }
+    if(live&&allDone&&!GU.expanded[ex.id]&&GU.menu!==ex.id){
+      h+=`<button class="ex mini" onclick="GU.expanded['${ex.id}']=true;renderGym()"><span class="ok">${ico("check",18)}</span><span class="ex-n">${esc(ex.name)}</span><span class="st">${setsTxt(done)}</span></button>`; return;
+    }
+    const best=bestBefore(ex.key,s);
+    h+=`<div class="ex${live&&ei===firstOpen?" active":""}">
+      <div class="ex-top">${GU.rename===ex.id?`<input class="g-in" id="g-rename" value="${esc(ex.name)}" style="flex:1" onkeydown="if(event.key==='Enter')gRenameEx('${sid}',${ei})"><button class="tr-go" onclick="gRenameEx('${sid}',${ei})">OK</button>`
+        :`<span class="ex-n">${esc(ex.name)}</span><button class="ex-more" aria-label="Lisätoiminnot" onclick="GU.menu=GU.menu==='${ex.id}'?null:'${ex.id}';GU.rename=null;renderGym()">⋯</button>`}</div>`;
+    if(GU.menu===ex.id&&GU.rename!==ex.id){
+      h+=`<div class="ex-menu"><button onclick="GU.rename='${ex.id}';renderGym();setTimeout(()=>document.getElementById('g-rename')?.select(),0)">Vaihda liike</button><button onclick="gSkip('${sid}',${ei})">${ex.skipped?"Palauta":"Ohita"}</button>
+        <button onclick="gMoveEx('${sid}',${ei},-1)" ${ei?"":"disabled"}>↑</button><button onclick="gMoveEx('${sid}',${ei},1)" ${ei<s.exercises.length-1?"":"disabled"}>↓</button><button class="danger" onclick="gRemoveEx('${sid}',${ei})">Poista</button></div>`;
+    }
+    const gt=goalTxt(ex.goal);
+    if(gt) h+=`<div class="ex-goal">Tavoite ${gt}</div>`;
+    if(ex.note) h+=`<div class="ex-prev">${esc(ex.note)}</div>`;
+    if(prev){
+      h+=`<div class="ex-prev">Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${prev.note?` <button class="nt" onclick="GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}</div>`;
+      if(prev.note&&GU.prevNote[ex.id]) h+=`<div class="ex-pnote">${esc(prev.note)}</div>`;
+    }
+    h+=`<div class="sets"><div class="set-h"><span>#</span><span>kg</span><span>toistot</span><span></span></div>`;
+    ex.sets.forEach((r,ri)=>{
+      const gh=ghostFor(s,ex,ri);
+      const pr=r.done&&best>0&&e1rm(r.kg,r.reps)>best+0.01;
+      h+=`<div class="set${r.done?" done":""}" data-set="${ei}-${ri}"><span class="no">${ri+1}</span>
+        <input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${ri+1} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)">
+        <input class="f" data-f="reps" inputmode="numeric" enterkeyhint="done" aria-label="Sarja ${ri+1} toistot" value="${r.reps!=null?r.reps:""}" placeholder="${gh.reps!=null?gh.reps:"–"}" oninput="gSetVal('${sid}',${ei},${ri},'reps',this.value)" onkeydown="if(event.key==='Enter'){this.blur();gToggleSet('${sid}',${ei},${ri})}">
+        <button class="ck" aria-label="Sarja ${ri+1} ${r.done?"tehty, peru":"tehty"}" aria-pressed="${r.done}" onclick="gToggleSet('${sid}',${ei},${ri})">${ico("check",20)}</button>
+        ${pr?`<span class="pr">Ennätys</span>`:""}</div>`;
+    });
+    h+=`</div><div class="ex-act"><button onclick="gAddSet('${sid}',${ei})">+ Sarja</button>${ex.sets.length&&!ex.sets[ex.sets.length-1].done?`<button onclick="gRemoveSet('${sid}',${ei})">− Sarja</button>`:""}
+      <button onclick="GU.note['${ex.id}']=!GU.note['${ex.id}'];renderGym()">${ex.userNote?"Huomio ✓":"Huomio"}</button>
+      ${allDone&&live?`<button style="margin-left:auto" onclick="GU.expanded['${ex.id}']=false;renderGym()">Pienennä</button>`:""}</div>`;
+    if(done.length) h+=`<div class="ex-feel"><span>Tuntuma</span>${FEELS.map(f=>`<button class="${ex.feel===f.id?"on":""}" aria-pressed="${ex.feel===f.id}" onclick="gFeel('${sid}',${ei},'${f.id}')">${f.l}</button>`).join("")}</div>`;
+    if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value)">${esc(ex.userNote||"")}</textarea>`;
+    h+=`</div>`;
+  });
+  h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div>`;
+  if(live) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="GU.finishing=true;GU.updateTpl=false;renderGym();gTop()">Lopeta treeni</button>`;
+  else h+=`<button class="g-link danger" style="margin-top:18px" onclick="discardSession('${s.id}')">Poista treeni</button>`;
+  return h+`<div style="height:${live?130:30}px"></div>`;
+}
+
+// ── Ohjelman muokkaus (tallentuu heti)
+function gEdit(fn){ const p=gProg(GU.progId); if(!p) return; fn(p); touchProg(p); }
+function gEditRender(){ renderGym(); }
+function gymEditHTML(p){
+  const types=S.settings.trainingTypes||TRAINING_TYPES;
+  let h=`<div class="view-hero"><div class="tr-hero-row"><input class="g-title-in" value="${esc(p.name)}" aria-label="Ohjelman nimi" oninput="gEdit(p=>p.name=this.value.trim()||'Ohjelma')"><button class="tr-pill dark" onclick="gBack()">Valmis</button></div>
+    <div class="tr-h2" style="padding-bottom:8px">Muutokset tallentuvat heti. Aiemmat treenit eivät muutu.</div></div>`;
+  p.days.forEach((d,di)=>{
+    h+=`<div class="ed-day"><div class="ed-dn"><input class="g-day-in" value="${esc(d.name)}" aria-label="Treenipäivän nimi" oninput="gEdit(p=>p.days[${di}].name=this.value.trim()||'Treenipäivä')"><span>${d.exercises.length} liikettä</span></div>`;
+    d.exercises.forEach((e,xi)=>{
+      const open=GU.openEx===e.id;
+      h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
+      if(open){
+        h+=`<div class="ed-form">
+          <input class="g-in" value="${esc(e.name)}" aria-label="Liikkeen nimi" placeholder="Liikkeen nimi" onchange="gEdit(p=>{const x=p.days[${di}].exercises[${xi}];x.name=this.value.trim()||x.name;x.key=exKey(x.name);});renderGym()">
+          <input class="g-in" value="${esc(goalInputTxt(e))}" aria-label="Tavoite" placeholder="Tavoite, esim. 3x8-10 80" onchange="gSetGoal(${di},${xi},this.value)">
+          <input class="g-in" value="${esc(e.note||"")}" aria-label="Ohje" placeholder="Ohje (valinnainen)" onchange="gEdit(p=>p.days[${di}].exercises[${xi}].note=this.value.trim())">
+          <div class="ex-menu"><button onclick="gMoveTplEx(${di},${xi},-1)" ${xi?"":"disabled"}>↑ Ylös</button><button onclick="gMoveTplEx(${di},${xi},1)" ${xi<d.exercises.length-1?"":"disabled"}>↓ Alas</button><button class="danger" onclick="gEdit(p=>p.days[${di}].exercises.splice(${xi},1));GU.openEx=null;renderGym()">Poista</button></div>
+        </div>`;
+      }
+    });
+    h+=`<div class="ed-addrow"><input class="g-in dashed" id="g-add-${d.id}" placeholder="+ Liike, esim. Penkki 3x8-10 80" enterkeyhint="done" oninput="gParsePreview('${d.id}',this.value)" onkeydown="if(event.key==='Enter')gAddTplEx(${di},'${d.id}')"><button class="tr-go" onclick="gAddTplEx(${di},'${d.id}')">Lisää</button></div>
+      <div class="ed-parse" id="g-prev-${d.id}"></div>
+      <div class="ed-dayfoot"><label>Kirjaa-merkintä <select onchange="gEdit(p=>p.days[${di}].trainingType=this.value)"><option value="">ei treenityyppiä</option>${types.map(t=>`<option value="${esc(t)}" ${d.trainingType===t?"selected":""}>${esc(t)}</option>`).join("")}</select></label>
+        <span><button onclick="gMoveDay(${di},-1)" ${di?"":"disabled"} aria-label="Siirrä ylös">↑</button><button onclick="gMoveDay(${di},1)" ${di<p.days.length-1?"":"disabled"} aria-label="Siirrä alas">↓</button><button class="danger" onclick="gDelDay(${di})">Poista päivä</button></span></div></div>`;
+  });
+  h+=`<button class="tr-go ghost" style="width:100%;height:46px" onclick="gEdit(p=>p.days.push({id:gid(),name:'Päivä '+String.fromCharCode(65+p.days.length),trainingType:'',exercises:[]}));renderGym()">+ Treenipäivä</button>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="tr-go ghost" style="flex:1" onclick="gCopyProg()">Kopioi ohjelma</button><button class="tr-go ghost" style="flex:1" onclick="gArchiveProg()">Arkistoi</button></div>`;
+  if(p.sourceText) h+=`<details class="g-src"><summary>Alkuperäinen teksti</summary><pre data-raw>${esc(p.sourceText)}</pre></details>`;
+  return h+`<div style="height:30px"></div>`;
+}
+function gParsePreview(dayId,v){
+  const el=document.getElementById("g-prev-"+dayId); if(!el) return;
+  const p=parseExLine(v);
+  el.innerHTML=p?`Tallentuu: <b>${esc(p.name)}</b>${p.sets?` · <b>${goalTxt(p)}</b>`:" · ei tavoitetta"}`:"";
+}
+function gAddTplEx(di,dayId){
+  const inp=document.getElementById("g-add-"+dayId); const p=parseExLine(inp&&inp.value); if(!p) return;
+  gEdit(pr=>pr.days[di].exercises.push(newEx(p)));
+  renderGym(); setTimeout(()=>document.getElementById("g-add-"+dayId)?.focus(),0);
+}
+function gSetGoal(di,xi,v){
+  const t=String(v||"").trim();
+  const p=t?parseExLine("x "+t):null;
+  gEdit(pr=>{ const x=pr.days[di].exercises[xi];
+    if(!t){ x.sets=null;x.repsMin=null;x.repsMax=null;x.max=false;x.weight=null; }
+    else if(p&&p.parsed){ x.sets=p.sets;x.repsMin=p.repsMin;x.repsMax=p.repsMax;x.max=p.max;x.weight=p.weight; }
+  });
+  renderGym();
+}
+function gMoveTplEx(di,xi,d){ gEdit(p=>{ const a=p.days[di].exercises; const j=xi+d; if(j<0||j>=a.length) return; [a[xi],a[j]]=[a[j],a[xi]]; }); renderGym(); }
+function gMoveDay(di,d){ gEdit(p=>{ const a=p.days; const j=di+d; if(j<0||j>=a.length) return; [a[di],a[j]]=[a[j],a[di]]; }); renderGym(); }
+function gDelDay(di){ const p=gProg(GU.progId); if(!confirm(`Poistetaanko treenipäivä ${p.days[di].name} ohjelmasta? Tehdyt treenit säilyvät historiassa.`)) return; gEdit(p=>p.days.splice(di,1)); renderGym(); }
+function gCopyProg(){
+  const p=gProg(GU.progId); const c=JSON.parse(JSON.stringify(p));
+  c.id=gid(); c.name=p.name+" (kopio)"; c.createdAt=c.updatedAt=Date.now(); c.archived=false;
+  c.days.forEach(d=>{ d.id=gid(); d.exercises.forEach(e=>e.id=gid()); });
+  G.programs.push(c); G.curProgramId=c.id; GU.progId=c.id; gymSave(); renderGym(); gTop(); showSavedToast("Ohjelma kopioitu");
+}
+function gArchiveProg(){
+  const p=gProg(GU.progId); if(!confirm(`Arkistoidaanko ${p.name}? Sen voi palauttaa Treeni-välilehden lopusta. Treenihistoria säilyy.`)) return;
+  p.archived=true; touchProg(p); G.curProgramId=null; gBack();
+}
+
+// ── Tekstituonti (esim. Keepistä): paikallinen jäsennin, esikatselu ennen tallennusta
+function gymImportHTML(){
+  const pv=GU.importPreview;
+  let h=`<div class="view-hero"><div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Esim. suoraan Google Keepistä</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
+    <div class="g-hint">Treenipäivän nimi omalle rivilleen, liikkeet sen alle: <b>Penkkipunnerrus 3x8-10 80</b>. Painot ja toistot voi jättää pois. Puuttuvia arvoja ei keksitä.</div>
+    <textarea class="g-note" id="g-import" rows="10" placeholder="Päivä A — ylävartalo&#10;Penkkipunnerrus 3x8-10 80&#10;Kulmasoutu 3x10-12&#10;&#10;Päivä B — alavartalo&#10;Takakyykky 4x6-8 100" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
+    <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=parseProgramText(GU.importText);renderGym()">Esikatsele</button>`;
+  if(pv){
+    if(!pv.length) h+=`<div class="g-hint" style="margin-top:12px">Tekstistä ei löytynyt liikkeitä.</div>`;
+    else{
+      const unp=pv.reduce((n,d)=>n+d.exercises.filter(e=>e.unparsed).length,0);
+      h+=`<div class="tr-sec">Esikatselu</div>`;
+      if(unp) h+=`<div class="g-hint warn">${ico("alert",15)} ${unp} riviltä ei löytynyt sarjoja ja toistoja. Ne tallentuvat pelkkinä nimiä, ja tavoitteen voi lisätä myöhemmin.</div>`;
+      pv.forEach(d=>{ h+=`<div class="ed-day"><div class="ed-dn"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text)">${esc(d.name)}</span><span>${d.exercises.length} liikettä</span></div>${d.exercises.map(e=>`<div class="ed-l static${e.unparsed?" unp":""}"><span class="x">${esc(e.name)}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>`).join("")}</div>`; });
+      const cur=G.programs.find(x=>x.id===G.curProgramId&&!x.archived);
+      h+=`<button class="tr-go" style="width:100%;height:46px" onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
+      if(cur) h+=`<button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="gImportSave(true)">Lisää päivät ohjelmaan ${esc(cur.name)}</button>`;
+    }
+  }
+  return h+`<div style="height:30px"></div>`;
+}
+function gImportSave(append){
+  const days=(GU.importPreview||[]).map(d=>({...d,exercises:d.exercises.map(({unparsed,...e})=>e)}));
+  if(!days.length) return;
+  let p;
+  if(append&&(p=curProgram())){ p.days.push(...days); p.sourceText=(p.sourceText?p.sourceText+"\n\n":"")+GU.importText; touchProg(p); }
+  else{ p=newProgram("Tuotu ohjelma"); p.days=days; p.sourceText=GU.importText; touchProg(p); }
+  GU.importPreview=null; GU.importText=null;
+  GU.mode="edit"; GU.progId=p.id; GU.openEx=null; renderGym(); gTop();
+}
+
+// ── Liikkeen kehitys: paras sarja kerralta, ei volyymia eikä tonnagea
+function exerciseHistory(key){
+  return G.sessions.filter(s=>s.endedAt).map(s=>{ const ex=s.exercises.find(e=>e.key===key&&doneSets(e).length); if(!ex) return null;
+    const sets=doneSets(ex); const top=sets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,sets[0]);
+    return {s,ex,sets,top,e1:e1rm(top.kg,top.reps)}; }).filter(Boolean).sort((a,b)=>a.s.startedAt-b.s.startedAt);
+}
+function gymExerciseHTML(key){
+  const H=exerciseHistory(key);
+  const name=H.length?H[H.length-1].ex.name:key;
+  let h=`<div class="view-hero"><div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(name)}</div><div class="tr-h2">${H.length} kertaa</div></div><button class="tr-pill" onclick="gBack()">Takaisin</button></div></div>`;
+  if(!H.length) return h+`<div class="g-hint">Ei kirjattuja sarjoja.</div>`;
+  const withKg=H.filter(x=>x.top.kg!=null);
+  const best=H.reduce((b,x)=>x.e1>b.e1?x:b,H[0]);
+  h+=`<div class="g-stats"><div><span class="lbl-small">Paras sarja</span><b>${best.top.kg!=null?fmtKg(best.top.kg)+" kg × ":""}${best.top.reps}</b><span>${gDay(best.s.date)}</span></div>
+    <div><span class="lbl-small">Viimeksi</span><b>${H[H.length-1].top.kg!=null?fmtKg(H[H.length-1].top.kg)+" kg × ":""}${H[H.length-1].top.reps}</b><span>${gDay(H[H.length-1].s.date)}</span></div>
+    ${best.top.kg!=null?`<div><span class="lbl-small">Arvioitu 1RM</span><b>${fmtKg(Math.round(best.e1*2)/2)} kg</b><span>suuntaa antava</span></div>`:""}</div>`;
+  if(withKg.length>=2){
+    const pts=withKg.slice(-24), W=340, Hh=120, pad=8;
+    const ys=pts.map(x=>x.top.kg), mn=Math.min(...ys), mx=Math.max(...ys), rng=mx-mn||1;
+    const X=i=>pad+(pts.length===1?0:i*(W-2*pad)/(pts.length-1)), Y=v=>Hh-pad-(v-mn)/rng*(Hh-2*pad);
+    h+=`<div class="g-chart"><span class="lbl-small">Paras sarja, kg</span><svg viewBox="0 0 ${W} ${Hh}" width="100%" height="${Hh}" preserveAspectRatio="none" aria-label="Parhaan sarjan paino kerroittain">
+      <polyline fill="none" stroke="var(--text)" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts.map((x,i)=>`${X(i).toFixed(1)},${Y(x.top.kg).toFixed(1)}`).join(" ")}"/>
+      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(x.top.kg).toFixed(1)}" r="3.5" fill="var(--hi,var(--orange))" stroke="var(--text)" stroke-width="1.2"/>`).join("")}</svg>
+      <div class="g-chart-ax"><span>${gDay(pts[0].s.date)} · ${fmtKg(pts[0].top.kg)}</span><span>${gDay(pts[pts.length-1].s.date)} · ${fmtKg(pts[pts.length-1].top.kg)}</span></div></div>`;
+  }
+  h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
+  h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
+  return h+`</div><div style="height:30px"></div>`;
+}
+
+// ── Trendit: jakson liikekehitys (vain kun ominaisuus on päällä ja dataa on)
+function gymTrendHTML(start,end){
+  if(!gymOn()) return "";
+  const ss=G.sessions.filter(s=>s.endedAt&&s.date>=start&&s.date<=end);
+  if(!ss.length) return "";
+  const keys={};
+  ss.forEach(s=>s.exercises.forEach(e=>{ if(doneSets(e).length) (keys[e.key]=keys[e.key]||[]).push({s,e}); }));
+  const up=[], same=[], down=[];
+  Object.values(keys).forEach(list=>{
+    if(list.length<2) return;
+    list.sort((a,b)=>a.s.startedAt-b.s.startedAt);
+    const top=x=>doneSets(x.e).reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b);
+    const a=top(list[0]), b=top(list[list.length-1]);
+    const ea=e1rm(a.kg,a.reps), eb=e1rm(b.kg,b.reps);
+    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?fmtKg(a.kg)+" × ":""}${a.reps} → ${b.kg!=null?fmtKg(b.kg)+" × ":""}${b.reps}`;
+    if(!ea||!eb){ return; }
+    if(eb>ea*1.01) up.push(lab); else if(eb<ea*0.99) down.push(lab); else same.push(lab);
+  });
+  const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0);
+  let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:${up.length||same.length||down.length?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
+  const grp=(t,a)=>a.length?`<div class="lbl-small" style="margin-top:8px">${t}</div>${a.map(x=>`<div style="font-size:13.5px;color:var(--text);padding:3px 0">${x}</div>`).join("")}`:"";
+  h+=grp("Nousi",up)+grp("Ennallaan",same)+grp("Laski",down);
+  if(!up.length&&!same.length&&!down.length) h+=`<div style="font-size:12.5px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty jaksolla vähintään kahdesti.</div>`;
+  return h+`</div>`;
+}
+
+
 // ═══ INIT ═══════════════════════════════════════════════════════
 loadAll();
+gymLoad();
 // v2.9.1: poistetun tekoälyn päivähavainnon välimuistirivit pois (kertaluonteinen siivous, vaaraton toistaa)
 try{ for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith("jarkale-daily-")||k.startsWith("seuranta-coach-")||k.startsWith("seuranta-wsummary-"))) localStorage.removeItem(k); } }catch(_){} // v2.11.6: poistettujen viikkokoosteen ja valmentajaraportin välimuistit
 // Trendit-näkymän muistetut valinnat (jakso + avatut osiot). Vapaa-jaksoa ei palauteta, koska sen päivämäärät eivät säily.
@@ -6819,6 +7685,7 @@ function fiDecNode(root){
 window.matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(S.settings.theme==="system") applyTheme("system");});
 loadDayIntoForm(S.date);
 renderAll();
+applyGymVisibility();
 updateThemeBtn();
 if(localStorage.getItem("seuranta-setup-done")==="1"&&isBodyOnly()) setTab("historia"); // v2.11: vain mittoja seuraava aloittaa Mitoista
 
