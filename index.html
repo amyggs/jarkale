@@ -1271,7 +1271,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.10</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.11</span>
       </div>
     </div>
   </div>
@@ -1305,6 +1305,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.11", d:"lokakuu 2026", items:[
+    "Google Drive -varmuuskopio on nyt kaikkien käytössä: Asetukset → Yhdistä Google Driveen. Tiedot tallentuvat omaan Driveesi piilotettuun kansioon ja siirtyvät uuteen puhelimeen kirjautumalla."
+  ]},
   {v:"2.18.10", d:"lokakuu 2026", items:[
     "iPhone: kotivalikkoon lisätyssä sovelluksessa yläpalkki ei enää jää kellon ja tilarivin alle, ja alapalkki pysyy näytön alareunassa."
   ]},
@@ -8213,8 +8216,8 @@ const SYNC_SCOPE_PT="https://www.googleapis.com/auth/drive.file";
 const PT_FILE="jarkale-pt.json", PT_FOLDER="Järkäle";
 const SYNC_FILE="jarkale-data.json";
 const SYNC_KEY="jarkale-sync", SYNC_TOMB_KEY="jarkale-sync-tomb", SYNC_TOKEN_KEY="jarkale-sync-token";
-// Ensin vain omaan versioon (pilotin käyttäjät eivät ole vielä Googlen testikäyttäjiä)
-const SYNC_AVAILABLE=!/jarkale-pilotti/.test(location.pathname);
+// v2.18.11: Google-sovellus julkaistu (In production) → synkronointi kaikille, myös pilottiin
+const SYNC_AVAILABLE=true;
 let SYNC_APPLYING=false, SYNC_TIMER=null, SYNC_BUSY=false, SYNC_TOKEN_CLIENT=null, SYNC_ERR=null;
 
 function syncState(){ try{ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0,email:null,...JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")}; }catch(_){ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0}; } }
