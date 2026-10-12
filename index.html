@@ -895,6 +895,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"] :is(.wr-tag,.g-trend,.g-seg,.wr-meta,.tr-tag,.pr-tag,.set .pr,.tw .ic,.g-sum-kpi>div,.ex-pnote,.vko-badge){border-radius:4px!important;}
 [data-palette="ampiainen"] #theme-toggle-btn{border-radius:4px!important;}
 [data-palette="ampiainen"] :is(.g-src pre,.tw,.tr-list,.ex,.ed-day,.g-sum,.g-chart,.g-stats>div,.g-empty,.g-finish,.inj-card,.ws-stat,.wr-oc-c,.wr-insight,.wr-backup,.gt,#view-asetukset .card div[style*="border-radius"]){border-radius:6px!important;}
+.sync-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surf);border-radius:6px;padding:8px 8px 8px 12px;margin-bottom:10px;font:600 13px Manrope,system-ui,sans-serif;color:var(--text);}
+.sync-bar span{display:flex;align-items:center;gap:6px;min-width:0;}
+.sync-bar .tr-go{min-height:36px;}
 /* kapea näyttö: laatikot allekkain */
 @media (max-width:359px){#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap{grid-column:1/-1;}}
 </style>
@@ -943,6 +946,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <!-- Viikon tilannekortti: kokonaiskuva heti avattaessa (renderWeekStatus) -->
       <div id="week-status" class="card" style="display:none"></div>
       <div id="week-recap" style="display:none"></div>
+        <div id="sync-bar" style="display:none"></div>
       <div id="body-only-note" class="card" style="display:none"></div>
 
       <!-- Setup-näkymä uudelle käyttäjälle -->
@@ -1218,6 +1222,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div id="stgl-content-data" style="display:none;margin-bottom:4px">
         <div class="card">
           <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20"/></svg>Varmuuskopiot ja tuonti</div>
+          <div id="sync-section" style="display:none;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bord)"></div>
           <button onclick="exportData()" class="btn-primary" style="width:100%;margin-bottom:8px">↓ Varmuuskopio (koko data)</button>
           <button onclick="exportCSV()" style="width:100%;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font-size:13px;font-weight:600;margin-bottom:10px">↓ CSV (Excel / Sheets)</button>
           <button onclick="exportForPT()" style="width:100%;height:46px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font-size:13px;font-weight:600;margin-bottom:10px">↓ Mittaukset Järkäle PT:lle</button>
@@ -1240,7 +1245,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.14</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.0</span>
       </div>
     </div>
   </div>
@@ -1274,6 +1279,11 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.0", d:"lokakuu 2026", items:[
+    "Google Drive -synkronointi (Asetukset → Varmuuskopiot ja tuonti): kaikki data tallentuu automaattisesti omaan Driveesi piilotettuun sovelluskansioon, ja sen saa uuteen puhelimeen kirjautumalla",
+    "Kahden laitteen muutokset yhdistetään päivä, treeni ja ohjelma kerrallaan, ja uudempi muutos voittaa. Poistettu ei palaa.",
+    "Kun Google-kirjautuminen on vanhentunut, Kirjaa-näkymään tulee yhden napautuksen Synkronoi-palkki"
+  ]},
   {v:"2.17.14", d:"lokakuu 2026", items:[
     "Tallennus suojataan: sovellus pyytää selainta olemaan poistamatta dataa tilan loppuessa. Tila näkyy kohdassa Varmuuskopiot ja tuonti."
   ]},
@@ -2309,6 +2319,7 @@ function saveAll() {
   catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
   try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(_){}
   try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(_){}
+  if(typeof syncMarkDirty==="function") syncMarkDirty();
 }
 
 // ═══ RANGE COMPUTATION ══════════════════════════════════════════
@@ -2854,7 +2865,7 @@ function renderLog() {
   // Varmuuskopio-muistutus
   let showBk=false;
   if(isToday){
-    const lastExp=parseInt(localStorage.getItem("lastExport")||"0");
+    const lastExp=Math.max(parseInt(localStorage.getItem("lastExport")||"0"),(typeof syncState==="function"&&syncState().enabled&&syncState().lastSyncAt)||0);
     const daysSince=lastExp?Math.floor((Date.now()-lastExp)/864e5):null;
     const setupDone=localStorage.getItem("seuranta-setup-done")==="1";
     const meaningfulCount=Object.values(S.entries).filter(hasMeaningfulEntry).length;
@@ -3007,7 +3018,7 @@ function autoSaveEntry(ds){
   // Kaikki arvot tyhjennetty jo kirjatulta päivältä → poista kirjaus
   if(!hasData){
     if(S.entries[ds]){
-      delete S.entries[ds];
+      delete S.entries[ds]; syncTomb("e",ds);
       saveAll();
       LAST_SAVED_JSON="";
       clearSaveInsight();
@@ -4239,7 +4250,7 @@ function buildInsightsHTML(start, effEnd, curr) {
   }
 
   // 6b. Mittausmuistutus jo lisätty, varmuuskopio vasta viimeisenä
-  const lastExp=parseInt(localStorage.getItem("lastExport")||"0");
+  const lastExp=Math.max(parseInt(localStorage.getItem("lastExport")||"0"),(typeof syncState==="function"&&syncState().enabled&&syncState().lastSyncAt)||0);
   const expDays=lastExp?Math.floor((Date.now()-lastExp)/864e5):null;
   const backupInsight=expDays===null?"Varmuuskopiota ei ole tehty.":(expDays>=14?`Varmuuskopiosta on ${expDays} päivää.`:null);
 
@@ -4887,6 +4898,8 @@ function saveMeasForm(){
     const clash=f.date!==f.editing&&S.measurements.some(m=>m.date===f.date);
     if(clash&&!confirm(`Päivälle ${f.date.split("-").reverse().join(".")} on jo mittaus. Korvataanko se?`)) return;
     S.measurements=S.measurements.filter(m=>m.date!==f.date&&m.date!==f.editing);
+    if(f.editing&&f.editing!==f.date) syncTomb("m",f.editing);
+    entry.updated_at=new Date().toISOString();
     S.measurements.push(entry);
     S.measurements.sort((a,b)=>a.date.localeCompare(b.date));
     saveAll();
@@ -4900,7 +4913,7 @@ function saveMeasForm(){
 function deleteMeas(date){
   clearAllAnalysisCaches();
   if(!confirm("Poista tämä mittaus?")) return;
-  S.measurements=(S.measurements||[]).filter(m=>m.date!==date);
+  S.measurements=(S.measurements||[]).filter(m=>m.date!==date); syncTomb("m",date);
   if(MEAS_FORM.editing===date) MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
   saveAll();
   renderMeasurements();
@@ -5476,6 +5489,7 @@ function renderPersistStatus(){
 }
 function renderAsetukset(){
   renderPersistStatus();
+  renderSyncUI();
   renderProfile();
   renderGenderSection();
   renderSettingsToggles();
@@ -5867,7 +5881,7 @@ function runCountUp(){
 function deleteEntry(ds){
   clearAllAnalysisCaches();
   if(!confirm("Poista tämä kirjaus?")) return;
-  delete S.entries[ds];
+  delete S.entries[ds]; syncTomb("e",ds);
   saveAll();
   renderHistoria();
 }
@@ -7100,7 +7114,9 @@ function gymLoad(){
   if(!Array.isArray(G.sessions)) G.sessions=[];
 }
 function gymSave(){
-  try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); }
+  // Synkronointia varten: katsottava/käynnissä oleva treeni saa muokkausajan
+  if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||s.id===GU.sessionId) s.updatedAt=now; }); }
+  try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); if(typeof syncMarkDirty==="function") syncMarkDirty(); }
   catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
 }
 function gTop(){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=0; }
@@ -7366,7 +7382,7 @@ function gAddEx(sid){
 function finishSession(silent){
   const s=gSession(G.activeId)||gSession(GU.sessionId); if(!s) return;
   if(!s.endedAt&&sessionStats(s).sets===0){
-    G.sessions=G.sessions.filter(x=>x.id!==s.id);
+    G.sessions=G.sessions.filter(x=>x.id!==s.id); syncTomb("s",s.id);
     if(G.activeId===s.id) G.activeId=null;
     G.timer.endsAt=null; G.timer.pausedLeft=null; GU.finishing=false; GU.updateTpl=false;
     gymSave(); gymWakeLock(false);
@@ -7388,7 +7404,7 @@ function discardSession(id){
   const n=sessionStats(s).sets;
   if(!confirm(n?`Poistetaanko treeni ${s.dayName} (${gDay(s.date)}) ja sen ${n} sarjaa?`:`Hylätäänkö treeni ${s.dayName}?`)) return;
   gymUnlinkEntry(s);
-  G.sessions=G.sessions.filter(x=>x.id!==id);
+  G.sessions=G.sessions.filter(x=>x.id!==id); syncTomb("s",id);
   if(G.activeId===id){ G.activeId=null; G.timer.endsAt=null; G.timer.pausedLeft=null; gymWakeLock(false); }
   gymSave(); GU.mode="home"; GU.sessionId=null; GU.finishing=false; renderGym(); renderLogGymCard();
 }
@@ -7853,7 +7869,7 @@ function gCancelEdit(){
   const changed=JSON.stringify(p)!==sn.json;
   if(sn.isNew){
     if(changed&&!confirm("Hylätäänkö uusi ohjelma?")) return;
-    G.programs=G.programs.filter(x=>x.id!==p.id);
+    G.programs=G.programs.filter(x=>x.id!==p.id); syncTomb("p",p.id);
     if(G.curProgramId===p.id) G.curProgramId=sn.cur&&sn.cur!==p.id?sn.cur:null;
   } else if(changed){
     if(!confirm("Hylätäänkö ohjelmaan tehdyt muutokset?")) return;
@@ -8051,6 +8067,203 @@ function gymTrendHTML(start,end){
 }
 
 
+// ═══ GOOGLE DRIVE -SYNKRONOINTI (v2.18.0) ═══════════════════════════
+// Data kulkee puhelimesta suoraan käyttäjän omaan Driveen piilotettuun sovelluskansioon (appDataFolder,
+// oikeus drive.appdata: sovellus ei näe muita tiedostoja). Omaa palvelinta ei ole.
+// Kirjautuminen: Google Identity Services -tokeni (voimassa ~1 h). Selainsovellus ei saa pitkäaikaista
+// lupaa, joten vanhentuneen tokenin uusiminen vaatii yhden napautuksen.
+// Yhdistäminen: päiväkirjaukset (updated_at), treenit (updatedAt), ohjelmat (updatedAt) ja mittaukset (updated_at)
+// kohde kerrallaan, uudempi voittaa. Poistot välitetään poistomerkinnöillä (tomb), jotta poistettu ei palaa.
+const SYNC_CLIENT_ID="1059222735837-uvla0hh0h8gmhn4kihm661bbtj16urda.apps.googleusercontent.com";
+const SYNC_SCOPE="https://www.googleapis.com/auth/drive.appdata";
+const SYNC_FILE="jarkale-data.json";
+const SYNC_KEY="jarkale-sync", SYNC_TOMB_KEY="jarkale-sync-tomb", SYNC_TOKEN_KEY="jarkale-sync-token";
+// Ensin vain omaan versioon (pilotin käyttäjät eivät ole vielä Googlen testikäyttäjiä)
+const SYNC_AVAILABLE=!/jarkale-pilotti/.test(location.pathname);
+let SYNC_APPLYING=false, SYNC_TIMER=null, SYNC_BUSY=false, SYNC_TOKEN_CLIENT=null, SYNC_ERR=null;
+
+function syncState(){ try{ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0,email:null,...JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")}; }catch(_){ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0}; } }
+function setSyncState(p){ const s={...syncState(),...p}; try{ localStorage.setItem(SYNC_KEY,JSON.stringify(s)); }catch(_){} return s; }
+function syncTombs(){ try{ return {e:{},s:{},p:{},m:{},...JSON.parse(localStorage.getItem(SYNC_TOMB_KEY)||"{}")}; }catch(_){ return {e:{},s:{},p:{},m:{}}; } }
+function syncTomb(kind,id){ const t=syncTombs(); t[kind][id]=Date.now(); try{ localStorage.setItem(SYNC_TOMB_KEY,JSON.stringify(t)); }catch(_){} syncMarkDirty(); }
+function syncMarkDirty(){
+  if(SYNC_APPLYING) return;
+  const st=syncState(); if(!st.enabled) return;
+  setSyncState({dirtyAt:Date.now()});
+  clearTimeout(SYNC_TIMER);
+  SYNC_TIMER=setTimeout(function tick(){
+    const a=document.activeElement; if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){ SYNC_TIMER=setTimeout(tick,15000); return; }
+    if(syncTokenValid()) syncNow({silent:true}); else renderSyncUI();
+  },20000);
+}
+function syncToken(){ try{ const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return t&&t.exp>Date.now()+60000?t.at:null; }catch(_){ return null; } }
+function syncTokenValid(){ return !!syncToken(); }
+
+function loadGis(){
+  return new Promise((res,rej)=>{
+    if(window.google&&google.accounts&&google.accounts.oauth2) return res();
+    const s=document.createElement("script"); s.src="https://accounts.google.com/gsi/client"; s.async=true;
+    s.onload=()=>res(); s.onerror=()=>rej(new Error("Google-kirjautumista ei voitu ladata. Tarkista verkkoyhteys."));
+    document.head.appendChild(s);
+  });
+}
+// Pyydä tokeni. Kutsutaan vain napautuksesta (selaimet estävät ponnahdusikkunan muuten).
+function syncSignIn(consent){
+  return loadGis().then(()=>new Promise((res,rej)=>{
+    SYNC_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:SYNC_CLIENT_ID,scope:SYNC_SCOPE,
+      callback:r=>{ if(r&&r.access_token){ try{ localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({at:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000})); }catch(_){} res(r.access_token); } else rej(new Error(r&&r.error||"Kirjautuminen keskeytyi")); },
+      error_callback:e=>rej(new Error(e&&e.type==="popup_closed"?"Kirjautuminen suljettiin":"Kirjautuminen epäonnistui"))});
+    SYNC_TOKEN_CLIENT.requestAccessToken({prompt:consent?"consent":""});
+  }));
+}
+
+async function driveFetch(url,opt={}){
+  const at=syncToken(); if(!at) throw Object.assign(new Error("Kirjaudu uudelleen"),{auth:true});
+  const r=await fetch(url,{...opt,cache:"no-store",headers:{...(opt.headers||{}),Authorization:"Bearer "+at}});
+  if(r.status===401){ try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){} throw Object.assign(new Error("Kirjaudu uudelleen"),{auth:true}); }
+  if(!r.ok) throw new Error(`Drive vastasi ${r.status}`);
+  return r;
+}
+async function driveFind(){
+  const q=encodeURIComponent(`name='${SYNC_FILE}' and trashed=false`);
+  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,modifiedTime)&pageSize=10`);
+  const j=await r.json(); const f=(j.files||[]).sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0];
+  return f||null;
+}
+async function driveDownload(id){ const r=await driveFetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`); return r.json(); }
+async function driveUpload(id,data){
+  const body=JSON.stringify(data);
+  if(id){
+    const r=await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media&fields=id,modifiedTime`,{method:"PATCH",headers:{"Content-Type":"application/json"},body});
+    return r.json();
+  }
+  const b="jarkale"+Date.now();
+  const multi=`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:SYNC_FILE,parents:["appDataFolder"]})}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`;
+  const r=await driveFetch(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime`,{method:"POST",headers:{"Content-Type":`multipart/related; boundary=${b}`},body:multi});
+  return r.json();
+}
+
+function syncSnapshot(){
+  flushPendingAutoSave();
+  const {activeId,timer,...gym}=G;
+  return {format:"jarkale-sync",version:1,savedAt:Date.now(),entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym,tombs:syncTombs()};
+}
+const tsOf=x=>x?(Date.parse(x.updated_at||x.created_at||"")||0):0;
+function mergeMaps(a,b,ts,tombs){
+  const out={};
+  new Set([...Object.keys(a||{}),...Object.keys(b||{})]).forEach(k=>{
+    const x=a&&a[k], y=b&&b[k];
+    let v=!x?y:!y?x:(ts(y)>ts(x)?y:x);
+    if(tombs&&tombs[k]&&tombs[k]>=ts(v)) return;
+    if(v) out[k]=v;
+  });
+  return out;
+}
+// Yhdistää paikallisen ja Driven datan. Puhdas funktio (testattava).
+function syncMerge(local,remote,localDirtySinceSync){
+  const tombs={};
+  ["e","s","p","m"].forEach(k=>{ tombs[k]={...(remote.tombs&&remote.tombs[k]||{})}; Object.entries(local.tombs&&local.tombs[k]||{}).forEach(([id,t])=>{ tombs[k][id]=Math.max(tombs[k][id]||0,t); }); });
+  const entries=mergeMaps(local.entries,remote.entries,tsOf,tombs.e);
+  const measTs=m=>Date.parse(m&&m.updated_at||"")||0;
+  const mArr=arr=>Object.fromEntries((arr||[]).map(m=>[m.date,m]));
+  const meas=Object.values(mergeMaps(mArr(local.measurements),mArr(remote.measurements),measTs,tombs.m)).sort((a,b)=>a.date.localeCompare(b.date));
+  const sTs=s=>s?(s.updatedAt||s.endedAt||s.startedAt||0):0;
+  const byId=arr=>Object.fromEntries((arr||[]).map(x=>[x.id,x]));
+  const sessions=Object.values(mergeMaps(byId(local.gym&&local.gym.sessions),byId(remote.gym&&remote.gym.sessions),sTs,tombs.s)).sort((a,b)=>a.startedAt-b.startedAt);
+  const pTs=p=>p?(p.updatedAt||p.createdAt||0):0;
+  const programs=Object.values(mergeMaps(byId(local.gym&&local.gym.programs),byId(remote.gym&&remote.gym.programs),pTs,tombs.p)).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  // Asetukset kokonaisuutena: paikalliset, jos niitä on muutettu edellisen synkronoinnin jälkeen, muuten Driven
+  const settings=localDirtySinceSync||!remote.settings?local.settings:{...local.settings,...remote.settings};
+  const curProgramId=(localDirtySinceSync?local.gym&&local.gym.curProgramId:remote.gym&&remote.gym.curProgramId)||(local.gym&&local.gym.curProgramId)||null;
+  // Vanhat poistomerkinnät (yli 180 pv) pois
+  const cut=Date.now()-180*864e5; Object.values(tombs).forEach(t=>Object.keys(t).forEach(k=>{ if(t[k]<cut) delete t[k]; }));
+  return {format:"jarkale-sync",version:1,savedAt:Date.now(),entries,measurements:meas,settings,gym:{...(local.gym||{}),programs,sessions,curProgramId,v:1},tombs};
+}
+function syncApply(m){
+  SYNC_APPLYING=true;
+  try{
+    S.entries=m.entries||{}; S.measurements=m.measurements||[];
+    if(m.settings) S.settings={...S.settings,...m.settings};
+    const keepActive=G.activeId&&m.gym.sessions.some(s=>s.id===G.activeId&&!s.endedAt)?G.activeId:null;
+    G={...G,programs:m.gym.programs,sessions:m.gym.sessions,curProgramId:m.gym.curProgramId,activeId:keepActive};
+    try{ localStorage.setItem(SYNC_TOMB_KEY,JSON.stringify(m.tombs)); }catch(_){}
+    saveAll(); gymSave();
+    clearAllAnalysisCaches();
+    LAST_SAVED_JSON="";
+    loadDayIntoForm(S.date); renderAll(); applyGymVisibility();
+    if(S.tab==="treeni") renderGym();
+  } finally { SYNC_APPLYING=false; }
+}
+async function syncNow(opts={}){
+  if(SYNC_BUSY) return;
+  const st=syncState();
+  if(!syncTokenValid()){
+    if(opts.silent) { renderSyncUI(); return; }
+    try{ await syncSignIn(!st.enabled); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
+  }
+  SYNC_BUSY=true; SYNC_ERR=null; renderSyncUI();
+  try{
+    const local=syncSnapshot();
+    const f=await driveFind();
+    let fileId=f&&f.id;
+    let out=local;
+    if(f){
+      const remote=await driveDownload(f.id);
+      if(remote&&remote.format==="jarkale-sync"){
+        // Ensimmäisellä synkronoinnilla Driven asetukset voittavat (uusi puhelin saa tavoitteet, lääkkeet ja teeman)
+        const dirty=!!st.lastSyncAt&&(st.dirtyAt||0)>(st.lastSyncAt||0);
+        out=syncMerge(local,remote,dirty);
+        const sig=x=>JSON.stringify([x.entries,x.measurements,x.gym.programs,x.gym.sessions]);
+        if(sig(out)!==sig(local)) syncApply(out);
+      }
+    }
+    const up=await driveUpload(fileId,out);
+    setSyncState({enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:0});
+    if(!opts.silent) showSavedToast("Synkronoitu Driveen");
+  }catch(e){
+    SYNC_ERR=e.auth?"Kirjaudu uudelleen synkronoidaksesi":(e.message||"Synkronointi epäonnistui");
+  }finally{ SYNC_BUSY=false; renderSyncUI(); }
+}
+function syncDisable(){
+  if(!confirm("Lopetetaanko synkronointi tällä laitteella? Data säilyy puhelimessa ja Drivessa.")) return;
+  setSyncState({enabled:false}); try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
+  renderSyncUI();
+}
+function syncAgo(ms){ if(!ms) return "ei vielä"; const m=Math.round((Date.now()-ms)/60000); if(m<1) return "juuri nyt"; if(m<60) return `${m} min sitten`; const h=Math.round(m/60); if(h<24) return `${h} h sitten`; return `${Math.round(h/24)} pv sitten`; }
+function renderSyncUI(){
+  // Asetukset
+  const el=document.getElementById("sync-section");
+  const st=syncState();
+  if(el){
+    if(!SYNC_AVAILABLE){ el.innerHTML=""; el.style.display="none"; }
+    else{
+      el.style.display="";
+      el.innerHTML=st.enabled?`<div style="font-size:14px;font-weight:700;color:var(--text)">Google Drive -synkronointi päällä</div>
+        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Viimeksi synkronoitu ${syncAgo(st.lastSyncAt)}${st.dirtyAt>st.lastSyncAt?" · muutoksia odottaa":""}.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
+        <button class="btn-primary" style="width:100%;margin-bottom:8px" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Synkronoidaan…":"Synkronoi nyt"}</button>
+        <button onclick="syncDisable()" style="width:100%;min-height:40px;border:none;background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif">Lopeta synkronointi tällä laitteella</button>`
+      :`<div style="font-size:14px;font-weight:700;color:var(--text)">Varmuuskopio automaattisesti Google Driveen</div>
+        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Kaikki data tallentuu omaan Driveesi piilotettuun sovelluskansioon, ja sen saa uuteen puhelimeen kirjautumalla. Sovellus ei näe Driven muita tiedostoja.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
+        <button class="btn-primary" style="width:100%" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Yhdistetään…":"Yhdistä Google Driveen"}</button>`;
+    }
+  }
+  // Kirjaa-näkymän muistutus: vain kun synkronointi on päällä, tokeni vanhentunut ja jotain odottaa tai edellisestä on yli 12 h
+  const bar=document.getElementById("sync-bar");
+  if(bar){
+    const need=SYNC_AVAILABLE&&st.enabled&&!syncTokenValid()&&(st.dirtyAt>st.lastSyncAt||Date.now()-st.lastSyncAt>12*3600e3);
+    bar.style.display=need?"":"none";
+    if(need) bar.innerHTML=`<div class="sync-bar"><span>${ico("save",16)} Drive-synkronointi odottaa · ${syncAgo(st.lastSyncAt)}</span><button class="tr-go" onclick="syncNow()">Synkronoi</button></div>`;
+  }
+}
+// Käynnistys ja taustalle siirtyminen: synkronoi hiljaa, jos tokeni on voimassa
+function syncOnStart(){ renderSyncUI(); if(SYNC_AVAILABLE&&syncState().enabled&&syncTokenValid()) syncNow({silent:true}); }
+document.addEventListener("visibilitychange",()=>{
+  const st=syncState(); if(!SYNC_AVAILABLE||!st.enabled) return;
+  if(document.visibilityState==="hidden"&&st.dirtyAt>st.lastSyncAt&&syncTokenValid()) syncNow({silent:true});
+  if(document.visibilityState==="visible"){ renderSyncUI(); if(syncTokenValid()&&Date.now()-st.lastSyncAt>5*60e3) syncNow({silent:true}); }
+});
+
+
 // ═══ INIT ═══════════════════════════════════════════════════════
 loadAll();
 gymLoad();
@@ -8090,6 +8303,7 @@ loadDayIntoForm(S.date);
 renderAll();
 applyGymVisibility();
 ensurePersistentStorage();
+syncOnStart();
 updateThemeBtn();
 if(localStorage.getItem("seuranta-setup-done")==="1"&&isBodyOnly()) setTab("historia"); // v2.11: vain mittoja seuraava aloittaa Mitoista
 
