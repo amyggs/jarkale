@@ -842,6 +842,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-stats b{display:block;font:800 16px Manrope,system-ui,sans-serif;color:var(--text);}
 .g-stats>div>span:last-child{font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);}
 .g-chart{background:var(--surf);border-radius:16px;padding:12px 14px;margin-top:10px;}
+.g-chart-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
+.g-chart-sum{font:600 12.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:6px;}
+.g-chart-sum b{color:var(--text);}
+.g-seg{display:inline-flex;background:var(--surf2);border-radius:9px;padding:2px;}
+.g-seg button{border:none;background:transparent;color:var(--dim);font:700 12px Manrope,system-ui,sans-serif;min-height:30px;padding:0 10px;border-radius:7px;}
+.g-seg button.on{background:var(--seg-on);color:var(--on-accent);}
 .g-chart-ax{display:flex;justify-content:space-between;font:600 11.5px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:4px;}
 /* Asetukset */
 .g-set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--bord) 50%,transparent);}
@@ -1195,7 +1201,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.17.3</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.17.4</span>
       </div>
     </div>
   </div>
@@ -1229,6 +1235,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.17.4", d:"lokakuu 2026", items:[
+    "Liikkeen kehityskäyrä näyttää oletuksena arvioidun 1RM:n, joten myös toistojen kasvu samalla kuormalla näkyy nousuna. Pisteiden kohdalla näkyy todellinen sarja (esim. 80×10), ja paino-näkymän saa yhdellä napautuksella.",
+    "Kehonpainoliikkeillä käyrä näyttää toistot"
+  ]},
   {v:"2.17.3", d:"lokakuu 2026", items:[
     "Liikkeiden kehitys -listassa näkyy jokaisen liikkeen suunta (nousi, ennallaan tai laski edelliseen kertaan verrattuna) ja maininta, jos ennätyksestä on kulunut kolme kertaa tai enemmän"
   ]},
@@ -7748,6 +7758,39 @@ function exerciseHistory(key){
     const sets=doneSets(ex); const top=sets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,sets[0]);
     return {s,ex,sets,top,e1:e1rm(top.kg,top.reps)}; }).filter(Boolean).sort((a,b)=>a.s.startedAt-b.s.startedAt);
 }
+// Kehityskäyrä (v2.17.4). Oletuksena arvioitu 1RM, joka nousee sekä kuorman että toistojen kasvaessa: tuplaprogressiossa
+// (80 × 8 → 80 × 10 → 82,5 × 8) pelkkä paino jäisi vaakasuoraksi. Jokaisen pisteen kohdalla näkyy todellinen sarja.
+// Kehonpainoliikkeissä käyrä on parhaan sarjan toistot.
+function gymChartHTML(H){
+  const anyKg=H.some(x=>x.top.kg!=null);
+  const data=anyKg?H.filter(x=>x.top.kg!=null):H;
+  if(data.length<2) return "";
+  const mode=anyKg?(GU.chartMode||"e1"):"reps";
+  const val=x=>mode==="e1"?x.e1:mode==="kg"?x.top.kg:x.top.reps;
+  const pts=data.slice(-16), W=340, Hh=168, padX=22, padT=26, padB=14;
+  const ys=pts.map(val); let mn=Math.min(...ys), mx=Math.max(...ys);
+  if(mx-mn<1e-9){ mn-=1; mx+=1; }
+  const X=i=>padX+i*(W-2*padX)/(pts.length-1), Y=v=>padT+(1-(v-mn)/(mx-mn))*(Hh-padT-padB);
+  // Tunnisteet: kaikki, jos pisteitä on vähän; muuten ensimmäinen, viimeinen ja paras
+  const bi=ys.indexOf(Math.max(...ys));
+  const lab=i=>pts.length<=7||i===0||i===pts.length-1||i===bi;
+  const set=x=>x.top.kg!=null?`${fmtKg(x.top.kg)}×${x.top.reps}`:`${x.top.reps}`;
+  const title=mode==="e1"?"Arvioitu 1RM (kg)":mode==="kg"?"Paras sarja, paino (kg)":"Paras sarja, toistot";
+  const unit=mode==="reps"?" toistoa":" kg";
+  const first=ys[0], last=ys[ys.length-1], diff=last-first;
+  const diffTxt=Math.abs(diff)<0.05?"ennallaan":`${diff>0?"+":"−"}${fmtKg(Math.round(Math.abs(diff)*10)/10)}${unit}`;
+  let h=`<div class="g-chart"><div class="g-chart-h"><span class="lbl-small" style="margin:0">${title}</span>`;
+  if(anyKg) h+=`<span class="g-seg"><button class="${mode==="e1"?"on":""}" aria-pressed="${mode==="e1"}" onclick="GU.chartMode='e1';renderGym()">1RM</button><button class="${mode==="kg"?"on":""}" aria-pressed="${mode==="kg"}" onclick="GU.chartMode='kg';renderGym()">Paino</button></span>`;
+  h+=`</div><div class="g-chart-sum">${gDay(pts[0].s.date)} → ${gDay(pts[pts.length-1].s.date)}: <b>${diffTxt}</b></div>
+    <svg viewBox="0 0 ${W} ${Hh}" width="100%" style="display:block;height:auto" role="img" aria-label="${title}, ${pts.length} kertaa, muutos ${diffTxt}">
+      <line x1="${padX}" x2="${W-padX}" y1="${Hh-padB}" y2="${Hh-padB}" stroke="var(--bord)" stroke-width="1"/>
+      <polyline fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round" points="${pts.map((x,i)=>`${X(i).toFixed(1)},${Y(val(x)).toFixed(1)}`).join(" ")}"/>
+      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(val(x)).toFixed(1)}" r="${i===bi?5:3.5}" fill="${i===bi?"var(--hi,var(--orange))":"var(--surf)"}" stroke="var(--text)" stroke-width="1.5"/>`).join("")}
+      ${pts.map((x,i)=>lab(i)?`<text x="${Math.min(W-4,Math.max(4,X(i))).toFixed(1)}" y="${(Y(val(x))-10).toFixed(1)}" text-anchor="${i===0?"start":i===pts.length-1?"end":"middle"}" font-size="11" font-weight="700" fill="var(--text)" stroke="var(--surf)" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="Manrope,system-ui,sans-serif">${set(x)}</text>`:"").join("")}
+    </svg>
+    <div class="g-chart-ax"><span>${gDay(pts[0].s.date)}</span><span>${gDay(pts[pts.length-1].s.date)}</span></div></div>`;
+  return h;
+}
 function gymExerciseHTML(key){
   const H=exerciseHistory(key);
   const name=H.length?H[H.length-1].ex.name:key;
@@ -7758,15 +7801,7 @@ function gymExerciseHTML(key){
   h+=`<div class="g-stats"><div><span class="lbl-small">Paras sarja</span><b>${best.top.kg!=null?fmtKg(best.top.kg)+" kg × "+best.top.reps:best.top.reps+" toistoa"}</b><span>${gDay(best.s.date)}</span></div>
     <div><span class="lbl-small">Viimeksi</span><b>${H[H.length-1].top.kg!=null?fmtKg(H[H.length-1].top.kg)+" kg × "+H[H.length-1].top.reps:H[H.length-1].top.reps+" toistoa"}</b><span>${gDay(H[H.length-1].s.date)}</span></div>
     ${best.top.kg!=null?`<div><span class="lbl-small">Arvioitu 1RM</span><b>${fmtKg(Math.round(best.e1*2)/2)} kg</b><span>suuntaa antava</span></div>`:""}</div>`;
-  if(withKg.length>=2){
-    const pts=withKg.slice(-24), W=340, Hh=120, pad=8;
-    const ys=pts.map(x=>x.top.kg), mn=Math.min(...ys), mx=Math.max(...ys), rng=mx-mn||1;
-    const X=i=>pad+(pts.length===1?0:i*(W-2*pad)/(pts.length-1)), Y=v=>Hh-pad-(v-mn)/rng*(Hh-2*pad);
-    h+=`<div class="g-chart"><span class="lbl-small">Paras sarja, kg</span><svg viewBox="0 0 ${W} ${Hh}" width="100%" height="${Hh}" preserveAspectRatio="none" aria-label="Parhaan sarjan paino kerroittain">
-      <polyline fill="none" stroke="var(--text)" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts.map((x,i)=>`${X(i).toFixed(1)},${Y(x.top.kg).toFixed(1)}`).join(" ")}"/>
-      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(x.top.kg).toFixed(1)}" r="3.5" fill="var(--hi,var(--orange))" stroke="var(--text)" stroke-width="1.2"/>`).join("")}</svg>
-      <div class="g-chart-ax"><span>${gDay(pts[0].s.date)} · ${fmtKg(pts[0].top.kg)}</span><span>${gDay(pts[pts.length-1].s.date)} · ${fmtKg(pts[pts.length-1].top.kg)}</span></div></div>`;
-  }
+  h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
   h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
   return h+`</div><div style="height:30px"></div>`;
