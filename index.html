@@ -746,8 +746,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .pr-tag{flex-shrink:0;font:800 10px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:3px 6px;margin-top:2px;}
 .g-sum-list{margin-top:12px;border-top:1px solid var(--surf2);}
 .g-sum-list>div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 14px Manrope,system-ui,sans-serif;color:var(--text);}
-.g-sum-list .nm{min-width:0;overflow-wrap:anywhere;}
-.g-sum-list .v{color:var(--dim);text-align:right;white-space:nowrap;}
+.g-sum-list .nm{flex:1 1 40%;min-width:0;overflow-wrap:break-word;hyphens:manual;}
+.g-sum-list .nm small{display:block;font:500 12px/1.35 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
+.g-sum-list .v{flex:0 1 auto;max-width:60%;color:var(--dim);text-align:right;}
 .g-sum-list .sk{color:var(--dim);}
 .g-dir{display:inline-block;min-width:18px;text-align:center;font-weight:800;color:var(--text);}
 .g-dir.up{color:var(--green);}
@@ -1292,7 +1293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.16</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.17</span>
       </div>
     </div>
   </div>
@@ -1326,6 +1327,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.17", d:"lokakuu 2026", items:[
+    "Kirjaa-näkymän salikortti näkyy vain, kun treeni on kesken tai tänään tehty. Aloita-nappi poistui, treeni aloitetaan Treeni-välilehdeltä.",
+    "Treenin yhteenveto: tekemätön liike näkyy tekstinä \"ei tehty\" ja sen alla huomio, jos sellainen on kirjattu. Saman painon sarjat ryhmitellään (105 × 10, 10, 10 · 65 × 13), ja pitkät liikkeiden nimet rivittyvät sanojen välistä.",
+    "Kuitattu sarja, josta on tyhjennetty toistot, ei enää laske tehdyksi sarjaksi. Liikkeen voi ohittaa suoraan Ohita-napista, kun siitä ei ole tehty yhtään sarjaa."
+  ]},
   {v:"2.18.16", d:"lokakuu 2026", items:[
     "Trendien kuormitusvertailu (\"7 pv kuorma · oma ka\") poistettu. Se laski kirjaamattomat päivät nollaksi ja treenin ilman rasitusarvoa kevyeksi, joten tulos saattoi olla harhaanjohtava."
   ]},
@@ -7344,7 +7350,8 @@ function touchProg(p){ p.updatedAt=Date.now(); gymSave(); }
 // ── Treenit (sessiot)
 function gSession(id){ return G.sessions.find(s=>s.id===id)||null; }
 function activeSession(){ const s=gSession(G.activeId); if(!s||s.endedAt){ if(G.activeId){ G.activeId=null; gymSave(); } return null; } return s; }
-function doneSets(ex){ return (ex.sets||[]).filter(r=>r.done); }
+// v2.18.17: kuitattu sarja ilman toistoja ei ole tehty sarja (käyttäjä tyhjensi kentät merkitäkseen, ettei tehnyt)
+function doneSets(ex){ return (ex.sets||[]).filter(r=>r.done&&r.reps!=null); }
 function sessionStats(s){
   const ex=s.exercises.filter(e=>!e.skipped);
   const done=ex.filter(e=>doneSets(e).length>0).length;
@@ -7508,6 +7515,7 @@ function finishSession(silent){
     if(!silent){ GU.mode="home"; GU.sessionId=null; renderGym(); renderLogGymCard(); showSavedToast("Tyhjää treeniä ei tallennettu"); gTop(); }
     return;
   }
+  s.exercises.forEach(ex=>(ex.sets||[]).forEach(r=>{ if(r.done&&r.reps==null) r.done=false; }));
   if(!s.endedAt) s.endedAt=Date.now();
   if(GU.updateTpl&&!silent) updateTemplateFromSession(s);
   if(G.activeId===s.id) G.activeId=null;
@@ -7572,6 +7580,12 @@ function dayGymSessions(ds){ return gymOn()?G.sessions.filter(s=>s.endedAt&&s.da
 // v2.18.6: korjaa päivät, joilla on tallennettu salitreeni mutta Treeni-merkintä puuttuu (esim. v2.18.4:n vanhentunut Kirjaa-näkymä)
 function gymHealLinks(){
   if(!gymOn()) return;
+  // v2.18.17: päättyneiden treenien kuitatut sarjat ilman toistoja → ei tehty
+  let fixed=false;
+  G.sessions.forEach(s=>{ if(!s.endedAt) return; let ch=false;
+    s.exercises.forEach(ex=>(ex.sets||[]).forEach(r=>{ if(r.done&&r.reps==null){ r.done=false; ch=true; } }));
+    if(ch){ s.updatedAt=Date.now(); fixed=true; } });
+  if(fixed){ try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); if(typeof syncMarkDirty==="function") syncMarkDirty(); }catch(_){} }
   G.sessions.filter(s=>s.endedAt&&sessionStats(s).sets>0).forEach(s=>{
     const e=S.entries[s.date];
     if(!e||!e.training_done||!(e.workout_ids||[]).includes(s.id)) gymLinkEntry(s);
@@ -7733,10 +7747,8 @@ function renderLogGymCard(){
     h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">${esc(act.dayName)}</div><div class="s">Kesken · ${st.done}/${st.exN} liikettä · aloitettu ${act.date===today()?`<span data-raw>${hhmm(act.startedAt)}</span>`:gDay(act.date)}</div></div><button class="tr-go" onclick="openSession('${act.id}')">Jatka</button></div>`;
   } else if(doneToday.length){
     h=doneToday.map(s=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
-  } else if(S.date===today()){
-    const p=curProgram();
-    h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">Salitreeni</div><div class="s">${p?esc(p.name):"Ei vielä ohjelmaa"}</div></div><button class="tr-go" onclick="GU.mode='home';setTab('treeni')">${p?"Aloita":"Luo ohjelma"}</button></div>`;
   }
+  // v2.18.17: ei Aloita-tilaa (näkyi myös lepopäivinä, käytännössä kehote). Treeni aloitetaan Treeni-välilehdeltä.
   el.innerHTML=h; el.style.display=h?"":"none";
 }
 function openSession(id){ GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
@@ -7850,11 +7862,13 @@ function exerciseTrend(key){
 
 const FEELS=[{id:"light",l:"Kevyt"},{id:"ok",l:"Sopiva"},{id:"hard",l:"Raskas"}];
 const feelTxt=f=>(FEELS.find(x=>x.id===f)||{}).l||"";
+// v2.18.17: peräkkäiset saman painon sarjat ryhmitellään: "105 × 10, 10, 10 · 65 × 13".
+// Ryhmän sisällä sitovat välilyönnit (\u00a0), joten rivi katkeaa vain ryhmien välistä.
 const setsTxt=sets=>{
   if(!sets.length) return "";
-  const kgs=[...new Set(sets.map(r=>r.kg??null))];
-  if(kgs.length===1) return `${kgs[0]!=null?fmtKg(kgs[0])+" × ":""}${sets.map(r=>r.reps).join(", ")}`;
-  return sets.map(r=>`${r.kg!=null?fmtKg(r.kg)+" × ":""}${r.reps}`).join(", ");
+  const g=[];
+  sets.forEach(r=>{ const k=r.kg??null; const last=g[g.length-1]; if(last&&last.kg===k) last.reps.push(r.reps); else g.push({kg:k,reps:[r.reps]}); });
+  return g.map(x=>`${x.kg!=null?fmtKg(x.kg)+"\u00a0×\u00a0":""}${x.reps.join(",\u00a0")}`).join(" · ");
 };
 
 // ── Treenin yhteenveto (v2.17.8): näkyy lopetuksen jälkeen ja historiassa. Kuvaileva: mitä tehtiin, ennätykset
@@ -7898,7 +7912,7 @@ function gymSummaryHTML(s,fresh){
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
   h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:"Ei ennätyksiä tällä kertaa"}</div>`;
   if(S2.prs.length) h+=`<div class="g-sum-pr">${S2.prs.map(p=>`<div><span class="pr-tag">Ennätys</span><span><b>${esc(p.ex.name)}</b> ${setOneTxt(p.set)}${p.was?`<small>${p.was}</small>`:""}</span></div>`).join("")}</div>`;
-  h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span>${esc(r.ex.name)}</span><span>${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
+  h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
     :`<div><span class="nm">${esc(r.ex.name)}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</span></div>`).join("")}</div>
     <div class="g-sum-foot">Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla.</div></div>`;
   return h;
@@ -7910,7 +7924,7 @@ function sessionShareText(s){
   L.push(`${S2.st.done}/${S2.st.exN} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`);
   if(S2.prs.length){ L.push("",`Ennätykset (${S2.prs.length}):`); S2.prs.forEach(p=>L.push(`• ${p.ex.name} ${setOneTxt(p.set)}${p.was?` (${p.was})`:""}`)); }
   L.push("");
-  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}`); else L.push(`${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}`); });
+  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else L.push(`${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}`); });
   L.push("","Järkäle tracking");
   return L.join("\n");
 }
@@ -7976,6 +7990,7 @@ function gymSessionHTML(s){
     });
     h+=`</div><div class="ex-act"><button onclick="gAddSet('${sid}',${ei})">+ Sarja</button>${ex.sets.length&&!ex.sets[ex.sets.length-1].done?`<button onclick="gRemoveSet('${sid}',${ei})">− Sarja</button>`:""}
       <button onclick="GU.note['${ex.id}']=!GU.note['${ex.id}'];renderGym()">${ex.userNote?"Huomio ✓":"Huomio"}</button>
+      ${live&&!done.length?`<button onclick="gSkip('${sid}',${ei})">Ohita</button>`:""}
       ${done.length&&live?`<button style="margin-left:auto" onclick="GU.expanded['${ex.id}']=false;G_FLASH.add('mini-${ex.id}');renderGym()">Pienennä</button>`:""}</div>`;
     if(done.length) h+=`<div class="ex-feel"><span>Tuntuma</span>${FEELS.map(f=>`<button class="${ex.feel===f.id?"on":""}${G_FLASH.has("feel-"+ex.id+"-"+f.id)?" pop":""}" aria-pressed="${ex.feel===f.id}" onclick="gFeel('${sid}',${ei},'${f.id}')">${f.l}</button>`).join("")}</div>`;
     if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value)">${esc(ex.userNote||"")}</textarea>`;
