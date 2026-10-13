@@ -937,6 +937,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-prog{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 14%,transparent);margin-top:12px;overflow:hidden;}
 .g-prog span{display:block;height:100%;background:currentColor;border-radius:3px;transition:width .35s ease;}
 [data-palette="ampiainen"]:not([data-theme="light"]) .g-prog span{background:var(--hi);}
+.g-seg{display:flex;gap:6px;margin-top:10px;}
+.g-seg button{flex:1;min-height:40px;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 4px;}
+.g-seg button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
 .su-head{margin:4px 0 18px;}
 .su-h1{font:800 22px/1.2 Manrope,system-ui,sans-serif;color:var(--text);letter-spacing:-.01em;}
 .su-sub{font:500 14px/1.55 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:6px;}
@@ -1315,7 +1318,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.23</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.24</span>
       </div>
     </div>
   </div>
@@ -1349,6 +1352,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.24", d:"lokakuu 2026", items:[
+    "Kosketusvärinälle voi valita voimakkuuden: kevyt, normaali tai voimakas. Värinä tuntuu nyt myös painon, unen ja askelten +/−-napeissa.",
+    "Taukoajastimen äänelle voi valita tason: hiljainen, normaali tai kova. ▶-napista voi kokeilla ääntä.",
+    "Kirjaa-näkymä: jos seuraat vain toista parista paino/uni tai palautuminen/vire, kenttä venyy koko leveyteen.",
+    "Profiilin pituuskentässä ei enää näy esimerkkiarvoa 190, joka näytti valmiiksi täytetyltä."
+  ]},
   {v:"2.18.23", d:"lokakuu 2026", items:[
     "Kosketusvärinä tuntuu nyt myös Kirjaa-näkymän napeissa. Ne olivat aiemmin niin lyhyitä, ettei moni puhelin värissyt ollenkaan."
   ]},
@@ -2264,6 +2273,13 @@ function applyTrackingVisibility(){
     const el=document.getElementById("track-"+k+"-wrap");
     if(el) el.style.display=trk(k)?"":"none";
   });
+  // v2.18.24: parista (paino|uni, palautuminen|vire) yksin valittu venyy koko leveyteen eikä jätä tyhjää puolikasta
+  [["weight","sleep"],["recovery","motivation"]].forEach(([a,b])=>{
+    const ea=document.getElementById("track-"+a+"-wrap"), eb=document.getElementById("track-"+b+"-wrap");
+    const solo=trk(a)!==trk(b);
+    if(ea) ea.style.gridColumn=solo&&trk(a)?"1 / -1":"";
+    if(eb) eb.style.gridColumn=solo&&trk(b)?"1 / -1":"";
+  });
   const extraKeys=['training','cardio','injury','bp','bloodSugar','migraine','menstrual','medications','notes'];
   const hasExtra=extraKeys.some(k=>trk(k));
   const tog=document.getElementById("extra-toggle");
@@ -2586,12 +2602,17 @@ function formatSleep(h){
 function calcBMI(w,h){return(w&&h)?+(w/((h/100)**2)).toFixed(1):null;}
 // v2.18.22: kosketusvärinän voi kytkeä pois (Asetukset → Tekniset asetukset). Ajastimen hälytysvärinä on oma asetuksensa.
 // v2.18.23: alle 15 ms värinä ei tunnu monissa puhelimissa (Kirjaa-näkymän napit olivat 6–8 ms) → vähintään 15 ms
-function haptic(ms=15){try{if(S.settings&&S.settings.haptics===false) return; if(navigator.vibrate)navigator.vibrate(Math.max(15,ms));}catch(_){}}
+// v2.18.24: voimakkuus = kesto (selain ei salli värinän voimakkuuden säätöä). Korostetut (≥20 ms) saavat +10 ms.
+const HAPTIC_MS={light:15,normal:30,strong:55};
+function hapticLevel(){ const h=S.settings&&S.settings.haptics; return h===false?null:(HAPTIC_MS[h]?h:"normal"); }
+function haptic(ms=15){try{ const l=hapticLevel(); if(!l) return; if(navigator.vibrate)navigator.vibrate(HAPTIC_MS[l]+(ms>=20?10:0)); }catch(_){}}
+function setHaptics(v){ S.settings.haptics=v; saveAll(); renderHapticsSection(); haptic(15); }
 function renderHapticsSection(){
   const el=document.getElementById("haptics-section"); if(!el) return;
-  const on=S.settings.haptics!==false;
+  const l=hapticLevel(), on=!!l;
   el.innerHTML=`<div class="g-set-row" style="border-bottom:none;padding:0"><span><span style="font-size:14px;color:var(--text);font-weight:600">Kosketusvärinä</span><span style="display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.45">Lyhyt värinä napautuksista, esimerkiksi sarjan kuittauksesta ja valinnoista.</span></span>
-    <button onclick="S.settings.haptics=${on?"false":"true"};saveAll();renderHapticsSection();haptic(20)" role="switch" aria-checked="${on}" aria-label="Kosketusvärinä" class="g-sw${on?" on":""}"><span></span></button></div>`;
+    <button onclick="setHaptics(${on?"false":"'normal'"})" role="switch" aria-checked="${on}" aria-label="Kosketusvärinä" class="g-sw${on?" on":""}"><span></span></button></div>
+    ${on?`<div class="g-seg" role="radiogroup" aria-label="Värinän voimakkuus">${[["light","Kevyt"],["normal","Normaali"],["strong","Voimakas"]].map(([k,t])=>`<button role="radio" aria-checked="${l===k}" class="${l===k?"on":""}" onclick="setHaptics('${k}')">${t}</button>`).join("")}</div>`:""}`;
 }
 function bmiCategory(bmi){
   if(!bmi) return null;
@@ -5093,7 +5114,7 @@ function renderProfile(){
       <div style="flex:1">
         <div class="lbl-small">Pituus</div>
         <div style="display:flex;align-items:center;gap:6px">
-          <input type="text" inputmode="numeric" value="${p.height||''}" placeholder="190"
+          <input type="text" inputmode="numeric" value="${p.height||''}" placeholder="–"
             onchange="setProfile('height',this.value)"
             style="flex:1;height:44px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:15px;text-align:center;outline:none;width:100%">
           <span style="color:var(--dim);font-size:11px">cm</span>
@@ -5973,6 +5994,7 @@ function relDay(d,ref){
   return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`;
 }
 function adj(field,delta){
+  haptic(15); // v2.18.24: myös paino, uni ja askeleet
   const limits={weight:[30,300],sleep:[0,24],steps:[0,80000]};
   const [mn,mx]=limits[field]||[0,Infinity];
   const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?(lastKnown("sleep",S.date)?.v??7):0);
@@ -7234,7 +7256,7 @@ let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehd
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
 const GU={exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
-function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
+function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
 function gymLoad(){
   try{ const r=localStorage.getItem(GYM_KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==="object") G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; } }catch(_){}
   if(!Array.isArray(G.programs)) G.programs=[];
@@ -7682,16 +7704,23 @@ function timerCustom(){
   if(m) sec=+m[1]*60+ +m[2]; else if(/^\d+$/.test(v.trim())) sec=+v.trim();
   if(sec&&sec>=5&&sec<=1800) timerStart(sec);
 }
+// v2.18.24: äänenvoimakkuus kolmella tasolla. Kova = täysi taso + kanttiaalto (kuuluu selvästi paremmin
+// salin melussa). Lopullinen voimakkuus riippuu puhelimen mediaäänenvoimakkuudesta.
+const BEEP_LV={quiet:{g:0.12,w:"sine"},normal:{g:0.35,w:"sine"},loud:{g:0.9,w:"square"}};
+function timerBeep(level){
+  const L=BEEP_LV[level]||BEEP_LV.normal; const now=GT_AUDIO.currentTime;
+  [0,0.32,0.64].forEach(off=>{ const o=GT_AUDIO.createOscillator(), g=GT_AUDIO.createGain(); o.type=L.w; o.frequency.value=880; o.connect(g); g.connect(GT_AUDIO.destination);
+    g.gain.setValueAtTime(0.0001,now+off); g.gain.exponentialRampToValueAtTime(L.g,now+off+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+off+0.22); o.start(now+off); o.stop(now+off+0.25); });
+}
+function gymTestBeep(){
+  try{ if(!GT_AUDIO) GT_AUDIO=new (window.AudioContext||window.webkitAudioContext)(); if(GT_AUDIO.state==="suspended") GT_AUDIO.resume(); timerBeep(gymCfg().soundLevel); }catch(_){}
+}
 function timerAlert(late){
   const c=gymCfg();
   if(late>15000) return; // palattiin myöhässä: näytetään vain "päättyi … sitten"
   try{ if(c.vibrate&&navigator.vibrate) navigator.vibrate([250,120,250,120,250]); }catch(_){}
   try{
-    if(c.sound&&GT_AUDIO){
-      const now=GT_AUDIO.currentTime;
-      [0,0.32,0.64].forEach(off=>{ const o=GT_AUDIO.createOscillator(), g=GT_AUDIO.createGain(); o.frequency.value=880; o.connect(g); g.connect(GT_AUDIO.destination);
-        g.gain.setValueAtTime(0.0001,now+off); g.gain.exponentialRampToValueAtTime(0.35,now+off+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+off+0.22); o.start(now+off); o.stop(now+off+0.25); });
-    }
+    if(c.sound&&GT_AUDIO) timerBeep(c.soundLevel);
   }catch(_){}
 }
 function timerLoop(){
@@ -7775,6 +7804,8 @@ function renderGymSettings(){
     h+=tg(c.wakeLock,`setGymOpt('wakeLock',${!c.wakeLock})`,"Näyttö päällä treenin ajan","Taukoajastin hälyttää vain, kun näyttö on päällä.");
     h+=tg(c.autoRest,`setGymOpt('autoRest',${!c.autoRest})`,"Käynnistä tauko automaattisesti","Sarjan kuittaus käynnistää viimeksi käytetyn tauon. Ei liikkeen viimeisen sarjan jälkeen.");
     h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
+    if(c.sound){ const lv=c.soundLevel||"normal";
+      h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶</button></div>`; }
     h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
   } else if(G.programs.length||G.sessions.length){
     h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
