@@ -1293,7 +1293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.17</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.18</span>
       </div>
     </div>
   </div>
@@ -1327,6 +1327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.18", d:"lokakuu 2026", items:[
+    "Korjaus: Drive-kirjautumisen uusiminen kysyi tilin ja luvan joka kerta, kun Järkäle PT -kopio oli päällä. Nyt Google muistaa tilin ja luvan, ja uusiminen on yksi lyhyt välähdys."
+  ]},
   {v:"2.18.17", d:"lokakuu 2026", items:[
     "Kirjaa-näkymän salikortti näkyy vain, kun treeni on kesken tai tänään tehty. Aloita-nappi poistui, treeni aloitetaan Treeni-välilehdeltä.",
     "Treenin yhteenveto: tekemätön liike näkyy tekstinä \"ei tehty\" ja sen alla huomio, jos sellainen on kirjattu. Saman painon sarjat ryhmitellään (105 × 10, 10, 10 · 65 × 13), ja pitkät liikkeiden nimet rivittyvät sanojen välistä.",
@@ -8249,6 +8252,12 @@ function syncMarkDirty(){
 function syncToken(){ try{ const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return t&&t.exp>Date.now()+60000?t.at:null; }catch(_){ return null; } }
 function syncHasScope(sc){ try{ const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return !!(t&&t.exp>Date.now()+60000&&String(t.scope||"").split(" ").includes(sc)); }catch(_){ return false; } }
 function syncTokenValid(){ return !!syncToken(); }
+// v2.18.18: onko lupa joskus myönnetty (tokenin voimassaolosta riippumatta). Aiemmin vanhentunut tokeni
+// tulkittiin puuttuvaksi PT-luvaksi, jolloin Google kysyi koko lupaa (tilivalinta + lupa) joka uusinnassa.
+function syncGranted(sc){
+  try{ const g=String(syncState().granted||""); if(g.split(" ").includes(sc)) return true;
+    const t=JSON.parse(localStorage.getItem(SYNC_TOKEN_KEY)||"null"); return !!(t&&String(t.scope||"").split(" ").includes(sc)); }catch(_){ return false; }
+}
 
 function loadGis(){
   return new Promise((res,rej)=>{
@@ -8262,8 +8271,11 @@ function loadGis(){
 function syncSignIn(consent){
   const scope=syncState().ptCopy?`${SYNC_SCOPE} ${SYNC_SCOPE_PT}`:SYNC_SCOPE;
   return loadGis().then(()=>new Promise((res,rej)=>{
-    SYNC_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:SYNC_CLIENT_ID,scope,
-      callback:r=>{ if(r&&r.access_token){ try{ localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({at:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000,scope:r.scope||scope})); }catch(_){} res(r.access_token); } else rej(new Error(r&&r.error||"Kirjautuminen keskeytyi")); },
+    const hint=syncState().email||undefined; // v2.18.18: tuttu tili → Google ei näytä tilivalintaa
+    SYNC_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:SYNC_CLIENT_ID,scope,hint,
+      callback:r=>{ if(r&&r.access_token){ try{ localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({at:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000,scope:r.scope||scope})); }catch(_){}
+        try{ const g=new Set(String(syncState().granted||"").split(" ").filter(Boolean)); String(r.scope||scope).split(" ").forEach(x=>x&&g.add(x)); setSyncState({granted:[...g].join(" ")}); }catch(_){}
+        res(r.access_token); } else rej(new Error(r&&r.error||"Kirjautuminen keskeytyi")); },
       error_callback:e=>rej(new Error(e&&e.type==="popup_closed"?"Kirjautuminen suljettiin":"Kirjautuminen epäonnistui"))});
     SYNC_TOKEN_CLIENT.requestAccessToken({prompt:consent?"consent":""});
   }));
@@ -8360,7 +8372,7 @@ function syncApply(m){
 async function syncNow(opts={}){
   if(SYNC_BUSY) return;
   const st=syncState();
-  const needPtScope=st.ptCopy&&!syncHasScope(SYNC_SCOPE_PT);
+  const needPtScope=st.ptCopy&&!syncGranted(SYNC_SCOPE_PT);
   if(!syncTokenValid()||(needPtScope&&!opts.silent)){
     if(opts.silent) { renderSyncUI(); return; }
     try{ await syncSignIn(!st.enabled||needPtScope); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
@@ -8384,6 +8396,7 @@ async function syncNow(opts={}){
     }
     const up=await driveUpload(fileId,out);
     setSyncState({enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:0});
+    if(!syncState().email){ try{ const ar=await driveFetch("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)"); const aj=await ar.json(); if(aj&&aj.user&&aj.user.emailAddress) setSyncState({email:aj.user.emailAddress}); }catch(e){ if(e&&e.auth) throw e; } }
     if(syncState().ptCopy){
       if(syncHasScope(SYNC_SCOPE_PT)){ try{ await writePtCopy(); }catch(e){ setSyncState({ptErr:e.auth?"Kirjaudu uudelleen":"PT-kopion päivitys epäonnistui"}); } }
       else setSyncState({ptErr:"Odottaa lupaa: paina Synkronoi nyt"});
@@ -8431,7 +8444,7 @@ function setPtCopy(on){
 }
 function syncDisable(){
   if(!confirm("Lopetetaanko synkronointi tällä laitteella? Data säilyy puhelimessa ja Drivessa.")) return;
-  setSyncState({enabled:false}); try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
+  setSyncState({enabled:false,email:null,granted:""}); try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
   renderSyncUI();
 }
 function syncAgo(ms){ if(!ms) return "ei vielä"; const m=Math.round((Date.now()-ms)/60000); if(m<1) return "juuri nyt"; if(m<60) return `${m} min sitten`; const h=Math.round(m/60); if(h<24) return `${h} h sitten`; return `${Math.round(h/24)} pv sitten`; }
