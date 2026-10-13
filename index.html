@@ -1293,7 +1293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.18</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.19</span>
       </div>
     </div>
   </div>
@@ -1327,6 +1327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.19", d:"lokakuu 2026", items:[
+    "Drive-synkronoinnin varmistuksia ulkopuolisen koodikatselmoinnin pohjalta: synkronoinnin aikana tehty muutos ei enää jää lähettämättä eikä jää vanhan tiedon alle, tuntematonta tiedostoa ei ylikirjoiteta, väärästä Google-tilistä kysytään ennen tallennusta, poistetut tiedot eivät palaa pitkään käyttämättömältä laitteelta ja itse merkitty treeni säilyy, vaikka siihen yhdistetty salitreeni poistettaisiin."
+  ]},
   {v:"2.18.18", d:"lokakuu 2026", items:[
     "Korjaus: Drive-kirjautumisen uusiminen kysyi tilin ja luvan joka kerta, kun Järkäle PT -kopio oli päällä. Nyt Google muistaa tilin ja luvan, ja uusiminen on yksi lyhyt välähdys."
   ]},
@@ -2427,8 +2430,8 @@ function saveAll() {
   const quota = e => e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22;
   try { localStorage.setItem("seuranta-entries",JSON.stringify(S.entries)); }
   catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
-  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(_){}
-  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(_){}
+  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nMittaus ei tallentunut. Lataa varmuuskopio Asetuksista."); }
+  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nAsetukset eivät tallentuneet. Lataa varmuuskopio Asetuksista."); }
   if(typeof syncMarkDirty==="function") syncMarkDirty();
 }
 
@@ -7565,6 +7568,7 @@ function gymLinkEntry(s){
   const ids=new Set(e.workout_ids||[]); const had=ids.has(s.id); ids.add(s.id);
   const wasDone=!!e.training_done;
   e.workout_ids=[...ids];
+  if(!wasDone) e.training_auto=true; // v2.18.19: Treeni-merkintä syntyi salitreenistä (ei käyttäjän oma)
   e.training_done=true;
   if(!e.training_type&&s.trainingType) e.training_type=s.trainingType;
   if(!had||!wasDone) e.updated_at=nowIso;
@@ -7598,10 +7602,11 @@ function gymUnlinkEntry(s){
   const ds=s.date; const e=S.entries[ds]; if(!e||!e.workout_ids) return;
   flushPendingAutoSave();
   e.workout_ids=e.workout_ids.filter(x=>x!==s.id);
-  const manual=e.training_load!=null||e.training_outcome!=null||(e.training_notes||"").trim()||(e.training_modifications||[]).length;
+  // v2.18.19: Treeni-merkintä poistetaan vain, jos se syntyi salitreenistä (training_auto) eikä päivälle ole kirjattu muuta
+  const manual=!e.training_auto||e.training_load!=null||e.training_outcome!=null||(e.training_notes||"").trim()||(e.training_modifications||[]).length;
   if(!e.workout_ids.length){
     delete e.workout_ids;
-    if(!manual){ e.training_done=false; if(!s.trainingType||e.training_type===s.trainingType) e.training_type=""; }
+    if(!manual){ e.training_done=false; delete e.training_auto; if(!s.trainingType||e.training_type===s.trainingType) e.training_type=""; }
   }
   e.updated_at=new Date().toISOString();
   saveAll();
@@ -8350,8 +8355,8 @@ function syncMerge(local,remote,localDirtySinceSync){
   // Asetukset kokonaisuutena: paikalliset, jos niitä on muutettu edellisen synkronoinnin jälkeen, muuten Driven
   const settings=localDirtySinceSync||!remote.settings?local.settings:{...local.settings,...remote.settings};
   const curProgramId=(localDirtySinceSync?local.gym&&local.gym.curProgramId:remote.gym&&remote.gym.curProgramId)||(local.gym&&local.gym.curProgramId)||null;
-  // Vanhat poistomerkinnät (yli 180 pv) pois
-  const cut=Date.now()-180*864e5; Object.values(tombs).forEach(t=>Object.keys(t).forEach(k=>{ if(t[k]<cut) delete t[k]; }));
+  // Vanhat poistomerkinnät pois. v2.18.19: 180 pv → 2 vuotta (pitkään käyttämätön laite ei palauta poistettua)
+  const cut=Date.now()-730*864e5; Object.values(tombs).forEach(t=>Object.keys(t).forEach(k=>{ if(t[k]<cut) delete t[k]; }));
   return {format:"jarkale-sync",version:1,savedAt:Date.now(),entries,measurements:meas,settings,gym:{...(local.gym||{}),programs,sessions,curProgramId,v:1},tombs};
 }
 function syncApply(m){
@@ -8369,52 +8374,81 @@ function syncApply(m){
     if(S.tab==="treeni") renderGym();
   } finally { SYNC_APPLYING=false; }
 }
+let SYNC_SIGNING=false;
 async function syncNow(opts={}){
-  if(SYNC_BUSY) return;
+  // v2.18.19: lukko myös kirjautumisen ajaksi (kaksi samanaikaista kutsua ei käynnistä kahta synkronointia)
+  if(SYNC_BUSY||SYNC_SIGNING) return;
   const st=syncState();
   const needPtScope=st.ptCopy&&!syncGranted(SYNC_SCOPE_PT);
+  let signedNow=false;
   if(!syncTokenValid()||(needPtScope&&!opts.silent)){
     if(opts.silent) { renderSyncUI(); return; }
-    try{ await syncSignIn(!st.enabled||needPtScope); }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
+    SYNC_SIGNING=true;
+    try{ await syncSignIn(!st.enabled||needPtScope); signedNow=true; }catch(e){ SYNC_ERR=e.message; renderSyncUI(); return; }
+    finally{ SYNC_SIGNING=false; }
   }
   if(!syncHasScope(SYNC_SCOPE)){ try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){} SYNC_ERR="Järkäle ei saanut lupaa Driveen. Paina nappia uudelleen ja rastita kirjautumisessa Google Drive -lupa."; renderSyncUI(); return; }
   SYNC_BUSY=true; SYNC_ERR=null; renderSyncUI();
+  let rerun=false;
   try{
+    // v2.18.19: väärä tili → kysytään ennen kuin mitään luetaan tai kirjoitetaan
+    if(signedNow&&st.email){
+      const ar=await driveFetch("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)"); const aj=await ar.json();
+      const em=aj&&aj.user&&aj.user.emailAddress;
+      if(em&&em.toLowerCase()!==String(st.email).toLowerCase()){
+        if(!confirm(`Kirjauduit Google-tilillä ${em}, mutta Järkäle on synkronoitu tilille ${st.email}.\n\nJatketaanko tilillä ${em}? Tiedot tallentuvat silloin sen tilin Driveen.`)){
+          try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
+          SYNC_ERR="Synkronointi peruttu: väärä Google-tili. Paina Synkronoi ja valitse oikea tili."; return;
+        }
+        setSyncState({email:em,fileId:null});
+      }
+    }
     const local=syncSnapshot();
+    const seq0=syncState().dirtyAt||0; // v2.18.19: muutosmerkki tilannekuvan hetkellä
     const f=await driveFind();
     let fileId=f&&f.id;
     let out=local;
     if(f){
       const remote=await driveDownload(f.id);
-      if(remote&&remote.format==="jarkale-sync"){
-        // Ensimmäisellä synkronoinnilla Driven asetukset voittavat (uusi puhelin saa tavoitteet, lääkkeet ja teeman)
-        const dirty=!!st.lastSyncAt&&(st.dirtyAt||0)>(st.lastSyncAt||0);
-        out=syncMerge(local,remote,dirty);
-        const sig=x=>JSON.stringify([x.entries,x.measurements,x.gym.programs,x.gym.sessions]);
-        if(sig(out)!==sig(local)) syncApply(out);
-      }
+      // v2.18.19: tuntematonta tai uudemman version tiedostoa ei koskaan ylikirjoiteta
+      if(!remote||remote.format!=="jarkale-sync") throw new Error("Drivessa on tuntematon Järkäle-tiedosto. Synkronointi pysäytettiin, jotta mitään ei ylikirjoiteta.");
+      if((remote.version||1)>1) throw new Error("Drivessa on uudemman Järkäle-version tallennus. Päivitä sovellus ennen synkronointia.");
+      // Ensimmäisellä synkronoinnilla Driven asetukset voittavat (uusi puhelin saa tavoitteet, lääkkeet ja teeman)
+      const dirty=!!st.lastSyncAt&&(st.dirtyAt||0)>(st.lastSyncAt||0);
+      out=syncMerge(local,remote,dirty);
+      // v2.18.19: jos käyttäjä muutti jotain latauksen aikana, yhdistettyä tilaa ei sovelleta puhelimeen (se korvaisi
+      // uuden muutoksen). Yhdistetty tila lähetetään silti Driveen, ja uusi synkronointi hakee sen perään.
+      const sig=x=>JSON.stringify([x.entries,x.measurements,x.gym.programs,x.gym.sessions,x.settings,x.gym.curProgramId]);
+      if((syncState().dirtyAt||0)!==seq0) rerun=true;
+      else if(sig(out)!==sig(local)) syncApply(out);
     }
     const up=await driveUpload(fileId,out);
-    setSyncState({enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:0});
+    // v2.18.19: lähetyksen aikana tehty muutos jää odottamaan; synkronoinnin lopetus kesken siirron pysyy voimassa
+    const now=syncState(), changed=(now.dirtyAt||0)!==seq0;
+    setSyncState({enabled:st.enabled?now.enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:changed?now.dirtyAt:0});
+    if(changed) rerun=true;
     if(!syncState().email){ try{ const ar=await driveFetch("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)"); const aj=await ar.json(); if(aj&&aj.user&&aj.user.emailAddress) setSyncState({email:aj.user.emailAddress}); }catch(e){ if(e&&e.auth) throw e; } }
     if(syncState().ptCopy){
-      if(syncHasScope(SYNC_SCOPE_PT)){ try{ await writePtCopy(); }catch(e){ setSyncState({ptErr:e.auth?"Kirjaudu uudelleen":"PT-kopion päivitys epäonnistui"}); } }
+      if(syncHasScope(SYNC_SCOPE_PT)){ try{ await writePtCopy(out); }catch(e){ setSyncState({ptErr:e.auth?"Kirjaudu uudelleen":"PT-kopion päivitys epäonnistui"}); } }
       else setSyncState({ptErr:"Odottaa lupaa: paina Synkronoi nyt"});
     }
     if(!opts.silent||opts.toast) showSavedToast("Synkronoitu Driveen");
   }catch(e){
     SYNC_ERR=e.auth?"Kirjaudu uudelleen synkronoidaksesi":(e.message||"Synkronointi epäonnistui");
-  }finally{ SYNC_BUSY=false; renderSyncUI(); }
+  }finally{ SYNC_BUSY=false; renderSyncUI(); if(rerun&&syncState().enabled) setTimeout(()=>syncNow({silent:true}),1500); }
 }
 // Näkyvä kopio tavalliseen Drive-kansioon (Järkäle/jarkale-pt.json), samassa muodossa kuin varmuuskopio (versio 6),
 // jotta ChatGPT:n Drive-yhteys voi lukea sen. Yksisuuntainen: tiedostoon tehtyjä muutoksia ei lueta takaisin.
-function ptBackupData(){
+// v2.18.19: muodostetaan samasta tilannekuvasta, joka lähetettiin Driveen (ei uudelleen S:stä ja G:stä)
+function ptBackupData(src){
+  src=src||{entries:S.entries,measurements:S.measurements,settings:S.settings,gym:G};
+  const {activeId,timer,...gym}=src.gym||{};
   return {version:6,exported:new Date().toISOString(),source:"Järkäle tracking, päivittyy automaattisesti synkronoinnin yhteydessä",
-    entryCount:Object.keys(S.entries).length,entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym:G};
+    entryCount:Object.keys(src.entries||{}).length,entries:src.entries||{},measurements:src.measurements||[],settings:src.settings,gym};
 }
-async function writePtCopy(){
+async function writePtCopy(src){
   const st=syncState();
-  const body=JSON.stringify(ptBackupData());
+  const body=JSON.stringify(ptBackupData(src));
   // v2.18.3: tunnistetaan ensin tallennetulla tunnisteella, joten tiedoston voi siirtää ja nimetä uudelleen Drivessa
   let found=null;
   if(st.ptFileId){ try{ const mr=await driveFetch(`https://www.googleapis.com/drive/v3/files/${st.ptFileId}?fields=id,trashed`); const mj=await mr.json(); if(mj&&mj.id&&!mj.trashed) found={id:mj.id}; }catch(e){ if(e.auth) throw e; } }
