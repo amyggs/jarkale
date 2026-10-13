@@ -937,6 +937,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-prog{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 14%,transparent);margin-top:12px;overflow:hidden;}
 .g-prog span{display:block;height:100%;background:currentColor;border-radius:3px;transition:width .35s ease;}
 [data-palette="ampiainen"]:not([data-theme="light"]) .g-prog span{background:var(--hi);}
+.ex-ss{display:inline-block;margin:2px 0 6px;padding:3px 8px;border-radius:6px;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));font:800 12px Manrope,system-ui,sans-serif;}
 .g-seg{display:flex;gap:6px;margin-top:10px;}
 .g-seg button{flex:1;min-height:40px;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 4px;}
 .g-seg button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
@@ -1318,7 +1319,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.24</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.25</span>
       </div>
     </div>
   </div>
@@ -1352,6 +1353,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.25", d:"lokakuu 2026", items:[
+    "Treeni: supersarjat näkyvät korostettuna merkkinä liikkeen alla (⇄ Supersarja: …).",
+    "Treeni: jos lisäät liikkeen, jonka kaltainen on jo treenissä tekemättä (esim. Etunosto ja Etunostot levypainolla), sovellus kysyy, kirjataanko olemassa olevaan. Näin samaa liikettä ei kirjata kahdesti."
+  ]},
   {v:"2.18.24", d:"lokakuu 2026", items:[
     "Kosketusvärinälle voi valita voimakkuuden: kevyt, normaali tai voimakas. Värinä tuntuu nyt myös painon, unen ja askelten +/−-napeissa.",
     "Taukoajastimen äänelle voi valita tason: hiljainen, normaali tai kova. ▶-napista voi kokeilla ääntä.",
@@ -7563,9 +7568,22 @@ function gRenameEx(sid,ei){
   const s=gSession(sid); const ex=s.exercises[ei];
   ex.name=v; ex.key=exKey(v); ex.renamed=true; GU.rename=null; GU.menu=null; gymSave(); renderGym();
 }
+// v2.18.25: onko treenissä jo samankaltainen liike, jota ei ole vielä tehty (esim. "Etunosto" vs. "Etunostot levypainolla")
+function similarEx(s,name){
+  const stem=w=>String(w||"").toLowerCase().replace(/[^a-zåäö]/g,"").slice(0,6);
+  const a=stem(String(name).trim().split(/\s+/)[0]); if(a.length<5) return -1;
+  return s.exercises.findIndex(e=>!e.skipped&&!doneSets(e).length&&stem(e.name.split(/\s+/)[0])===a);
+}
 function gAddEx(sid){
   const inp=document.getElementById("g-addex"); const p=parseExLine(inp&&inp.value); if(!p) return;
-  const s=gSession(sid); const prev=prevFor(exKey(p.name),s);
+  const s=gSession(sid);
+  const si=similarEx(s,p.name);
+  if(si>=0&&confirm(`Treenissä on jo liike "${s.exercises[si].name}". Kirjataanko siihen?\n\nOK = siirry siihen · Peruuta = lisää "${p.name}" uutena liikkeenä`)){
+    const ex=s.exercises[si]; inp.value=""; GU.expanded[ex.id]=true; GU.menu=null; renderGym();
+    setTimeout(()=>{ const el=document.querySelector(`[data-ex="${ex.id}"]`); if(el){ el.scrollIntoView({behavior:"smooth",block:"start"}); G_FLASH.add("mini-"+ex.id); } },50);
+    return;
+  }
+  const prev=prevFor(exKey(p.name),s);
   const n=p.sets||(prev?prev.sets.length:3);
   s.exercises.push({id:gid(),key:exKey(p.name),name:p.name,goal:goalFields(p),note:p.note||"",
     skipped:false,added:true,feel:null,userNote:"",sets:[...Array(n)].map(()=>({kg:null,reps:null,done:false}))});
@@ -8049,7 +8067,7 @@ function gymSessionHTML(s){
       h+=`<button class="ex mini${G_FLASH.has("mini-"+ex.id)?" pop":""}" onclick="GU.expanded['${ex.id}']=true;renderGym()"><span class="ok"${allDone?"":` style="color:var(--dim)"`}>${ico("check",18)}</span><span class="ex-n">${esc(ex.name)}</span><span class="st">${setsTxt(done)}${ex.feel?` · ${feelTxt(ex.feel).toLowerCase()}`:""}${allDone?"":`<br>${done.length}/${ex.sets.length} sarjaa`}</span></button>`; return;
     }
     const prevSets=setsBefore(ex.key,s);
-    h+=`<div class="ex${live&&ei===firstOpen?" active":""}">
+    h+=`<div class="ex${live&&ei===firstOpen?" active":""}" data-ex="${ex.id}">
       <div class="ex-top">${GU.rename===ex.id?`<input class="g-in" id="g-rename" value="${esc(ex.name)}" style="flex:1" onkeydown="if(event.key==='Enter')gRenameEx('${sid}',${ei})"><button class="tr-go" onclick="gRenameEx('${sid}',${ei})">OK</button>`
         :`<span class="ex-n">${esc(ex.name)}</span><button class="ex-more" aria-label="Lisätoiminnot" onclick="GU.menu=GU.menu==='${ex.id}'?null:'${ex.id}';GU.rename=null;renderGym()">⋯</button>`}</div>`;
     if(GU.menu===ex.id&&GU.rename!==ex.id){
@@ -8058,7 +8076,8 @@ function gymSessionHTML(s){
     }
     const gt=goalTxt(ex.goal);
     if(gt) h+=`<div class="ex-goal">Tavoite ${gt}</div>`;
-    if(ex.note) h+=`<div class="ex-prev">${esc(ex.note)}</div>`;
+    // v2.18.25: supersarja näkyvänä merkkinä, ei pienenä huomiotekstinä
+    if(ex.note){ const m=/^Supersarja:\s*(.+)$/i.exec(ex.note); h+=m?`<div class="ex-ss">⇄ Supersarja: ${esc(m[1])}</div>`:`<div class="ex-prev">${esc(ex.note)}</div>`; }
     if(prev){
       h+=`<div class="ex-prev">Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${prev.note?` <button class="nt" onclick="GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}</div>`;
       if(prev.note&&GU.prevNote[ex.id]) h+=`<div class="ex-pnote">${esc(prev.note)}</div>`;
