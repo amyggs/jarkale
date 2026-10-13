@@ -1315,7 +1315,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.22</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.23</span>
       </div>
     </div>
   </div>
@@ -1349,6 +1349,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.23", d:"lokakuu 2026", items:[
+    "Kosketusvärinä tuntuu nyt myös Kirjaa-näkymän napeissa. Ne olivat aiemmin niin lyhyitä, ettei moni puhelin värissyt ollenkaan."
+  ]},
   {v:"2.18.22", d:"lokakuu 2026", items:[
     "Kosketusvärinän voi kytkeä pois: Asetukset → Tekniset asetukset. Oletuksena päällä."
   ]},
@@ -2582,7 +2585,8 @@ function formatSleep(h){
 }
 function calcBMI(w,h){return(w&&h)?+(w/((h/100)**2)).toFixed(1):null;}
 // v2.18.22: kosketusvärinän voi kytkeä pois (Asetukset → Tekniset asetukset). Ajastimen hälytysvärinä on oma asetuksensa.
-function haptic(ms=8){try{if(S.settings&&S.settings.haptics===false) return; if(navigator.vibrate)navigator.vibrate(ms);}catch(_){}}
+// v2.18.23: alle 15 ms värinä ei tunnu monissa puhelimissa (Kirjaa-näkymän napit olivat 6–8 ms) → vähintään 15 ms
+function haptic(ms=15){try{if(S.settings&&S.settings.haptics===false) return; if(navigator.vibrate)navigator.vibrate(Math.max(15,ms));}catch(_){}}
 function renderHapticsSection(){
   const el=document.getElementById("haptics-section"); if(!el) return;
   const on=S.settings.haptics!==false;
