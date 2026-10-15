@@ -937,6 +937,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-prog{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 14%,transparent);margin-top:12px;overflow:hidden;}
 .g-prog span{display:block;height:100%;background:currentColor;border-radius:3px;transition:width .35s ease;}
 [data-palette="ampiainen"]:not([data-theme="light"]) .g-prog span{background:var(--hi);}
+.g-tot{margin-top:8px;border-top:1px solid var(--surf2);}
+.g-tot>div{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:2px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);}
+.g-tot .d{min-width:0;}
+.g-tot b{color:var(--text);font-weight:800;font-size:16px;text-align:right;}
+.g-tot em{grid-column:1/-1;font-style:normal;font-weight:600;font-size:12px;color:var(--dim);}
+.g-tot em.ok{color:var(--text);font-weight:800;}
 .ex-ss{display:inline-block;margin:2px 0 6px;padding:3px 8px;border-radius:6px;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));font:800 12px Manrope,system-ui,sans-serif;}
 .g-seg{display:flex;gap:6px;margin-top:10px;}
 .g-seg button{flex:1;min-height:40px;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 4px;}
@@ -1319,7 +1325,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.25</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.26</span>
       </div>
     </div>
   </div>
@@ -1353,6 +1359,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.26", d:"lokakuu 2026", items:[
+    "Liikkeen kehityskuvaajaan uusi mittari \"Toistot yht.\": kerran tehtyjen sarjojen toistot yhteensä. Viimeisten kertojen listassa näkyvät sarjamäärä ja painot. Muutos edelliseen kertaan näytetään vain, kun paino ja sarjamäärä ovat samat, muuten ero merkitään."
+  ]},
   {v:"2.18.25", d:"lokakuu 2026", items:[
     "Treeni: supersarjat näkyvät korostettuna merkkinä liikkeen alla (⇄ Supersarja: …).",
     "Treeni: jos lisäät liikkeen, jonka kaltainen on jo treenissä tekemättä (esim. Etunosto ja Etunostot levypainolla), sovellus kysyy, kirjataanko olemassa olevaan. Näin samaa liikettä ei kirjata kahdesti."
@@ -8240,12 +8249,26 @@ function exerciseHistory(key){
 // Kehityskäyrä (v2.17.4). Oletuksena arvioitu 1RM, joka nousee sekä kuorman että toistojen kasvaessa: tuplaprogressiossa
 // (80 × 8 → 80 × 10 → 82,5 × 8) pelkkä paino jäisi vaakasuoraksi. Jokaisen pisteen kohdalla näkyy todellinen sarja.
 // Kehonpainoliikkeissä käyrä on parhaan sarjan toistot.
+// v2.18.26: "Toistot yht." = kerran kaikkien kuitattujen sarjojen (doneSets) toistot yhteensä. Kuvaileva:
+// muutos edelliseen näytetään vain, kun sarjamäärä ja painot ovat samat; muuten ero merkitään.
+const totReps=x=>x.sets.reduce((n,r)=>n+(+r.reps||0),0);
+const kgSig=x=>x.sets.map(r=>r.kg==null?"bw":String(r.kg)).sort().join("|");
+function totCompare(cur,prev){
+  if(!prev) return {ok:false,why:""};
+  const setsCh=cur.sets.length!==prev.sets.length, kgCh=kgSig(cur)!==kgSig(prev);
+  if(!setsCh&&!kgCh) return {ok:true,d:totReps(cur)-totReps(prev)};
+  return {ok:false,why:[kgCh?"paino muuttui":"",setsCh?"sarjamäärä muuttui":""].filter(Boolean).join(", ")};
+}
+function kgDesc(x){
+  const g=[]; x.sets.forEach(r=>{ const k=r.kg==null?null:r.kg; const f=g.find(y=>y.k===k); if(f) f.n++; else g.push({k,n:1}); });
+  return g.map(y=>`${y.k==null?"kehonpaino":fmtKg(y.k)+" kg"}${g.length>1?` ×${y.n}`:""}`).join(", ");
+}
 function gymChartHTML(H){
   const anyKg=H.some(x=>x.top.kg!=null);
-  const data=anyKg?H.filter(x=>x.top.kg!=null):H;
+  const mode=GU.chartMode==="tot"?"tot":anyKg?(GU.chartMode||"e1"):"reps";
+  const data=mode==="tot"?H:anyKg?H.filter(x=>x.top.kg!=null):H;
   if(data.length<2) return "";
-  const mode=anyKg?(GU.chartMode||"e1"):"reps";
-  const val=x=>mode==="e1"?x.e1:mode==="kg"?x.top.kg:x.top.reps;
+  const val=x=>mode==="tot"?totReps(x):mode==="e1"?x.e1:mode==="kg"?x.top.kg:x.top.reps;
   const pts=data.slice(-16), W=340, Hh=168, padX=22, padT=26, padB=14;
   const ys=pts.map(val); let mn=Math.min(...ys), mx=Math.max(...ys);
   if(mx-mn<1e-9){ mn-=1; mx+=1; }
@@ -8253,22 +8276,34 @@ function gymChartHTML(H){
   // Tunnisteet: kaikki, jos pisteitä on vähän; muuten ensimmäinen, viimeinen ja paras
   const bi=ys.indexOf(Math.max(...ys));
   const lab=i=>pts.length<=7||i===0||i===pts.length-1||i===bi;
-  const set=x=>x.top.kg!=null?`${fmtKg(x.top.kg)}×${x.top.reps}`:`${x.top.reps}`;
-  const title=mode==="e1"?"Arvioitu 1RM (kg)":mode==="kg"?"Paras sarja, paino (kg)":"Paras sarja, toistot";
-  const unit=mode==="reps"?" toistoa":" kg";
+  const set=x=>mode==="tot"?String(totReps(x)):x.top.kg!=null?`${fmtKg(x.top.kg)}×${x.top.reps}`:`${x.top.reps}`;
+  const title=mode==="tot"?"Toistot yhteensä (tehdyt sarjat)":mode==="e1"?"Arvioitu 1RM (kg)":mode==="kg"?"Paras sarja, paino (kg)":"Paras sarja, toistot";
+  const unit=mode==="reps"||mode==="tot"?" toistoa":" kg";
   const first=ys[0], last=ys[ys.length-1], diff=last-first;
-  const diffTxt=Math.abs(diff)<0.05?"ennallaan":`${diff>0?"+":"−"}${fmtKg(Math.round(Math.abs(diff)*10)/10)}${unit}`;
+  let diffTxt=Math.abs(diff)<0.05?"ennallaan":`${diff>0?"+":"−"}${fmtKg(Math.round(Math.abs(diff)*10)/10)}${unit}`;
+  let sumTxt=null;
+  if(mode==="tot"){ const c=totCompare(pts[pts.length-1],pts[pts.length-2]);
+    sumTxt=c.ok?`Viimeksi vs. edellinen: <b>${c.d===0?"ennallaan":(c.d>0?"+":"−")+Math.abs(c.d)+" toistoa"}</b> (sama paino ja sarjamäärä)`:`Viimeksi vs. edellinen: <b>ei suoraan vertailukelpoinen</b> · ${c.why}`;
+    diffTxt=c.ok?(c.d===0?"ennallaan":(c.d>0?"+":"−")+Math.abs(c.d)+" toistoa"):"ei vertailukelpoinen"; }
+  const ncmp=i=>mode==="tot"&&i>0&&!totCompare(pts[i],pts[i-1]).ok;
   let h=`<div class="g-chart"><div class="g-chart-h"><span class="lbl-small" style="margin:0">${title}</span>`;
-  if(anyKg) h+=`<span class="g-seg"><button class="${mode==="e1"?"on":""}" aria-pressed="${mode==="e1"}" onclick="GU.chartMode='e1';renderGym()">1RM</button><button class="${mode==="kg"?"on":""}" aria-pressed="${mode==="kg"}" onclick="GU.chartMode='kg';renderGym()">Paino</button></span>`;
-  h+=`</div><div class="g-chart-sum">${gDay(pts[0].s.date)} → ${gDay(pts[pts.length-1].s.date)}: <b>${diffTxt}</b></div>
+  h+=`<span class="g-seg">${anyKg?`<button class="${mode==="e1"?"on":""}" aria-pressed="${mode==="e1"}" onclick="GU.chartMode='e1';renderGym()">1RM</button><button class="${mode==="kg"?"on":""}" aria-pressed="${mode==="kg"}" onclick="GU.chartMode='kg';renderGym()">Paino</button>`:`<button class="${mode==="reps"?"on":""}" aria-pressed="${mode==="reps"}" onclick="GU.chartMode='reps';renderGym()">Paras</button>`}<button class="${mode==="tot"?"on":""}" aria-pressed="${mode==="tot"}" onclick="GU.chartMode='tot';renderGym()">Toistot yht.</button></span>`;
+  h+=`</div><div class="g-chart-sum">${sumTxt||`${gDay(pts[0].s.date)} → ${gDay(pts[pts.length-1].s.date)}: <b>${diffTxt}</b>`}</div>
     <svg viewBox="0 0 ${W} ${Hh}" width="100%" style="display:block;height:auto" role="img" aria-label="${title}, ${pts.length} kertaa, muutos ${diffTxt}">
       <line x1="${padX}" x2="${W-padX}" y1="${Hh-padB}" y2="${Hh-padB}" stroke="var(--bord)" stroke-width="1"/>
       <polyline fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round" points="${pts.map((x,i)=>`${X(i).toFixed(1)},${Y(val(x)).toFixed(1)}`).join(" ")}"/>
-      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(val(x)).toFixed(1)}" r="${i===bi?5:3.5}" fill="${i===bi?"var(--hi,var(--orange))":"var(--surf)"}" stroke="var(--text)" stroke-width="1.5"/>`).join("")}
+      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(val(x)).toFixed(1)}" r="${i===bi?5:3.5}" fill="${i===bi?"var(--hi,var(--orange))":"var(--surf)"}" stroke="var(--text)" stroke-width="1.5"${ncmp(i)?` stroke-dasharray="2 2"`:""}/>`).join("")}
       ${pts.map((x,i)=>lab(i)?`<text x="${Math.min(W-4,Math.max(4,X(i))).toFixed(1)}" y="${(Y(val(x))-10).toFixed(1)}" text-anchor="${i===0?"start":i===pts.length-1?"end":"middle"}" font-size="11" font-weight="700" fill="var(--text)" stroke="var(--surf)" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="Manrope,system-ui,sans-serif">${set(x)}</text>`:"").join("")}
     </svg>
-    <div class="g-chart-ax"><span>${gDay(pts[0].s.date)}</span><span>${gDay(pts[pts.length-1].s.date)}</span></div></div>`;
-  return h;
+    <div class="g-chart-ax"><span>${gDay(pts[0].s.date)}</span><span>${gDay(pts[pts.length-1].s.date)}</span></div>`;
+  if(mode==="tot"){
+    // Viimeiset kerrat: sarjamäärä, painot ja muutos edelliseen vain vertailukelpoisena
+    h+=`<div class="g-tot">${pts.map((x,i)=>({x,i})).slice(-5).reverse().map(({x,i})=>{ const c=totCompare(x,pts[i-1]);
+      const dt=i===0?"":c.ok?(c.d===0?"±0 edelliseen":(c.d>0?"+":"−")+Math.abs(c.d)+" edelliseen"):"≠ "+c.why;
+      return `<div><span class="d">${gDay(x.s.date)} · ${x.sets.length} sarjaa · ${kgDesc(x)}</span><b>${totReps(x)}</b>${dt?`<em class="${c.ok?"ok":""}">${dt}</em>`:""}</div>`; }).join("")}</div>
+      <div class="g-stats-note">Katkoviivainen piste: paino tai sarjamäärä muuttui edellisestä, joten toistojen summa ei ole suoraan vertailukelpoinen.</div>`;
+  }
+  return h+`</div>`;
 }
 function gymExerciseHTML(key){
   const H=exerciseHistory(key);
