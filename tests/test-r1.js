@@ -672,10 +672,10 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     { const h=await p.evaluate(()=>{const R={weekStart:'2026-10-05',weekEnd:'2026-10-11',logged:7,passed:7,enough:true,complete:true,factors:[],pains:[],training:{n:2,goal:4,outcomeN:2,outcomes:{worse:0,normal:1,better:1}},sleep:{avg:6.5,n:7,below:7,goal:7},dayState:{n:1,loaded:0,normal:1,recovered:0}};return weekRecapHTML(R);});
       ok(/>Normaalisti<b>1<\/b>/.test(h)&&/>Kuormittunut<b>0<\/b>/.test(h)&&!/<b>1<\/b> normaalisti/.test(h)&&/6 h 30 min/.test(h)&&/2 alle tavoitteen/.test(h),'viikkoyhteenveto: lukumäärät muodossa "Normaalisti 1", uni h min'); }
     // v2.14.0: teemat
-    ok(await p.evaluate(()=>document.documentElement.getAttribute('data-palette'))==='kaurapuuro','oletusteema Kaurapuuro');
+    ok(await p.evaluate(()=>document.documentElement.getAttribute('data-palette'))==='ampiainen','oletusteema Järkäle (ampiainen)');
     { const dd=await p.evaluate(()=>{const e=document.getElementById('date-display'),b=e.querySelector('.vko-badge');const r=e.getBoundingClientRect(),q=b.getBoundingClientRect();return {t:e.innerText,one:Math.abs(r.top-q.top)<14&&e.scrollWidth<=e.clientWidth+1};});
       ok(/VKO \d+/.test(dd.t)&&!/20\d\d/.test(dd.t)&&dd.one,'viikkonumero samalla rivillä, ei kuluvaa vuotta ('+dd.t.replace(/\n/g,' ')+')'); }
-    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','tekstitv','manageri','kaurapuuro']){
+    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','tekstitv','manageri','hahmo','hiscore','kaurapuuro']){
       const r=await p.evaluate(pl=>{applyPalette(pl);const b=document.querySelector('#stars-recovery button.active')||document.querySelector('#stars-recovery button');
         const cs=getComputedStyle(b);return {attr:document.documentElement.getAttribute('data-palette'),saved:JSON.parse(localStorage.getItem('seuranta-settings')).palette,bg:cs.backgroundColor,fg:cs.color};},pal);
       ok(r.attr===pal&&r.saved===pal&&r.bg!==r.fg,'teema '+pal+' asettuu ja tallentuu');

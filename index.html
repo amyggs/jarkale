@@ -1345,6 +1345,141 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="tekstitv"] .tr-list{padding:0!important;}
 [data-palette="tekstitv"] .tr-row{padding-left:10px!important;padding-right:10px!important;}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap,#track-recovery-wrap,#track-motivation-wrap){margin-bottom:8px;}
+/* ── v2.18.42 Hahmo (roolipelin hahmoruutu) ja Hi-score (pelihalli). Fontit repossa (OFL). */
+@font-face{font-family:"J Cinzel";font-weight:600;src:url(fonts/cinzel-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Cinzel";font-weight:700;src:url(fonts/cinzel-latin-700-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Alegreya Sans";font-weight:400;src:url(fonts/alegreya-sans-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Alegreya Sans";font-weight:500;src:url(fonts/alegreya-sans-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Alegreya Sans";font-weight:700;src:url(fonts/alegreya-sans-latin-700-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Press Start";src:url(fonts/press-start-2p-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Exo 2";font-weight:500;src:url(fonts/exo-2-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Exo 2";font-weight:600;src:url(fonts/exo-2-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Exo 2";font-weight:700;src:url(fonts/exo-2-latin-700-normal.woff2) format("woff2");font-display:swap;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 24px 0 4px!important;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) #view-log .lbl-small{min-width:0;flex:1 1 auto;white-space:normal!important;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) #view-log button[onclick^="toggleFieldHint"]{flex-shrink:0;width:26px;height:26px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;}
+:is([data-palette="hahmo"],[data-palette="hiscore"]) #nav button svg,:is([data-palette="hahmo"],[data-palette="hiscore"]) #nav button svg *{stroke:currentColor!important;}
+
+/* Hahmo: tumma = kivi ja kulta, vaalea = päivänvalossa vaalea kivi ja tummempi kulta */
+:root[data-palette="hahmo"]{
+  --h-gold:#D9AE4E; --h-gold-hi:#F2D27A; --h-gold-lo:#B8913A; --h-frame-in:#5A4524; --h-card-a:#2A2219; --h-card-b:#1C1712; --h-well:#120F0B; --h-btn-a:#3A3024; --h-btn-b:#251E16; --h-xp:#B07FD9; --h-bg-a:#221C14; --h-bg-b:#0B0907; --h-glow:rgba(217,174,78,.35);
+  --bg:#15120E; --surf:#211B14; --surf2:#2C241A; --bord:#6B5229; --text:#EDE3CC; --dim:#AE9F82;
+  --orange:#D9AE4E; --yellow:#D9AE4E; --blue:#6F98E6; --green:#7CC05A; --red:#D9574A; --purple:#B07FD9;
+  --card-bg:#211B14; --header-bg:#15120E; --nav-bg:#0F0C09; --shadow:none;
+  --seg-on:#D9AE4E; --on-accent:#1A140C; --hi:#D9AE4E; --hi2:#B8913A; --hi-ink:#1A140C; --ol:#6B5229; --olbg:transparent; color-scheme:dark;
+}
+:root[data-palette="hahmo"][data-theme="light"]{
+  --h-gold:#8A6416; --h-gold-hi:#7A5510; --h-gold-lo:#A87E2A; --h-frame-in:#D8C59A; --h-card-a:#FBF7EE; --h-card-b:#F1E9D6; --h-well:#FFFDF8; --h-btn-a:#EFE5CF; --h-btn-b:#E0D2B2; --h-xp:#7A4FB8; --h-bg-a:#EEE7D7; --h-bg-b:#D9CFB8; --h-glow:transparent;
+  --bg:#E6DECB; --surf:#FBF7EE; --surf2:#EFE5CF; --bord:#B89A5E; --text:#2A2116; --dim:#6E5F45;
+  --orange:#8A6416; --yellow:#8A6416; --blue:#2F5DB0; --green:#3E7A22; --red:#A93226; --purple:#7A4FB8;
+  --nav-bg:#2A2116; --seg-on:#D9AE4E; --on-accent:#1A140C; --hi:#D9AE4E; --hi-ink:#1A140C; --ol:#B89A5E; color-scheme:light;
+}
+[data-palette="hahmo"] body{background:radial-gradient(ellipse at 50% 30%,var(--h-bg-a) 0%,var(--bg) 60%,var(--h-bg-b) 100%) fixed;}
+[data-palette="hahmo"] *{font-family:"J Alegreya Sans",sans-serif!important;}
+[data-palette="hahmo"] #app *:not(.ws-dot){border-radius:3px!important;}
+[data-palette="hahmo"] :is(.brand,.tr-h1,.tr-sec,.section-head,.lbl-small){font-family:"J Cinzel",serif!important;}
+[data-palette="hahmo"] .brand{color:var(--h-gold)!important;font-weight:700!important;letter-spacing:.06em;text-transform:uppercase;}
+[data-palette="hahmo"] .tr-h1{color:var(--h-gold-hi);font-weight:700;letter-spacing:.03em;}
+[data-palette="hahmo"] :is(.tr-sec,.section-head){color:var(--h-gold)!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.14em!important;font-size:13px!important;text-align:center;}
+[data-palette="hahmo"] .tr-sec::before{content:"✦  ";} [data-palette="hahmo"] .tr-sec::after{content:"  ✦";}
+[data-palette="hahmo"] .lbl-small{color:var(--h-gold)!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.08em;font-size:12px!important;}
+[data-palette="hahmo"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){background:linear-gradient(180deg,var(--h-card-a),var(--h-card-b))!important;border:1px solid var(--h-gold-lo)!important;box-shadow:inset 0 0 0 2px var(--h-card-b),inset 0 0 0 3px var(--h-frame-in),0 2px 10px rgba(0,0,0,.25)!important;}
+[data-palette="hahmo"] .tr-row{border-top-color:var(--h-frame-in)!important;}
+[data-palette="hahmo"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b,.gt .gt-tm){color:var(--h-gold-hi)!important;font-weight:700!important;text-shadow:0 0 8px var(--h-glow);}
+[data-palette="hahmo"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:linear-gradient(180deg,#F0CE6E,#B8913A)!important;color:#1A140C!important;font-weight:700!important;box-shadow:0 0 10px var(--h-glow)!important;border:1px solid #F7E3A4!important;}
+[data-palette="hahmo"] :is(.tr-go.ghost,.tr-pill,.tr-pick,.stepper-btn,.stars button:not(.active)){background:linear-gradient(180deg,var(--h-btn-a),var(--h-btn-b))!important;color:var(--text)!important;border:1px solid var(--bord)!important;}
+[data-palette="hahmo"] :is(input,textarea){background:var(--h-well)!important;border:1px solid var(--h-frame-in)!important;color:var(--h-gold-hi)!important;}
+[data-palette="hahmo"] .ws-day .ws-dot{background:var(--h-well)!important;border:1px solid var(--bord)!important;transform:rotate(45deg) scale(.82);}
+[data-palette="hahmo"] .ws-day .ws-dot svg{transform:rotate(-45deg);}
+[data-palette="hahmo"] .ws-day.logged .ws-dot{background:linear-gradient(135deg,#F0CE6E,#B8913A)!important;color:#1A140C!important;box-shadow:0 0 8px var(--h-glow);}
+[data-palette="hahmo"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--h-gold)!important;}
+[data-palette="hahmo"] #header{background:linear-gradient(180deg,#1E1913,#15120E)!important;border-bottom:1px solid #B8913A!important;}
+[data-palette="hahmo"] #header :is(.brand){color:#D9AE4E!important;} [data-palette="hahmo"] #header #streak-count{color:#F2D27A!important;}
+[data-palette="hahmo"] :is(#nav,nav){background:#0F0C09!important;border-top:1px solid #B8913A!important;}
+[data-palette="hahmo"] #nav button,[data-palette="hahmo"] #nav button *{color:#AE9F82!important;} [data-palette="hahmo"] #nav button.active,[data-palette="hahmo"] #nav button.active *{color:#F2D27A!important;}
+[data-palette="hahmo"] #nav button::before{background:#D9AE4E!important;}
+[data-palette="hahmo"] .g-prog{height:12px;background:var(--h-well);border:1px solid var(--bord);border-radius:0!important;} [data-palette="hahmo"] .g-prog span{background:linear-gradient(90deg,#7A5BD9,var(--h-xp))!important;border-radius:0!important;}
+[data-palette="hahmo"] .ex-prmsg{background:linear-gradient(180deg,#F0CE6E,#B8913A);color:#1A140C;border:1px solid #F7E3A4;text-align:center;}
+[data-palette="hahmo"] .ex-prmsg::before{content:"LEVEL UP!  ";font-family:"J Cinzel",serif!important;font-weight:700;letter-spacing:.1em;}
+[data-palette="hahmo"] .pr-tag,[data-palette="hahmo"] .set .pr{background:var(--h-xp)!important;color:#fff!important;}
+[data-palette="hahmo"] .gt{background:var(--surf);border:1px solid #B8913A;color:var(--text);} [data-palette="hahmo"] .gt button{background:var(--surf2);color:var(--text);border:1px solid var(--bord);} [data-palette="hahmo"] .gt button.p{background:#D9AE4E;color:#1A140C;}
+[data-palette="hahmo"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px #D9AE4E;}
+[data-palette="hahmo"] #header img{filter:sepia(1) saturate(1.6) hue-rotate(-8deg) brightness(.95);}
+
+/* Hi-score: tumma = neon yössä, vaalea = pelihallin päiväkuva ilman hehkua */
+:root[data-palette="hiscore"]{
+  --a-mag:#FF2BD6; --a-cyan:#20E3FF; --a-yel:#FFE53B; --a-grn:#39FF88; --a-deep:#07020F; --a-panel:rgba(14,6,32,.85); --a-row:#2A1250; --a-line:#3B1A6E;
+  --a-gmag:rgba(255,43,214,.35); --a-gcyan:rgba(32,227,255,.5); --a-gyel:rgba(255,229,59,.6); --a-grid:rgba(255,43,214,.22); --a-bg2:#120533; --a-bg3:#2A0845;
+  --bg:#07020F; --surf:#0E0620; --surf2:#170A30; --bord:#3B1A6E; --text:#F2F0FF; --dim:#A99BD9;
+  --orange:#FF2BD6; --yellow:#FFE53B; --blue:#20E3FF; --green:#39FF88; --red:#FF4D6D; --purple:#B26BFF;
+  --card-bg:#0E0620; --header-bg:#07020F; --nav-bg:#07020F; --shadow:none;
+  --seg-on:#FF2BD6; --on-accent:#07020F; --hi:#FFE53B; --hi2:#E6CC2A; --hi-ink:#07020F; --ol:#3B1A6E; --olbg:transparent; color-scheme:dark;
+}
+:root[data-palette="hiscore"][data-theme="light"]{
+  --a-mag:#C2179E; --a-cyan:#0A7FA0; --a-yel:#7A5C00; --a-grn:#0F8F48; --a-deep:#FFFFFF; --a-panel:rgba(255,255,255,.92); --a-row:#EADFFB; --a-line:#C9B6EE;
+  --a-gmag:transparent; --a-gcyan:transparent; --a-gyel:transparent; --a-grid:rgba(194,23,158,.12); --a-bg2:#F1EAFE; --a-bg3:#FBE3F5;
+  --bg:#F7F3FF; --surf:#FFFFFF; --surf2:#F1EAFE; --bord:#C9B6EE; --text:#1A0F33; --dim:#5B4A86;
+  --orange:#C2179E; --yellow:#7A5C00; --blue:#0A7FA0; --green:#0F8F48; --red:#C8283F; --purple:#6B2FC0;
+  --nav-bg:#1A0F33; --seg-on:#C2179E; --on-accent:#FFFFFF; --hi:#C2179E; --hi-ink:#fff; --ol:#C9B6EE; color-scheme:light;
+}
+[data-palette="hiscore"] body{background:linear-gradient(180deg,var(--bg) 0%,var(--a-bg2) 70%,var(--a-bg3) 100%) fixed;}
+[data-palette="hiscore"] .view{background:transparent;}
+[data-palette="hiscore"] body::after{content:"";position:fixed;left:-50%;right:-50%;bottom:0;height:34vh;pointer-events:none;z-index:0;background:repeating-linear-gradient(90deg,var(--a-grid) 0 1px,transparent 1px 60px),repeating-linear-gradient(0deg,var(--a-grid) 0 1px,transparent 1px 40px);transform:perspective(300px) rotateX(60deg);transform-origin:bottom;-webkit-mask-image:linear-gradient(to top,#000,transparent);mask-image:linear-gradient(to top,#000,transparent);}
+[data-palette="hiscore"] #app{z-index:1;}
+[data-palette="hiscore"] *{font-family:"J Exo 2",sans-serif!important;}
+[data-palette="hiscore"] #app *:not(.ws-dot){border-radius:2px!important;}
+[data-palette="hiscore"] :is(.brand,.tr-sec,.section-head){font-family:"J Press Start",monospace!important;}
+[data-palette="hiscore"] #header .brand{font-size:15px!important;color:#FFE53B!important;text-shadow:0 0 8px rgba(255,229,59,.7),2px 2px 0 #FF2BD6;}
+[data-palette="hiscore"] .tr-h1{font-weight:700;font-style:italic;color:var(--a-cyan);text-shadow:0 0 10px var(--a-gcyan);text-transform:uppercase;}
+[data-palette="hiscore"] :is(.tr-sec,.section-head){color:var(--a-cyan)!important;font-size:10px!important;letter-spacing:.08em!important;text-transform:uppercase;text-shadow:0 0 8px var(--a-gcyan);line-height:1.6;}
+[data-palette="hiscore"] .tr-sec::before{content:"▶ ";color:var(--a-mag);}
+[data-palette="hiscore"] .lbl-small{color:var(--a-mag)!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.1em;font-size:12px!important;}
+[data-palette="hiscore"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){background:var(--a-panel)!important;border:1px solid var(--a-mag)!important;box-shadow:0 0 12px var(--a-gmag),inset 0 0 14px var(--a-gmag)!important;}
+[data-palette="hiscore"] .tr-row{border-top-color:var(--a-row)!important;}
+[data-palette="hiscore"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b,.gt .gt-tm){color:var(--a-yel)!important;font-weight:700!important;font-style:italic;text-shadow:0 0 10px var(--a-gyel);}
+[data-palette="hiscore"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--a-mag)!important;color:var(--on-accent)!important;font-weight:700!important;box-shadow:0 0 14px var(--a-gmag)!important;}
+[data-palette="hiscore"] :is(.tr-go.ghost,.tr-pill,.tr-pick,.stepper-btn,.stars button:not(.active)){background:transparent!important;color:var(--a-cyan)!important;border:1px solid var(--a-cyan)!important;box-shadow:0 0 8px var(--a-gcyan)!important;}
+[data-palette="hiscore"] :is(input,textarea){background:var(--a-deep)!important;border:1px solid var(--a-line)!important;color:var(--a-yel)!important;}
+[data-palette="hiscore"] .ws-day .ws-dot{background:transparent!important;border:1px solid var(--a-line)!important;}
+[data-palette="hiscore"] .ws-day.logged .ws-dot{background:var(--a-grn)!important;color:var(--a-deep)!important;box-shadow:0 0 10px var(--a-gcyan);}
+[data-palette="hiscore"][data-theme="light"] .ws-day.logged .ws-dot{color:#fff!important;}
+[data-palette="hiscore"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--a-yel)!important;}
+[data-palette="hiscore"] #header{background:#07020F!important;border-bottom:1px solid #FF2BD6!important;box-shadow:0 0 12px rgba(255,43,214,.5);}
+[data-palette="hiscore"] :is(#nav,nav){background:#07020F!important;border-top:1px solid #20E3FF!important;box-shadow:0 0 12px rgba(32,227,255,.4);}
+[data-palette="hiscore"] #nav button,[data-palette="hiscore"] #nav button *{color:#A99BD9!important;} [data-palette="hiscore"] #nav button.active,[data-palette="hiscore"] #nav button.active *{color:#FFE53B!important;filter:drop-shadow(0 0 4px rgba(255,229,59,.8));}
+[data-palette="hiscore"] #nav button::before{background:#FFE53B!important;}
+[data-palette="hiscore"] #header #theme-toggle-btn{color:#fff!important;background:#0E0620!important;border:1px solid #3B1A6E!important;}
+[data-palette="hiscore"] .ex-prmsg{background:var(--a-deep);color:var(--a-yel);border:1px solid var(--a-yel);box-shadow:0 0 14px var(--a-gyel);}
+[data-palette="hiscore"] .ex-prmsg::before{content:"NEW HIGH SCORE!  ";font-family:"J Press Start",monospace!important;font-size:9px;color:var(--a-mag);}
+[data-palette="hiscore"] .pr-tag,[data-palette="hiscore"] .set .pr{background:var(--a-yel)!important;color:var(--a-deep)!important;}
+[data-palette="hiscore"] .gt{background:var(--surf);border:1px solid var(--a-cyan);box-shadow:0 0 14px var(--a-gcyan);color:var(--text);} [data-palette="hiscore"] .gt button{background:transparent;color:var(--a-cyan);border:1px solid var(--a-line);} [data-palette="hiscore"] .gt button.p{background:var(--a-mag);color:var(--on-accent);}
+[data-palette="hiscore"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px var(--a-yel);}
+[data-palette="hiscore"] #header img{filter:hue-rotate(260deg) saturate(2) drop-shadow(0 0 6px rgba(255,43,214,.7));}
+
+/* Käynnistykset */
+.tb-hahmo{background:radial-gradient(ellipse at 50% 40%,#2A2219 0%,#0B0907 75%);}
+.tb-hahmo .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;}
+.tb-hahmo .hm{width:min(86vw,360px);padding:26px 22px;border:1px solid #B8913A;box-shadow:inset 0 0 0 3px #1C1712,inset 0 0 0 4px #5A4524;background:linear-gradient(180deg,#2A2219,#1C1712);color:#EDE3CC;font-family:"J Alegreya Sans",sans-serif!important;opacity:0;transform:scale(.94);animation:hmIn .5s ease .1s forwards;}
+.tb-hahmo .hm *{font-family:inherit!important;}
+.tb-hahmo .hm-t{font-family:"J Cinzel",serif!important;font-weight:700;color:#D9AE4E;text-align:center;font-size:26px;letter-spacing:.1em;text-shadow:0 0 12px rgba(217,174,78,.5);}
+.tb-hahmo .hm-s{text-align:center;color:#AE9F82;font-family:"J Cinzel",serif!important;font-size:12px;letter-spacing:.2em;margin:4px 0 18px;}
+.tb-hahmo .hm-r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #3A2F20;font-size:17px;opacity:0;transition:opacity .25s;}
+.tb-hahmo .hm-r.on{opacity:1;} .tb-hahmo .hm-r b{color:#F2D27A;}
+.tb-hahmo .hm-xp{margin-top:16px;height:12px;border:1px solid #6B5229;background:#120F0B;} .tb-hahmo .hm-xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7A5BD9,#B07FD9);transition:width .9s ease;}
+.tb-hahmo .hm-lv{margin-top:14px;text-align:center;font-family:"J Cinzel",serif!important;font-weight:700;color:#F2D27A;letter-spacing:.14em;opacity:0;}
+.tb-hahmo .hm-lv.on{animation:hmLv .6s ease forwards;}
+@keyframes hmIn{to{opacity:1;transform:none}} @keyframes hmLv{0%{opacity:0;transform:scale(.8)}60%{opacity:1;transform:scale(1.1)}100%{opacity:1;transform:none}}
+.tb-hiscore{background:#07020F;}
+.tb-hiscore .tb-scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:"J Press Start",monospace!important;}
+.tb-hiscore .tb-scr *{font-family:inherit!important;}
+.tb-hiscore .hs-t{color:#FFE53B;font-size:min(6vw,24px);text-shadow:0 0 10px rgba(255,229,59,.7),3px 3px 0 #FF2BD6;}
+.tb-hiscore .hs-ic{color:#20E3FF;font-size:12px;animation:tbBlink .5s steps(1) infinite;}
+.tb-hiscore .hs-tab{width:min(84vw,340px);display:none;}
+.tb-hiscore .hs-h{color:#FF2BD6;font-size:11px;text-align:center;margin-bottom:12px;text-shadow:0 0 8px rgba(255,43,214,.7);}
+.tb-hiscore .hs-r{display:flex;justify-content:space-between;font-size:11px;line-height:2.2;opacity:0;}
+.tb-hiscore .hs-r.on{opacity:1;}
 </style>
 </head>
 <body>
@@ -1693,7 +1828,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.41</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.42</span>
       </div>
     </div>
   </div>
@@ -1727,8 +1862,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.42", d:"lokakuu 2026", items:[
+    "Keltamusta Järkäle-teema (ent. Ampiainen) on nyt oletus. Itse valittu teema pysyy ennallaan.",
+    "Kaksi uutta teemaa: Hahmo (roolipelin hahmoruutu, ennätys on LEVEL UP!) ja Hi-score (pelihallin neonvalot, ennätys on NEW HIGH SCORE!). Molemmissa vaalea ja tumma versio sekä oma käynnistysanimaatio."
+  ]},
   {v:"2.18.41", d:"lokakuu 2026", items:[
-    "Ampiainen-teeman uusi nimi on Black and Yellow, Varkauden värien mukaan. Teema ja asetukset pysyvät ennallaan.",
+    "Ampiainen-teeman uusi nimi on Järkäle, ja se on nyt oletusteema. Jos olet itse valinnut teeman, se pysyy ennallaan.",
     "Kaikilla teemoilla on nyt oma käynnistysanimaatio, kun teema valitaan: Kaurapuurossa ja Magnesiumissa rauhallinen logo ja tervehdys, Black and Yellow'ssa varoitusraidat.",
     "Teksti-TV: tiedot ovat sinisissä laatikoissa, jolloin kokonaisuudet erottuvat paremmin."
   ]},
@@ -2952,18 +3091,20 @@ function updateThemeBtn(){
 }
 // v2.14: teema (väripaletti) erikseen vaalea/tumma-tilasta
 const PALETTES=[
+  {id:"ampiainen",l:"Järkäle",d:"Keltainen ja musta, oletusteema (Varkauden värit)",sw:["#FFD23B","#F1F2EC","#181C1B"]},
   {id:"kaurapuuro",l:"Kaurapuuro",d:"Lämmin ja rauhallinen, alkuperäinen",sw:["#F4F2EC","#E9E1C8","#8C6A0A"]},
   {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
-  {id:"ampiainen",l:"Black and Yellow",d:"Keltainen ja musta, Varkauden värit",sw:["#FFD23B","#F1F2EC","#181C1B"]},
   {id:"kuusnelonen",l:"Kuusnelonen",d:"80-luvun kotitietokone: sininen ruutu tai harmaa",sw:["#40318D","#7869C4","#333333"]},
   {id:"tekstitv",l:"Teksti-TV",d:"Sivu 100: mustalla tai valkoisella",sw:["#000000","#0000FF","#FFFF00"]},
   {id:"manageri",l:"Manageri",d:"90-luvun manageripelin tilastoruudut",sw:["#0A1733","#2F5BAE","#FFD400"]},
+  {id:"hahmo",l:"Hahmo",d:"Roolipelin hahmoruutu: kivi ja kulta",sw:["#15120E","#D9AE4E","#B07FD9"]},
+  {id:"hiscore",l:"Hi-score",d:"Pelihallin neonvalot",sw:["#07020F","#FF2BD6","#20E3FF"]},
   {id:"fosfori",l:"Fosfori",d:"Vihreä kuvaputkipääte, vaaleana LCD-näyttö",sw:["#050B07","#C2E6C6","#5CFF8F"]}
 ];
-function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
+function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"ampiainen"; } // v2.18.42: oletus Järkäle (id ampiainen)
 function applyPalette(p){
   if(PALETTES.some(x=>x.id===p)) setTimeout(()=>themeBoot(p),30);
-  S.settings.palette=PALETTES.some(x=>x.id===p)?p:"kaurapuuro";
+  S.settings.palette=PALETTES.some(x=>x.id===p)?p:"ampiainen";
   document.documentElement.setAttribute("data-palette",S.settings.palette);
   updateMetaThemeColor();
   saveAll(); renderAsetukset(); renderLog();
@@ -3002,6 +3143,24 @@ function themeBoot(pal){
     // Black and Yellow: varoitusraidat pyyhkäisevät, iso nimi ja putki
     o.innerHTML=`<div class="by-stripes"></div><div class="tb-scr"><div class="by-c"><div class="by-name">JÄRKÄLE</div><div class="by-sub">${st>0?`${st} päivän putki`:`${n} kirjausta`}</div></div></div>`;
     at(2100,()=>bootEnd());
+  } else if(pal==="hahmo"){
+    const rows=[["Kirjauksia",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","Varusteltu"]]:[]),["Taso",String(1+Math.floor(n/30))]]; // taso = kirjausmäärä / 30 (kuvaileva leikki, ei arvio kunnosta)
+    o.innerHTML=`<div class="tb-scr"><div class="hm"><div class="hm-t">JÄRKÄLE</div><div class="hm-s">— HAHMO —</div><div class="hm-rs">${rows.map(r=>`<div class="hm-r"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")}</div><div class="hm-xp"><i></i></div><div class="hm-lv">SEIKKAILU JATKUU</div></div></div>`;
+    const rs=[...o.querySelectorAll(".hm-r")];
+    rs.forEach((r,i)=>at(550+i*220,()=>r.classList.add("on")));
+    const t1=550+rs.length*220;
+    at(t1,()=>{ o.querySelector(".hm-xp i").style.width=Math.min(100,30+(st%70))+"%"; });
+    at(t1+900,()=>o.querySelector(".hm-lv").classList.add("on"));
+    at(t1+1900,()=>bootEnd());
+  } else if(pal==="hiscore"){
+    o.innerHTML=`<div class="tb-scr"><div class="hs-t">JÄRKÄLE</div><div class="hs-ic">INSERT COIN</div><div class="hs-tab"><div class="hs-h">HIGH SCORES</div></div></div>`;
+    const tab=o.querySelector(".hs-tab"), ic=o.querySelector(".hs-ic");
+    const R=[["PUTKI",st,"#FFE53B"],["KIRJAUKSET",n,"#20E3FF"],["TREENIT 28PV",Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=new Date(Date.now()-27*864e5).toISOString().slice(0,10)).length,"#39FF88"]];
+    R.forEach((r,i)=>{ const d2=document.createElement("div"); d2.className="hs-r"; d2.style.color=r[2]; d2.innerHTML=`<span>${i+1}. ${esc(r[0])}</span><span>${String(r[1]).padStart(4,"0")}</span>`; tab.appendChild(d2); });
+    at(1000,()=>{ ic.textContent="PRESS START"; });
+    at(1500,()=>{ ic.style.display="none"; tab.style.display="block"; });
+    [...tab.querySelectorAll(".hs-r")].forEach((r,i)=>at(1650+i*250,()=>r.classList.add("on")));
+    at(1650+R.length*250+1100,()=>bootEnd());
   } else if(pal==="tekstitv"){
     const d=new Date(), pad2=x=>String(x).padStart(2,"0"), WD=["su","ma","ti","ke","to","pe","la"];
     const clock=()=>{ const t=new Date(); return `${pad2(t.getHours())}:${pad2(t.getMinutes())}:${pad2(t.getSeconds())}`; };
@@ -9309,7 +9468,7 @@ const PILOT_NEWS=[
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
   {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
    act:null,go:null,skip:()=>!gymOn()},
-  {id:"2026-10-teemat2",title:"Neljä uutta teemaa",text:"Fosfori (vihreä kuvaputkipääte), Kuusnelonen (80-luvun kotitietokone), Teksti-TV (sivu 100) ja Manageri (90-luvun manageripelin tilastoruudut). Kaikissa on vaalea ja tumma versio.",
+  {id:"2026-10-teemat3",title:"Kuusi uutta teemaa",text:"Fosfori, Kuusnelonen, Teksti-TV, Manageri, Hahmo ja Hi-score. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
    act:"Kokeile",go:"theme"},
 ];
 const NEWS_KEY="jarkale-news-seen";

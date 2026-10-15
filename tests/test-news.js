@@ -22,7 +22,7 @@ await p.locator('#news-card button',{hasText:'Yhdistä Driveen'}).click();await 
 ok(await p.evaluate(()=>S.tab==='asetukset'&&getComputedStyle(document.getElementById('stgl-content-data')).display!=='none'),'Yhdistä Driveen vie asetusten varmuuskopio-osioon');
 await p.evaluate(()=>{localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali']));});await p.reload();await p.waitForTimeout(400);
 const t3=await p.locator('#news-card').innerText().catch(()=>'');
-ok(/Ennätykset|ennätykset/i.test(t3)&&/Neljä uutta teemaa/.test(t3)&&(await p.locator('#news-card .ni').count())===2,'uudet uutiset: treeni (sali päällä) ja teemat');
+ok(/Ennätykset|ennätykset/i.test(t3)&&/Kuusi uutta teemaa/.test(t3)&&(await p.locator('#news-card .ni').count())===2,'uudet uutiset: treeni (sali päällä) ja teemat');
 ok((await p.locator('#news-card .ni').first().locator('button').count())===0,'uutinen ilman toimintoa: ei nappia');
 await p.locator('#news-card button',{hasText:'Kokeile'}).click();await p.waitForTimeout(500);
 ok(await p.evaluate(()=>S.tab==='asetukset'&&!!document.getElementById('theme-section')),'Kokeile vie teema-asetuksiin');
