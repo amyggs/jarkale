@@ -1119,7 +1119,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="kuusnelonen"] .tr-row{border-top-color:var(--bord)!important;}
 [data-palette="kuusnelonen"] #app *:not(.ws-dot){border-radius:0!important;}
 /* v2.18.38: kehystetyissä kentissä paino ja uni keskelle (vrt. askeleet), kentän otsikkorivit samankorkuisiksi, jotta 1–5-rivit ovat linjassa */
-:is([data-palette="kuusnelonen"],[data-palette="fosfori"]) :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 26px!important;}
+:is([data-palette="kuusnelonen"],[data-palette="fosfori"]) :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 24px 0 4px!important;}
+[data-palette="kuusnelonen"] :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{font-size:min(30px,7vw)!important;}
+[data-palette="kuusnelonen"] #track-sleep-wrap .sleep-hm b{font-size:min(30px,7vw)!important;}
 :is([data-palette="kuusnelonen"],[data-palette="fosfori"]) #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
 :is([data-palette="kuusnelonen"],[data-palette="fosfori"]) :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
 [data-palette="fosfori"] #track-sleep-wrap .stepper-row>div:not(.editing) input{text-shadow:none!important;}
@@ -1521,7 +1523,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.38</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.39</span>
       </div>
     </div>
   </div>
@@ -1555,6 +1557,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.39", d:"lokakuu 2026", items:[
+    "Kuusnelonen: painon ja unen luvut pienemmällä fontilla, jotta esimerkiksi 108,7 mahtuu kenttään kapealla näytölläkin."
+  ]},
   {v:"2.18.38", d:"lokakuu 2026", items:[
     "Kuusnelonen ja Fosfori: paino ja uni keskellä kehystettyä kenttää. Kuusnelosessa 1–5-valinnat samalla korkeudella ja kaikki kulmat kantikkaita."
   ]},
