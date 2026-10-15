@@ -686,7 +686,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
       const lum=c=>{const m=c.match(/\d+/g).map(Number);return (m[0]*299+m[1]*587+m[2]*114)/1000;};
       ok(lum(fz.dark.bg)<40&&lum(fz.dark.fg)>150&&lum(fz.light.bg)>180&&lum(fz.light.fg)<90,'Fosfori: tumma pääte ja vaalea käänteinen versio '+JSON.stringify([fz.dark.bg,fz.dark.fg,fz.light.bg,fz.light.fg]));
       ok(/Share Tech Mono/.test(fz.dark.ff),'Fosfori: tasalevyinen fontti'); }
-    { const bt=await p.evaluate(async()=>{ const r={}; const mm=window.matchMedia; window.matchMedia=q=>({matches:false,media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
+    { const bt=await p.evaluate(async()=>{ const r={}; await new Promise(x=>setTimeout(x,120)); bootEnd(true); const mm=window.matchMedia; window.matchMedia=q=>({matches:false,media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
         themeBoot('kuusnelonen'); r.k=!!document.querySelector('#theme-boot.tb-kuusnelonen');
         await new Promise(x=>setTimeout(x,700)); r.kTxt=document.querySelector('#theme-boot .tb-txt').textContent;
         document.getElementById('theme-boot').click(); await new Promise(x=>setTimeout(x,450)); r.kSkip=!document.getElementById('theme-boot');

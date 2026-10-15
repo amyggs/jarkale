@@ -1203,7 +1203,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   --t-num:#0000AA; --t-lbl:#0000AA; --t-sub:#007A00; --t-bar:#0000CC; --t-bar-ink:#FFFF00; --t-btn:#0000CC; --t-btn-ink:#FFFFFF; --t-mag:#C000C0;
   --bg:#FFFFFF; --surf:#FFFFFF; --surf2:#F0F0F0; --bord:#0000CC; --text:#000000; --dim:#0000AA;
   --orange:#0000CC; --yellow:#8A7A00; --blue:#0000AA; --green:#007A00; --red:#C00000; --purple:#C000C0;
-  --nav-bg:#0000CC; --seg-on:#0000CC; --on-accent:#FFFFFF; --hi:#0000CC; --hi2:#0000AA; --hi-ink:#FFFFFF; --ol:#0000CC; color-scheme:light;
+  --nav-bg:#0000CC; --seg-on:#FFE600; --on-accent:#000000; --hi:#0000CC; --hi2:#0000AA; --hi-ink:#FFFFFF; --ol:#0000CC; color-scheme:light;
 }
 [data-palette="tekstitv"] body{background:var(--bg);}
 [data-palette="tekstitv"] *{font-family:"J Plex Mono",ui-monospace,monospace!important;}
@@ -1313,6 +1313,38 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .tb-manageri .mg-go{margin-top:22px;align-self:flex-start;background:linear-gradient(180deg,#FFE04D,#E6B800);color:#0A1733;font-weight:700;font-size:18px;letter-spacing:.08em;padding:8px 22px;text-transform:uppercase;opacity:0;}
 .tb-manageri .mg-go.on{opacity:1;animation:mgPulse .5s ease 2;}
 @keyframes mgPulse{50%{transform:scale(1.06)}}
+
+/* v2.18.41 Käynnistykset alkuperäisille teemoille */
+.tb-kaurapuuro{background:#F4F2EC;} .tb-magnesium{background:#F0F1F3;}
+[data-theme="dark"] .tb-kaurapuuro{background:#0E0E0C;} [data-theme="dark"] .tb-magnesium{background:#0D0E10;}
+.tb-kaurapuuro .tb-scr,.tb-magnesium .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.kp-c{display:flex;flex-direction:column;align-items:center;gap:10px;font-family:Manrope,system-ui,sans-serif!important;}
+.kp-c *{font-family:inherit!important;}
+.kp-logo{width:72px;height:72px;border-radius:18px;opacity:0;transform:scale(.8);animation:kpLogo .5s cubic-bezier(.2,1.3,.4,1) .05s forwards;}
+.tb-magnesium .kp-logo{filter:grayscale(1);border-radius:10px;}
+.kp-name{font-weight:800;font-size:38px;letter-spacing:-.02em;color:#1B1A17;}
+[data-theme="dark"] .kp-name{color:#F2F0EA;}
+.kp-name span{display:inline-block;opacity:0;transform:translateY(10px);animation:kpChar .35s ease forwards;}
+.kp-line{height:2px;width:0;background:#C9A227;animation:kpLine .5s ease .95s forwards;}
+.tb-magnesium .kp-line{background:#15171A;height:1px;} [data-theme="dark"] .tb-magnesium .kp-line{background:#E8EAEE;}
+.kp-sub{font-weight:600;font-size:14px;color:#66625A;opacity:0;animation:kpFade .4s ease 1.25s forwards;}
+[data-theme="dark"] .kp-sub{color:#A09D93;}
+.tb-magnesium .kp-name{font-weight:600;letter-spacing:.02em;color:#15171A;} [data-theme="dark"] .tb-magnesium .kp-name{color:#E8EAEE;}
+@keyframes kpLogo{to{opacity:1;transform:none}} @keyframes kpChar{to{opacity:1;transform:none}} @keyframes kpLine{to{width:140px}} @keyframes kpFade{to{opacity:1}}
+.tb-ampiainen{background:#FFD23B;}
+.tb-ampiainen .by-stripes{position:absolute;inset:-20%;background:repeating-linear-gradient(-45deg,#181C1B 0 34px,#FFD23B 34px 68px);transform:translateX(-120%);animation:byWipe 1.1s cubic-bezier(.7,0,.3,1) forwards;}
+@keyframes byWipe{0%{transform:translateX(-120%)}45%{transform:translateX(0)}100%{transform:translateX(120%)}}
+.tb-ampiainen .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.by-c{text-align:center;font-family:Manrope,system-ui,sans-serif!important;opacity:0;animation:byIn .45s cubic-bezier(.2,1.3,.4,1) .75s forwards;}
+.by-c *{font-family:inherit!important;}
+.by-name{font-weight:800;font-size:min(15vw,64px);letter-spacing:-.02em;color:#181C1B;line-height:1;border-bottom:8px solid #181C1B;padding-bottom:6px;}
+.by-sub{margin-top:12px;font-weight:800;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#181C1B;}
+@keyframes byIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+/* Teksti-TV: tiedot laatikoihin, jotta kokonaisuudet erottuvat */
+[data-palette="tekstitv"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){border:2px solid var(--t-bar)!important;padding:10px!important;}
+[data-palette="tekstitv"] .tr-list{padding:0!important;}
+[data-palette="tekstitv"] .tr-row{padding-left:10px!important;padding-right:10px!important;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap,#track-recovery-wrap,#track-motivation-wrap){margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -1661,7 +1693,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.40</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.41</span>
       </div>
     </div>
   </div>
@@ -1695,6 +1727,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.41", d:"lokakuu 2026", items:[
+    "Ampiainen-teeman uusi nimi on Black and Yellow, Varkauden värien mukaan. Teema ja asetukset pysyvät ennallaan.",
+    "Kaikilla teemoilla on nyt oma käynnistysanimaatio, kun teema valitaan: Kaurapuurossa ja Magnesiumissa rauhallinen logo ja tervehdys, Black and Yellow'ssa varoitusraidat.",
+    "Teksti-TV: tiedot ovat sinisissä laatikoissa, jolloin kokonaisuudet erottuvat paremmin."
+  ]},
   {v:"2.18.40", d:"lokakuu 2026", items:[
     "Kaksi uutta teemaa: Teksti-TV (sivu 100 mustalla tai valkoisella) ja Manageri (90-luvun manageripelin tilastoruudut). Molemmilla on oma käynnistysanimaatio, ja fontit tulevat sovelluksen mukana."
   ]},
@@ -2917,7 +2954,7 @@ function updateThemeBtn(){
 const PALETTES=[
   {id:"kaurapuuro",l:"Kaurapuuro",d:"Lämmin ja rauhallinen, alkuperäinen",sw:["#F4F2EC","#E9E1C8","#8C6A0A"]},
   {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
-  {id:"ampiainen",l:"Ampiainen",d:"Keltainen ja musta",sw:["#FFD23B","#F1F2EC","#181C1B"]},
+  {id:"ampiainen",l:"Black and Yellow",d:"Keltainen ja musta, Varkauden värit",sw:["#FFD23B","#F1F2EC","#181C1B"]},
   {id:"kuusnelonen",l:"Kuusnelonen",d:"80-luvun kotitietokone: sininen ruutu tai harmaa",sw:["#40318D","#7869C4","#333333"]},
   {id:"tekstitv",l:"Teksti-TV",d:"Sivu 100: mustalla tai valkoisella",sw:["#000000","#0000FF","#FFFF00"]},
   {id:"manageri",l:"Manageri",d:"90-luvun manageripelin tilastoruudut",sw:["#0A1733","#2F5BAE","#FFD400"]},
@@ -2925,7 +2962,7 @@ const PALETTES=[
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
 function applyPalette(p){
-  if(["fosfori","kuusnelonen","tekstitv","manageri"].includes(p)) setTimeout(()=>themeBoot(p),30);
+  if(PALETTES.some(x=>x.id===p)) setTimeout(()=>themeBoot(p),30);
   S.settings.palette=PALETTES.some(x=>x.id===p)?p:"kaurapuuro";
   document.documentElement.setAttribute("data-palette",S.settings.palette);
   updateMetaThemeColor();
@@ -2956,6 +2993,15 @@ function themeBoot(pal){
     at(t,()=>spans[spans.length-1].classList.add("cur"));
     at(t+520,()=>o.classList.add("flick"));
     at(t+820,()=>bootEnd());
+  } else if(pal==="kaurapuuro"||pal==="magnesium"){
+    // Rauhalliset teemat: logo, nimi kirjain kerrallaan, viiva ja tervehdys
+    const h=new Date().getHours(), hello=h<10?"Hyvää huomenta":h<17?"Hyvää päivää":h<22?"Hyvää iltaa":"Hyvää yötä";
+    o.innerHTML=`<div class="tb-scr"><div class="kp-c"><img class="kp-logo" src="./icon-192.png?v=2" alt=""><div class="kp-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${380+i*70}ms">${c}</span>`).join("")}</div><div class="kp-line"></div><div class="kp-sub">${hello} · ${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
+    at(2300,()=>bootEnd());
+  } else if(pal==="ampiainen"){
+    // Black and Yellow: varoitusraidat pyyhkäisevät, iso nimi ja putki
+    o.innerHTML=`<div class="by-stripes"></div><div class="tb-scr"><div class="by-c"><div class="by-name">JÄRKÄLE</div><div class="by-sub">${st>0?`${st} päivän putki`:`${n} kirjausta`}</div></div></div>`;
+    at(2100,()=>bootEnd());
   } else if(pal==="tekstitv"){
     const d=new Date(), pad2=x=>String(x).padStart(2,"0"), WD=["su","ma","ti","ke","to","pe","la"];
     const clock=()=>{ const t=new Date(); return `${pad2(t.getHours())}:${pad2(t.getMinutes())}:${pad2(t.getSeconds())}`; };
