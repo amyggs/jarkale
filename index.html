@@ -1117,7 +1117,16 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="kuusnelonen"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,.g-stats>div,.g-sum-kpi>div){border:2px solid var(--bord)!important;border-radius:0!important;background:var(--surf)!important;box-shadow:none!important;}
 [data-palette="kuusnelonen"] :is(button,input,select,textarea,.chip,.ws-dot,.pill-btn,.tr-go,.tr-pill,.tr-pick,.tr-tag,.pr-tag,.set .pr,.ex-prmsg){border-radius:0!important;}
 [data-palette="kuusnelonen"] .tr-row{border-top-color:var(--bord)!important;}
-[data-palette="kuusnelonen"] #view-log [id$="-wrap"],[data-palette="kuusnelonen"] #view-log [id$="-wrap"]>*{border-radius:0!important;}
+[data-palette="kuusnelonen"] #app *:not(.ws-dot){border-radius:0!important;}
+/* v2.18.38: kehystetyissä kentissä paino ja uni keskelle (vrt. askeleet), kentän otsikkorivit samankorkuisiksi, jotta 1–5-rivit ovat linjassa */
+:is([data-palette="kuusnelonen"],[data-palette="fosfori"]) :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 26px!important;}
+:is([data-palette="kuusnelonen"],[data-palette="fosfori"]) #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
+:is([data-palette="kuusnelonen"],[data-palette="fosfori"]) :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
+[data-palette="fosfori"] #track-sleep-wrap .stepper-row>div:not(.editing) input{text-shadow:none!important;}
+[data-palette="fosfori"] #app *:not(.ws-dot){border-radius:2px!important;}
+[data-palette="fosfori"] #view-log .lbl-small{min-width:0;flex:1 1 auto;white-space:normal!important;overflow-wrap:break-word;line-height:1.25;}
+[data-palette="fosfori"] #view-log [id$="-wrap"]>div:first-child{gap:6px;}
+[data-palette="fosfori"] #view-log button[onclick^="toggleFieldHint"]{flex-shrink:0;width:26px;height:26px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;}
 /* valittu = käänteinen merkki (reverse video) */
 [data-palette="kuusnelonen"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--hi)!important;color:var(--hi-ink)!important;box-shadow:none!important;}
 [data-palette="kuusnelonen"] :is(.tr-go.ghost,.tr-pill,.tr-pick){background:transparent!important;border:2px solid var(--text)!important;color:var(--text)!important;}
@@ -1512,7 +1521,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.37</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.38</span>
       </div>
     </div>
   </div>
@@ -1546,6 +1555,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.38", d:"lokakuu 2026", items:[
+    "Kuusnelonen ja Fosfori: paino ja uni keskellä kehystettyä kenttää. Kuusnelosessa 1–5-valinnat samalla korkeudella ja kaikki kulmat kantikkaita."
+  ]},
   {v:"2.18.37", d:"lokakuu 2026", items:[
     "Kuusnelonen: kuvaajien viivat 64:n syaanilla (vaalea) ja vaaleansinisellä (tumma) keltaisen sijaan, kovat kulmat, pienemmät kuvaajaotsikot ja selvemmät alapalkin tekstit."
   ]},
