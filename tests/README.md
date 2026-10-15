@@ -13,6 +13,7 @@ tests/run.sh test-gym.js
 | `test-gym.js` | Saliosio: ohjelmien tuonti tekstinä, treenin kirjaus, ajastin, ennätykset, kehityskuvaajat, ohjelmanäkymä, liikenimien täsmäys |
 | `test-sync.js` | Google Drive -synkronointi (väärennetyt GIS ja Drive), tilitarkistus, tombstonet, PT-kopio |
 | `test-r1.js` | Päiväkirjaus, Päivän tila, PT-vienti ja taaksepäinyhteensopivuus vanhaan versioon (v2.9.3, haetaan gitistä) |
+| `test-delete.js` | Päivän kirjauksen poisto, Kumoa, salitreenipäivä |
 | `test-haptics.js` | Kosketusvärinän tasot |
 | `test-news.js` | Pilotin uutiskortti (tarvitsee `../jarkale-pilotti`) |
 

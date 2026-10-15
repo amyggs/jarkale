@@ -723,6 +723,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h2{opacity:.78;}
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-pill:not(.dark){background:rgba(255,255,255,.6);color:var(--hi-ink);}
 .tr-pick{font:700 13px Manrope,system-ui,sans-serif;color:var(--text);background:var(--surf2);border-radius:10px;padding:8px 12px;flex-shrink:0;}
+.log-del{display:block;margin:18px auto 6px;background:none;border:none;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;padding:8px 12px;}
+.undo-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);transform:translate(-50%,12px);display:flex;align-items:center;gap:14px;background:var(--text);color:var(--bg);font:600 14px Manrope,system-ui,sans-serif;padding:10px 10px 10px 16px;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:210;}
+.undo-toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+.undo-toast button{background:none;border:none;color:var(--hi,#FFD23B);font:800 14px Manrope,system-ui,sans-serif;padding:6px 8px;}
 .tr-curtag{font:700 12px Manrope,system-ui,sans-serif;color:var(--dim);flex-shrink:0;}
 .tr-btn.tr-cur:disabled{opacity:1;}
 .tr-add .n{font-weight:800;}
@@ -1195,6 +1199,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <!-- v2.12.1: huomio ja ylläpitomuistutukset vasta kaiken kirjaamisen (myös lisäseurantojen) jälkeen -->
       <div id="logged-badge" class="badge" style="display:none">● Kirjattu</div>
+      <button id="log-del" class="log-del" style="display:none" onclick="deleteDay(S.date)">Poista päivän kirjaus</button>
       <div id="save-insight" style="display:none"></div>
       <div id="evening-note" style="display:none"></div>
       <div id="meas-reminder" style="display:none;margin-bottom:12px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:9px 13px;align-items:center;justify-content:space-between;cursor:pointer" onclick="setTab('historia')">
@@ -1339,7 +1344,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.29</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.30</span>
       </div>
     </div>
   </div>
@@ -1373,6 +1378,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.30", d:"lokakuu 2026", items:[
+    "Päivän kirjauksen voi poistaa Kirjaa-näkymän lopusta (Poista päivän kirjaus). Poiston voi kumota muutaman sekunnin ajan. Jos päivälle on tallennettu salitreeni, se säilyy ja Treeni-merkintä jää."
+  ]},
   {v:"2.18.29", d:"lokakuu 2026", items:[
     "Treeni-välilehdellä on treenipäivien alla Ohjelmat-osio: ohjelmat riveinä (vaihto napauttamalla, ei pudotusvalikkoa), sen alla + Uusi ohjelma, josta valitaan tuonti tekstistä tai tyhjästä aloittaminen. Arkistoidut ohjelmat ovat samassa kohdassa.",
     "Jos tyhjän ohjelman avaa ja poistuu muokkauksesta tallentamatta, ohjelma ei enää jää listalle eikä vaihda valittua ohjelmaa."
@@ -3072,6 +3080,8 @@ function renderLog() {
   const bpCard=document.getElementById("bp-card");
   if(bpCard) bpCard.style.display=trk("bp")?"block":"none";
   // logged-badge poistettu käytöstä — header-pilli + toast riittävät
+  // v2.18.30: päivän kirjauksen poisto (hillitty linkki lomakkeen lopussa, vain kun päivälle on kirjaus)
+  { const del=document.getElementById("log-del"); if(del) del.style.display=hasData&&!entryGymOnly(S.entries[ds])?"block":"none"; }
 
   // Varmuuskopio-muistutus
   let showBk=false;
@@ -6091,6 +6101,45 @@ function runCountUp(){
   });
 }
 
+// v2.18.30: Poista päivän kirjaus. Jos päivälle on tallennettu salitreeni, se säilyy, joten kirjaukseen jää vain
+// salitreenistä syntynyt Treeni-merkintä (muuten gymHealLinks loisi sen heti uudelleen). Kumoa palauttaa kirjauksen.
+function deleteDay(ds){
+  flushPendingAutoSave();
+  const e=S.entries[ds]; if(!e) return;
+  const gs=dayGymSessions(ds);
+  const lbl=ds===today()?"tämän päivän":gDay(ds);
+  if(!confirm(`Poistetaanko ${lbl} kirjaus?`+(gs.length?"\n\nPäivän salitreeni säilyy Treeni-historiassa, joten Treeni-merkintä jää päivälle.":""))) return;
+  const copy=JSON.parse(JSON.stringify(e)), nowIso=new Date().toISOString();
+  if(gs.length){
+    const tt=(gs.find(x=>x.trainingType)||{}).trainingType||"";
+    S.entries[ds]={date:ds,created_at:e.created_at||nowIso,updated_at:nowIso,workout_ids:gs.map(x=>x.id),training_done:true,training_auto:true,training_type:tt};
+  } else { delete S.entries[ds]; syncTomb("e",ds); }
+  if(ds===today()) clearDraft();
+  saveAll(); clearAllAnalysisCaches(); LAST_SAVED_JSON="";
+  if(S.date===ds) loadDayIntoForm(ds);
+  clearSaveInsight(); deleteDayRefresh();
+  showUndoToast("Kirjaus poistettu",()=>{
+    S.entries[ds]={...copy,updated_at:new Date(Math.max(Date.now(),Date.parse(nowIso)+1)).toISOString()};
+    saveAll(); clearAllAnalysisCaches(); LAST_SAVED_JSON="";
+    if(S.date===ds) loadDayIntoForm(ds);
+    deleteDayRefresh();
+    showSavedToast("Kirjaus palautettu");
+  });
+}
+// Kirjaus, jossa on vain salitreenistä syntynyt Treeni-merkintä: poistettavaa ei ole (salitreeni poistetaan Treeni-historiasta)
+function entryGymOnly(e){
+  if(!e||!e.training_auto) return false;
+  const base=new Set(["date","created_at","updated_at","workout_ids","training_done","training_auto","training_type"]);
+  return Object.entries(e).every(([k,v])=>base.has(k)||v==null||v===""||v===false||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length));
+}
+function deleteDayRefresh(){ renderAll(); if(S.tab!=="log") LOG_STALE=true; }
+function showUndoToast(msg,undo){
+  let t=document.getElementById("undo-toast");
+  if(!t){ t=document.createElement("div"); t.id="undo-toast"; t.className="undo-toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+  t.innerHTML=`<span>${esc(msg)}</span><button type="button">Kumoa</button>`;
+  t.querySelector("button").onclick=()=>{ clearTimeout(t._h); t.classList.remove("on"); undo(); };
+  t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),7000);
+}
 function deleteEntry(ds){
   clearAllAnalysisCaches();
   if(!confirm("Poista tämä kirjaus?")) return;
