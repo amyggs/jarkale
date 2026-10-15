@@ -1132,6 +1132,32 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="kuusnelonen"] .tr-sec:first-of-type::after{content:"";display:inline-block;width:.8em;height:1em;background:currentColor;vertical-align:-2px;margin-left:6px;animation:k-blink 1s steps(1) infinite;}
 @keyframes k-blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){[data-palette="kuusnelonen"] .tr-sec:first-of-type::after{animation:none}}
+
+/* ── v2.18.35 Erikoisteemojen käynnistysanimaatiot (#theme-boot) */
+.tb{position:fixed;inset:0;z-index:100000;opacity:0;transition:opacity .25s;cursor:pointer;overflow:hidden;}
+.tb.on{opacity:1;} .tb.out{opacity:0;transition:opacity .35s;}
+.tb pre{margin:0;white-space:pre;}
+.tb .tb-l{min-height:1.15em;}
+.tb .tb-l.cur::after{content:"";display:inline-block;width:.6em;height:1em;background:currentColor;vertical-align:-.12em;margin-left:2px;animation:tbBlink .5s steps(1) infinite;}
+@keyframes tbBlink{50%{opacity:0}}
+/* Fosfori: kuvaputki syttyy viivasta, teksti hehkuu, lopuksi välkähdys */
+.tb-fosfori{background:#000;}
+.tb-fosfori .tb-crt{position:absolute;left:50%;top:50%;width:0;height:2px;background:#C8FFD8;box-shadow:0 0 18px 6px rgba(92,255,143,.8);transform:translate(-50%,-50%);animation:tbCrtW .22s ease-out forwards,tbCrtH .26s .22s cubic-bezier(.2,.9,.3,1) forwards;}
+@keyframes tbCrtW{to{width:100%}}
+@keyframes tbCrtH{0%{height:2px;background:#C8FFD8}60%{background:#1A4D2A}100%{height:100%;background:radial-gradient(ellipse at 50% 45%,#0B1F12 0%,#050B07 65%,#010302 100%);box-shadow:none}}
+.tb-fosfori .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;}
+.tb-fosfori .tb-scr::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.28) 3px,transparent 4px),radial-gradient(ellipse at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
+.tb-fosfori .tb-txt{width:24ch;max-width:100%;font:26px/1.25 "VT323","Share Tech Mono",ui-monospace,monospace!important;color:#5CFF8F;text-shadow:0 0 6px rgba(92,255,143,.7),0 0 18px rgba(92,255,143,.25);min-width:16ch;}
+.tb-fosfori.flick .tb-scr{animation:tbFlick .3s steps(2) 1;}
+@keyframes tbFlick{0%{opacity:1}30%{opacity:.35}60%{opacity:1;filter:brightness(1.6)}100%{opacity:1}}
+/* Kuusnelonen: kehys ja ruutu, LOAD-komento ja latausraidat kehyksessä */
+.tb-kuusnelonen{background:#7869C4;}
+.tb-kuusnelonen .tb-frame{position:absolute;inset:0;background:#7869C4;}
+.tb-kuusnelonen .tb-frame.raster{background:repeating-linear-gradient(to bottom,#40318D 0 7px,#9AE29B 7px 11px,#B86962 11px 16px,#70D2E0 16px 20px,#EDF171 20px 26px,#7869C4 26px 31px,#8B5429 31px 35px,#FFFFFF 35px 38px);background-size:100% 38px;animation:tbRaster .09s steps(4) infinite;}
+@keyframes tbRaster{to{background-position:0 38px}}
+.tb-kuusnelonen .tb-scr{position:absolute;left:6%;right:6%;top:9%;bottom:9%;background:#40318D;padding:3.5vw 2vw;overflow:hidden;}
+.tb-kuusnelonen .tb-txt{font:400 min(2.75vw,16px)/1.6 "Sixtyfour",ui-monospace,monospace!important;color:#A99BF2;}
+.tb .tb-txt *{font-family:inherit!important;}
 </style>
 </head>
 <body>
@@ -1480,7 +1506,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.34</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.35</span>
       </div>
     </div>
   </div>
@@ -1514,6 +1540,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.35", d:"lokakuu 2026", items:[
+    "Fosfori- ja Kuusnelonen-teemoilla on oma käynnistysanimaatio, joka näytetään, kun teema valitaan Asetuksista. Napautus ohittaa animaation."
+  ]},
   {v:"2.18.34", d:"lokakuu 2026", items:[
     "Kuusnelonen-teeman korjauksia: otsikkorivin teemanappi ja viikkonumero mahtuvat, info-painikkeet pysyvät paikoillaan."
   ]},
@@ -2724,10 +2753,60 @@ const PALETTES=[
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
 function applyPalette(p){
+  if(p==="fosfori"||p==="kuusnelonen") setTimeout(()=>themeBoot(p),30);
   S.settings.palette=PALETTES.some(x=>x.id===p)?p:"kaurapuuro";
   document.documentElement.setAttribute("data-palette",S.settings.palette);
   updateMetaThemeColor();
   saveAll(); renderAsetukset(); renderLog();
+}
+
+// ── v2.18.35 Erikoisteemojen käynnistysanimaatio: näytetään, kun Fosfori tai Kuusnelonen valitaan Asetuksista
+// (ei sovelluksen joka käynnistyksessä). Napautus ohittaa. Vähennä liikettä -asetuksella ei animaatiota.
+let BOOT_T=[];
+function themeBoot(pal){
+  try{ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return; }catch(_){}
+  bootEnd(true);
+  const n=Object.keys(S.entries||{}).length, st=(typeof calcStreak==="function"?calcStreak():0)||0, gym=typeof gymOn==="function"&&gymOn();
+  const ver=(CHANGELOG[0]&&CHANGELOG[0].v)||"";
+  const o=document.createElement("div"); o.id="theme-boot"; o.className="tb tb-"+pal; o.setAttribute("aria-hidden","true");
+  o.onclick=()=>bootEnd();
+  document.body.appendChild(o);
+  const at=(ms,f)=>BOOT_T.push(setTimeout(f,ms));
+  const typeLine=(el,txt,ms,cps)=>{ for(let i=0;i<=txt.length;i++) at(ms+i*cps,()=>{ el.textContent=txt.slice(0,i); }); return ms+txt.length*cps; };
+  if(pal==="fosfori"){
+    o.innerHTML=`<div class="tb-crt"></div><div class="tb-scr"><pre class="tb-txt"></pre></div>`;
+    const pre=o.querySelector(".tb-txt");
+    const pad=(a,b)=>a+" "+".".repeat(Math.max(2,17-a.length))+" "+b;
+    const lines=[`JÄRKÄLE-PÄÄTE  v${ver}`,"",pad("MUISTI","OK"),pad("KIRJAUKSIA",String(n)),pad("PUTKI",st+" PV"),...(gym?[pad("SALIOHJELMA","OK")]:[]),"",">  KÄYNNISTETÄÄN"];
+    const spans=lines.map(()=>{ const d=document.createElement("div"); d.className="tb-l"; pre.appendChild(d); return d; });
+    let t=520;
+    lines.forEach((l,i)=>{ t=typeLine(spans[i],l,t,l.startsWith(">")?28:9)+(l?70:30); });
+    at(t,()=>spans[spans.length-1].classList.add("cur"));
+    at(t+520,()=>o.classList.add("flick"));
+    at(t+820,()=>bootEnd());
+  } else {
+    o.innerHTML=`<div class="tb-frame"></div><div class="tb-scr"><pre class="tb-txt"></pre></div>`;
+    const pre=o.querySelector(".tb-txt"), frame=o.querySelector(".tb-frame");
+    const L=t=>{ const d=document.createElement("div"); d.className="tb-l"; d.textContent=t; pre.appendChild(d); return d; };
+    const head=["**** JARKALE 64 BASIC V2 ****","",` 64K RAM SYSTEM  ${n} PAIVAA`,"","READY."];
+    head.forEach((h,i)=>at(120+i*60,()=>L(h)));
+    let t=520; let cmd=null;
+    at(t,()=>{ cmd=L(""); cmd.classList.add("cur"); });
+    const cmdTxt='LOAD"JARKALE",8,1';
+    for(let i=1;i<=cmdTxt.length;i++) at(t+260+i*38,()=>{ if(cmd) cmd.textContent=cmdTxt.slice(0,i); });
+    t=t+260+cmdTxt.length*38;
+    at(t+120,()=>{ cmd.classList.remove("cur"); L(""); L("SEARCHING FOR JARKALE"); });
+    at(t+520,()=>{ L("LOADING"); frame.classList.add("raster"); });
+    at(t+1500,()=>{ frame.classList.remove("raster"); L("READY."); const r=L(""); r.classList.add("cur"); BOOT_T.push(setTimeout(()=>{ r.textContent="RUN"; },260)); });
+    at(t+2050,()=>bootEnd());
+  }
+  requestAnimationFrame(()=>o.classList.add("on"));
+}
+function bootEnd(now){
+  BOOT_T.forEach(clearTimeout); BOOT_T=[];
+  const o=document.getElementById("theme-boot"); if(!o) return;
+  if(now){ o.remove(); return; }
+  o.classList.add("out"); setTimeout(()=>o.remove(),380);
 }
 function updateMetaThemeColor(){
   const m=document.querySelector('meta[name="theme-color"]'); if(!m) return;

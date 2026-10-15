@@ -686,6 +686,18 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
       const lum=c=>{const m=c.match(/\d+/g).map(Number);return (m[0]*299+m[1]*587+m[2]*114)/1000;};
       ok(lum(fz.dark.bg)<40&&lum(fz.dark.fg)>150&&lum(fz.light.bg)>180&&lum(fz.light.fg)<90,'Fosfori: tumma pääte ja vaalea käänteinen versio '+JSON.stringify([fz.dark.bg,fz.dark.fg,fz.light.bg,fz.light.fg]));
       ok(/Share Tech Mono/.test(fz.dark.ff),'Fosfori: tasalevyinen fontti'); }
+    { const bt=await p.evaluate(async()=>{ const r={}; const mm=window.matchMedia; window.matchMedia=q=>({matches:false,media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
+        themeBoot('kuusnelonen'); r.k=!!document.querySelector('#theme-boot.tb-kuusnelonen');
+        await new Promise(x=>setTimeout(x,700)); r.kTxt=document.querySelector('#theme-boot .tb-txt').textContent;
+        document.getElementById('theme-boot').click(); await new Promise(x=>setTimeout(x,450)); r.kSkip=!document.getElementById('theme-boot');
+        themeBoot('fosfori'); await new Promise(x=>setTimeout(x,4200)); r.fGone=!document.getElementById('theme-boot');
+        window.matchMedia=q=>({matches:/reduce/.test(q),media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
+        themeBoot('fosfori'); r.reduced=!document.getElementById('theme-boot');
+        window.matchMedia=mm; return r; });
+      ok(bt.k&&/JARKALE 64 BASIC V2/.test(bt.kTxt)&&/PAIVAA/.test(bt.kTxt),'Kuusnelonen: käynnistysanimaatio ja kirjausmäärä ('+bt.kTxt.slice(0,60)+')');
+      ok(bt.kSkip,'napautus ohittaa animaation');
+      ok(bt.fGone,'Fosforin animaatio päättyy itsestään');
+      ok(bt.reduced,'Vähennä liikettä: ei animaatiota'); }
     { await p.evaluate(()=>{const st=JSON.parse(localStorage.getItem('seuranta-settings'));st.palette='ampiainen';st.theme='light';localStorage.setItem('seuranta-settings',JSON.stringify(st));});
       await p.reload(); await p.waitForTimeout(900);
       const mc=await p.evaluate(()=>[document.querySelector('meta[name=theme-color]').content,getComputedStyle(document.getElementById('header')).backgroundColor]);
