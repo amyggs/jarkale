@@ -1073,7 +1073,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 :root[data-palette="kuusnelonen"]{
   --k-frame:#262626; --k-scr:#333333; --k-ink:#E6E6E6; --k-lo:#5A5A5A; --k-card:#3B3B3B; --k-well:#2A2A2A;
   --bg:#333333; --surf:#3B3B3B; --surf2:#474747; --bord:#5A5A5A; --text:#E6E6E6; --dim:#A8A8A8;
-  --orange:#EDF171; --yellow:#EDF171; --blue:#70D2E0; --green:#9AE29B; --red:#E0827B; --purple:#A99BF2;
+  --orange:#A99BF2; --yellow:#EDF171; --blue:#70D2E0; --green:#9AE29B; --red:#E0827B; --purple:#A99BF2;
   --card-bg:var(--surf); --header-bg:var(--k-frame); --nav-bg:var(--k-frame); --shadow:none;
   --seg-on:#A99BF2; --on-accent:#1E1A3A; --hi:#A99BF2; --hi2:#8F80E6; --hi-ink:#1E1A3A; --ol:#5A5A5A; --olbg:transparent;
   color-scheme:dark;
@@ -1081,7 +1081,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 :root[data-palette="kuusnelonen"][data-theme="light"]{
   --k-frame:#7869C4; --k-scr:#40318D; --k-ink:#C9C1FF; --k-lo:#6A5CC0; --k-card:#4A3B9A; --k-well:#362a7a;
   --bg:#40318D; --surf:#4A3B9A; --surf2:#5546A8; --bord:#7869C4; --text:#D6D0FF; --dim:#A69AF0;
-  --orange:#EDF171; --yellow:#EDF171; --blue:#70D2E0; --green:#9AE29B; --red:#F0A098; --purple:#D6D0FF;
+  --orange:#8EE6F2; --yellow:#EDF171; --blue:#8EE6F2; --green:#9AE29B; --red:#F0A098; --purple:#D6D0FF;
   --nav-bg:var(--k-frame); --header-bg:var(--k-frame);
   --seg-on:#D6D0FF; --on-accent:#40318D; --hi:#D6D0FF; --hi2:#B9B0FA; --hi-ink:#40318D; --ol:#7869C4;
   color-scheme:dark;
@@ -1103,8 +1103,14 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="kuusnelonen"] :is(#nav,nav){background:var(--k-frame)!important;border-top:none!important;}
 [data-palette="kuusnelonen"] .view{background:var(--k-scr);}
 [data-palette="kuusnelonen"] .view-hero{background:var(--k-scr)!important;}
-[data-palette="kuusnelonen"] #nav button span.lbl,[data-palette="kuusnelonen"] #nav button{color:var(--k-ink)!important;opacity:.75;}
+[data-palette="kuusnelonen"] #nav button span.lbl,[data-palette="kuusnelonen"] #nav button{color:#C8C8C8!important;opacity:1;}
+[data-palette="kuusnelonen"][data-theme="light"] #nav button span.lbl,[data-palette="kuusnelonen"][data-theme="light"] #nav button{color:#DDD8FF!important;}
 [data-palette="kuusnelonen"] #nav button.active,[data-palette="kuusnelonen"] #nav button.active *{color:#fff!important;opacity:1;}
+[data-palette="kuusnelonen"] #nav button svg,[data-palette="kuusnelonen"] #nav button svg *{stroke:currentColor!important;}
+[data-palette="kuusnelonen"] #nav button.active span.lbl{font-weight:700;}
+/* kuvaajat: kovat kulmat ja yksi korostusväri (vaalea: syaani, tumma: vaaleansininen) */
+[data-palette="kuusnelonen"] svg polyline{stroke-linejoin:miter!important;stroke-linecap:square!important;shape-rendering:crispEdges;}
+[data-palette="kuusnelonen"] .section-head{font-size:11px!important;line-height:1.5;color:var(--text)!important;}
 [data-palette="kuusnelonen"] #nav button::before{background:#fff!important;}
 [data-palette="kuusnelonen"][data-theme="light"] #header :is(.brand,#streak-count,#streak-display span){color:#fff!important;}
 /* kortit: kantikkaat lohkot */
@@ -1506,7 +1512,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.36</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.37</span>
       </div>
     </div>
   </div>
@@ -1540,6 +1546,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.37", d:"lokakuu 2026", items:[
+    "Kuusnelonen: kuvaajien viivat 64:n syaanilla (vaalea) ja vaaleansinisellä (tumma) keltaisen sijaan, kovat kulmat, pienemmät kuvaajaotsikot ja selvemmät alapalkin tekstit."
+  ]},
   {v:"2.18.36", d:"lokakuu 2026", items:[
     "Fosforin käynnistysanimaatio englanniksi. Kuusnelosessa otsikkorivin Kirjattu-merkki on piilotettu, koska viikkonauha näyttää kirjauksen jo."
   ]},
