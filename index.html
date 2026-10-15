@@ -1010,7 +1010,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   --ph:#5CFF8F; --ph-lo:#1B6B37; --ph-glow:rgba(92,255,143,.45); --ph-card:rgba(8,19,12,.85); --ph-well:#030805; --ph-scan:rgba(0,0,0,.22); --ph-vig:rgba(0,0,0,.55);
   --ph-body:radial-gradient(ellipse at 50% 40%,#0A1A0F 0%,#050B07 60%,#020503 100%);
   --bg:#050B07; --surf:#08130C; --surf2:#0D2014; --bord:#1B6B37; --text:#5CFF8F; --dim:#2FB35E;
-  --orange:#F2D25C; --yellow:#F2D25C; --blue:#5CFF8F; --green:#5CFF8F; --red:#FF7A59; --purple:#5CFF8F;
+  --orange:#C8FF8A; --yellow:#C8FF8A; --blue:#5CFF8F; --green:#5CFF8F; --red:#FF7A59; --purple:#5CFF8F;
   --card-bg:var(--surf); --header-bg:var(--bg); --nav-bg:#030805; --shadow:none;
   --seg-on:#5CFF8F; --on-accent:#03140A; --hi:#5CFF8F; --hi2:#3FE077; --hi-ink:#03140A; --ol:#1B6B37; --olbg:transparent;
   color-scheme:dark;
@@ -1019,7 +1019,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   --ph:#0E3B1C; --ph-lo:#6FA87B; --ph-glow:transparent; --ph-card:rgba(214,240,216,.9); --ph-well:#E4F6E6; --ph-scan:rgba(0,48,16,.05); --ph-vig:rgba(0,48,16,.10);
   --ph-body:radial-gradient(ellipse at 50% 40%,#D2EFD5 0%,#C2E6C6 65%,#AFD9B5 100%);
   --bg:#C2E6C6; --surf:#D6F0D8; --surf2:#B6DDBB; --bord:#6FA87B; --text:#0E3B1C; --dim:#2F6B3D;
-  --orange:#7A5A00; --yellow:#7A5A00; --blue:#0E3B1C; --green:#0E3B1C; --red:#A4321A; --purple:#0E3B1C;
+  --orange:#3C6B10; --yellow:#3C6B10; --blue:#0E3B1C; --green:#0E3B1C; --red:#A4321A; --purple:#0E3B1C;
   --nav-bg:#B6DDBB; --seg-on:#0E3B1C; --on-accent:#C9F0CD; --hi:#0E3B1C; --hi2:#1A5A2D; --hi-ink:#C9F0CD; --ol:#6FA87B;
   color-scheme:light;
 }
@@ -1055,6 +1055,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="fosfori"] #nav button.active span.lbl,[data-palette="fosfori"] #nav button.active *{color:var(--ph)!important;}
 [data-palette="fosfori"] #nav button::before{background:var(--ph)!important;}
 [data-palette="fosfori"] .ex-prmsg{border-radius:2px;text-shadow:none;}
+/* korostusväri (--orange: kuvaajat, putki, aktiivinen välilehti) on fosforin vaaleampi sävy; logo vihreäksi */
+[data-palette="fosfori"] #header img{filter:grayscale(1) sepia(1) hue-rotate(72deg) saturate(3.2) brightness(.95);}
+[data-palette="fosfori"][data-theme="light"] #header img{filter:grayscale(1) sepia(1) hue-rotate(72deg) saturate(2.4) brightness(.75);}
 [data-palette="fosfori"] .tr-sec:first-of-type::after{content:"_";animation:fos-blink 1.1s steps(1) infinite;margin-left:2px;}
 @keyframes fos-blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){[data-palette="fosfori"] .tr-sec:first-of-type::after{animation:none}}
@@ -1406,7 +1409,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.31</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.32</span>
       </div>
     </div>
   </div>
@@ -1440,10 +1443,13 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.32", d:"lokakuu 2026", items:[
+    "Fosfori-teemassa kuvaajien viivat, putki, aktiivinen välilehti ja logo ovat nyt fosforin sävyjä keltaisen sijaan.","Liikkeen sivulla 1RM-huomautus näkyy kokonaan tunnuslukujen alla."
+  ]},
   {v:"2.18.31", d:"lokakuu 2026", items:[
     "Ennätyksen hetki: kun kuittaat ennätyssarjan, puhelin värähtää kahdesti ja liikkeen alle tulee hetkeksi rivi, jossa on uusi ennätys ja aiempi paras. Kerran liikettä kohden treenissä.",
     "Treenin aikana liikkeen kohdalla näkyy arvioitu 1RM (Epleyn kaava) ja sarja, josta se on laskettu. Arvio on laskennallinen ja järkevä noin 1–12 toiston sarjoista; pidemmistä sarjoista se merkitään epätarkaksi.",
-    "Uusi teema Fosfori: tummana vihreä kuvaputkipääte, vaaleana käänteinen LCD-näyttö."
+    "Uusi teema Fosfori: tummana vihreä kuvaputkipääte, vaaleana käänteinen LCD-näyttö. Kuvaajat, logo ja korostukset fosforin sävyissä."
   ]},
   {v:"2.18.30", d:"lokakuu 2026", items:[
     "Päivän kirjauksen voi poistaa Kirjaa-näkymän lopusta (Poista päivän kirjaus). Poiston voi kumota muutaman sekunnin ajan. Jos päivälle on tallennettu salitreeni, se säilyy ja Treeni-merkintä jää."
@@ -8568,8 +8574,8 @@ function gymExerciseHTML(key){
   const lastT=H[H.length-1];
   h+=`<div class="g-stats"><div><b>${kgx(best.top)}</b><span>Paras sarja</span><small>${gDay(best.s.date)}</small></div>
     <div><b>${kgx(lastT.top)}</b><span>Viimeksi</span><small>${gDay(lastT.s.date)}</small></div>
-    ${best.top.kg!=null?`<div><b>${fmtKg(Math.round(best.e1*2)/2)}</b><span>Arvioitu 1RM</span><small>kg · laskennallinen, järkevä 1–12 toistolla</small></div>`:""}</div>
-    <div class="g-stats-note">Sarjat muodossa ${unit}.</div>`;
+    ${best.top.kg!=null?`<div><b>${fmtKg(Math.round(best.e1*2)/2)}</b><span>Arvioitu 1RM</span><small>kg · arvio</small></div>`:""}</div>
+    <div class="g-stats-note">Sarjat muodossa ${unit}.${best.top.kg!=null?" Arvioitu 1RM on laskennallinen ja järkevä noin 1–12 toiston sarjoista.":""}</div>`;
   h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
   h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
