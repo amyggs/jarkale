@@ -1088,8 +1088,14 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 }
 [data-palette="kuusnelonen"] body{background:var(--k-frame);}
 [data-palette="kuusnelonen"] *{font-family:"K64 Digits","Pixelify Sans",ui-monospace,monospace!important;}
-[data-palette="kuusnelonen"] :is(.brand,.tr-h1,.big-val,.val,.stepper-val,.g-sum-kpi b,.lbl-big,.tr-sec,.section-head,.tr-nx,.vko-badge,#streak-count){font-family:"Sixtyfour",monospace!important;letter-spacing:0;}
-[data-palette="kuusnelonen"] #header .brand{font-size:17px!important;}
+[data-palette="kuusnelonen"] :is(.brand,.tr-h1,.big-val,.val,.stepper-val,.g-sum-kpi b,.lbl-big,.tr-sec,.section-head,.tr-nx){font-family:"Sixtyfour",monospace!important;letter-spacing:0;}
+[data-palette="kuusnelonen"] #header .brand{font-size:14px!important;}
+/* v2.18.34: leveä pikselifontti ei saa työntää otsikon nappeja tai info-painikkeita ulos */
+[data-palette="kuusnelonen"] #streak-count{font-size:14px!important;}
+[data-palette="kuusnelonen"] #today-check{padding:2px 7px!important;}
+[data-palette="kuusnelonen"] #view-log .lbl-small{font-size:12px!important;min-width:0;flex:1 1 auto;white-space:normal!important;overflow-wrap:break-word;line-height:1.25;}
+[data-palette="kuusnelonen"] #view-log [id$="-wrap"]>div:first-child{gap:6px;}
+[data-palette="kuusnelonen"] #view-log button[onclick^="toggleFieldHint"]{flex-shrink:0;width:26px;height:26px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-width:2px!important;}
 [data-palette="kuusnelonen"] .tr-h1{font-size:15px;line-height:1.35;}
 [data-palette="kuusnelonen"] :is(.tr-sec,.section-head,.tr-nx){font-size:11px!important;text-transform:none;letter-spacing:0!important;}
 /* kehys ja ruutu: otsikko- ja alapalkki kehyksen väriä, sisältö ruudun väriä */
@@ -1474,7 +1480,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.33</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.34</span>
       </div>
     </div>
   </div>
@@ -1508,6 +1514,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.34", d:"lokakuu 2026", items:[
+    "Kuusnelonen-teeman korjauksia: otsikkorivin teemanappi ja viikkonumero mahtuvat, info-painikkeet pysyvät paikoillaan."
+  ]},
   {v:"2.18.33", d:"lokakuu 2026", items:[
     "Uusi teema Kuusnelonen: vaaleana klassinen sininen ruutu vaaleansinisellä kehyksellä, tummana harmaa. Pikselifontit tulevat sovelluksen mukana, joten ne toimivat myös ilman verkkoa."
   ]},
