@@ -1061,6 +1061,71 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="fosfori"] .tr-sec:first-of-type::after{content:"_";animation:fos-blink 1.1s steps(1) infinite;margin-left:2px;}
 @keyframes fos-blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){[data-palette="fosfori"] .tr-sec:first-of-type::after{animation:none}}
+/* Kuusnelonen-teeman fontit repossa (SIL OFL 1.1, ks. fonts/LICENSE-*): toimivat myös offline. Numerot Sixtyfourilla
+   (unicode-range), koska Pixelify Sansin 5 ja 2 sekoittuvat helposti S:ään ja 8:aan. */
+@font-face{font-family:"Sixtyfour";src:url(fonts/sixtyfour-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"K64 Digits";src:url(fonts/sixtyfour-latin-400-normal.woff2) format("woff2");unicode-range:U+0030-0039;size-adjust:78%;font-display:swap;}
+@font-face{font-family:"Pixelify Sans";font-weight:400;src:url(fonts/pixelify-sans-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Pixelify Sans";font-weight:500;src:url(fonts/pixelify-sans-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Pixelify Sans";font-weight:600;src:url(fonts/pixelify-sans-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Pixelify Sans";font-weight:700;src:url(fonts/pixelify-sans-latin-700-normal.woff2) format("woff2");font-display:swap;}
+/* ── v2.18.33 Kuusnelonen-teema: 80-luvun kotitietokone. Vaalea = klassinen sininen ruutu ja vaaleansininen kehys, tumma = harmaa. */
+:root[data-palette="kuusnelonen"]{
+  --k-frame:#262626; --k-scr:#333333; --k-ink:#E6E6E6; --k-lo:#5A5A5A; --k-card:#3B3B3B; --k-well:#2A2A2A;
+  --bg:#333333; --surf:#3B3B3B; --surf2:#474747; --bord:#5A5A5A; --text:#E6E6E6; --dim:#A8A8A8;
+  --orange:#EDF171; --yellow:#EDF171; --blue:#70D2E0; --green:#9AE29B; --red:#E0827B; --purple:#A99BF2;
+  --card-bg:var(--surf); --header-bg:var(--k-frame); --nav-bg:var(--k-frame); --shadow:none;
+  --seg-on:#A99BF2; --on-accent:#1E1A3A; --hi:#A99BF2; --hi2:#8F80E6; --hi-ink:#1E1A3A; --ol:#5A5A5A; --olbg:transparent;
+  color-scheme:dark;
+}
+:root[data-palette="kuusnelonen"][data-theme="light"]{
+  --k-frame:#7869C4; --k-scr:#40318D; --k-ink:#C9C1FF; --k-lo:#6A5CC0; --k-card:#4A3B9A; --k-well:#362a7a;
+  --bg:#40318D; --surf:#4A3B9A; --surf2:#5546A8; --bord:#7869C4; --text:#D6D0FF; --dim:#A69AF0;
+  --orange:#EDF171; --yellow:#EDF171; --blue:#70D2E0; --green:#9AE29B; --red:#F0A098; --purple:#D6D0FF;
+  --nav-bg:var(--k-frame); --header-bg:var(--k-frame);
+  --seg-on:#D6D0FF; --on-accent:#40318D; --hi:#D6D0FF; --hi2:#B9B0FA; --hi-ink:#40318D; --ol:#7869C4;
+  color-scheme:dark;
+}
+[data-palette="kuusnelonen"] body{background:var(--k-frame);}
+[data-palette="kuusnelonen"] *{font-family:"K64 Digits","Pixelify Sans",ui-monospace,monospace!important;}
+[data-palette="kuusnelonen"] :is(.brand,.tr-h1,.big-val,.val,.stepper-val,.g-sum-kpi b,.lbl-big,.tr-sec,.section-head,.tr-nx,.vko-badge,#streak-count){font-family:"Sixtyfour",monospace!important;letter-spacing:0;}
+[data-palette="kuusnelonen"] #header .brand{font-size:17px!important;}
+[data-palette="kuusnelonen"] .tr-h1{font-size:15px;line-height:1.35;}
+[data-palette="kuusnelonen"] :is(.tr-sec,.section-head,.tr-nx){font-size:11px!important;text-transform:none;letter-spacing:0!important;}
+/* kehys ja ruutu: otsikko- ja alapalkki kehyksen väriä, sisältö ruudun väriä */
+[data-palette="kuusnelonen"] #header{background:var(--k-frame)!important;border-bottom:none!important;}
+[data-palette="kuusnelonen"] :is(#nav,nav){background:var(--k-frame)!important;border-top:none!important;}
+[data-palette="kuusnelonen"] .view{background:var(--k-scr);}
+[data-palette="kuusnelonen"] .view-hero{background:var(--k-scr)!important;}
+[data-palette="kuusnelonen"] #nav button span.lbl,[data-palette="kuusnelonen"] #nav button{color:var(--k-ink)!important;opacity:.75;}
+[data-palette="kuusnelonen"] #nav button.active,[data-palette="kuusnelonen"] #nav button.active *{color:#fff!important;opacity:1;}
+[data-palette="kuusnelonen"] #nav button::before{background:#fff!important;}
+[data-palette="kuusnelonen"][data-theme="light"] #header :is(.brand,#streak-count,#streak-display span){color:#fff!important;}
+/* kortit: kantikkaat lohkot */
+[data-palette="kuusnelonen"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,.g-stats>div,.g-sum-kpi>div){border:2px solid var(--bord)!important;border-radius:0!important;background:var(--surf)!important;box-shadow:none!important;}
+[data-palette="kuusnelonen"] :is(button,input,select,textarea,.chip,.ws-dot,.pill-btn,.tr-go,.tr-pill,.tr-pick,.tr-tag,.pr-tag,.set .pr,.ex-prmsg){border-radius:0!important;}
+[data-palette="kuusnelonen"] .tr-row{border-top-color:var(--bord)!important;}
+[data-palette="kuusnelonen"] #view-log [id$="-wrap"],[data-palette="kuusnelonen"] #view-log [id$="-wrap"]>*{border-radius:0!important;}
+/* valittu = käänteinen merkki (reverse video) */
+[data-palette="kuusnelonen"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--hi)!important;color:var(--hi-ink)!important;box-shadow:none!important;}
+[data-palette="kuusnelonen"] :is(.tr-go.ghost,.tr-pill,.tr-pick){background:transparent!important;border:2px solid var(--text)!important;color:var(--text)!important;}
+[data-palette="kuusnelonen"] :is(input,textarea){background:var(--k-well)!important;border:2px solid var(--bord)!important;color:var(--text)!important;caret-color:var(--text);}
+[data-palette="kuusnelonen"] ::placeholder{color:var(--dim)!important;opacity:.6;}
+[data-palette="kuusnelonen"] .ws-day.logged .ws-dot{background:var(--hi)!important;color:var(--hi-ink)!important;}
+[data-palette="kuusnelonen"] .ws-day .ws-dot{border:2px solid var(--bord)!important;background:transparent;}
+[data-palette="kuusnelonen"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--k-scr),0 0 0 4px var(--text)!important;}
+[data-palette="kuusnelonen"] .gt{background:var(--k-frame);color:#fff;border-radius:0;border:2px solid var(--text);}
+[data-palette="kuusnelonen"] .gt button{background:transparent;border:2px solid var(--text);color:var(--text);border-radius:0;}
+[data-palette="kuusnelonen"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px var(--orange);}
+[data-palette="kuusnelonen"] .gt button.p{background:var(--hi);color:var(--hi-ink);}
+[data-palette="kuusnelonen"] .gt :is(.gt-tm,.gt-l){color:#fff;}
+[data-palette="kuusnelonen"] .gt .gt-bar{background:var(--bord);}
+[data-palette="kuusnelonen"] .gt .gt-bar i{background:var(--orange);}
+[data-palette="kuusnelonen"] #header img{filter:grayscale(1) contrast(1.2);}
+/* vilkkuva lohkokursori ensimmäisen osion otsikossa */
+[data-palette="kuusnelonen"] .tr-sec:first-of-type::after{content:"";display:inline-block;width:.8em;height:1em;background:currentColor;vertical-align:-2px;margin-left:6px;animation:k-blink 1s steps(1) infinite;}
+@keyframes k-blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){[data-palette="kuusnelonen"] .tr-sec:first-of-type::after{animation:none}}
 </style>
 </head>
 <body>
@@ -1409,7 +1474,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.32</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.33</span>
       </div>
     </div>
   </div>
@@ -1443,6 +1508,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.33", d:"lokakuu 2026", items:[
+    "Uusi teema Kuusnelonen: vaaleana klassinen sininen ruutu vaaleansinisellä kehyksellä, tummana harmaa. Pikselifontit tulevat sovelluksen mukana, joten ne toimivat myös ilman verkkoa."
+  ]},
   {v:"2.18.32", d:"lokakuu 2026", items:[
     "Fosfori-teemassa kuvaajien viivat, putki, aktiivinen välilehti ja logo ovat nyt fosforin sävyjä keltaisen sijaan.","Liikkeen sivulla 1RM-huomautus näkyy kokonaan tunnuslukujen alla."
   ]},
@@ -2642,6 +2710,7 @@ const PALETTES=[
   {id:"kaurapuuro",l:"Kaurapuuro",d:"Lämmin ja rauhallinen, alkuperäinen",sw:["#F4F2EC","#E9E1C8","#8C6A0A"]},
   {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
   {id:"ampiainen",l:"Ampiainen",d:"Keltainen ja musta",sw:["#FFD23B","#F1F2EC","#181C1B"]},
+  {id:"kuusnelonen",l:"Kuusnelonen",d:"80-luvun kotitietokone: sininen ruutu tai harmaa",sw:["#40318D","#7869C4","#333333"]},
   {id:"fosfori",l:"Fosfori",d:"Vihreä kuvaputkipääte, vaaleana LCD-näyttö",sw:["#050B07","#C2E6C6","#5CFF8F"]}
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
@@ -8905,6 +8974,10 @@ const PILOT_NEWS=[
    act:"Yhdistä Driveen",go:"data",skip:()=>syncState().enabled},
   {id:"2026-10-sali",title:"Saliohjelma ja treenien kirjaus",text:"Oma ohjelma sisään tekstinä, sarjat ja kilot kirjataan salilla, ja edellisen kerran tulokset näkyvät valmiina. Vapaaehtoinen.",
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
+  {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
+   act:null,go:null,skip:()=>!gymOn()},
+  {id:"2026-10-teemat",title:"Kaksi uutta teemaa",text:"Fosfori on vihreä kuvaputkipääte ja Kuusnelonen 80-luvun kotitietokone. Molemmissa on vaalea ja tumma versio.",
+   act:"Kokeile",go:"theme"},
 ];
 const NEWS_KEY="jarkale-news-seen";
 function newsSeen(){ try{ return JSON.parse(localStorage.getItem(NEWS_KEY)||"[]"); }catch(_){ return []; } }
@@ -8920,7 +8993,7 @@ function renderNewsCard(){
   if(!list.length){ el.style.display="none"; el.innerHTML=""; return; }
   el.style.display="";
   el.innerHTML=`<div class="news-card"><span class="nk">Uutta Järkäleessä</span>
-    ${list.map(n=>`<div class="ni"><b>${n.title}</b><p>${n.text}</p><button onclick="newsGo('${n.go}')">${n.act} ›</button></div>`).join("")}
+    ${list.map(n=>`<div class="ni"><b>${n.title}</b><p>${n.text}</p>${n.act?`<button onclick="newsGo('${n.go}')">${n.act} ›</button>`:""}</div>`).join("")}
     <div class="na"><a href="esittely.html#uutta" target="_blank" rel="noopener">Lue lisää</a><button class="tr-go" onclick="newsDismiss()">Selvä</button></div></div>`;
 }
 function newsDismiss(){
@@ -8931,6 +9004,7 @@ function newsDismiss(){
 function newsGo(key){
   newsDismiss();
   setTab("asetukset");
+  if(key==="theme"){ setTimeout(()=>document.getElementById("theme-section")?.scrollIntoView({behavior:"smooth",block:"center"}),250); return; }
   SETTINGS_TOGGLES[key]=true; renderAsetukset();
   const c=document.getElementById("stgl-content-"+key); if(c){ c.style.display=""; setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),250); }
 }
