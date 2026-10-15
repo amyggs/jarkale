@@ -722,6 +722,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h1,[data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h2{color:var(--hi-ink);}
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-h2{opacity:.78;}
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .tr-pill:not(.dark){background:rgba(255,255,255,.6);color:var(--hi-ink);}
+.g-prog-wrap{position:relative;display:block;}
+.g-prog-wrap .g-prog-sel{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;}
+.g-prog-car{display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid currentColor;margin-left:8px;vertical-align:4px;}
+.tr-nx{font:800 11px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:3px;}
+.tr-next .tr-go{display:inline-flex;align-items:center;}
+.tr-btn:disabled{opacity:.5;}
 .g-prog-sel{max-width:100%;border:none;background:transparent;font:800 20px/1.15 Manrope,system-ui,sans-serif;color:inherit;padding:0 22px 0 0;margin:0;outline:none;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat;color:var(--text);}
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .g-prog-sel{color:var(--hi-ink);}
 .g-title-in{flex:1;min-width:0;border:none;border-bottom:1.5px dashed currentColor;background:transparent;font:800 20px Manrope,system-ui,sans-serif;color:var(--text);padding:4px 0;outline:none;}
@@ -880,6 +886,11 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ed-l .g{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
 .ed-l.open{border-bottom-color:transparent;font-weight:800;}
 .ed-l.unp .g{color:var(--orange);}
+.ed-l.has-m{border-bottom:none;padding-bottom:4px;}
+.ed-match{display:flex;gap:8px;align-items:flex-start;font:500 13px/1.4 Manrope,system-ui,sans-serif;color:var(--dim);padding:2px 0 12px;border-bottom:1px solid var(--surf2);}
+.ed-match b{color:var(--text);}
+.ed-match input{margin:2px 0 0;width:18px;height:18px;flex-shrink:0;accent-color:var(--seg-on);}
+.ed-match.auto{padding-left:0;}
 .ed-note{display:block;font:500 12px/1.35 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
 .ed-day.off{opacity:.55;}
 .ed-day .g-inc{width:20px;height:20px;accent-color:var(--text);flex-shrink:0;}
@@ -1325,7 +1336,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.26</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.27</span>
       </div>
     </div>
   </div>
@@ -1359,6 +1370,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.27", d:"lokakuu 2026", items:[
+    "Treeni-näkymä: koko rivi aloittaa treenin. Pisimpään tekemättä ollut päivä näkyy merkinnällä \"Seuraavana kierrossa\", mutta minkä tahansa päivän voi aloittaa. Pitkä ohjelman nimi rivittyy eikä katkea.",
+    "Ohjelman tuonti tunnistaa saman liikkeen, vaikka nimen kirjoitusasu vaihtelee (esim. Hack-kyykky / Hack kyykky), ja liikkeen historia jatkuu. Epävarmoista nimistä esikatselu kysyy, onko kyse samasta liikkeestä."
+  ]},
   {v:"2.18.26", d:"lokakuu 2026", items:[
     "Liikkeen kehityskuvaajaan uusi mittari \"Toistot yht.\": kerran tehtyjen sarjojen toistot yhteensä. Viimeisten kertojen listassa näkyvät sarjamäärä ja painot. Muutos edelliseen kertaan näytetään vain, kun paino ja sarjamäärä ovat samat, muuten ero merkitään."
   ]},
@@ -7411,6 +7426,62 @@ function parseProgramText(text){
   out.skipped=skipped;
   return out;
 }
+// ── v2.18.27 Liikenimien täsmäys: historia seuraa avainta (exKey). Uuden ohjelman nimi voi poiketa kirjoitusasultaan.
+// Automaattisesti yhdistetään vain kirjainkoko-, väliviiva-, välimerkki- ja välilyöntierot. Muut ovat ehdotuksia, jotka
+// käyttäjä hyväksyy. Pidempi nimi (esim. "Hauiskääntö KP vasaraotteella") on usein eri liike, joten sitä ei valita valmiiksi.
+const exNorm=n=>String(n||"").toLowerCase().replace(/[-–—_/.,:;()*'"+&!?]+/g," ").replace(/\s+/g," ").trim();
+function gLev(a,b){
+  if(Math.abs(a.length-b.length)>2) return 9;
+  let prev=[...Array(b.length+1).keys()];
+  for(let i=1;i<=a.length;i++){ const cur=[i]; for(let j=1;j<=b.length;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); prev=cur; }
+  return prev[b.length];
+}
+function gKnownEx(){
+  const m={};
+  const add=(key,name,date)=>{ if(!key) return; const o=m[key]||(m[key]={key,name,n:0,last:""}); if(date){ o.n++; if(date>=o.last){ o.last=date; o.name=name; } } };
+  G.sessions.filter(s=>s.endedAt).forEach(s=>s.exercises.forEach(e=>{ if(doneSets(e).length) add(e.key,e.name,s.date); }));
+  G.programs.forEach(p=>p.days.forEach(d=>d.exercises.forEach(e=>add(e.key,e.name,null))));
+  return m;
+}
+// 2 = todennäköisesti sama (valitaan valmiiksi), 1 = mahdollinen (ei valita), 0 = ei
+function exSimilarity(a,b){
+  const na=exNorm(a), nb=exNorm(b); if(!na||!nb) return 0;
+  if(na===nb) return 3;
+  if(na.replace(/ /g,"")===nb.replace(/ /g,"")) return 2;                       // "hackkyykky" / "hack kyykky"
+  const ta=na.split(" "), tb=nb.split(" ");
+  if(ta.length===tb.length){
+    if(ta.slice().sort().join(" ")===tb.slice().sort().join(" ")) return 2;      // sanajärjestys
+    const diff=ta.map((t,i)=>t===tb[i]?-1:i).filter(i=>i>=0);
+    if(diff.length===1){ const x=ta[diff[0]], y=tb[diff[0]]; if(x.length>=5&&y.length>=5&&gLev(x,y)<=2) return 2;
+      let c=0; while(c<x.length&&x[c]===y[c]) c++; if(c>=7&&Math.abs(x.length-y.length)<=4) return 2; }   // taivutus: "koukistus" / "koukistukset"   // kirjoitusvirhe, taivutus
+  }
+  const [sh,lo]=ta.length<tb.length?[ta,tb]:[tb,ta];
+  if(sh.length<lo.length&&sh.every((t,i)=>t===lo[i])&&sh.join("").length>=3) return 1;   // lyhyempi nimi on pidemmän alku
+  return 0;
+}
+// Esikatselun liikkeille: match={key,name,auto,use,n,last}. Täsmälleen sama avain = ei merkintää (historia jatkuu jo).
+function gMatchImport(pv){
+  if(!pv||!pv.length) return pv;
+  const known=gKnownEx();
+  const all=pv.flatMap(d=>d.exercises);
+  const used=new Set(all.map(e=>e.key).filter(k=>known[k]));
+  all.forEach(e=>{
+    delete e.match;
+    if(known[e.key]) return;
+    let best=null;
+    Object.values(known).forEach(o=>{ if(used.has(o.key)) return; const lv=exSimilarity(e.name,o.name);
+      if(lv&&(!best||lv>best.lv||(lv===best.lv&&o.n>best.o.n))) best={lv,o}; });
+    if(!best) return;
+    e.match={key:best.o.key,name:best.o.name,n:best.o.n,last:best.o.last,auto:best.lv===3,use:best.lv>=2};
+  });
+  return pv;
+}
+// Yksittäinen lisäys (editori, treenin aikana): vain automaattinen tason 3 täsmäys, ei kysymyksiä
+function exResolveKey(name){
+  const k=exKey(name), known=gKnownEx(); if(known[k]) return k;
+  const n=exNorm(name); const o=Object.values(known).find(o=>exNorm(o.name)===n||exNorm(o.key)===n);
+  return o?o.key:k;
+}
 function blankEx(name){ return {name,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:""}; }
 
 // ── Ohjelmat
@@ -7592,9 +7663,9 @@ function gAddEx(sid){
     setTimeout(()=>{ const el=document.querySelector(`[data-ex="${ex.id}"]`); if(el){ el.scrollIntoView({behavior:"smooth",block:"start"}); G_FLASH.add("mini-"+ex.id); } },50);
     return;
   }
-  const prev=prevFor(exKey(p.name),s);
+  const key=exResolveKey(p.name), prev=prevFor(key,s);
   const n=p.sets||(prev?prev.sets.length:3);
-  s.exercises.push({id:gid(),key:exKey(p.name),name:p.name,goal:goalFields(p),note:p.note||"",
+  s.exercises.push({id:gid(),key,name:p.name,goal:goalFields(p),note:p.note||"",
     skipped:false,added:true,feel:null,userNote:"",sets:[...Array(n)].map(()=>({kg:null,reps:null,done:false}))});
   gymSave(); renderGym();
   setTimeout(()=>document.getElementById("g-addex")?.focus(),0);
@@ -7881,7 +7952,8 @@ function gymHomeHTML(){
   const p=curProgram();
   const active=G.programs.filter(x=>!x.archived), archived=G.programs.filter(x=>x.archived);
   let h=`<div class="view-hero"><div class="tr-hero-row"><div style="min-width:0;flex:1">`;
-  if(active.length>1) h+=`<select class="g-prog-sel" onchange="G.curProgramId=this.value;gymSave();renderGym()">${active.map(x=>`<option value="${x.id}" ${p&&x.id===p.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>`;
+  // v2.18.27: ohjelman nimi rivittyy (select ei rivity), valinta läpinäkyvänä päällä
+  if(active.length>1) h+=`<label class="g-prog-wrap"><span class="tr-h1">${p?esc(p.name):"Valitse ohjelma"}<span class="g-prog-car" aria-hidden="true"></span></span><select class="g-prog-sel" aria-label="Ohjelma" onchange="G.curProgramId=this.value;gymSave();renderGym()">${active.map(x=>`<option value="${x.id}" ${p&&x.id===p.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>`;
   else h+=`<div class="tr-h1">${p?esc(p.name):"Treeni"}</div>`;
   h+=`<div class="tr-h2">${p?`${p.days.length} treenipäivää`:"Ei vielä ohjelmaa"}</div></div>`;
   if(p) h+=`<button class="tr-pill" onclick="gOpenEdit('${p.id}',false)">Muokkaa</button>`;
@@ -7895,13 +7967,14 @@ function gymHomeHTML(){
       <button class="tr-go" style="width:100%;height:46px;margin-top:14px" onclick="const c=G.curProgramId;const p=newProgram();gOpenEdit(p.id,true);GU.editSnap.cur=c">+ Uusi ohjelma</button>
       <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä ohjelma tekstinä</button></div>`;
   } else {
-    // Seuraavaksi: treenipäivä, joka on tehty pisimpään sitten (vain vihje)
+    // v2.18.27 Seuraavana: päivä, joka on tehty pisimpään sitten; kertaakaan tekemätön on vanhin (ohjelman järjestyksessä).
+    // Vain vihje: kaikki rivit aloittavat treenin. Ei merkkiä ennen ohjelman ensimmäistä tehtyä treeniä.
     const lasts=p.days.map(d=>({d,l:lastDoneOfDay(d.id)}));
-    // Merkki vasta kun jokainen päivä on tehty kerran: ensimmäisellä kierroksella ohjelman järjestys on ohje, eikä vertailtavaa ole
-    const next=p.days.length>1&&lasts.every(x=>x.l)?lasts.slice().sort((a,b)=>a.l.startedAt-b.l.startedAt)[0].d.id:null;
+    const cand=lasts.filter(x=>x.d.exercises.length);
+    const next=cand.length>1&&cand.some(x=>x.l)?cand.slice().sort((a,b)=>(a.l?a.l.startedAt:0)-(b.l?b.l.startedAt:0))[0].d.id:null;
     h+=`<div class="tr-sec">Valitse treenipäivä</div><div class="tr-list">`;
-    h+=lasts.map(({d,l})=>`<div class="tr-row"><div class="t"><div class="n">${esc(d.name)}${d.id===next?`<span class="tr-tag">Pisimpään tekemättä</span>`:""}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:""}</div></div>
-      <button class="tr-go${d.id===next||p.days.length===1?"":" ghost"}" ${d.exercises.length?"":"disabled"} onclick="startSession('${p.id}','${d.id}')">Aloita</button></div>`).join("");
+    h+=lasts.map(({d,l})=>{ const on=d.id===next||p.days.length===1;
+      return `<button class="tr-row tr-btn${on?" tr-next":""}" ${d.exercises.length?"":"disabled"} onclick="startSession('${p.id}','${d.id}')"><div class="t">${d.id===next?`<div class="tr-nx">Seuraavana kierrossa</div>`:""}<div class="n">${esc(d.name)}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:" · ei vielä tehty"}</div></div>${on?`<span class="tr-go" aria-hidden="true">Aloita</span>`:`<span class="chev">›</span>`}</button>`; }).join("");
     h+=`</div>`;
   }
   const hist=G.sessions.filter(s=>s.endedAt).sort((a,b)=>b.startedAt-a.startedAt);
@@ -8177,7 +8250,7 @@ function gParsePreview(dayId,v){
 }
 function gAddTplEx(di,dayId){
   const inp=document.getElementById("g-add-"+dayId); const p=parseExLine(inp&&inp.value); if(!p) return;
-  gEdit(pr=>pr.days[di].exercises.push(newEx(p)));
+  gEdit(pr=>pr.days[di].exercises.push({...newEx(p),key:exResolveKey(p.name)}));
   renderGym(); setTimeout(()=>document.getElementById("g-add-"+dayId)?.focus(),0);
 }
 function gSetGoal(di,xi,v){
@@ -8209,7 +8282,7 @@ function gymImportHTML(){
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Esim. suoraan Google Keepistä</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
     <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Puuttuvia arvoja ei keksitä.</div>
     <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
-    <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=parseProgramText(GU.importText);renderGym()">Esikatsele</button>`;
+    <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=gMatchImport(parseProgramText(GU.importText));renderGym()">Esikatsele</button>`;
   if(pv){
     if(!pv.length) h+=`<div class="g-hint" style="margin-top:12px">Tekstistä ei löytynyt liikkeitä.</div>`;
     else{
@@ -8218,8 +8291,10 @@ function gymImportHTML(){
       h+=`<div class="tr-sec">Esikatselu · ${inc.length} treenipäivää</div>`;
       if(unp) h+=`<div class="g-hint warn">${ico("alert",15)} ${unp} riviltä ei löytynyt sarjoja ja toistoja. Ne tallentuvat pelkkinä nimiä, ja tavoitteen voi lisätä myöhemmin.</div>`;
       pv.forEach((d,di)=>{ h+=`<div class="ed-day${d.include?"":" off"}"><label class="ed-dn"><span style="display:flex;gap:10px;align-items:center;min-width:0"><input type="checkbox" class="g-inc" ${d.include?"checked":""} onchange="GU.importPreview[${di}].include=this.checked;renderGym()"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text);min-width:0;overflow-wrap:anywhere">${esc(d.name)}</span></span><span>${d.exercises.length} liikettä</span></label>
-        ${d.include?d.exercises.map(e=>`<div class="ed-l static${e.unparsed?" unp":""}"><span class="x">${esc(e.name)}${e.note?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>`).join(""):""}</div>`; });
+        ${d.include?d.exercises.map((e,ei)=>`<div class="ed-l static${e.unparsed?" unp":""}${e.match?" has-m":""}"><span class="x">${esc(e.name)}${e.note?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>${gMatchRow(e,di,ei)}`).join(""):""}</div>`; });
       if(pv.skipped&&pv.skipped.length) h+=`<details class="g-src" style="margin:0 0 12px"><summary>Ohitetut rivit (${pv.skipped.length}): ohjetekstiä, ei tuoda</summary><pre data-raw>${esc(pv.skipped.join("\n"))}</pre></details>`;
+      const nm=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.match&&!e.match.auto).length,0);
+      if(nm) h=h.replace(`<div class="tr-sec">Esikatselu`,`<div class="g-hint warn">${ico("alert",15)} ${nm} liikkeen nimi muistuttaa aiempaa liikettä. Tarkista alta, onko kyse samasta liikkeestä. Silloin liikkeen historia jatkuu.</div><div class="tr-sec">Esikatselu`);
       const cur=G.programs.find(x=>x.id===G.curProgramId&&!x.archived);
       h+=`<button class="tr-go" style="width:100%;height:46px" ${inc.length?"":"disabled"} onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
       if(cur) h+=`<button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" ${inc.length?"":"disabled"} onclick="gImportSave(true)">Lisää päivät ohjelmaan ${esc(cur.name)}</button>`;
@@ -8227,8 +8302,14 @@ function gymImportHTML(){
   }
   return h+`<div style="height:30px"></div>`;
 }
+function gMatchRow(e,di,ei){
+  const m=e.match; if(!m) return "";
+  const meta=m.n?` · ${m.n} ${m.n===1?"kerta":"kertaa"}, viimeksi ${gDay(m.last)}`:" · ohjelmassa";
+  if(m.auto) return `<div class="ed-match auto">Historia jatkuu: ${esc(m.name)}${meta}</div>`;
+  return `<label class="ed-match"><input type="checkbox" ${m.use?"checked":""} onchange="GU.importPreview[${di}].exercises[${ei}].match.use=this.checked"> <span>Sama liike kuin <b>${esc(m.name)}</b>${meta}</span></label>`;
+}
 function gImportSave(append){
-  const days=(GU.importPreview||[]).filter(d=>d.include).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,...e})=>e)}));
+  const days=(GU.importPreview||[]).filter(d=>d.include).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,match,...e})=>match&&match.use?{...e,key:match.key}:e)}));
   if(!days.length) return;
   let p;
   if(append&&(p=curProgram())){ p.days.push(...days); p.sourceText=(p.sourceText?p.sourceText+"\n\n":"")+GU.importText; touchProg(p); }
