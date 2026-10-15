@@ -1549,6 +1549,36 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="hahmo"],[data-palette="hiscore"],[data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
 [data-palette="soitin"] #view-log .stepper-row>div>span,[data-palette="soitin"] .sleep-hm small{color:#7FC07F!important;opacity:1!important;}
+
+/* v2.18.45 Otsikkorivin Kirjattu-merkki: erikoisteemoissa piiloon (leveät fontit eivät mahdu, viikkonauha näyttää kirjauksen),
+   perusteemoissa vain kapeilla näytöillä */
+:is([data-palette="hahmo"],[data-palette="hiscore"],[data-palette="soitin"],[data-palette="fosfori"],[data-palette="tekstitv"],[data-palette="manageri"],[data-palette="kuusnelonen"]) #today-check{display:none!important;}
+@media (max-width:400px){#today-check{display:none!important;}}
+
+/* v2.18.45 Teksti-TV, Kirjaa: yksi kirjasin ja kaksi kokoa kuten teksti-TV:ssä (normaali ja kaksinkertainen korkeus),
+   jokainen tieto omassa laatikossaan sinisen otsikkopalkin alla */
+[data-palette="tekstitv"] #view-log,[data-palette="tekstitv"] #view-log *:not(svg):not(svg *){font-family:"J VT323",monospace!important;font-size:21px!important;line-height:1.15!important;letter-spacing:.02em!important;font-weight:400!important;}
+[data-palette="tekstitv"] #view-log :is(#date-display){font-size:28px!important;color:var(--t-num)!important;}
+[data-palette="tekstitv"] #view-log .vko-badge{font-size:21px!important;}
+[data-palette="tekstitv"] #view-log :is(.stepper input,.sleep-hm b){font-size:42px!important;line-height:1!important;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap,#track-recovery-wrap,#track-motivation-wrap){border:2px solid var(--t-bar)!important;padding:0 10px 10px!important;background:var(--bg)!important;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap)>div.stepper{border:none!important;padding:0!important;background:transparent!important;}
+/* otsikkopalkki laatikon yläreunaan */
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child,
+[data-palette="tekstitv"] #view-log :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{background:var(--t-bar);margin:0 -10px 8px!important;padding:3px 10px!important;min-height:0!important;flex-direction:row!important;align-items:center!important;justify-content:space-between;}
+[data-palette="tekstitv"] #view-log #track-steps-wrap>.stepper>.lbl-small{display:block;background:var(--t-bar);margin:0 -10px 8px!important;padding:3px 10px!important;}
+[data-palette="tekstitv"] #view-log #track-steps-wrap>.stepper{display:block!important;}
+[data-palette="tekstitv"] #view-log #track-steps-wrap .stepper-row{width:100%;}
+[data-palette="tekstitv"] #view-log .lbl-small{color:var(--t-bar-ink)!important;text-transform:uppercase;white-space:normal!important;flex:1 1 auto;min-width:0;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child{flex-wrap:wrap!important;gap:0 8px;}
+[data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint){flex-basis:100%;position:static!important;}
+[data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint) *{color:#FFFFFF!important;}
+[data-palette="tekstitv"] #view-log :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em!important;align-items:flex-start!important;}
+[data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,.ghost-hint){color:#FFFFFF!important;}
+[data-palette="tekstitv"] #view-log button[onclick^="toggleFieldHint"]{background:transparent!important;border:none!important;color:#00FFFF!important;width:auto!important;height:auto!important;}
+[data-palette="tekstitv"] #view-log :is(.stars button){font-size:24px!important;}
+[data-palette="tekstitv"] #view-log :is(.stepper-btn){font-size:28px!important;}
+[data-palette="tekstitv"] #view-log .stepper-row>div>span,[data-palette="tekstitv"] #view-log .sleep-hm small{font-size:21px!important;color:var(--t-lbl)!important;}
 </style>
 </head>
 <body>
@@ -1897,7 +1927,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.44</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.45</span>
       </div>
     </div>
   </div>
@@ -1931,6 +1961,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.45", d:"lokakuu 2026", items:[
+    "Otsikkorivin Kirjattu-merkki on piilotettu erikoisteemoissa ja kapeilla näytöillä, koska se ei mahtunut nimen viereen. Viikkonauha näyttää kirjauksen.",
+    "Teksti-TV:n Kirjaa-näkymä: yksi kirjasin kahdessa koossa kuten teksti-TV:ssä, ja jokainen tieto omassa laatikossaan sinisen otsikkopalkin alla."
+  ]},
   {v:"2.18.44", d:"lokakuu 2026", items:[
     "Teemojen luettavuus tarkistettu: Soittimen vaalean version kuvaajaviiva tummemman vihreä, LCD-kenttien yksiköt näkyvät, Kuusnelosen vaalean version alapalkki ja pienet tekstit vaaleammat, ja Hahmon ja Hi-scoren vaalean version taukoajastimen teksti näkyy."
   ]},
