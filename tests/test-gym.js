@@ -481,6 +481,32 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   ok(await p.evaluate(()=>{ G.sessions.push({id:'mt2',programId:'x',dayId:'x',date:today(),startedAt:Date.now()-5e3,endedAt:Date.now()-4e3,dayName:'V',exercises:[{id:'e',key:'hack kyykky',name:'Hack kyykky',sets:[{kg:50,reps:10,done:true}]}]});
     const r=exResolveKey('HACK-kyykky')==='hack kyykky'&&exResolveKey('Hack kyykky tangolla')==='hack kyykky tangolla'; G.sessions=G.sessions.filter(s=>s.id!=='mt2'); gymSave(); return r; }),'yksittäinen lisäys: vain kirjoitusasuero yhdistetään automaattisesti');
 
+  console.log('\nEnnätyksen hetki ja arvioitu 1RM (v2.18.31)');
+  const prt=await p.evaluate(()=>{ const pr=newProgram('PR-testi'); pr.days[0].exercises.push(newEx({name:'PR-penkki',sets:3,repsMin:6,repsMax:10}),newEx({name:'PR-ojennus',sets:2,repsMin:15,repsMax:20}));
+    const t=Date.now()-3*864e5; const k1=exKey('PR-penkki'), k2=exKey('PR-ojennus');
+    G.sessions.push({id:'prold',programId:pr.id,dayId:pr.days[0].id,date:new Date(t).toISOString().slice(0,10),startedAt:t,endedAt:t+1000,dayName:'A',exercises:[
+      {id:'a',key:k1,name:'PR-penkki',sets:[{kg:80,reps:8,done:true},{kg:80,reps:7,done:true}]},{id:'b',key:k2,name:'PR-ojennus',sets:[{kg:40,reps:18,done:true}]}]});
+    G.curProgramId=pr.id; gymSave(); if(G.activeId) finishSession(true); startSession(pr.id,pr.days[0].id); const s=activeSession(); GU.expanded={}; s.exercises.forEach(e=>GU.expanded[e.id]=true); renderGym();
+    const vib=[]; navigator.vibrate=x=>{vib.push(x);return true;};
+    const ex=s.exercises[0];
+    const e1before=document.querySelector(`[data-ex="${ex.id}"] .ex-e1`)?.textContent||document.querySelectorAll('#view-treeni .ex-e1')[0]?.textContent;
+    ex.sets[0].kg=80; ex.sets[0].reps=9; gToggleSet(s.id,0,0);
+    const msg1=document.querySelector('[data-prmsg]')?.textContent, tag=!!document.querySelector('.set .pr.pop');
+    ex.sets[1].kg=80; ex.sets[1].reps=10; gToggleSet(s.id,0,1);
+    const v=vib.slice();
+    const ex2=s.exercises[1]; ex2.sets[0].kg=45; ex2.sets[0].reps=18; gToggleSet(s.id,1,0);
+    const msg2=[...document.querySelectorAll('[data-prmsg]')].map(x=>x.textContent);
+    const e1s=[...document.querySelectorAll('#view-treeni .ex-e1')].map(x=>x.textContent);
+    const inData=JSON.stringify(G).includes('prShown')||JSON.stringify(G).includes('prMsg');
+    finishSession(true); G.sessions=G.sessions.filter(x=>x.id!=='prold'&&x.programId!==pr.id); G.programs=G.programs.filter(x=>x!==pr); G.curProgramId=G.programs[0].id; gymSave(); GU.mode='home'; renderGym();
+    return {e1before,msg1,tag,v,msg2,e1s,inData}; });
+  ok(/Arv\. 1RM ~101,5 kg/.test(prt.e1before)&&/80 × 8/.test(prt.e1before)&&/järkevä 1–12 toistolla/.test(prt.e1before),'1RM-rivi aiemmasta sarjasta ja huomautus toistomäärästä ('+prt.e1before+')');
+  ok(/Uusi ennätys 80 × 9 · aiempi paras 80 × 8/.test(prt.msg1)&&prt.tag,'ennätysrivi ja tagin animaatio ('+prt.msg1+')');
+  ok(Array.isArray(prt.v[0])&&prt.v[0].length===3&&typeof prt.v[1]==='number','tuplavärinä vain ensimmäisestä ennätyksestä, toinen sarja tavallinen värinä '+JSON.stringify(prt.v));
+  ok(prt.msg2.some(m=>/45 × 18 · aiempi raskain 40 × 18/.test(m)),'painavampi kuin koskaan: vertailu aiempaan raskaimpaan');
+  ok(/epätarkka, sarjat yli 12 toistoa/.test(prt.e1s[1])&&/80 × 10/.test(prt.e1s[0])&&/~106,5 kg/.test(prt.e1s[0]),'1RM päivittyy treenin aikana, pitkät sarjat merkitään epätarkoiksi ('+prt.e1s.join(' | ')+')');
+  ok(!prt.inData,'ennätysilmoitusten tila ei tallennu dataan');
+
   console.log('\nDesimaalit ja kellonaika');
   await p.evaluate(()=>{const pr=G.programs[0];startSession(pr.id,pr.days[1].id);});
   const hero=await p.locator('#view-treeni .tr-h2').first().innerText();

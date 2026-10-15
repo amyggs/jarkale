@@ -675,11 +675,17 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     ok(await p.evaluate(()=>document.documentElement.getAttribute('data-palette'))==='kaurapuuro','oletusteema Kaurapuuro');
     { const dd=await p.evaluate(()=>{const e=document.getElementById('date-display'),b=e.querySelector('.vko-badge');const r=e.getBoundingClientRect(),q=b.getBoundingClientRect();return {t:e.innerText,one:Math.abs(r.top-q.top)<14&&e.scrollWidth<=e.clientWidth+1};});
       ok(/VKO \d+/.test(dd.t)&&!/20\d\d/.test(dd.t)&&dd.one,'viikkonumero samalla rivillä, ei kuluvaa vuotta ('+dd.t.replace(/\n/g,' ')+')'); }
-    for(const pal of ['magnesium','ampiainen','kaurapuuro']){
+    for(const pal of ['magnesium','ampiainen','fosfori','kaurapuuro']){
       const r=await p.evaluate(pl=>{applyPalette(pl);const b=document.querySelector('#stars-recovery button.active')||document.querySelector('#stars-recovery button');
         const cs=getComputedStyle(b);return {attr:document.documentElement.getAttribute('data-palette'),saved:JSON.parse(localStorage.getItem('seuranta-settings')).palette,bg:cs.backgroundColor,fg:cs.color};},pal);
       ok(r.attr===pal&&r.saved===pal&&r.bg!==r.fg,'teema '+pal+' asettuu ja tallentuu');
     }
+    { const fz=await p.evaluate(()=>{ const prevT=S.settings.theme; applyPalette('fosfori'); const res={};
+        for(const t of ['dark','light']){ applyTheme(t); const b=getComputedStyle(document.body); res[t]={bg:b.backgroundColor,fg:b.color,ff:b.fontFamily}; }
+        applyTheme(prevT); applyPalette('kaurapuuro'); return res; });
+      const lum=c=>{const m=c.match(/\d+/g).map(Number);return (m[0]*299+m[1]*587+m[2]*114)/1000;};
+      ok(lum(fz.dark.bg)<40&&lum(fz.dark.fg)>150&&lum(fz.light.bg)>180&&lum(fz.light.fg)<90,'Fosfori: tumma pääte ja vaalea käänteinen versio '+JSON.stringify([fz.dark.bg,fz.dark.fg,fz.light.bg,fz.light.fg]));
+      ok(/Share Tech Mono/.test(fz.dark.ff),'Fosfori: tasalevyinen fontti'); }
     { await p.evaluate(()=>{const st=JSON.parse(localStorage.getItem('seuranta-settings'));st.palette='ampiainen';st.theme='light';localStorage.setItem('seuranta-settings',JSON.stringify(st));});
       await p.reload(); await p.waitForTimeout(900);
       const mc=await p.evaluate(()=>[document.querySelector('meta[name=theme-color]').content,getComputedStyle(document.getElementById('header')).backgroundColor]);
