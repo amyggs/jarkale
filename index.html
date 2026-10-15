@@ -1480,6 +1480,70 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .tb-hiscore .hs-h{color:#FF2BD6;font-size:11px;text-align:center;margin-bottom:12px;text-shadow:0 0 8px rgba(255,43,214,.7);}
 .tb-hiscore .hs-r{display:flex;justify-content:space-between;font-size:11px;line-height:2.2;opacity:0;}
 .tb-hiscore .hs-r.on{opacity:1;}
+/* ── v2.18.43 Soitin: 90-luvun mediasoitin. Vihreä LCD vain numeroissa. */
+@font-face{font-family:"J Rajdhani";font-weight:500;src:url(fonts/rajdhani-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Rajdhani";font-weight:600;src:url(fonts/rajdhani-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Rajdhani";font-weight:700;src:url(fonts/rajdhani-latin-700-normal.woff2) format("woff2");font-display:swap;}
+:root[data-palette="soitin"]{--s-pa:#30304A;--s-pb:#22222F;--s-hi:#5A5A7A;--s-lo:#14141C;--s-ba:#5A5A78;--s-bb:#33334A;--s-bhi:#8A8AAA;--s-ta:#3A3A55;--s-tb:#24243A;--s-rib:#6C6C90;--s-tt:#E8E8F0;--s-bt:#E8E8F0;
+--bg:#16161F;--surf:#262635;--surf2:#33334A;--bord:#4A4A66;--text:#D6D6E6;--dim:#8C8CA8;--orange:#00E000;--yellow:#E8D23A;--blue:#5AA0FF;--green:#00E000;--red:#E8402C;--purple:#A08CFF;--card-bg:#262635;--header-bg:#16161F;--nav-bg:#101018;--shadow:none;--seg-on:#00E000;--on-accent:#000;--hi:#00E000;--hi-ink:#000;--ol:#4A4A66;--olbg:transparent;color-scheme:dark;}
+:root[data-palette="soitin"][data-theme="light"]{--s-pa:#E4E4EA;--s-pb:#C9C9D2;--s-hi:#FFFFFF;--s-lo:#8E8E9C;--s-ba:#F2F2F6;--s-bb:#CFCFD8;--s-bhi:#FFFFFF;--s-ta:#D8D8E2;--s-tb:#B8B8C6;--s-rib:#8E8EA2;--s-tt:#22222F;--s-bt:#22222F;
+--bg:#B9B9C4;--surf:#DCDCE4;--surf2:#CFCFD8;--bord:#8E8E9C;--text:#1C1C26;--dim:#4E4E60;--nav-bg:#C9C9D2;color-scheme:light;}
+[data-palette="soitin"] body{background:var(--bg);}
+[data-palette="soitin"] *{font-family:"J Rajdhani","Arial Narrow",sans-serif!important;font-weight:600;}
+[data-palette="soitin"] #app *:not(.ws-dot){border-radius:1px!important;}
+[data-palette="soitin"] :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 24px 0 4px!important;}
+[data-palette="soitin"] #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
+[data-palette="soitin"] :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
+[data-palette="soitin"] #view-log .lbl-small{min-width:0;flex:1 1 auto;white-space:normal!important;}
+[data-palette="soitin"] #nav button svg,[data-palette="soitin"] #nav button svg *{stroke:currentColor!important;}
+/* paneelit: metallinen kehys, ohut korostusreuna */
+[data-palette="soitin"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){background:linear-gradient(180deg,var(--s-pa),var(--s-pb))!important;border:1px solid #0B0B12!important;box-shadow:inset 1px 1px 0 var(--s-hi),inset -1px -1px 0 var(--s-lo)!important;}
+/* otsikkopalkki: uurrettu nauha ja pieni spektrianalysaattori */
+[data-palette="soitin"] :is(.tr-sec,.section-head){display:flex;align-items:center;gap:8px;color:var(--s-tt)!important;font-size:11px!important;letter-spacing:.18em!important;text-transform:uppercase;padding:3px 8px!important;background:linear-gradient(180deg,var(--s-ta),var(--s-tb));border:1px solid #0B0B12;box-shadow:inset 1px 1px 0 var(--s-hi);}
+[data-palette="soitin"] .tr-sec::before,[data-palette="soitin"] .tr-sec::after{content:"";flex:1;height:5px;background:repeating-linear-gradient(180deg,var(--s-rib) 0 1px,transparent 1px 2px);}
+[data-palette="soitin"] .lbl-small{color:var(--dim)!important;text-transform:uppercase;letter-spacing:.12em;font-size:11px!important;}
+/* LCD-näytöt: musta pohja, vihreät numerot */
+[data-palette="soitin"] :is(input,textarea){background:#000!important;border:1px solid #0B0B12!important;box-shadow:inset 1px 1px 0 #000,inset -1px -1px 0 #3A3A55!important;color:#00E000!important;}
+[data-palette="soitin"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b,.gt .gt-tm){font-family:"J VT323",monospace!important;color:#00E000!important;font-weight:400!important;text-shadow:0 0 6px rgba(0,224,0,.5);}
+[data-palette="soitin"] #view-log .stepper input,[data-palette="soitin"] .sleep-hm b{font-size:44px!important;}
+[data-palette="soitin"] .tr-h1{font-family:"J VT323",monospace!important;color:#00E000;font-size:28px;font-weight:400;background:#000;padding:2px 8px;display:inline-block;letter-spacing:.04em;}
+[data-palette="soitin"] .tr-row{border-top:1px solid var(--s-lo)!important;}
+/* napit kuin soittimen ohjausnapit */
+[data-palette="soitin"] :is(.tr-go.ghost,.tr-pill,.tr-pick,.stepper-btn,.stars button:not(.active),.gt button){background:linear-gradient(180deg,var(--s-ba),var(--s-bb))!important;color:var(--s-bt)!important;border:1px solid #0B0B12!important;box-shadow:inset 1px 1px 0 var(--s-bhi)!important;}
+[data-palette="soitin"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:linear-gradient(180deg,#2E2E44,#1A1A28)!important;color:#00E000!important;border:1px solid #0B0B12!important;box-shadow:inset 1px 1px 0 #000,0 0 8px rgba(0,224,0,.35)!important;}
+[data-palette="soitin"] .ws-day .ws-dot{background:#000!important;border:1px solid #3A3A55!important;}
+[data-palette="soitin"] .ws-day.logged .ws-dot{background:#000!important;color:#00E000!important;box-shadow:0 0 6px rgba(0,224,0,.6);}
+[data-palette="soitin"] #header{background:linear-gradient(180deg,var(--s-ta),var(--s-tb))!important;border-bottom:1px solid #000!important;box-shadow:inset 0 -1px 0 var(--s-hi);}
+[data-palette="soitin"] :is(#nav,nav){background:linear-gradient(180deg,var(--s-ta),var(--s-tb))!important;border-top:1px solid #000!important;}
+[data-palette="soitin"] #nav button,[data-palette="soitin"] #nav button *{color:var(--dim)!important;}
+[data-palette="soitin"][data-theme="light"] #nav button.active,[data-palette="soitin"][data-theme="light"] #nav button.active *{color:#0A7A0A!important;} [data-palette="soitin"] #nav button.active,[data-palette="soitin"] #nav button.active *{color:#00E000!important;}
+/* edistyminen kuin taajuusnäyttö: vihreä → keltainen → punainen */
+[data-palette="soitin"] .g-prog{height:10px;background:#000;border:1px solid #0B0B12;}
+[data-palette="soitin"] .g-prog span{background:repeating-linear-gradient(90deg,transparent 0 3px,#000 3px 4px),linear-gradient(90deg,#00E000 0%,#E8D23A 70%,#E8402C 100%)!important;background-size:auto,calc(100vw - 32px) 100%!important;}
+[data-palette="soitin"] .ex-prmsg{background:#000;color:#00E000;border:1px solid #00E000;font-family:"J VT323",monospace!important;font-size:18px;font-weight:400;}
+[data-palette="soitin"] .pr-tag,[data-palette="soitin"] .set .pr{background:#E8D23A!important;color:#000!important;}
+[data-palette="soitin"] .gt{background:linear-gradient(180deg,var(--s-pa),var(--s-pb));border:1px solid #000;color:var(--text);}
+[data-palette="soitin"] .gt .gt-l{color:var(--dim);} [data-palette="soitin"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px #00E000!important;} [data-palette="soitin"] .gt .gt-bar{background:#000;} [data-palette="soitin"] .gt .gt-bar i{background:#00E000;}
+[data-palette="soitin"] #header img{filter:grayscale(1) contrast(1.2);}
+
+.tb-soitin{background:#16161F;}
+.tb-soitin .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.tb-soitin .sp{width:min(88vw,360px);background:linear-gradient(180deg,#30304A,#22222F);border:1px solid #000;box-shadow:inset 1px 1px 0 #5A5A7A,0 10px 30px rgba(0,0,0,.6);padding:10px;font-family:"J Rajdhani",sans-serif!important;opacity:0;transform:translateY(10px);animation:spIn .35s ease .05s forwards;}
+.tb-soitin .sp *{font-family:inherit!important;}
+.tb-soitin .sp-bar{display:flex;align-items:center;gap:8px;color:#E8E8F0;font-size:10px;letter-spacing:.2em;font-weight:700;margin-bottom:8px;}
+.tb-soitin .sp-bar::before,.tb-soitin .sp-bar::after{content:"";flex:1;height:5px;background:repeating-linear-gradient(180deg,#6C6C90 0 1px,transparent 1px 2px);}
+.tb-soitin .sp-lcd{background:#000;border:1px solid #000;box-shadow:inset -1px -1px 0 #3A3A55;padding:8px 10px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;}
+.tb-soitin .sp-time{font-family:"J VT323",monospace!important;color:#00E000;font-size:42px;line-height:1;text-shadow:0 0 6px rgba(0,224,0,.6);}
+.tb-soitin .sp-an{display:flex;align-items:flex-end;gap:2px;height:34px;}
+.tb-soitin .sp-an i{flex:1;background:linear-gradient(0deg,#00E000 0%,#00E000 55%,#E8D23A 80%,#E8402C 100%);background-size:100% 34px;background-position:bottom;height:10%;animation:spBar .42s ease-in-out infinite alternate;}
+.tb-soitin .sp-ttl{grid-column:1/-1;overflow:hidden;white-space:nowrap;color:#00E000;font-family:"J VT323",monospace!important;font-size:20px;}
+.tb-soitin .sp-ttl span{display:inline-block;padding-left:100%;animation:spScroll 3.2s linear infinite;}
+.tb-soitin .sp-btn{display:flex;gap:4px;margin-top:8px;}
+.tb-soitin .sp-btn b{flex:1;text-align:center;background:linear-gradient(180deg,#5A5A78,#33334A);border:1px solid #000;box-shadow:inset 1px 1px 0 #8A8AAA;color:#E8E8F0;font-size:14px;padding:4px 0;}
+.tb-soitin .sp-btn b.on{background:linear-gradient(180deg,#2E2E44,#1A1A28);color:#00E000;box-shadow:inset 1px 1px 0 #000,0 0 8px rgba(0,224,0,.4);}
+@keyframes spIn{to{opacity:1;transform:none}} @keyframes spScroll{to{transform:translateX(-100%)}}
+@keyframes spBar{from{height:var(--h0,10%)}to{height:var(--h1,90%)}}
+@media (prefers-reduced-motion:reduce){.tb-soitin .sp-an i,.tb-soitin .sp-ttl span{animation:none}}
 </style>
 </head>
 <body>
@@ -1828,7 +1892,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.42</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.43</span>
       </div>
     </div>
   </div>
@@ -1862,6 +1926,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.43", d:"lokakuu 2026", items:[
+    "Uusi teema Soitin: 90-luvun mediasoitin, metalliset paneelit ja vihreät LCD-numerot. Käynnistyksessä soitin lähtee soimaan taajuusnäytön kanssa."
+  ]},
   {v:"2.18.42", d:"lokakuu 2026", items:[
     "Keltamusta Järkäle-teema (ent. Ampiainen) on nyt oletus. Itse valittu teema pysyy ennallaan.",
     "Kaksi uutta teemaa: Hahmo (roolipelin hahmoruutu, ennätys on LEVEL UP!) ja Hi-score (pelihallin neonvalot, ennätys on NEW HIGH SCORE!). Molemmissa vaalea ja tumma versio sekä oma käynnistysanimaatio."
@@ -3099,6 +3166,7 @@ const PALETTES=[
   {id:"manageri",l:"Manageri",d:"90-luvun manageripelin tilastoruudut",sw:["#0A1733","#2F5BAE","#FFD400"]},
   {id:"hahmo",l:"Hahmo",d:"Roolipelin hahmoruutu: kivi ja kulta",sw:["#15120E","#D9AE4E","#B07FD9"]},
   {id:"hiscore",l:"Hi-score",d:"Pelihallin neonvalot",sw:["#07020F","#FF2BD6","#20E3FF"]},
+  {id:"soitin",l:"Soitin",d:"90-luvun mediasoitin: metalli ja vihreä LCD",sw:["#22222F","#00E000","#5A5A78"]},
   {id:"fosfori",l:"Fosfori",d:"Vihreä kuvaputkipääte, vaaleana LCD-näyttö",sw:["#050B07","#C2E6C6","#5CFF8F"]}
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"ampiainen"; } // v2.18.42: oletus Järkäle (id ampiainen)
@@ -3143,6 +3211,15 @@ function themeBoot(pal){
     // Black and Yellow: varoitusraidat pyyhkäisevät, iso nimi ja putki
     o.innerHTML=`<div class="by-stripes"></div><div class="tb-scr"><div class="by-c"><div class="by-name">JÄRKÄLE</div><div class="by-sub">${st>0?`${st} päivän putki`:`${n} kirjausta`}</div></div></div>`;
     at(2100,()=>bootEnd());
+  } else if(pal==="soitin"){
+    const pad2=x=>String(x).padStart(2,"0");
+    o.innerHTML=`<div class="tb-scr"><div class="sp"><div class="sp-bar">JÄRKÄLE</div><div class="sp-lcd"><div class="sp-time">00:00</div><div class="sp-an">${Array.from({length:16},(_,i)=>`<i style="--h0:${8+((i*37)%30)}%;--h1:${40+((i*53)%60)}%;animation-delay:${(i*47)%400}ms"></i>`).join("")}</div>
+      <div class="sp-ttl"><span>*** JÄRKÄLE · ${n} kirjausta · putki ${st} pv · ***</span></div></div>
+      <div class="sp-btn"><b>⏮</b><b class="pl">▶</b><b>⏸</b><b>⏹</b><b>⏭</b></div></div></div>`;
+    const tm=o.querySelector(".sp-time");
+    at(250,()=>o.querySelector(".pl").classList.add("on"));
+    for(let i=1;i<=9;i++) at(250+i*260,()=>{ const sec=Math.round(i*st/9)||i; tm.textContent=`${pad2(Math.floor(sec/60)%100)}:${pad2(sec%60)}`; });
+    at(2900,()=>bootEnd());
   } else if(pal==="hahmo"){
     const rows=[["Kirjauksia",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","Varusteltu"]]:[]),["Taso",String(1+Math.floor(n/30))]]; // taso = kirjausmäärä / 30 (kuvaileva leikki, ei arvio kunnosta)
     o.innerHTML=`<div class="tb-scr"><div class="hm"><div class="hm-t">JÄRKÄLE</div><div class="hm-s">— HAHMO —</div><div class="hm-rs">${rows.map(r=>`<div class="hm-r"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")}</div><div class="hm-xp"><i></i></div><div class="hm-lv">SEIKKAILU JATKUU</div></div></div>`;
@@ -9468,7 +9545,7 @@ const PILOT_NEWS=[
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
   {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
    act:null,go:null,skip:()=>!gymOn()},
-  {id:"2026-10-teemat3",title:"Kuusi uutta teemaa",text:"Fosfori, Kuusnelonen, Teksti-TV, Manageri, Hahmo ja Hi-score. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
+  {id:"2026-10-teemat4",title:"Seitsemän uutta teemaa",text:"Fosfori, Kuusnelonen, Teksti-TV, Manageri, Hahmo, Hi-score ja Soitin. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
    act:"Kokeile",go:"theme"},
 ];
 const NEWS_KEY="jarkale-news-seen";
