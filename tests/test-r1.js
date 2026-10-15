@@ -695,11 +695,13 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
         themeBoot('manageri'); await new Promise(x=>setTimeout(x,2000)); r.mg=document.querySelector('#theme-boot .mg-ls')?.textContent; await new Promise(x=>setTimeout(x,2000)); r.mgGone=!document.getElementById('theme-boot');
         window.matchMedia=q=>({matches:/reduce/.test(q),media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
         themeBoot('fosfori'); r.reduced=!document.getElementById('theme-boot');
+        const RD=Date; for(const [hh,exp] of [[0,'yötä'],[4,'yötä'],[5,'huomenta'],[12,'päivää'],[19,'iltaa'],[23,'yötä']]){ window.Date=class extends RD{constructor(...a){super(...(a.length?a:[2026,9,16,hh,4]));} static now(){return RD.now();}}; window.matchMedia=q=>({matches:false,media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}); themeBoot('kaurapuuro'); const tx=document.querySelector('#theme-boot .kp-sub')?.textContent||''; (r.greet=r.greet||[]).push(hh+':'+(tx.includes(exp)?'ok':tx)); bootEnd(true); } window.Date=RD;
         window.matchMedia=mm; return r; });
       ok(bt.k&&/JARKALE 64 BASIC V2/.test(bt.kTxt)&&/PAIVAA/.test(bt.kTxt),'Kuusnelonen: käynnistysanimaatio ja kirjausmäärä ('+bt.kTxt.slice(0,60)+')');
       ok(bt.kSkip,'napautus ohittaa animaation');
       ok(bt.fGone,'Fosforin animaatio päättyy itsestään');
       ok(bt.reduced,'Vähennä liikettä: ei animaatiota');
+      ok(bt.greet.every(x=>x.endsWith(':ok')),'tervehdys vuorokaudenajan mukaan, 0.04 on yö ('+bt.greet.join(', ')+')');
       ok(bt.tt==='P100'&&bt.ttGone,'Teksti-TV: sivunumero näppäillään, animaatio päättyy');
       ok(/Kirjaukset/.test(bt.mg||'')&&!/Tero/.test(bt.mg||'')&&bt.mgGone,'Manageri: tietokannan lataus, ei henkilötietoja'); }
     { await p.evaluate(()=>{const st=JSON.parse(localStorage.getItem('seuranta-settings'));st.palette='ampiainen';st.theme='light';localStorage.setItem('seuranta-settings',JSON.stringify(st));});

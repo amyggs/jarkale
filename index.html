@@ -1968,7 +1968,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.46</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.47</span>
       </div>
     </div>
   </div>
@@ -2002,6 +2002,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.47", d:"lokakuu 2026", items:[
+    "Kaurapuuron käynnistys toivotti puolenyön jälkeen hyvää huomenta. Nyt kello 22–5 on yö."
+  ]},
   {v:"2.18.46", d:"lokakuu 2026", items:[
     "Magnesium on nyt täysin mustavalkoinen: vaaleana valkoinen ja lähes musta, tummana musta ja valkoinen, eikä missään ole värikorostuksia. Valinnat näkyvät käänteisvärinä ja suunnat nuolina."
   ]},
@@ -3293,7 +3296,7 @@ function themeBoot(pal){
     at(2100,()=>bootEnd());
   } else if(pal==="kaurapuuro"){
     // Rauhalliset teemat: logo, nimi kirjain kerrallaan, viiva ja tervehdys
-    const h=new Date().getHours(), hello=h<10?"Hyvää huomenta":h<17?"Hyvää päivää":h<22?"Hyvää iltaa":"Hyvää yötä";
+    const h=new Date().getHours(), hello=h<5||h>=22?"Hyvää yötä":h<10?"Hyvää huomenta":h<17?"Hyvää päivää":"Hyvää iltaa"; // v2.18.47: 0–4 on yö, ei aamu
     o.innerHTML=`<div class="tb-scr"><div class="kp-c"><img class="kp-logo" src="./icon-192.png?v=2" alt=""><div class="kp-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${380+i*70}ms">${c}</span>`).join("")}</div><div class="kp-line"></div><div class="kp-sub">${hello} · ${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
     at(2300,()=>bootEnd());
   } else if(pal==="ampiainen"){
@@ -3321,7 +3324,7 @@ function themeBoot(pal){
   } else if(pal==="hiscore"){
     o.innerHTML=`<div class="tb-scr"><div class="hs-t">JÄRKÄLE</div><div class="hs-ic">INSERT COIN</div><div class="hs-tab"><div class="hs-h">HIGH SCORES</div></div></div>`;
     const tab=o.querySelector(".hs-tab"), ic=o.querySelector(".hs-ic");
-    const R=[["PUTKI",st,"#FFE53B"],["KIRJAUKSET",n,"#20E3FF"],["TREENIT 28PV",Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=new Date(Date.now()-27*864e5).toISOString().slice(0,10)).length,"#39FF88"]];
+    const R=[["PUTKI",st,"#FFE53B"],["KIRJAUKSET",n,"#20E3FF"],["TREENIT 28PV",Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=iso(new Date(Date.now()-27*864e5))).length,"#39FF88"]];
     R.forEach((r,i)=>{ const d2=document.createElement("div"); d2.className="hs-r"; d2.style.color=r[2]; d2.innerHTML=`<span>${i+1}. ${esc(r[0])}</span><span>${String(r[1]).padStart(4,"0")}</span>`; tab.appendChild(d2); });
     at(1000,()=>{ ic.textContent="PRESS START"; });
     at(1500,()=>{ ic.style.display="none"; tab.style.display="block"; });
@@ -3348,7 +3351,7 @@ function themeBoot(pal){
     o.innerHTML=`<div class="tb-scr"><div class="mg-t">Järkäle <b>Manageri</b></div><div class="mg-s">Kausi ${season}</div>
       <div class="mg-ls"></div><div class="mg-bar"><i></i></div><div class="mg-st">Ladataan tietokantaa</div><div class="mg-go">Jatka ›</div></div>`;
     const ls=o.querySelector(".mg-ls"), bar=o.querySelector(".mg-bar i"), stt=o.querySelector(".mg-st");
-    const L=[["Kirjaukset",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","Ladattu"]]:[]),["Treenejä 28 pv",String(Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=new Date(Date.now()-27*864e5).toISOString().slice(0,10)).length)]];
+    const L=[["Kirjaukset",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","Ladattu"]]:[]),["Treenejä 28 pv",String(Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=iso(new Date(Date.now()-27*864e5))).length)]];
     L.forEach((l,i)=>{ const d2=document.createElement("div"); d2.className="mg-l"; d2.innerHTML=`<span>${esc(l[0])}</span><span>${esc(l[1])}</span>`; ls.appendChild(d2);
       at(450+i*260,()=>{ d2.classList.add("on"); bar.style.width=Math.round((i+1)/L.length*100)+"%"; }); });
     const tEnd=450+L.length*260;

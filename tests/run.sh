@@ -3,6 +3,8 @@
 # Vaatii: node, playwright (npm i playwright) ja Chromium. CHROMIUM_PATH ohittaa selaimen polun.
 # Pilottitesti (test-news.js) tarvitsee jarkale-pilotti-repon sisarkansioksi (../jarkale-pilotti).
 set -u
+# Testit luovat päivämääriä toISOString():lla (UTC). Ajetaan UTC-ajassa, ettei puolenyön ja kolmen välillä (Suomen aikaa) tule vääriä hälytyksiä.
+export TZ=UTC
 cd "$(dirname "$0")/.."
 ROOT=$(pwd); TMP=$(mktemp -d); trap 'kill $P1 $P2 2>/dev/null; rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/new/jarkale-pilotti" "$TMP/old"
