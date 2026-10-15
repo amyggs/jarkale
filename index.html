@@ -1579,6 +1579,47 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="tekstitv"] #view-log :is(.stars button){font-size:24px!important;}
 [data-palette="tekstitv"] #view-log :is(.stepper-btn){font-size:28px!important;}
 [data-palette="tekstitv"] #view-log .stepper-row>div>span,[data-palette="tekstitv"] #view-log .sleep-hm small{font-size:21px!important;color:var(--t-lbl)!important;}
+
+/* ── v2.18.46 Magnesium = mustavalkoinen: ei yhtään värikorostusta. Tumma = musta + valkoinen, vaalea = valkoinen + lähes musta.
+   Merkitys värin sijaan käänteisvärillä, lihavoinnilla ja nuolilla. Varmistuksena harmaasävysuodin (myös upotetut värit). */
+:root[data-palette="magnesium"]{
+  --bg:#000000; --surf:#141414; --surf2:#222222; --bord:#3A3A3A; --text:#F5F5F5; --dim:#A8A8A8;
+  --orange:#FFFFFF; --yellow:#FFFFFF; --blue:#D6D6D6; --green:#FFFFFF; --red:#FFFFFF; --purple:#D6D6D6;
+  --card-bg:#141414; --header-bg:#000; --nav-bg:#000; --shadow:none;
+  --seg-on:#FFFFFF; --on-accent:#000000; --hi:#FFFFFF; --hi2:#DDDDDD; --hi-ink:#000000; --ol:#3A3A3A; --olbg:transparent;
+}
+:root[data-palette="magnesium"][data-theme="light"]{
+  --bg:#FFFFFF; --surf:#F3F3F3; --surf2:#E4E4E4; --bord:#CCCCCC; --text:#0A0A0A; --dim:#555555;
+  --orange:#0A0A0A; --yellow:#0A0A0A; --blue:#333333; --green:#0A0A0A; --red:#0A0A0A; --purple:#333333;
+  --card-bg:#F3F3F3; --header-bg:#FFFFFF; --nav-bg:#FFFFFF;
+  --seg-on:#0A0A0A; --on-accent:#FFFFFF; --hi:#0A0A0A; --hi2:#333333; --hi-ink:#FFFFFF; --ol:#CCCCCC;
+}
+[data-palette="magnesium"] :is(#app,#gym-timer,#saved-toast,#undo-toast){filter:grayscale(1);}
+[data-palette="magnesium"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--text)!important;color:var(--bg)!important;font-weight:800!important;box-shadow:none!important;}
+[data-palette="magnesium"] .ws-day.logged .ws-dot{background:var(--text)!important;color:var(--bg)!important;}
+[data-palette="magnesium"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--text)!important;}
+[data-palette="magnesium"] #today-check{background:transparent!important;border-color:var(--bord)!important;}
+[data-palette="magnesium"] #today-check span{color:var(--text)!important;}
+[data-palette="magnesium"] .gt{background:var(--surf);color:var(--text);border:1px solid var(--text);}
+[data-palette="magnesium"] .gt button{background:var(--surf2);color:var(--text);}
+[data-palette="magnesium"] .gt button.p{background:var(--text);color:var(--bg);}
+[data-palette="magnesium"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px var(--text);}
+[data-palette="magnesium"] .gt .gt-tm{color:var(--text);} [data-palette="magnesium"] .gt .gt-l{color:var(--dim);}
+[data-palette="magnesium"] .gt .gt-bar{background:var(--surf2);} [data-palette="magnesium"] .gt .gt-bar i{background:var(--text);}
+[data-palette="magnesium"] .ex-prmsg{background:var(--text);color:var(--bg);}
+[data-palette="magnesium"] .pr-tag,[data-palette="magnesium"] .set .pr{background:var(--text)!important;color:var(--bg)!important;}
+[data-palette="magnesium"] #nav button.active,[data-palette="magnesium"] #nav button.active *{color:var(--text)!important;font-weight:800;}
+[data-palette="magnesium"] #nav button::before{background:var(--text)!important;}
+[data-palette="magnesium"] #header img{filter:grayscale(1) contrast(1.15);}
+/* käynnistys: viiva piirtyy, nimi nousee, ei värejä */
+.tb-magnesium{background:#FFFFFF!important;} [data-theme="dark"] .tb-magnesium{background:#000000!important;}
+.tb-magnesium .mg2{display:flex;flex-direction:column;align-items:center;gap:14px;font-family:Manrope,system-ui,sans-serif!important;color:#0A0A0A;}
+[data-theme="dark"] .tb-magnesium .mg2{color:#F5F5F5;}
+.tb-magnesium .mg2 *{font-family:inherit!important;}
+.tb-magnesium .mg2-name{font-weight:300;font-size:30px;letter-spacing:.42em;padding-left:.42em;opacity:0;transform:translateY(6px);animation:kpChar .6s ease .55s forwards;}
+.tb-magnesium .mg2-line{height:1px;width:0;background:currentColor;animation:mg2Line .55s cubic-bezier(.6,0,.2,1) .05s forwards;}
+.tb-magnesium .mg2-sub{font-weight:500;font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:0;animation:kpFade .5s ease 1.05s forwards;}
+@keyframes mg2Line{to{width:min(70vw,280px)}}
 </style>
 </head>
 <body>
@@ -1927,7 +1968,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.45</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.46</span>
       </div>
     </div>
   </div>
@@ -1961,6 +2002,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.46", d:"lokakuu 2026", items:[
+    "Magnesium on nyt täysin mustavalkoinen: vaaleana valkoinen ja lähes musta, tummana musta ja valkoinen, eikä missään ole värikorostuksia. Valinnat näkyvät käänteisvärinä ja suunnat nuolina."
+  ]},
   {v:"2.18.45", d:"lokakuu 2026", items:[
     "Otsikkorivin Kirjattu-merkki on piilotettu erikoisteemoissa ja kapeilla näytöillä, koska se ei mahtunut nimen viereen. Viikkonauha näyttää kirjauksen.",
     "Teksti-TV:n Kirjaa-näkymä: yksi kirjasin kahdessa koossa kuten teksti-TV:ssä, ja jokainen tieto omassa laatikossaan sinisen otsikkopalkin alla."
@@ -3202,7 +3246,7 @@ function updateThemeBtn(){
 const PALETTES=[
   {id:"ampiainen",l:"Järkäle",d:"Keltainen ja musta, oletusteema (Varkauden värit)",sw:["#FFD23B","#F1F2EC","#181C1B"]},
   {id:"kaurapuuro",l:"Kaurapuuro",d:"Lämmin ja rauhallinen, alkuperäinen",sw:["#F4F2EC","#E9E1C8","#8C6A0A"]},
-  {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
+  {id:"magnesium",l:"Magnesium",d:"Mustavalkoinen, ei värikorostuksia",sw:["#FFFFFF","#888888","#000000"]},
   {id:"kuusnelonen",l:"Kuusnelonen",d:"80-luvun kotitietokone: sininen ruutu tai harmaa",sw:["#40318D","#7869C4","#333333"]},
   {id:"tekstitv",l:"Teksti-TV",d:"Sivu 100: mustalla tai valkoisella",sw:["#000000","#0000FF","#FFFF00"]},
   {id:"manageri",l:"Manageri",d:"90-luvun manageripelin tilastoruudut",sw:["#0A1733","#2F5BAE","#FFD400"]},
@@ -3244,7 +3288,10 @@ function themeBoot(pal){
     at(t,()=>spans[spans.length-1].classList.add("cur"));
     at(t+520,()=>o.classList.add("flick"));
     at(t+820,()=>bootEnd());
-  } else if(pal==="kaurapuuro"||pal==="magnesium"){
+  } else if(pal==="magnesium"){
+    o.innerHTML=`<div class="tb-scr"><div class="mg2"><div class="mg2-name">JÄRKÄLE</div><div class="mg2-line"></div><div class="mg2-sub">${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
+    at(2100,()=>bootEnd());
+  } else if(pal==="kaurapuuro"){
     // Rauhalliset teemat: logo, nimi kirjain kerrallaan, viiva ja tervehdys
     const h=new Date().getHours(), hello=h<10?"Hyvää huomenta":h<17?"Hyvää päivää":h<22?"Hyvää iltaa":"Hyvää yötä";
     o.innerHTML=`<div class="tb-scr"><div class="kp-c"><img class="kp-logo" src="./icon-192.png?v=2" alt=""><div class="kp-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${380+i*70}ms">${c}</span>`).join("")}</div><div class="kp-line"></div><div class="kp-sub">${hello} · ${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
