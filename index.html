@@ -596,7 +596,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 #view-log .scale-lbl{margin:0;font-size:12px;line-height:1.35;}
 
 /* Kaurapuuro: alkuperäiset sävyt, tummaan selvempi valinta ja korttien erottuvuus */
-:root[data-palette="kaurapuuro"]{--surf:#1D1C18;--surf2:#2A2823;--dim:#B3AFA4;--seg-on:#C9A227;--on-accent:#0E0E0C;}
+:root[data-palette="kaurapuuro"]{--bg:#1F1813;--surf:#2B221B;--surf2:#3A2E24;--bord:#4A3B2E;--text:#F4ECDF;--dim:#C4B49D;--nav-bg:#18130F;--header-bg:#1F1813;--seg-on:#D4A84A;--on-accent:#1F1813;--orange:#D4A84A;--yellow:#DDB75A;}
 :root[data-palette="kaurapuuro"][data-theme="light"]{--surf:#FFFFFF;--surf2:#EFECE4;--dim:#66625A;--seg-on:#E9E1C8;--on-accent:#1B1A17;}
 :root[data-palette="kaurapuuro"][data-theme="light"] .stars button.active,:root[data-palette="kaurapuuro"][data-theme="light"] .chip.on{box-shadow:inset 0 0 0 1.5px var(--orange)!important;}
 
@@ -1317,7 +1317,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
 /* v2.18.41 Käynnistykset alkuperäisille teemoille */
 .tb-kaurapuuro{background:#F4F2EC;} .tb-magnesium{background:#F0F1F3;}
-[data-theme="dark"] .tb-kaurapuuro{background:#0E0E0C;} [data-theme="dark"] .tb-magnesium{background:#0D0E10;}
+[data-theme="dark"] .tb-kaurapuuro{background:#1F1813;} [data-theme="dark"] .tb-magnesium{background:#0D0E10;}
 .tb-kaurapuuro .tb-scr,.tb-magnesium .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 .kp-c{display:flex;flex-direction:column;align-items:center;gap:10px;font-family:Manrope,system-ui,sans-serif!important;}
 .kp-c *{font-family:inherit!important;}
@@ -1584,6 +1584,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper{flex:1;display:flex!important;flex-direction:column;}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper-row{margin-top:auto!important;}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>*{align-self:stretch!important;}
+/* v2.18.49: palkit yhtä korkeiksi (kuten Managerissa), ettei unen laatikkoon jää tyhjää aukkoa palkin ja luvun väliin */
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child{min-height:calc(3 * 1.15em + 6px)!important;align-items:flex-start!important;align-content:flex-start;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper-row{margin-top:0!important;}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child{flex-wrap:wrap!important;gap:0 8px;}
 [data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint){flex-basis:100%;position:static!important;}
 [data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint) *{color:#FFFFFF!important;}
@@ -1982,7 +1985,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.48</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.49</span>
       </div>
     </div>
   </div>
@@ -2016,6 +2019,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.49", d:"lokakuu 2026", items:[
+    "Teksti-TV: painon ja unen otsikkopalkit ovat yhtä korkeat, joten unen laatikkoon ei jää tyhjää aukkoa.",
+    "Kaurapuuron tumma tila on nyt lämmin tummanruskea eikä enää musta, joten se erottuu Järkäle-teemasta."
+  ]},
   {v:"2.18.48", d:"lokakuu 2026", items:[
     "Teksti-TV: Jatkuuko kipu? -kysymys omassa laatikossaan sinisellä otsikkopalkilla (vaaleassa otsikko oli keltaista valkoisella), ja painon ja unen luvut samalla korkeudella."
   ]},
