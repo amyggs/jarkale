@@ -1569,7 +1569,21 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="tekstitv"] #view-log #track-steps-wrap>.stepper>.lbl-small{display:block;background:var(--t-bar);margin:0 -10px 8px!important;padding:3px 10px!important;}
 [data-palette="tekstitv"] #view-log #track-steps-wrap>.stepper{display:block!important;}
 [data-palette="tekstitv"] #view-log #track-steps-wrap .stepper-row{width:100%;}
-[data-palette="tekstitv"] #view-log .lbl-small{color:var(--t-bar-ink)!important;text-transform:uppercase;white-space:normal!important;flex:1 1 auto;min-width:0;}
+[data-palette="tekstitv"] #view-log .lbl-small{color:var(--t-lbl)!important;text-transform:uppercase;white-space:normal!important;flex:1 1 auto;min-width:0;}
+/* v2.18.48: keltainen vain sinisten otsikkopalkkien sisällä (vaaleassa keltainen valkoisella ei näy) */
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child .lbl-small,
+[data-palette="tekstitv"] #view-log :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child .lbl-small,
+[data-palette="tekstitv"] #view-log #track-steps-wrap>.stepper>.lbl-small,
+[data-palette="tekstitv"] #view-log #pain-carry>.lbl-small{color:var(--t-bar-ink)!important;}
+/* Jatkuuko kipu? omaksi laatikokseen otsikkopalkilla, napit teksti-TV:n sinisinä */
+[data-palette="tekstitv"] #view-log #pain-carry{border:2px solid var(--t-bar)!important;padding:0 10px 10px!important;background:var(--bg)!important;box-shadow:none!important;}
+[data-palette="tekstitv"] #view-log #pain-carry>.lbl-small{display:block;background:var(--t-bar);margin:0 -10px 10px!important;padding:3px 10px!important;}
+[data-palette="tekstitv"] #view-log #pain-carry button{background:var(--t-btn)!important;color:#FFFFFF!important;border:none!important;}
+/* paino ja uni: luku ja napit laatikon alareunaan, jotta ne ovat samalla korkeudella vaikka painon palkissa on muutosrivi */
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap){display:flex!important;flex-direction:column;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper{flex:1;display:flex!important;flex-direction:column;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper-row{margin-top:auto!important;}
+[data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>*{align-self:stretch!important;}
 [data-palette="tekstitv"] #view-log :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child{flex-wrap:wrap!important;gap:0 8px;}
 [data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint){flex-basis:100%;position:static!important;}
 [data-palette="tekstitv"] #view-log :is(#weight-ma-hint,#weight-ghost-hint,#sleep-ghost-hint) *{color:#FFFFFF!important;}
@@ -1968,7 +1982,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.47</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.48</span>
       </div>
     </div>
   </div>
@@ -2002,6 +2016,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.48", d:"lokakuu 2026", items:[
+    "Teksti-TV: Jatkuuko kipu? -kysymys omassa laatikossaan sinisellä otsikkopalkilla (vaaleassa otsikko oli keltaista valkoisella), ja painon ja unen luvut samalla korkeudella."
+  ]},
   {v:"2.18.47", d:"lokakuu 2026", items:[
     "Kaurapuuron käynnistys toivotti puolenyön jälkeen hyvää huomenta. Nyt kello 22–5 on yö."
   ]},
