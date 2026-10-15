@@ -1175,6 +1175,144 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .tb-kuusnelonen .tb-scr{position:absolute;left:6%;right:6%;top:9%;bottom:9%;background:#40318D;padding:3.5vw 2vw;overflow:hidden;}
 .tb-kuusnelonen .tb-txt{font:400 min(2.75vw,16px)/1.6 "Sixtyfour",ui-monospace,monospace!important;color:#A99BF2;}
 .tb .tb-txt *{font-family:inherit!important;}
+/* ── v2.18.40 Teksti-TV ja Manageri. Fontit repossa (OFL): IBM Plex Mono, VT323, Barlow Condensed. */
+@font-face{font-family:"J VT323";src:url(fonts/vt323-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Plex Mono";font-weight:400;src:url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Plex Mono";font-weight:700;src:url(fonts/ibm-plex-mono-latin-700-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Barlow C";font-weight:500;src:url(fonts/barlow-condensed-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Barlow C";font-weight:600;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"J Barlow C";font-weight:700;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-display:swap;}
+/* yhteiset: kantikkaat kulmat, keskitetyt paino/uni, linjassa olevat 1–5-rivit */
+:is([data-palette="tekstitv"],[data-palette="manageri"]) #app *:not(.ws-dot){border-radius:0!important;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 24px 0 4px!important;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) #view-log .lbl-small{min-width:0;flex:1 1 auto;white-space:normal!important;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) #view-log button[onclick^="toggleFieldHint"]{flex-shrink:0;width:26px;height:26px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;}
+:is([data-palette="tekstitv"],[data-palette="manageri"]) #nav button svg,:is([data-palette="tekstitv"],[data-palette="manageri"]) #nav button svg *{stroke:currentColor!important;}
+
+/* Teksti-TV: tumma = musta ruutu, vaalea = sama sivu valkoisella (luvut tummansinisinä, koska keltainen ei näy valkoisella) */
+:root[data-palette="tekstitv"]{
+  --t-num:#FFFF00; --t-lbl:#00FFFF; --t-sub:#00FF00; --t-bar:#0000FF; --t-bar-ink:#FFFF00; --t-btn:#0000FF; --t-btn-ink:#FFFFFF; --t-mag:#FF00FF;
+  --bg:#000000; --surf:#000000; --surf2:#101010; --bord:#0000FF; --text:#FFFFFF; --dim:#00FFFF;
+  --orange:#FFFF00; --yellow:#FFFF00; --blue:#00FFFF; --green:#00FF00; --red:#FF3030; --purple:#FF00FF;
+  --card-bg:#000; --header-bg:#000; --nav-bg:#0000FF; --shadow:none;
+  --seg-on:#00FFFF; --on-accent:#000; --hi:#FFFF00; --hi2:#E6E600; --hi-ink:#000; --ol:#0000FF; --olbg:transparent; color-scheme:dark;
+}
+:root[data-palette="tekstitv"][data-theme="light"]{
+  --t-num:#0000AA; --t-lbl:#0000AA; --t-sub:#007A00; --t-bar:#0000CC; --t-bar-ink:#FFFF00; --t-btn:#0000CC; --t-btn-ink:#FFFFFF; --t-mag:#C000C0;
+  --bg:#FFFFFF; --surf:#FFFFFF; --surf2:#F0F0F0; --bord:#0000CC; --text:#000000; --dim:#0000AA;
+  --orange:#0000CC; --yellow:#8A7A00; --blue:#0000AA; --green:#007A00; --red:#C00000; --purple:#C000C0;
+  --nav-bg:#0000CC; --seg-on:#0000CC; --on-accent:#FFFFFF; --hi:#0000CC; --hi2:#0000AA; --hi-ink:#FFFFFF; --ol:#0000CC; color-scheme:light;
+}
+[data-palette="tekstitv"] body{background:var(--bg);}
+[data-palette="tekstitv"] *{font-family:"J Plex Mono",ui-monospace,monospace!important;}
+[data-palette="tekstitv"] :is(.big-val,.val,.stepper-val,.tr-h1,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b,.brand,.gt .gt-tm){font-family:"J VT323",monospace!important;}
+[data-palette="tekstitv"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b){color:var(--t-num)!important;}
+[data-palette="tekstitv"] #view-log .stepper input,[data-palette="tekstitv"] .sleep-hm b{font-size:44px!important;}
+[data-palette="tekstitv"] .tr-h1{color:var(--t-num)!important;font-size:28px;}
+[data-palette="tekstitv"] :is(.tr-sec,.section-head){background:var(--t-bar);color:var(--t-bar-ink)!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.05em!important;padding:4px 8px!important;font-size:13px!important;}
+[data-palette="tekstitv"] .lbl-small{color:var(--t-lbl)!important;font-weight:700;}
+[data-palette="tekstitv"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){background:var(--bg)!important;border:none!important;box-shadow:none!important;}
+[data-palette="tekstitv"] .tr-row{border-top:1px dotted var(--t-bar)!important;}
+[data-palette="tekstitv"] .tr-row .s{color:var(--t-sub)!important;}
+[data-palette="tekstitv"] #header{background:var(--bg)!important;border-bottom:none!important;position:relative;}
+[data-palette="tekstitv"] #header::before{content:"P100  JÄRKÄLE-TEKSTI";position:absolute;left:16px;top:1px;font:700 10px "J Plex Mono",monospace;color:var(--t-sub);letter-spacing:.06em;}
+[data-palette="tekstitv"] .brand{color:var(--t-num)!important;font-size:32px!important;font-weight:400!important;}
+[data-palette="tekstitv"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--seg-on)!important;color:var(--on-accent)!important;box-shadow:none!important;}
+[data-palette="tekstitv"] :is(.tr-go.ghost,.tr-pill,.tr-pick){background:var(--t-mag)!important;color:#000!important;border:none!important;}
+[data-palette="tekstitv"][data-theme="light"] :is(.tr-go.ghost,.tr-pill,.tr-pick){color:#fff!important;}
+[data-palette="tekstitv"] :is(input,textarea){background:transparent!important;border:none!important;border-bottom:2px solid var(--t-bar)!important;color:var(--t-num)!important;}
+[data-palette="tekstitv"] :is(.stepper-btn,.stars button:not(.active)){background:var(--t-btn)!important;color:var(--t-btn-ink)!important;border:none!important;}
+[data-palette="tekstitv"] .ws-day.logged .ws-dot{background:var(--t-sub)!important;color:var(--bg)!important;}
+[data-palette="tekstitv"] .ws-day .ws-dot{border:2px solid var(--t-bar)!important;background:transparent;}
+[data-palette="tekstitv"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--t-num)!important;}
+[data-palette="tekstitv"] :is(#nav,nav){background:var(--t-bar)!important;border-top:none!important;}
+[data-palette="tekstitv"] #nav button,[data-palette="tekstitv"] #nav button *{color:#FFFFFF!important;}
+[data-palette="tekstitv"] #nav button.active,[data-palette="tekstitv"] #nav button.active *{color:#FFFF00!important;}
+[data-palette="tekstitv"] #nav button::before{background:#FFFF00!important;}
+[data-palette="tekstitv"] .gt{background:var(--t-bar);color:#fff;border:none;}
+[data-palette="tekstitv"] .gt button{background:#000;color:#00FFFF;border:none;}
+[data-palette="tekstitv"] .gt button.p{background:#FFFF00;color:#000;}
+[data-palette="tekstitv"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px #FFFF00;}
+[data-palette="tekstitv"] .gt .gt-tm{color:#FFFF00;font-size:34px;}
+[data-palette="tekstitv"] .gt .gt-l{color:#fff;}
+[data-palette="tekstitv"] .gt .gt-bar{background:#000;} [data-palette="tekstitv"] .gt .gt-bar i{background:#FFFF00;}
+[data-palette="tekstitv"] .pr-tag,[data-palette="tekstitv"] .set .pr{background:var(--t-mag)!important;color:#000!important;}
+[data-palette="tekstitv"] .ex-prmsg{background:#FFFF00;color:#000;}
+[data-palette="tekstitv"] #today-check{border-radius:0!important;}
+[data-palette="tekstitv"] #header img{filter:grayscale(1) contrast(1.6);}
+
+/* Manageri: 90-luvun manageripelin tilastoruudut. Tumma = yönsininen, vaalea = vaaleat paneelit tummalla kehyksellä */
+:root[data-palette="manageri"]{
+  --m-val:#FFD400; --m-zebra:#0F1F44; --m-row:#1E3A75; --m-panel:#12244D; --m-well:#081127; --m-bord:#2B4A8C;
+  --bg:#0A1733; --surf:#12244D; --surf2:#1A3266; --bord:#2B4A8C; --text:#E9EFFA; --dim:#9FB3D9;
+  --orange:#FFD400; --yellow:#FFD400; --blue:#6FB6FF; --green:#3DDC6E; --red:#FF5A4F; --purple:#C69CFF;
+  --card-bg:#12244D; --header-bg:#0A1733; --nav-bg:#081127; --shadow:none;
+  --seg-on:#FFD400; --on-accent:#0A1733; --hi:#FFD400; --hi2:#E6B800; --hi-ink:#0A1733; --ol:#2B4A8C; --olbg:transparent; color-scheme:dark;
+}
+:root[data-palette="manageri"][data-theme="light"]{
+  --m-val:#0A1733; --m-zebra:#EEF2F9; --m-row:#D3DCEB; --m-panel:#FFFFFF; --m-well:#F4F7FC; --m-bord:#A9B8D3;
+  --bg:#DDE4F0; --surf:#FFFFFF; --surf2:#EEF2F9; --bord:#A9B8D3; --text:#0A1733; --dim:#4A5E85;
+  --orange:#1F4FB0; --yellow:#8A6D00; --blue:#1F4FB0; --green:#13803A; --red:#C62E25; --purple:#6B3FB0;
+  --nav-bg:#0A1733; --seg-on:#FFD400; --on-accent:#0A1733; --hi:#FFD400; --hi2:#E6B800; --hi-ink:#0A1733; --ol:#A9B8D3; color-scheme:light;
+}
+[data-palette="manageri"] body{background:var(--bg);}
+[data-palette="manageri"] *{font-family:"J Barlow C","Arial Narrow",sans-serif!important;}
+[data-palette="manageri"] :is(.tr-sec,.section-head){background:linear-gradient(180deg,#3B6CC8,#244C98);color:#fff!important;font-weight:700!important;font-size:15px!important;text-transform:uppercase;letter-spacing:.06em!important;padding:5px 10px!important;border-top:1px solid #6F9BE8;}
+[data-palette="manageri"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){background:var(--m-panel)!important;border:1px solid var(--m-bord)!important;box-shadow:none!important;}
+[data-palette="manageri"] .tr-list>.tr-row:nth-child(even){background:var(--m-zebra)!important;}
+[data-palette="manageri"] .tr-row{border-top:1px solid var(--m-row)!important;}
+[data-palette="manageri"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b){color:var(--m-val)!important;font-weight:700!important;}
+[data-palette="manageri"] .lbl-small{text-transform:uppercase;letter-spacing:.08em!important;color:var(--dim)!important;font-weight:600!important;font-size:13px!important;}
+[data-palette="manageri"] #header{background:linear-gradient(180deg,#14306A,#0A1733)!important;border-bottom:2px solid #FFD400!important;}
+[data-palette="manageri"] #header :is(.brand,#streak-count){color:#fff!important;}
+[data-palette="manageri"] #header .brand{font-weight:700!important;text-transform:uppercase;letter-spacing:.04em;font-size:26px!important;}
+[data-palette="manageri"] #header :is(#theme-toggle-btn){color:#fff!important;border-color:#2B4A8C!important;background:#12244D!important;}
+[data-palette="manageri"] .tr-h1{font-weight:700!important;text-transform:uppercase;font-size:24px;}
+[data-palette="manageri"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:linear-gradient(180deg,#FFE04D,#E6B800)!important;color:#0A1733!important;font-weight:700!important;box-shadow:none!important;}
+[data-palette="manageri"] :is(.tr-go.ghost,.tr-pill,.tr-pick,.stepper-btn,.stars button:not(.active)){background:linear-gradient(180deg,#2F5BAE,#1D3E80)!important;color:#fff!important;border:1px solid #4A78CF!important;}
+[data-palette="manageri"] :is(input,textarea){background:var(--m-well)!important;border:1px solid var(--m-bord)!important;color:var(--m-val)!important;}
+[data-palette="manageri"] .ws-day.logged .ws-dot{background:#3DDC6E!important;color:#0A1733!important;}
+[data-palette="manageri"] .ws-day .ws-dot{border:1px solid var(--m-bord)!important;background:var(--m-well);}
+[data-palette="manageri"] .ws-day.sel .ws-dot{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #FFD400!important;}
+[data-palette="manageri"] :is(#nav,nav){background:#081127!important;border-top:2px solid #FFD400!important;}
+[data-palette="manageri"] #nav button,[data-palette="manageri"] #nav button *{color:#B8C7E6!important;}
+[data-palette="manageri"] #nav button span.lbl{text-transform:uppercase;letter-spacing:.06em;}
+[data-palette="manageri"] #nav button.active,[data-palette="manageri"] #nav button.active *{color:#FFD400!important;}
+[data-palette="manageri"] #nav button::before{background:#FFD400!important;}
+[data-palette="manageri"] .gt{background:#12244D;border:1px solid #FFD400;color:#E9EFFA;}
+[data-palette="manageri"] .gt .gt-tm{color:#FFD400;} [data-palette="manageri"] .gt .gt-l{color:#9FB3D9;}
+[data-palette="manageri"] .gt button{background:#1D3E80;color:#fff;border:1px solid #4A78CF;}
+[data-palette="manageri"] .gt button.p{background:#FFD400;color:#0A1733;}
+[data-palette="manageri"] .gt .gt-q.on{box-shadow:inset 0 0 0 2px #FFD400;}
+[data-palette="manageri"] .gt .gt-bar{background:#081127;} [data-palette="manageri"] .gt .gt-bar i{background:#FFD400;}
+[data-palette="manageri"] .pr-tag,[data-palette="manageri"] .set .pr{background:#3DDC6E!important;color:#0A1733!important;}
+[data-palette="manageri"] .ex-prmsg{background:#FFD400;color:#0A1733;}
+
+/* Käynnistykset */
+.tb-tekstitv{background:#000;}
+.tb-tekstitv .tb-scr{position:absolute;inset:0;padding:14px 10px;}
+.tb-tekstitv .tb-txt{font:700 min(3.6vw,16px)/1.45 "J Plex Mono",ui-monospace,monospace!important;color:#fff;}
+.tb-tekstitv .tt-hd{display:flex;justify-content:space-between;color:#fff;}
+.tb-tekstitv .tt-hd b{color:#00FF00;}
+.tb-tekstitv .tt-bar{background:#0000FF;color:#FFFF00;font:400 min(15vw,64px)/1 "J VT323",monospace!important;padding:6px 10px 2px;margin:10px 0 4px;letter-spacing:.02em;}
+.tb-tekstitv .tt-mos{display:flex;height:10px;margin:0 0 12px;} .tb-tekstitv .tt-mos i{flex:1;}
+.tb-tekstitv .tt-row{display:flex;justify-content:space-between;} .tb-tekstitv .tt-row span:first-child{color:#00FFFF;} .tb-tekstitv .tt-row span:last-child{color:#FFFF00;}
+.tb-tekstitv .tt-ft{margin-top:14px;display:flex;gap:0;} .tb-tekstitv .tt-ft span{flex:1;text-align:center;color:#000;padding:2px 0;}
+.tb-manageri{background:radial-gradient(ellipse at 50% 30%,#1A3A7A 0%,#0A1733 70%);}
+.tb-manageri .tb-scr{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 28px;font-family:"J Barlow C","Arial Narrow",sans-serif!important;color:#E9EFFA;}
+.tb-manageri .tb-scr *{font-family:inherit!important;}
+.tb-manageri .mg-t{font-weight:700;font-size:min(11vw,46px);letter-spacing:.04em;line-height:1;text-transform:uppercase;}
+.tb-manageri .mg-t b{color:#FFD400;font-weight:700;}
+.tb-manageri .mg-s{font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#9FB3D9;margin:8px 0 28px;font-size:14px;}
+.tb-manageri .mg-l{display:flex;justify-content:space-between;font-weight:600;font-size:17px;padding:5px 0;border-bottom:1px solid #1E3A75;opacity:0;transform:translateX(-8px);transition:opacity .2s,transform .2s;}
+.tb-manageri .mg-l.on{opacity:1;transform:none;} .tb-manageri .mg-l span:last-child{color:#FFD400;}
+.tb-manageri .mg-bar{height:10px;background:#081127;border:1px solid #2B4A8C;margin:22px 0 10px;} .tb-manageri .mg-bar i{display:block;height:100%;width:0;background:linear-gradient(180deg,#FFE04D,#E6B800);transition:width .25s linear;}
+.tb-manageri .mg-st{font-size:14px;color:#9FB3D9;letter-spacing:.06em;text-transform:uppercase;min-height:1.3em;}
+.tb-manageri .mg-go{margin-top:22px;align-self:flex-start;background:linear-gradient(180deg,#FFE04D,#E6B800);color:#0A1733;font-weight:700;font-size:18px;letter-spacing:.08em;padding:8px 22px;text-transform:uppercase;opacity:0;}
+.tb-manageri .mg-go.on{opacity:1;animation:mgPulse .5s ease 2;}
+@keyframes mgPulse{50%{transform:scale(1.06)}}
 </style>
 </head>
 <body>
@@ -1523,7 +1661,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.39</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.40</span>
       </div>
     </div>
   </div>
@@ -1557,6 +1695,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.40", d:"lokakuu 2026", items:[
+    "Kaksi uutta teemaa: Teksti-TV (sivu 100 mustalla tai valkoisella) ja Manageri (90-luvun manageripelin tilastoruudut). Molemmilla on oma käynnistysanimaatio, ja fontit tulevat sovelluksen mukana."
+  ]},
   {v:"2.18.39", d:"lokakuu 2026", items:[
     "Kuusnelonen: painon ja unen luvut pienemmällä fontilla, jotta esimerkiksi 108,7 mahtuu kenttään kapealla näytölläkin."
   ]},
@@ -2778,11 +2919,13 @@ const PALETTES=[
   {id:"magnesium",l:"Magnesium",d:"Viileä ja kliininen",sw:["#F0F1F3","#FFFFFF","#15171A"]},
   {id:"ampiainen",l:"Ampiainen",d:"Keltainen ja musta",sw:["#FFD23B","#F1F2EC","#181C1B"]},
   {id:"kuusnelonen",l:"Kuusnelonen",d:"80-luvun kotitietokone: sininen ruutu tai harmaa",sw:["#40318D","#7869C4","#333333"]},
+  {id:"tekstitv",l:"Teksti-TV",d:"Sivu 100: mustalla tai valkoisella",sw:["#000000","#0000FF","#FFFF00"]},
+  {id:"manageri",l:"Manageri",d:"90-luvun manageripelin tilastoruudut",sw:["#0A1733","#2F5BAE","#FFD400"]},
   {id:"fosfori",l:"Fosfori",d:"Vihreä kuvaputkipääte, vaaleana LCD-näyttö",sw:["#050B07","#C2E6C6","#5CFF8F"]}
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"kaurapuuro"; }
 function applyPalette(p){
-  if(p==="fosfori"||p==="kuusnelonen") setTimeout(()=>themeBoot(p),30);
+  if(["fosfori","kuusnelonen","tekstitv","manageri"].includes(p)) setTimeout(()=>themeBoot(p),30);
   S.settings.palette=PALETTES.some(x=>x.id===p)?p:"kaurapuuro";
   document.documentElement.setAttribute("data-palette",S.settings.palette);
   updateMetaThemeColor();
@@ -2813,6 +2956,33 @@ function themeBoot(pal){
     at(t,()=>spans[spans.length-1].classList.add("cur"));
     at(t+520,()=>o.classList.add("flick"));
     at(t+820,()=>bootEnd());
+  } else if(pal==="tekstitv"){
+    const d=new Date(), pad2=x=>String(x).padStart(2,"0"), WD=["su","ma","ti","ke","to","pe","la"];
+    const clock=()=>{ const t=new Date(); return `${pad2(t.getHours())}:${pad2(t.getMinutes())}:${pad2(t.getSeconds())}`; };
+    o.innerHTML=`<div class="tb-scr"><div class="tb-txt"><div class="tt-hd"><span><b class="tt-pg">P</b></span><span>JÄRKÄLE ${WD[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}. <span class="tt-ck">${clock()}</span></span></div>
+      <div class="tt-bar" style="opacity:0">JÄRKÄLE</div><div class="tt-mos" style="opacity:0">${["#FF0000","#00FF00","#FFFF00","#0000FF","#FF00FF","#00FFFF","#FFFFFF"].map(c=>`<i style="background:${c}"></i>`).join("")}</div>
+      <div class="tt-rows"></div><div class="tt-ft" style="opacity:0"><span style="background:#FF0000">Kirjaa</span><span style="background:#00FF00">Treeni</span><span style="background:#FFFF00">Trendit</span><span style="background:#00FFFF">Mitat</span></div></div></div>`;
+    const pg=o.querySelector(".tt-pg"), ck=o.querySelector(".tt-ck"), rows=o.querySelector(".tt-rows");
+    ["1","0","0"].forEach((c,i)=>at(200+i*170,()=>{ pg.textContent+=c; }));
+    for(let i=1;i<=4;i++) at(i*500,()=>{ ck.textContent=clock(); });
+    at(820,()=>{ o.querySelector(".tt-bar").style.opacity=1; o.querySelector(".tt-mos").style.opacity=1; });
+    const R=[["Kirjauksia",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","300"]]:[]),["Trendit","400"],["Asetukset","800"]];
+    R.forEach((r,i)=>at(1050+i*130,()=>{ const d2=document.createElement("div"); d2.className="tt-row"; d2.innerHTML=`<span>${esc(r[0])} ${".".repeat(Math.max(2,22-r[0].length-r[1].length))}</span><span>${esc(r[1])}</span>`; rows.appendChild(d2); }));
+    const tEnd=1050+R.length*130;
+    at(tEnd+80,()=>{ o.querySelector(".tt-ft").style.opacity=1; });
+    at(tEnd+1000,()=>bootEnd());
+  } else if(pal==="manageri"){
+    const yr=new Date().getFullYear(), m=new Date().getMonth();
+    const season=m>=6?`${yr}/${String(yr+1).slice(2)}`:`${yr-1}/${String(yr).slice(2)}`;
+    o.innerHTML=`<div class="tb-scr"><div class="mg-t">Järkäle <b>Manageri</b></div><div class="mg-s">Kausi ${season}</div>
+      <div class="mg-ls"></div><div class="mg-bar"><i></i></div><div class="mg-st">Ladataan tietokantaa</div><div class="mg-go">Jatka ›</div></div>`;
+    const ls=o.querySelector(".mg-ls"), bar=o.querySelector(".mg-bar i"), stt=o.querySelector(".mg-st");
+    const L=[["Kirjaukset",String(n)],["Putki",st+" pv"],...(gym?[["Saliohjelma","Ladattu"]]:[]),["Treenejä 28 pv",String(Object.values(S.entries||{}).filter(e=>e&&e.training_done&&e.date>=new Date(Date.now()-27*864e5).toISOString().slice(0,10)).length)]];
+    L.forEach((l,i)=>{ const d2=document.createElement("div"); d2.className="mg-l"; d2.innerHTML=`<span>${esc(l[0])}</span><span>${esc(l[1])}</span>`; ls.appendChild(d2);
+      at(450+i*260,()=>{ d2.classList.add("on"); bar.style.width=Math.round((i+1)/L.length*100)+"%"; }); });
+    const tEnd=450+L.length*260;
+    at(tEnd,()=>{ stt.textContent="Valmis"; o.querySelector(".mg-go").classList.add("on"); });
+    at(tEnd+1100,()=>bootEnd());
   } else {
     o.innerHTML=`<div class="tb-frame"></div><div class="tb-scr"><pre class="tb-txt"></pre></div>`;
     const pre=o.querySelector(".tb-txt"), frame=o.querySelector(".tb-frame");
@@ -9093,7 +9263,7 @@ const PILOT_NEWS=[
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
   {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
    act:null,go:null,skip:()=>!gymOn()},
-  {id:"2026-10-teemat",title:"Kaksi uutta teemaa",text:"Fosfori on vihreä kuvaputkipääte ja Kuusnelonen 80-luvun kotitietokone. Molemmissa on vaalea ja tumma versio.",
+  {id:"2026-10-teemat2",title:"Neljä uutta teemaa",text:"Fosfori (vihreä kuvaputkipääte), Kuusnelonen (80-luvun kotitietokone), Teksti-TV (sivu 100) ja Manageri (90-luvun manageripelin tilastoruudut). Kaikissa on vaalea ja tumma versio.",
    act:"Kokeile",go:"theme"},
 ];
 const NEWS_KEY="jarkale-news-seen";

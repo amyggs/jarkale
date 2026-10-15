@@ -675,7 +675,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     ok(await p.evaluate(()=>document.documentElement.getAttribute('data-palette'))==='kaurapuuro','oletusteema Kaurapuuro');
     { const dd=await p.evaluate(()=>{const e=document.getElementById('date-display'),b=e.querySelector('.vko-badge');const r=e.getBoundingClientRect(),q=b.getBoundingClientRect();return {t:e.innerText,one:Math.abs(r.top-q.top)<14&&e.scrollWidth<=e.clientWidth+1};});
       ok(/VKO \d+/.test(dd.t)&&!/20\d\d/.test(dd.t)&&dd.one,'viikkonumero samalla rivillä, ei kuluvaa vuotta ('+dd.t.replace(/\n/g,' ')+')'); }
-    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','kaurapuuro']){
+    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','tekstitv','manageri','kaurapuuro']){
       const r=await p.evaluate(pl=>{applyPalette(pl);const b=document.querySelector('#stars-recovery button.active')||document.querySelector('#stars-recovery button');
         const cs=getComputedStyle(b);return {attr:document.documentElement.getAttribute('data-palette'),saved:JSON.parse(localStorage.getItem('seuranta-settings')).palette,bg:cs.backgroundColor,fg:cs.color};},pal);
       ok(r.attr===pal&&r.saved===pal&&r.bg!==r.fg,'teema '+pal+' asettuu ja tallentuu');
@@ -691,13 +691,17 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
         await new Promise(x=>setTimeout(x,700)); r.kTxt=document.querySelector('#theme-boot .tb-txt').textContent;
         document.getElementById('theme-boot').click(); await new Promise(x=>setTimeout(x,450)); r.kSkip=!document.getElementById('theme-boot');
         themeBoot('fosfori'); await new Promise(x=>setTimeout(x,4200)); r.fGone=!document.getElementById('theme-boot');
+        themeBoot('tekstitv'); await new Promise(x=>setTimeout(x,900)); r.tt=document.querySelector('#theme-boot .tt-pg')?.textContent; await new Promise(x=>setTimeout(x,3000)); r.ttGone=!document.getElementById('theme-boot');
+        themeBoot('manageri'); await new Promise(x=>setTimeout(x,2000)); r.mg=document.querySelector('#theme-boot .mg-ls')?.textContent; await new Promise(x=>setTimeout(x,2000)); r.mgGone=!document.getElementById('theme-boot');
         window.matchMedia=q=>({matches:/reduce/.test(q),media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
         themeBoot('fosfori'); r.reduced=!document.getElementById('theme-boot');
         window.matchMedia=mm; return r; });
       ok(bt.k&&/JARKALE 64 BASIC V2/.test(bt.kTxt)&&/PAIVAA/.test(bt.kTxt),'Kuusnelonen: käynnistysanimaatio ja kirjausmäärä ('+bt.kTxt.slice(0,60)+')');
       ok(bt.kSkip,'napautus ohittaa animaation');
       ok(bt.fGone,'Fosforin animaatio päättyy itsestään');
-      ok(bt.reduced,'Vähennä liikettä: ei animaatiota'); }
+      ok(bt.reduced,'Vähennä liikettä: ei animaatiota');
+      ok(bt.tt==='P100'&&bt.ttGone,'Teksti-TV: sivunumero näppäillään, animaatio päättyy');
+      ok(/Kirjaukset/.test(bt.mg||'')&&!/Tero/.test(bt.mg||'')&&bt.mgGone,'Manageri: tietokannan lataus, ei henkilötietoja'); }
     { await p.evaluate(()=>{const st=JSON.parse(localStorage.getItem('seuranta-settings'));st.palette='ampiainen';st.theme='light';localStorage.setItem('seuranta-settings',JSON.stringify(st));});
       await p.reload(); await p.waitForTimeout(900);
       const mc=await p.evaluate(()=>[document.querySelector('meta[name=theme-color]').content,getComputedStyle(document.getElementById('header')).backgroundColor]);
