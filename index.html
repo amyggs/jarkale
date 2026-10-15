@@ -725,6 +725,8 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-prog-wrap{position:relative;display:block;}
 .g-prog-wrap .g-prog-sel{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;}
 .g-prog-car{display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid currentColor;margin-left:8px;vertical-align:4px;}
+.g-newprog{font:500 13px Manrope,system-ui,sans-serif;color:var(--dim);margin:10px 2px 0;}
+.g-newprog .g-link{display:inline;padding:6px 2px;margin:0;font:700 13px Manrope,system-ui,sans-serif;color:var(--text);text-decoration:underline;text-underline-offset:3px;}
 .tr-nx{font:800 11px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:3px;}
 .tr-next .tr-go{display:inline-flex;align-items:center;}
 .tr-btn:disabled{opacity:.5;}
@@ -1336,7 +1338,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.27</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.28</span>
       </div>
     </div>
   </div>
@@ -1370,6 +1372,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.28", d:"lokakuu 2026", items:[
+    "Uuden ohjelman tuonti löytyy aina treenipäivien alta (Liitä tekstinä · Tyhjä ohjelma), eikä se enää jää historian ja liikelistan alle."
+  ]},
   {v:"2.18.27", d:"lokakuu 2026", items:[
     "Treeni-näkymä: koko rivi aloittaa treenin. Pisimpään tekemättä ollut päivä näkyy merkinnällä \"Seuraavana kierrossa\", mutta minkä tahansa päivän voi aloittaa. Pitkä ohjelman nimi rivittyy eikä katkea.",
     "Ohjelman tuonti tunnistaa saman liikkeen, vaikka nimen kirjoitusasu vaihtelee (esim. Hack-kyykky / Hack kyykky), ja liikkeen historia jatkuu. Epävarmoista nimistä esikatselu kysyy, onko kyse samasta liikkeestä."
@@ -7976,6 +7981,8 @@ function gymHomeHTML(){
     h+=lasts.map(({d,l})=>{ const on=d.id===next||p.days.length===1;
       return `<button class="tr-row tr-btn${on?" tr-next":""}" ${d.exercises.length?"":"disabled"} onclick="startSession('${p.id}','${d.id}')"><div class="t">${d.id===next?`<div class="tr-nx">Seuraavana kierrossa</div>`:""}<div class="n">${esc(d.name)}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:" · ei vielä tehty"}</div></div>${on?`<span class="tr-go" aria-hidden="true">Aloita</span>`:`<span class="chev">›</span>`}</button>`; }).join("");
     h+=`</div>`;
+    // v2.18.28: uusi ohjelma aina samassa kohdassa päivälistan alla (ei historian ja liikelistan perässä)
+    h+=`<div class="g-newprog">Uusi ohjelma: <button class="g-link" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym();gTop()">Liitä tekstinä</button> · <button class="g-link" onclick="const c=G.curProgramId;const p=newProgram('Uusi ohjelma');gOpenEdit(p.id,true);GU.editSnap.cur=c">Tyhjä ohjelma</button></div>`;
   }
   const hist=G.sessions.filter(s=>s.endedAt).sort((a,b)=>b.startedAt-a.startedAt);
   if(hist.length){
@@ -7989,10 +7996,6 @@ function gymHomeHTML(){
         <div class="tr-list" id="g-exlist">${gymExListHTML()}</div>`;
     }
   }
-  h+=`<div style="display:flex;gap:8px;margin-top:18px">`;
-  if(p) h+=`<button class="tr-go ghost" style="flex:1" onclick="const c=G.curProgramId;const p=newProgram('Uusi ohjelma');gOpenEdit(p.id,true);GU.editSnap.cur=c">+ Uusi ohjelma</button>`;
-  if(p) h+=`<button class="tr-go ghost" style="flex:1" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä tekstinä</button>`;
-  h+=`</div>`;
   if(archived.length){
     h+=`<button class="g-link" onclick="GU.showArchived=!GU.showArchived;renderGym()">${GU.showArchived?"▾":"▸"} Arkistoidut ohjelmat (${archived.length})</button>`;
     if(GU.showArchived) h+=`<div class="tr-list">${archived.map(x=>`<div class="tr-row"><div class="t"><div class="n">${esc(x.name)}</div><div class="s">${x.days.length} treenipäivää</div></div><button class="tr-go ghost" onclick="gProg('${x.id}').archived=false;G.curProgramId='${x.id}';touchProg(gProg('${x.id}'));renderGym()">Palauta</button></div>`).join("")}</div>`;
