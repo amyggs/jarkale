@@ -1,0 +1,26 @@
+const { chromium, devices } = require('playwright');
+let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  ✗ ')+m);};
+(async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(require('fs').existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
+const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block'});
+const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8765/jarkale-pilotti/index.html');
+await p.evaluate(()=>{localStorage.clear();localStorage.setItem('lastExport',String(Date.now()));localStorage.setItem('seuranta-settings',JSON.stringify({palette:'ampiainen',theme:'light'}));});
+await p.reload();await p.waitForTimeout(500);
+ok(!(await p.locator('#news-card').isVisible()),'uusi käyttäjä aloitusnäkymässä: ei uutiskorttia');
+await p.evaluate(()=>{localStorage.setItem('seuranta-setup-done','1');});await p.reload();await p.waitForTimeout(500);
+const t=await p.locator('#news-card').innerText().catch(()=>'');
+ok(/Google Driveen/.test(t)&&/Saliohjelma/.test(t),'pilotti: kortissa Drive ja sali');
+
+await p.getByRole('button',{name:'Selvä'}).click();
+ok(!(await p.locator('#news-card').isVisible()),'Selvä piilottaa kortin');
+await p.reload();await p.waitForTimeout(400);
+ok(!(await p.locator('#news-card').isVisible()),'kortti ei palaa uudelleenkäynnistyksessä');
+await p.evaluate(()=>{localStorage.removeItem('jarkale-news-seen');S.settings.gym={enabled:true};saveAll();});await p.reload();await p.waitForTimeout(400);
+const t2=await p.locator('#news-card').innerText().catch(()=>'');
+ok(/Driveen/.test(t2)&&!/Saliohjelma/.test(t2),'käytössä oleva ominaisuus ohitetaan');
+await p.locator('#news-card button',{hasText:'Yhdistä Driveen'}).click();await p.waitForTimeout(400);
+ok(await p.evaluate(()=>S.tab==='asetukset'&&getComputedStyle(document.getElementById('stgl-content-data')).display!=='none'),'Yhdistä Driveen vie asetusten varmuuskopio-osioon');
+const q=await ctx.newPage();await q.goto('http://localhost:8765/index.html');await q.evaluate(()=>{localStorage.removeItem('jarkale-news-seen');});await q.reload();await q.waitForTimeout(400);
+ok(!(await q.locator('#news-card').isVisible()),'oma versio: ei uutiskorttia');
+ok(errs.length===0,'ei JS-virheitä '+errs.join('|'));
+console.log(`${pass} / ${pass+fail} läpi`);await b.close();})();
