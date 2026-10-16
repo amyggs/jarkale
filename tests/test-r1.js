@@ -675,7 +675,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     ok(await p.evaluate(()=>document.documentElement.getAttribute('data-palette'))==='ampiainen','oletusteema Järkäle (ampiainen)');
     { const dd=await p.evaluate(()=>{const e=document.getElementById('date-display'),b=e.querySelector('.vko-badge');const r=e.getBoundingClientRect(),q=b.getBoundingClientRect();return {t:e.innerText,one:Math.abs(r.top-q.top)<14&&e.scrollWidth<=e.clientWidth+1};});
       ok(/VKO \d+/.test(dd.t)&&!/20\d\d/.test(dd.t)&&dd.one,'viikkonumero samalla rivillä, ei kuluvaa vuotta ('+dd.t.replace(/\n/g,' ')+')'); }
-    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','tekstitv','manageri','hahmo','hiscore','soitin','kaurapuuro']){
+    for(const pal of ['magnesium','ampiainen','fosfori','kuusnelonen','tekstitv','manageri','soitin','kaurapuuro','lasi']){
       const r=await p.evaluate(pl=>{applyPalette(pl);const b=document.querySelector('#stars-recovery button.active')||document.querySelector('#stars-recovery button');
         const cs=getComputedStyle(b);return {attr:document.documentElement.getAttribute('data-palette'),saved:JSON.parse(localStorage.getItem('seuranta-settings')).palette,bg:cs.backgroundColor,fg:cs.color};},pal);
       ok(r.attr===pal&&r.saved===pal&&r.bg!==r.fg,'teema '+pal+' asettuu ja tallentuu');
