@@ -1643,6 +1643,81 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .tb-magnesium .mg2-line{height:1px;width:0;background:currentColor;animation:mg2Line .55s cubic-bezier(.6,0,.2,1) .05s forwards;}
 .tb-magnesium .mg2-sub{font-weight:500;font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:0;animation:kpFade .5s ease 1.05s forwards;}
 @keyframes mg2Line{to{width:min(70vw,280px)}}
+
+/* v2.18.51 Lasi: huurrettu lasi pehmeän valon päällä. Oma tulkinta läpikuultavista lasipinnoista, ei kopio minkään järjestelmän ulkoasusta.
+   Luettavuus ensin: kortit riittävän peittäviä, teksti ei koskaan suoraan värillisen taustan päällä ilman lasia. */
+:root[data-palette="lasi"]{
+  --l-glass:rgba(24,28,44,.55); --l-edge:rgba(255,255,255,.14); --l-hl:rgba(255,255,255,.12); --l-sh:0 10px 30px rgba(0,0,0,.35); --l-pill:rgba(125,184,255,.18);
+  --l-b1:#23367E; --l-b2:#4D2470; --l-b3:#0C4E57;
+  --bg:#06070C; --surf:#151927; --surf2:rgba(255,255,255,.09); --bord:rgba(255,255,255,.14); --text:#F3F5FB; --dim:#AEB6C8;
+  --orange:#7DB8FF; --yellow:#FFD27A; --blue:#7DB8FF; --green:#6EE0A0; --red:#FF8D85; --purple:#C7A8FF;
+  --card-bg:var(--surf); --header-bg:transparent; --nav-bg:#06070C; --shadow:none;
+  --seg-on:#7DB8FF; --on-accent:#06101F; --hi:#7DB8FF; --hi2:#5FA3F5; --hi-ink:#06101F; --ol:rgba(255,255,255,.18); --olbg:transparent; color-scheme:dark;
+}
+:root[data-palette="lasi"][data-theme="light"]{
+  --l-glass:rgba(255,255,255,.62); --l-edge:rgba(255,255,255,.9); --l-hl:rgba(255,255,255,1); --l-sh:0 8px 28px rgba(40,60,110,.10); --l-pill:rgba(10,95,209,.12);
+  --l-b1:#BCD5FF; --l-b2:#E7D3FF; --l-b3:#FFDCCB;
+  --bg:#F2F4F9; --surf:#FFFFFF; --surf2:rgba(110,125,165,.14); --bord:rgba(20,30,60,.12); --text:#0D1220; --dim:#4B5468;
+  --orange:#0A5FD1; --yellow:#8A6200; --blue:#0A5FD1; --green:#167A45; --red:#C23A2B; --purple:#6A3FC4;
+  --nav-bg:#F2F4F9; --seg-on:#0A5FD1; --on-accent:#FFFFFF; --hi:#0A5FD1; --hi2:#0850B3; --hi-ink:#FFFFFF; --ol:rgba(20,30,60,.14); color-scheme:light;
+}
+[data-palette="lasi"] body{background-color:var(--bg);background-image:radial-gradient(70vmax 55vmax at -5% -5%,var(--l-b1),transparent 62%),radial-gradient(60vmax 50vmax at 105% 35%,var(--l-b2),transparent 62%),radial-gradient(70vmax 55vmax at 25% 105%,var(--l-b3),transparent 62%);background-attachment:fixed;}
+[data-palette="lasi"] :is(#app,#content,.view){background:transparent!important;}
+[data-palette="lasi"] #header{background:transparent!important;border-bottom:none!important;box-shadow:none!important;}
+[data-palette="lasi"] :is(.card,.inj-card,.wr-banner,.ds-card,.g-sum,.tr-list,.g-empty,.tw,.ex,.g-finish,.ed-day,.g-chart,.news-card,.su-card,.sync-bar,#pain-carry,#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-steps-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap){
+  background:var(--l-glass)!important;-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid var(--l-edge)!important;box-shadow:inset 0 1px 0 var(--l-hl),var(--l-sh)!important;border-radius:22px!important;}
+[data-palette="lasi"] .g-stats>div{background:var(--surf2)!important;border-radius:16px!important;}
+[data-palette="lasi"] :is(#view-log .stepper-btn,#view-log .stars button,.pill-btn,.chip,.seg-btn,.tr-pill:not(.dark),.tr-pick,.tr-go.ghost){background:var(--surf2);border-color:transparent!important;}
+[data-palette="lasi"] .tr-pill.dark{background:var(--seg-on)!important;color:var(--on-accent)!important;border-color:transparent!important;}
+[data-palette="lasi"] :is(#view-log .stepper-btn,.pill-btn,.chip,.tr-go,.tr-pill){border-radius:999px!important;}
+[data-palette="lasi"] #view-log .stars button{border-radius:14px!important;}
+[data-palette="lasi"] :is(.stars button.active,.chip.on,.pill-btn.active,.seg-btn.on,.tr-go:not(.ghost)){background:var(--seg-on)!important;color:var(--on-accent)!important;}
+[data-palette="lasi"] .brand{color:var(--text)!important;}
+[data-palette="lasi"] #header img{border-radius:12px;}
+[data-palette="lasi"] #header #theme-toggle-btn{background:var(--l-glass)!important;border:1px solid var(--l-edge)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:999px!important;}
+[data-palette="lasi"] .vko-badge{border-radius:999px!important;}
+/* kelluva lasinen alapalkki, sisältö rullaa sen alta */
+[data-palette="lasi"]{--l-navglass:rgba(20,24,38,.78);} [data-palette="lasi"][data-theme="light"]{--l-navglass:rgba(250,251,254,.8);}
+[data-palette="lasi"] #nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(calc(100% - 24px),456px);padding:5px!important;z-index:50;
+  background:var(--l-navglass)!important;-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid var(--l-edge)!important;border-radius:30px;box-shadow:inset 0 1px 0 var(--l-hl),0 10px 30px rgba(0,0,0,.22);}
+[data-palette="lasi"] #nav button{padding:7px 2px 7px;border-radius:24px;}
+[data-palette="lasi"] #nav button::before{display:none;}
+[data-palette="lasi"] #nav button.active{background:var(--l-pill);}
+[data-palette="lasi"] #nav button.active,[data-palette="lasi"] #nav button.active *{color:var(--orange)!important;}
+[data-palette="lasi"] .view{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))!important;}
+[data-palette="lasi"] .gt{bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--l-glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--l-edge);box-shadow:inset 0 1px 0 var(--l-hl),var(--l-sh);color:var(--text);border-radius:24px;}
+[data-palette="lasi"] .gt .gt-l{color:var(--dim);}
+[data-palette="lasi"] .gt button{background:var(--surf2);color:var(--text);border-radius:999px;}
+[data-palette="lasi"] .gt button.p{background:var(--seg-on);color:var(--on-accent);}
+[data-palette="lasi"] .gt .gt-q.on{box-shadow:inset 0 0 0 1.5px var(--seg-on);}
+[data-palette="lasi"] .undo-toast{bottom:calc(env(safe-area-inset-bottom,0px) + 96px);border-radius:999px;}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-palette="lasi"]:not([data-theme="light"]){--l-glass:rgba(24,28,44,.92);} [data-palette="lasi"][data-theme="light"]{--l-glass:rgba(255,255,255,.92);}
+}
+/* Lasi: käynnistys – valo liikkuu, lasiruutu nousee ja heijastus pyyhkäisee */
+.tb-lasi{background:#F2F4F9;} [data-theme="dark"] .tb-lasi{background:#06070C;}
+.tb-lasi .ls-bg{position:absolute;inset:-20%;opacity:0;animation:lsBg 2.6s ease-out forwards;
+  background:radial-gradient(40vmax 34vmax at 20% 25%,#9EC2FF,transparent 65%),radial-gradient(38vmax 32vmax at 80% 45%,#DCC2FF,transparent 65%),radial-gradient(40vmax 34vmax at 40% 80%,#FFC9B0,transparent 65%);}
+[data-theme="dark"] .tb-lasi .ls-bg{background:radial-gradient(40vmax 34vmax at 20% 25%,#2E4AA8,transparent 65%),radial-gradient(38vmax 32vmax at 80% 45%,#6A2F95,transparent 65%),radial-gradient(40vmax 34vmax at 40% 80%,#0F6B76,transparent 65%);}
+.tb-lasi .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.tb-lasi .ls-pane{position:relative;overflow:hidden;width:min(72vw,280px);padding:30px 20px 26px;border-radius:32px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:rgba(255,255,255,.5);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);border:1px solid rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 0 #fff,0 24px 60px rgba(40,60,110,.18);opacity:0;transform:translateY(28px) scale(.93);animation:lsPane .85s cubic-bezier(.2,.9,.25,1.08) .3s forwards;
+  font-family:Manrope,system-ui,sans-serif;color:#0D1220;}
+[data-theme="dark"] .tb-lasi .ls-pane{background:rgba(24,28,44,.5);border-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 24px 60px rgba(0,0,0,.5);color:#F3F5FB;}
+.tb-lasi .ls-pane *{font-family:inherit!important;}
+.tb-lasi .ls-pane::after{content:"";position:absolute;top:-60%;left:-70%;width:45%;height:220%;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:lsSheen 1.1s ease-in-out 1.05s forwards;}
+[data-theme="dark"] .tb-lasi .ls-pane::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);}
+.tb-lasi .ls-logo{width:64px;height:64px;border-radius:16px;}
+.tb-lasi .ls-name{font-size:28px;font-weight:800;letter-spacing:-.01em;}
+.tb-lasi .ls-sub{font-size:13px;font-weight:600;opacity:0;animation:kpFade .5s ease 1.1s forwards;color:#4B5468;}
+[data-theme="dark"] .tb-lasi .ls-sub{color:#AEB6C8;}
+@keyframes lsBg{0%{opacity:0;transform:translate(-4%,3%) scale(1.05)}35%{opacity:1}100%{opacity:1;transform:translate(3%,-2%) scale(1)}}
+@keyframes lsPane{to{opacity:1;transform:none}}
+@keyframes lsSheen{to{left:140%}}
+@media (prefers-reduced-motion:reduce){.tb-lasi *{animation:none!important;opacity:1!important;transform:none!important;}}
 </style>
 </head>
 <body>
@@ -1991,7 +2066,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.50</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.51</span>
       </div>
     </div>
   </div>
@@ -2025,6 +2100,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.51", d:"lokakuu 2026", items:[
+    "Uusi teema Lasi: läpikuultavat lasikortit pehmeän värivalon päällä ja kelluva alapalkki, jonka alta sisältö rullaa. Vaalea on hyvin vaalea, tumma lähes musta. Oma käynnistysanimaatio."
+  ]},
   {v:"2.18.50", d:"lokakuu 2026", items:[
     "Korjattu: Kaurapuuron vaalea tila oli rikki edellisessä versiossa. Vaalea on taas ennallaan, ja tummanruskea koskee vain tummaa tilaa.",
     "Palautumisen tunteen ja Yleisen vireen info-napit eivät enää mene otsikon päälle."
@@ -3290,6 +3368,7 @@ const PALETTES=[
   {id:"hahmo",l:"Hahmo",d:"Roolipelin hahmoruutu: kivi ja kulta",sw:["#15120E","#D9AE4E","#B07FD9"]},
   {id:"hiscore",l:"Hi-score",d:"Pelihallin neonvalot",sw:["#07020F","#FF2BD6","#20E3FF"]},
   {id:"soitin",l:"Soitin",d:"90-luvun mediasoitin: metalli ja vihreä LCD",sw:["#22222F","#00E000","#5A5A78"]},
+  {id:"lasi",l:"Lasi",d:"Huurrettu lasi pehmeän valon päällä",sw:["#EEF2FA","#BCD5FF","#0A5FD1"]},
   {id:"fosfori",l:"Fosfori",d:"Vihreä kuvaputkipääte, vaaleana LCD-näyttö",sw:["#050B07","#C2E6C6","#5CFF8F"]}
 ];
 function curPalette(){ const p=S.settings.palette; return PALETTES.some(x=>x.id===p)?p:"ampiainen"; } // v2.18.42: oletus Järkäle (id ampiainen)
@@ -3333,6 +3412,10 @@ function themeBoot(pal){
     const h=new Date().getHours(), hello=h<5||h>=22?"Hyvää yötä":h<10?"Hyvää huomenta":h<17?"Hyvää päivää":"Hyvää iltaa"; // v2.18.47: 0–4 on yö, ei aamu
     o.innerHTML=`<div class="tb-scr"><div class="kp-c"><img class="kp-logo" src="./icon-192.png?v=2" alt=""><div class="kp-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${380+i*70}ms">${c}</span>`).join("")}</div><div class="kp-line"></div><div class="kp-sub">${hello} · ${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
     at(2300,()=>bootEnd());
+  } else if(pal==="lasi"){
+    // Lasi: taustan valo liikkuu, lasiruutu nousee ja heijastus pyyhkäisee yli
+    o.innerHTML=`<div class="ls-bg"></div><div class="tb-scr"><div class="ls-pane"><img class="ls-logo" src="./icon-192.png?v=2" alt=""><div class="ls-name">Järkäle</div><div class="ls-sub">${st>0?`${st} päivän putki`:`${n} ${n===1?"kirjaus":"kirjausta"}`}</div></div></div>`;
+    at(2400,()=>bootEnd());
   } else if(pal==="ampiainen"){
     // Black and Yellow: varoitusraidat pyyhkäisevät, iso nimi ja putki
     o.innerHTML=`<div class="by-stripes"></div><div class="tb-scr"><div class="by-c"><div class="by-name">JÄRKÄLE</div><div class="by-sub">${st>0?`${st} päivän putki`:`${n} kirjausta`}</div></div></div>`;
@@ -9671,7 +9754,7 @@ const PILOT_NEWS=[
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
   {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
    act:null,go:null,skip:()=>!gymOn()},
-  {id:"2026-10-teemat4",title:"Seitsemän uutta teemaa",text:"Fosfori, Kuusnelonen, Teksti-TV, Manageri, Hahmo, Hi-score ja Soitin. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
+  {id:"2026-10-teemat5",title:"Kahdeksan uutta teemaa",text:"Uusin on Lasi: huurrettuja lasipintoja pehmeän valon päällä. Lisäksi Fosfori, Kuusnelonen, Teksti-TV, Manageri, Hahmo, Hi-score ja Soitin. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
    act:"Kokeile",go:"theme"},
 ];
 const NEWS_KEY="jarkale-news-seen";
