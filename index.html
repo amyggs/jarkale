@@ -1647,7 +1647,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 /* v2.18.51 Lasi: huurrettu lasi pehmeän valon päällä. Oma tulkinta läpikuultavista lasipinnoista, ei kopio minkään järjestelmän ulkoasusta.
    Luettavuus ensin: kortit riittävän peittäviä, teksti ei koskaan suoraan värillisen taustan päällä ilman lasia. */
 :root[data-palette="lasi"]{
-  --l-glass:rgba(24,28,44,.55); --l-edge:rgba(255,255,255,.14); --l-hl:rgba(255,255,255,.12); --l-sh:0 10px 30px rgba(0,0,0,.35); --l-pill:rgba(125,184,255,.18);
+  --l-glass:rgba(24,28,44,.34); --l-edge:rgba(255,255,255,.14); --l-hl:rgba(255,255,255,.12); --l-sh:0 10px 30px rgba(0,0,0,.35); --l-pill:rgba(125,184,255,.18);
   --l-b1:#23367E; --l-b2:#4D2470; --l-b3:#0C4E57;
   --bg:#06070C; --surf:#151927; --surf2:rgba(255,255,255,.09); --bord:rgba(255,255,255,.14); --text:#F3F5FB; --dim:#AEB6C8;
   --orange:#7DB8FF; --yellow:#FFD27A; --blue:#7DB8FF; --green:#6EE0A0; --red:#FF8D85; --purple:#C7A8FF;
@@ -1655,7 +1655,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   --seg-on:#7DB8FF; --on-accent:#06101F; --hi:#7DB8FF; --hi2:#5FA3F5; --hi-ink:#06101F; --ol:rgba(255,255,255,.18); --olbg:transparent; color-scheme:dark;
 }
 :root[data-palette="lasi"][data-theme="light"]{
-  --l-glass:rgba(255,255,255,.62); --l-edge:rgba(255,255,255,.9); --l-hl:rgba(255,255,255,1); --l-sh:0 8px 28px rgba(40,60,110,.10); --l-pill:rgba(10,95,209,.12);
+  --l-glass:rgba(255,255,255,.40); --l-edge:rgba(255,255,255,.9); --l-hl:rgba(255,255,255,1); --l-sh:0 8px 28px rgba(40,60,110,.10); --l-pill:rgba(10,95,209,.12);
   --l-b1:#BCD5FF; --l-b2:#E7D3FF; --l-b3:#FFDCCB;
   --bg:#F2F4F9; --surf:#FFFFFF; --surf2:rgba(110,125,165,.14); --bord:rgba(20,30,60,.12); --text:#0D1220; --dim:#4B5468;
   --orange:#0A5FD1; --yellow:#8A6200; --blue:#0A5FD1; --green:#167A45; --red:#C23A2B; --purple:#6A3FC4;
@@ -1677,6 +1677,19 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="lasi"] #header img{border-radius:12px;}
 [data-palette="lasi"] #header #theme-toggle-btn{background:var(--l-glass)!important;border:1px solid var(--l-edge)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:999px!important;}
 [data-palette="lasi"] .vko-badge{border-radius:999px!important;}
+/* v2.18.52 napit kuplina: läpikuultava täyttö, kirkas yläreuna, varjo alareunassa */
+[data-palette="lasi"]{--l-bub:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.03));--l-bub-edge:rgba(255,255,255,.22);
+  --l-bub-sh:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.25),0 2px 8px rgba(0,0,0,.25);
+  --l-on:linear-gradient(180deg,rgba(150,200,255,.95),rgba(95,163,245,.85));--l-on-sh:inset 0 1px 1px rgba(255,255,255,.7),inset 0 -2px 4px rgba(10,40,100,.35),0 4px 14px rgba(95,163,245,.35);}
+[data-palette="lasi"][data-theme="light"]{--l-bub:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.12));--l-bub-edge:rgba(255,255,255,.85);
+  --l-bub-sh:inset 0 1px 1px rgba(255,255,255,1),inset 0 -2px 4px rgba(30,50,110,.10),0 2px 8px rgba(30,50,110,.10);
+  --l-on:linear-gradient(180deg,rgba(40,120,235,.92),rgba(10,95,209,.88));--l-on-sh:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -2px 4px rgba(0,30,90,.30),0 4px 14px rgba(10,95,209,.30);}
+[data-palette="lasi"] :is(#view-log .stepper-btn,#view-log .stars button,.pill-btn,.chip,.seg-btn,.tr-pill:not(.dark),.tr-pick,.tr-go.ghost,.gt button:not(.p),#theme-toggle-btn){
+  background:var(--l-bub)!important;border:1px solid var(--l-bub-edge)!important;box-shadow:var(--l-bub-sh)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%);}
+[data-palette="lasi"] :is(#view-log .stars button.active,.chip.on,.pill-btn.active,.seg-btn.on,.tr-go:not(.ghost),.tr-pill.dark,.gt button.p){
+  background:var(--l-on)!important;color:var(--on-accent)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;}
+[data-palette="lasi"] #view-log .stepper-btn:active,[data-palette="lasi"] #view-log .stars button:active{transform:scale(.94);transition:transform .12s;}
 /* kelluva lasinen alapalkki, sisältö rullaa sen alta */
 [data-palette="lasi"]{--l-navglass:rgba(20,24,38,.78);} [data-palette="lasi"][data-theme="light"]{--l-navglass:rgba(250,251,254,.8);}
 [data-palette="lasi"] #nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(calc(100% - 24px),456px);padding:5px!important;z-index:50;
@@ -2066,7 +2079,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.51</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.52</span>
       </div>
     </div>
   </div>
@@ -2100,6 +2113,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.52", d:"lokakuu 2026", items:[
+    "Lasi: napit ovat läpikuultavia kuplia, ja kortit ovat kirkkaampaa lasia. Alapalkki pysyy peittävämpänä, koska sen alta rullaa tekstiä."
+  ]},
   {v:"2.18.51", d:"lokakuu 2026", items:[
     "Uusi teema Lasi: läpikuultavat lasikortit pehmeän värivalon päällä ja kelluva alapalkki, jonka alta sisältö rullaa. Vaalea on hyvin vaalea, tumma lähes musta. Oma käynnistysanimaatio."
   ]},
