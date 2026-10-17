@@ -1555,6 +1555,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="lasi"] :is(#view-log .stars button.active,.chip.on,.pill-btn.active,.seg-btn.on,.tr-go:not(.ghost),.tr-pill.dark,.gt button.p){
   background:var(--l-on)!important;color:var(--on-accent)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;}
 [data-palette="lasi"] #view-log .stepper-btn:active,[data-palette="lasi"] #view-log .stars button:active{transform:scale(.94);transition:transform .12s;}
+/* v2.18.54 viikkonauhan pallot samoiksi kupliksi kuin napit */
+[data-palette="lasi"] .ws-day .ws-dot{background:var(--l-bub)!important;border:1px solid var(--l-bub-edge)!important;box-shadow:var(--l-bub-sh)!important;}
+[data-palette="lasi"] .ws-day.logged .ws-dot{background:var(--l-on)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;color:var(--on-accent)!important;}
+[data-palette="lasi"] .ws-day.future .ws-dot{background:transparent!important;border:1px dashed var(--l-bub-edge)!important;box-shadow:none!important;}
+[data-palette="lasi"] .ws-day.sel .ws-dot{box-shadow:var(--l-bub-sh),0 0 0 2px var(--orange)!important;}
+[data-palette="lasi"] .ws-day.sel.logged .ws-dot{box-shadow:var(--l-on-sh),0 0 0 3px rgba(255,255,255,.0),0 0 0 2px var(--orange)!important;outline:2px solid var(--orange);outline-offset:3px;}
 /* kelluva lasinen alapalkki, sisältö rullaa sen alta */
 [data-palette="lasi"]{--l-navglass:rgba(20,24,38,.78);} [data-palette="lasi"][data-theme="light"]{--l-navglass:rgba(250,251,254,.8);}
 [data-palette="lasi"] #nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(calc(100% - 24px),456px);padding:5px!important;z-index:50;
@@ -1944,7 +1950,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.53</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.54</span>
       </div>
     </div>
   </div>
@@ -1978,6 +1984,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.54", d:"lokakuu 2026", items:[
+    "Lasi: viikkonauhan päiväpallot ovat samoja lasikuplia kuin napit."
+  ]},
   {v:"2.18.53", d:"lokakuu 2026", items:[
     "Hahmo- ja Hi-score-teemat poistettu. Jos jompikumpi oli käytössä, tilalle vaihtuu Järkäle-teema."
   ]},
