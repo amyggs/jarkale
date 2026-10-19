@@ -2087,7 +2087,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.72</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.73</span>
       </div>
     </div>
   </div>
@@ -2121,6 +2121,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.73", d:"lokakuu 2026", items:[
+    "Kivut: kortti pienenee riviksi heti kun taso on merkitty ja poistut Kirjaa-näkymästä tai suljet sovelluksen. Suuntaa ei tarvitse valita."
+  ]},
   {v:"2.18.72", d:"lokakuu 2026", items:[
     "Järkäle-teeman aloitusanimaatio uusittu: keltainen laatta putoaa ja tömähtää, J piirtyy siihen ja piste napsahtaa paikalleen.",
     "Kivut: kirjattu kipu (taso ja suunta valittu) näkyy tiiviinä rivinä. Napauta riviä muokataksesi."
@@ -6900,6 +6903,7 @@ function setTab(tab){
   S.tab=tab;
 
   // Nav
+  if(tab!=="log") injCloseAll();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.remove("active"));
   document.getElementById("nav-"+tab).classList.add("active");
   document.getElementById("header-title").textContent=TAB_TITLES[tab];
@@ -7769,10 +7773,10 @@ function renderInjurySelector(){
     const part=INJURY_PARTS.find(p=>p.id===item.bodyPart);
     const name=part?part.l:(INJURY_LEGACY[item.bodyPart]||"Tuntematon");
     // v2.18.72: kirjattu kipu (taso + suunta) näkyy tiiviinä rivinä, napautus avaa muokkauksen
-    const done=!item.resolved&&item.painLevel&&item.direction, open=injOpen(item.bodyPart);
+    const done=!item.resolved&&item.painLevel, open=injOpen(item.bodyPart);
     if(done&&!open) return `<button class="inj-card inj-mini" onclick="injToggle('${item.bodyPart}',true)" aria-expanded="false" aria-label="Muokkaa: ${esc(name)}">
       <span class="inj-name">${ico("bandage",16)}${esc(name)}</span>
-      <span class="inj-sum">${item.painLevel}/5 · ${DIR_TXT[item.direction]||""}</span><span class="inj-chev" aria-hidden="true">›</span></button>`;
+      <span class="inj-sum">${item.painLevel}/5${item.direction?` · ${DIR_TXT[item.direction]||""}`:""}</span><span class="inj-chev" aria-hidden="true">›</span></button>`;
     return `<div class="inj-card${item.resolved?" res":""}">
       <div class="inj-head">
         <span class="inj-name">${ico("bandage",16)}${esc(name)}</span>
@@ -7844,9 +7848,12 @@ function removeInjuryItem(idx){
 // myös S.entries-kirjausta (jaettu objekti), jolloin autosaven sisältövertailu ei nähnyt muutosta eikä
 // tallentanut sitä localStorageen (korjattu v2.9.4).
 // v2.18.72: avattujen kipukorttien tila (päivä + kipupaikka). Muokattu kortti pysyy auki, ettei se pienene kesken valinnan.
-const INJ_OPEN={};
+var INJ_OPEN={};
 function injOpen(bp){ return !!INJ_OPEN[S.date+"|"+bp]; }
 function injToggle(bp,on){ INJ_OPEN[S.date+"|"+bp]=on; renderInjurySelector(); }
+// v2.18.73: muokkauksen jälkeen kortti pienenee, kun poistut näkymästä tai sovellus menee taustalle
+function injCloseAll(){ let ch=false; for(const k in INJ_OPEN){ if(INJ_OPEN[k]){ INJ_OPEN[k]=false; ch=true; } } if(ch) try{ renderInjurySelector(); }catch(_){} }
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) injCloseAll(); });
 function setInjuryPainLevel(idx,n){
   const it=S.injury_items[idx]; INJ_OPEN[S.date+"|"+it.bodyPart]=true; S.injury_items[idx]={...it,painLevel:it.painLevel===n?null:n};
   injuryChanged();
