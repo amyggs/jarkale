@@ -275,7 +275,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
   await p.getByRole('button',{name:'Tallenna treeni'}).click();
   const sum=await p.locator('.g-sum').innerText();
-  ok(/TREENI TALLENNETTU|Treeni tallennettu/i.test(sum)&&/ennätykset \(1\)/i.test(sum),'yhteenveto lopetuksen jälkeen, ennätysten määrä listan otsikossa');
+  ok((await p.locator('.g-sum .g-stamp').count())===1&&/ennätykset \(1\)/i.test(sum),'yhteenveto ja tallennusleima lopetuksen jälkeen, ennätysten määrä listan otsikossa');
   ok(sum.includes('90 × 8')&&/uusi paino/.test(sum),'ennätys ja vertailukohta: '+sum.split('\n').filter(x=>/90|aiemmin|uusi/.test(x)).join(' | '));
   const shared=await p.evaluate(async()=>{ let got=null; navigator.share=async d=>{got=d;}; await gShareSession(GU.sessionId); return got; });
   ok(shared&&shared.text.includes('Ennätykset (1)')&&shared.text.includes('90 × 8')&&/\d{1,2}\.\d{1,2}\./.test(shared.text),'jaettava teksti: '+(shared?shared.text.split('\n').slice(0,4).join(' / '):'-'));

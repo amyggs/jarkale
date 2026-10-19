@@ -107,6 +107,8 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(!stp.again&&stp.still,'leima ei toistu uudelleenpiirrossa, jälki jää');
   ok(stp.lbl.includes(stp.dt),'leimassa treenin päivä ('+stp.lbl+')');
   ok(!stp.edit,'muokkaus ei lyö leimaa uudelleen');
+  const old=await p.evaluate(()=>{const id=G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0].id;gBack();openSession(id);return {stamp:document.querySelectorAll('.g-sum .g-stamp').length,lbl:document.querySelector('.g-sum-h .lbl-small').textContent,toast:document.body.innerText.includes('Treeni tallennettu')};});
+  ok(old.stamp===0&&old.lbl==='Yhteenveto','myöhemmin avatussa treenissä ei leimaa, otsikko Yhteenveto');
   console.log('\nSynkronointi ja varmuuskopio');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('jarkale-gym')).exMeta.penkkipunnerrus.pin==='Penkki 5'),'tallentuu laitteelle salidatan mukana (myös varmuuskopioon)');
   const mg=await p.evaluate(()=>{
