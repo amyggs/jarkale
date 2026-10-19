@@ -1478,6 +1478,58 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 :is(.ex-prev .nt,#theme-toggle-btn,.g-back,.g-sw,.mo-date,.mo-info-btn)::after{content:"";position:absolute;inset:-8px;}
 :is(#track-recovery-wrap>div:first-child>button,#track-motivation-wrap>div:first-child>button)::after{content:"";position:absolute;inset:-11px;}
 .ds-row::after{content:"";position:absolute;inset:-6px 0;}
+
+/* v2.18.68 Järkäle: putoava järkäle */
+.tb-ampiainen{background:#0B0B0A!important;}
+.tb-ampiainen .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.tb-ampiainen.jk-hit .tb-scr,.tb-ampiainen.jk-hit .jk-floor{animation:jkShake .34s ease-out;}
+.tb-ampiainen .jk-floor{position:absolute;left:8%;right:8%;top:calc(50% + min(26vw,108px));height:2px;background:linear-gradient(90deg,transparent,#3A3F3C,transparent);}
+.tb-ampiainen .jk{position:relative;width:min(84vw,360px);height:min(60vw,252px);display:flex;align-items:center;justify-content:center;}
+.tb-ampiainen .jk-name{font:800 min(14vw,60px)/1 Manrope,system-ui,sans-serif!important;letter-spacing:.04em;color:#FFD23B;text-shadow:0 0 28px rgba(255,210,59,.45);opacity:0;transform:scale(.9);transition:opacity .35s ease .1s,transform .45s cubic-bezier(.2,1.3,.4,1) .1s;}
+.tb-ampiainen.jk-open .jk-name{opacity:1;transform:none;}
+.tb-ampiainen .jk-rock{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform:translateY(-120vh);animation:jkFall .56s cubic-bezier(.55,0,.85,.35) .05s forwards;}
+.tb-ampiainen .jk-rock polygon{fill:#232725;stroke:#151716;stroke-width:1.2;stroke-linejoin:round;}
+.tb-ampiainen .jk-rock polygon.hl{fill:#2F3431;stroke:none;}
+.tb-ampiainen .jk-crack{fill:none;stroke:#FFD23B;stroke-width:3;stroke-linejoin:round;stroke-dasharray:140;stroke-dashoffset:140;filter:drop-shadow(0 0 6px rgba(255,210,59,.9));}
+.tb-ampiainen.jk-hit .jk-crack{animation:jkCrack .45s ease-out .15s forwards;}
+.tb-ampiainen .jk-l,.tb-ampiainen .jk-r{transition:transform .6s cubic-bezier(.3,0,.2,1),opacity .5s ease .15s;transform-box:fill-box;}
+.tb-ampiainen.jk-open .jk-l{transform:translate(-46px,6px) rotate(-7deg);opacity:0;transform-origin:left bottom;}
+.tb-ampiainen.jk-open .jk-r{transform:translate(46px,6px) rotate(7deg);opacity:0;transform-origin:right bottom;}
+.tb-ampiainen.jk-open .jk-crack{opacity:0;transition:opacity .2s;}
+.tb-ampiainen .jk-dust{position:absolute;left:50%;bottom:4%;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle,rgba(150,150,140,.55),rgba(150,150,140,0) 70%);opacity:0;animation:jkDust .7s ease-out forwards;}
+@keyframes jkFall{to{transform:none}}
+@keyframes jkShake{0%,100%{transform:none}15%{transform:translateY(9px)}35%{transform:translate(-5px,-3px)}55%{transform:translate(4px,2px)}75%{transform:translate(-2px,-1px)}}
+@keyframes jkCrack{to{stroke-dashoffset:0}}
+@keyframes jkDust{0%{opacity:.9;transform:translate(0,0) scale(.4)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(2.6)}}
+
+/* v2.18.68 Kaurapuuro: värit valuvat */
+.tb-kaurapuuro .kpw{position:absolute;left:-5%;width:110%;height:100%;transform:translateY(60vh);animation:kpwPour 1.1s cubic-bezier(.3,.6,.25,1) forwards,kpwDrift 3s ease-in-out infinite alternate;}
+.tb-kaurapuuro .kpw.w1{top:52%;} .tb-kaurapuuro .kpw.w2{top:64%;} .tb-kaurapuuro .kpw.w3{top:76%;}
+.tb-kaurapuuro .kpw.w1 path{fill:#E9E1C8;} .tb-kaurapuuro .kpw.w2 path{fill:#D4A84A;} .tb-kaurapuuro .kpw.w3 path{fill:#8C6A0A;}
+[data-theme="dark"] .tb-kaurapuuro .kpw.w1 path{fill:#3A2E24;} [data-theme="dark"] .tb-kaurapuuro .kpw.w2 path{fill:#8C6A0A;} [data-theme="dark"] .tb-kaurapuuro .kpw.w3 path{fill:#D4A84A;}
+.tb-kaurapuuro .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:22vh;}
+.tb-kaurapuuro .kpv{text-align:center;font-family:Manrope,system-ui,sans-serif!important;}
+.tb-kaurapuuro .kpv *{font-family:inherit!important;}
+.tb-kaurapuuro .kpv-name{font-weight:800;font-size:44px;letter-spacing:-.02em;color:#1B1A17;}
+[data-theme="dark"] .tb-kaurapuuro .kpv-name{color:#F4ECDF;}
+.tb-kaurapuuro .kpv-name span{display:inline-block;opacity:0;transform:translateY(12px);animation:kpChar .4s cubic-bezier(.2,1.3,.4,1) forwards;}
+.tb-kaurapuuro .kpv-sub{margin-top:8px;font-weight:600;font-size:15px;color:#8C6A0A;opacity:0;animation:kpFade .45s ease 1.55s forwards;}
+[data-theme="dark"] .tb-kaurapuuro .kpv-sub{color:#D4A84A;}
+@keyframes kpwPour{0%{transform:translateY(60vh)}70%{transform:translateY(-14px)}100%{transform:none}}
+@keyframes kpwDrift{from{left:-5%}to{left:-9%}}
+/* v2.18.68 Lasi: kuplat */
+.tb-lasi .ls2-b{position:absolute;bottom:-80px;border-radius:50%;animation:ls2Rise linear both;pointer-events:none;}
+.tb-lasi .ls2-b i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,.25) 10% 22%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.18) 70%,rgba(255,255,255,.55) 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),0 2px 10px rgba(40,60,110,.15);animation:ls2Sway ease-in-out infinite alternate;}
+[data-theme="dark"] .tb-lasi .ls2-b i{background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.8) 0 9%,rgba(255,255,255,.15) 10% 22%,rgba(255,255,255,.03) 45%,rgba(160,190,255,.12) 70%,rgba(200,220,255,.4) 100%);box-shadow:inset 0 0 0 1px rgba(200,220,255,.35);}
+.tb-lasi .ls2-pane{animation:ls2Pane .9s cubic-bezier(.2,.9,.25,1.05) .35s forwards!important;}
+.tb-lasi .ls2-pop{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;border:2px solid rgba(255,255,255,.85);opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3);animation:ls2Pop .45s ease-out forwards;}
+[data-theme="dark"] .tb-lasi .ls2-pop{border-color:rgba(190,215,255,.7);}
+@keyframes ls2Rise{0%{transform:translateY(0) scale(.8);opacity:0}10%{opacity:1}85%{opacity:1}100%{transform:translateY(-118vh) scale(1.05);opacity:0}}
+@keyframes ls2Sway{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+@keyframes ls2Pane{0%{opacity:0;transform:scale(.12);border-radius:50%}55%{opacity:1;transform:scale(1.05);border-radius:44px}75%{transform:scale(.98)}100%{opacity:1;transform:none;border-radius:32px}}
+@keyframes ls2Pop{0%{opacity:.9;transform:translate(var(--dx),var(--dy)) scale(.3)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(2.4)}}
+
+@media (prefers-reduced-motion:reduce){.tb-ampiainen *,.tb-lasi *,.tb-kaurapuuro *{animation:none!important;opacity:1!important;}}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
 [data-palette="soitin"] #view-log .stepper-row>div>span,[data-palette="soitin"] .sleep-hm small{color:#7FC07F!important;opacity:1!important;}
@@ -2015,7 +2067,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.67</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.68</span>
       </div>
     </div>
   </div>
@@ -2049,6 +2101,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.68", d:"lokakuu 2026", items:[
+    "Uudet käynnistysanimaatiot: Järkäle-teemassa musta järkäle putoaa, iskeytyy maahan ja halkeaa keltaiseksi nimeksi. Lasi kuplii ja kupla laajenee lasiruuduksi. Kaurapuuron lämpimät sävyt nousevat aaltoina ruudulle."
+  ]},
   {v:"2.18.67", d:"lokakuu 2026", items:[
     "Pilotti: uutiskortti treenin uudistuksista (näkyy, kun saliosio on käytössä). Esittelysivun Uutta-osio päivitetty."
   ]},
@@ -3410,18 +3465,35 @@ function themeBoot(pal){
     o.innerHTML=`<div class="tb-scr"><div class="mg2"><div class="mg2-name">JÄRKÄLE</div><div class="mg2-line"></div><div class="mg2-sub">${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
     at(2100,()=>bootEnd());
   } else if(pal==="kaurapuuro"){
-    // Rauhalliset teemat: logo, nimi kirjain kerrallaan, viiva ja tervehdys
-    const h=new Date().getHours(), hello=h<5||h>=22?"Hyvää yötä":h<10?"Hyvää huomenta":h<17?"Hyvää päivää":"Hyvää iltaa"; // v2.18.47: 0–4 on yö, ei aamu
-    o.innerHTML=`<div class="tb-scr"><div class="kp-c"><img class="kp-logo" src="./icon-192.png?v=2" alt=""><div class="kp-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${380+i*70}ms">${c}</span>`).join("")}</div><div class="kp-line"></div><div class="kp-sub">${hello} · ${n} ${n===1?"kirjaus":"kirjausta"}</div></div></div>`;
-    at(2300,()=>bootEnd());
+    // v2.18.68 Kaurapuuro: teeman lämpimät sävyt valuvat aaltoina ruudun yli ja asettuvat taustaksi, nimi kirjain kerrallaan
+    const h=new Date().getHours(), hello=h<5||h>=22?"Hyvää yötä":h<10?"Hyvää huomenta":h<17?"Hyvää päivää":"Hyvää iltaa";
+    const wave=(cls,d)=>`<svg class="kpw ${cls}" style="animation-delay:${d}ms" viewBox="0 0 400 600" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 C 50 0, 100 0, 150 30 S 250 70, 300 35 S 380 0, 400 25 L400 600 L0 600 Z"/></svg>`;
+    o.innerHTML=`${wave("w1",0)}${wave("w2",260)}${wave("w3",520)}<div class="tb-scr"><div class="kpv">
+      <div class="kpv-name">${[..."Järkäle"].map((c,i)=>`<span style="animation-delay:${900+i*70}ms">${c}</span>`).join("")}</div>
+      <div class="kpv-sub">${hello}</div></div></div>`;
+    at(2600,()=>bootEnd());
   } else if(pal==="lasi"){
-    // Lasi: taustan valo liikkuu, lasiruutu nousee ja heijastus pyyhkäisee yli
-    o.innerHTML=`<div class="ls-bg"></div><div class="tb-scr"><div class="ls-pane"><img class="ls-logo" src="./icon-192.png?v=2" alt=""><div class="ls-name">Järkäle</div><div class="ls-sub">${st>0?`${st} päivän putki`:`${n} ${n===1?"kirjaus":"kirjausta"}`}</div></div></div>`;
-    at(2400,()=>bootEnd());
+    // v2.18.68 Lasi: kuplat nousevat, yksi kupla laajenee lasiruuduksi, heijastus pyyhkäisee
+    const B=[[8,22,0,1.9],[18,44,260,2.2],[27,16,520,1.6],[36,30,120,2.0],[48,58,380,2.4],[58,20,60,1.7],[66,36,460,2.1],[75,26,200,1.8],[84,50,620,2.3],[92,18,340,1.6],[14,28,760,1.9],[70,14,820,1.5],[42,22,900,1.7],[88,32,980,2.0]];
+    o.innerHTML=`<div class="ls-bg"></div>${B.map(([x,sz,d,du],i)=>`<div class="ls2-b" style="left:${x}%;width:${sz}px;height:${sz}px;animation-delay:${d}ms;animation-duration:${du}s"><i style="animation-duration:${(1.1+(i%4)*.25).toFixed(2)}s"></i></div>`).join("")}
+      <div class="tb-scr"><div class="ls-pane ls2-pane"><img class="ls-logo" src="./icon-192.png?v=2" alt=""><div class="ls-name">Järkäle</div><div class="ls-sub">${st>0?`${st} päivän putki`:`${n} ${n===1?"kirjaus":"kirjausta"}`}</div></div>
+      ${[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b],i)=>`<span class="ls2-pop" style="--dx:${a*120}px;--dy:${b*90}px;animation-delay:${1500+i*90}ms"></span>`).join("")}</div>`;
+    at(2800,()=>bootEnd());
   } else if(pal==="ampiainen"){
-    // Black and Yellow: varoitusraidat pyyhkäisevät, iso nimi ja putki
-    o.innerHTML=`<div class="by-stripes"></div><div class="tb-scr"><div class="by-c"><div class="by-name">JÄRKÄLE</div><div class="by-sub">${st>0?`${st} päivän putki`:`${n} kirjausta`}</div></div></div>`;
-    at(2100,()=>bootEnd());
+    // v2.18.68 Järkäle: musta järkäle (iso kivi) putoaa ja iskeytyy maahan, halkeaa keltaisesta saumasta ja paljastaa nimen
+    const L="8,78 30,34 78,12 100,8 92,40 108,70 94,100 104,134 64,134 20,120", R="100,8 132,8 176,30 194,74 182,118 130,134 104,134 94,100 108,70 92,40";
+    o.innerHTML=`<div class="jk-floor"></div><div class="tb-scr"><div class="jk">
+      <div class="jk-name">JÄRKÄLE</div>
+      <svg class="jk-rock" viewBox="0 0 200 140" aria-hidden="true">
+        <g class="jk-l"><polygon points="${L}"/><polygon class="hl" points="30,34 78,12 100,8 92,40 60,48"/></g>
+        <g class="jk-r"><polygon points="${R}"/><polygon class="hl" points="100,8 132,8 176,30 150,44 108,30"/></g>
+        <polyline class="jk-crack" points="100,8 92,40 108,70 94,100 104,134"/>
+      </svg>
+      ${[-1,1].map(sd=>[0,1,2].map(k=>`<i class="jk-dust" style="--x:${sd*(60+k*38)}px;--y:${-8-k*10}px;animation-delay:${560+k*40}ms"></i>`).join("")).join("")}
+    </div></div>`;
+    at(560,()=>{ o.classList.add("jk-hit"); try{haptic(25);}catch(_){} });
+    at(1150,()=>o.classList.add("jk-open"));
+    at(2500,()=>bootEnd());
   } else if(pal==="soitin"){
     const pad2=x=>String(x).padStart(2,"0");
     o.innerHTML=`<div class="tb-scr"><div class="sp"><div class="sp-bar">JÄRKÄLE</div><div class="sp-lcd"><div class="sp-time">00:00</div><div class="sp-an">${Array.from({length:16},(_,i)=>`<i style="--h0:${8+((i*37)%30)}%;--h1:${40+((i*53)%60)}%;animation-delay:${(i*47)%400}ms"></i>`).join("")}</div>
