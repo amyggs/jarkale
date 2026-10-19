@@ -95,6 +95,18 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.waitForTimeout(250); ok(await p.locator('#jdlg').count()===0,'ikkuna sulkeutuu');
   const r2=p.evaluate(()=>jConfirm('Jatketaanko?'));await p.waitForTimeout(200);
   await p.locator('#jdlg .jdlg-ok').click(); ok(await r2===true,'OK palauttaa true');
+
+  console.log('\nTallennusleima');
+  const stp=await p.evaluate(()=>{const pr=curProgram();GU.mode='home';startSession(pr.id,pr.days[0].id);const a=activeSession();a.exercises[0].sets[0]={kg:90,reps:5,done:true};finishSession();
+    const first=!!document.querySelector('.g-sum .g-stamp.hit')&&!!document.querySelector('.g-sum.stamped');
+    renderGym(); const again=!!document.querySelector('.g-stamp.hit'); const still=!!document.querySelector('.g-sum .g-stamp');
+    const [y,m,d]=a.date.split('-'); const lbl=document.querySelector('.g-stamp').getAttribute('aria-label');
+    GU.editPast=a.id; renderGym(); const edit=!!document.querySelector('.g-stamp.hit');
+    return {first,again,still,lbl,dt:`${+d}.${+m}.`,edit};});
+  ok(stp.first,'tallennus lyö leiman (animaatio)');
+  ok(!stp.again&&stp.still,'leima ei toistu uudelleenpiirrossa, jälki jää');
+  ok(stp.lbl.includes(stp.dt),'leimassa treenin päivä ('+stp.lbl+')');
+  ok(!stp.edit,'muokkaus ei lyö leimaa uudelleen');
   console.log('\nSynkronointi ja varmuuskopio');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('jarkale-gym')).exMeta.penkkipunnerrus.pin==='Penkki 5'),'tallentuu laitteelle salidatan mukana (myös varmuuskopioon)');
   const mg=await p.evaluate(()=>{
