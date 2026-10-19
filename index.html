@@ -1530,6 +1530,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 @keyframes ls2Pop{0%{opacity:.9;transform:translate(var(--dx),var(--dy)) scale(.3)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(2.4)}}
 
 @media (prefers-reduced-motion:reduce){.tb-ampiainen *,.tb-lasi *,.tb-kaurapuuro *{animation:none!important;opacity:1!important;}}
+/* v2.18.74 Android-tilarivi samaan väriin kuin sovelluksen yläreuna (theme-color luetaan --status-muuttujasta, jos teema asettaa sen) */
+[data-palette="lasi"]{--status:#161C3E;} [data-palette="lasi"][data-theme="light"]{--status:#DCE5F8;}
+[data-palette="manageri"]{--status:#142F68;}
+[data-palette="soitin"]{--status:var(--s-ta);}
+[data-palette="fosfori"]{--status:#020402;} [data-palette="fosfori"][data-theme="light"]{--status:#A9D0AE;}
 /* v2.18.71 kelluva alapalkki myös Kaurapuurossa (pehmeä pilleri) ja Järkäleessä (terävä, paksu reuna). Lasi omana tyylinään yllä. */
 :is([data-palette="kaurapuuro"],[data-palette="ampiainen"]) #nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(calc(100% - 24px),456px);padding:5px!important;z-index:50;}
 :is([data-palette="kaurapuuro"],[data-palette="ampiainen"]) #nav button{padding:7px 2px 7px;}
@@ -1659,7 +1664,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   --orange:#0A5FD1; --yellow:#8A6200; --blue:#0A5FD1; --green:#167A45; --red:#C23A2B; --purple:#6A3FC4;
   --nav-bg:#F2F4F9; --seg-on:#0A5FD1; --on-accent:#FFFFFF; --hi:#0A5FD1; --hi2:#0850B3; --hi-ink:#FFFFFF; --ol:rgba(20,30,60,.14); color-scheme:light;
 }
-[data-palette="lasi"] body{background-color:var(--bg);background-image:radial-gradient(70vmax 55vmax at -5% -5%,var(--l-b1),transparent 62%),radial-gradient(60vmax 50vmax at 105% 35%,var(--l-b2),transparent 62%),radial-gradient(70vmax 55vmax at 25% 105%,var(--l-b3),transparent 62%);background-attachment:fixed;}
+[data-palette="lasi"] body{background-color:var(--bg);background-image:linear-gradient(180deg,var(--status) 0,var(--status) 6px,transparent 110px),radial-gradient(70vmax 55vmax at -5% -5%,var(--l-b1),transparent 62%),radial-gradient(60vmax 50vmax at 105% 35%,var(--l-b2),transparent 62%),radial-gradient(70vmax 55vmax at 25% 105%,var(--l-b3),transparent 62%);background-attachment:fixed;}
 [data-palette="lasi"] :is(#app,#content,.view){background:transparent!important;}
 [data-palette="lasi"] #header{background:transparent!important;border-bottom:none!important;box-shadow:none!important;}
 [data-palette="lasi"] :is(.card,.inj-card,.wr-banner,.ds-card,.g-sum,.tr-list,.g-empty,.tw,.ex,.g-finish,.ed-day,.g-chart,.news-card,.su-card,.sync-bar,#pain-carry,#view-log>#track-weight-wrap,#view-log>#track-sleep-wrap,#view-log>#track-steps-wrap,#view-log>#track-recovery-wrap,#view-log>#track-motivation-wrap){
@@ -2087,7 +2092,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.73</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.74</span>
       </div>
     </div>
   </div>
@@ -2121,6 +2126,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.74", d:"lokakuu 2026", items:[
+    "Puhelimen yläreunan tilarivi on nyt samaa väriä kuin sovelluksen yläosa myös Lasi-, Manageri-, Soitin- ja Fosfori-teemoissa."
+  ]},
   {v:"2.18.73", d:"lokakuu 2026", items:[
     "Kivut: kortti pienenee riviksi heti kun taso on merkitty ja poistut Kirjaa-näkymästä tai suljet sovelluksen. Suuntaa ei tarvitse valita."
   ]},
@@ -3591,7 +3599,7 @@ function bootEnd(now){
 function updateMetaThemeColor(){
   const m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
   const light=document.documentElement.getAttribute("data-theme")==="light";
-  let c=getComputedStyle(document.getElementById("header")||document.body).backgroundColor;
+  let c=getComputedStyle(document.documentElement).getPropertyValue("--status").trim()||getComputedStyle(document.getElementById("header")||document.body).backgroundColor;
   if(!c||/rgba\(.*,\s*0\)$/.test(c)||c==="transparent") c=getComputedStyle(document.body).backgroundColor;
   m.content=c||(light?"#f2f2f7":"#0a0a0a");
 }
