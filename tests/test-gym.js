@@ -150,6 +150,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   await p.getByRole('button',{name:'Tallenna treeni'}).click();
   await p.evaluate(()=>gBack());
   ok((await p.locator('.tr-sec',{hasText:'Historia'}).count())===1,'historia näkyy');
+  await p.locator('#g-exlist .ex-grp-h',{hasText:'Rinta'}).click(); // v2.18.55: liikkeet lihasryhmittäin, ryhmät oletuksena kiinni
   const exl=await p.locator('#g-exlist .tr-row',{hasText:'Penkkipunnerrus'}).innerText();
   ok(exl.includes('edellinen 82,5 × 7')&&exl.includes('85 × 8')&&(await p.locator('#g-exlist .tr-row',{hasText:'Penkkipunnerrus'}).locator('.g-trend.up').count())===1,'liikelistassa suunta: '+exl.replace(/\n/g,' | '));
   const stall=await p.evaluate(()=>{ const k='testi-junnaa'; const base=Date.now()-40*864e5; for(let i=0;i<5;i++){ const t=base+i*864e5; G.sessions.push({id:'st'+i,programId:'x',dayId:'y',date:new Date(t).toISOString().slice(0,10),startedAt:t,endedAt:t+1000,dayName:'T',exercises:[{id:'e'+i,key:k,name:'Testi junnaa',sets:[{kg:i===1?60:55,reps:8,done:true}]}]}); } const r=exerciseTrend(k); G.sessions=G.sessions.filter(s=>!String(s.id).startsWith('st')); return r; });

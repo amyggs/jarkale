@@ -1417,6 +1417,21 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 @keyframes spBar{from{height:var(--h0,10%)}to{height:var(--h1,90%)}}
 @media (prefers-reduced-motion:reduce){.tb-soitin .sp-an i,.tb-soitin .sp-ttl span{animation:none}}
 
+
+/* v2.18.55 kiinnitetty liikehuomio ja lihasryhmät */
+.ex-pin{display:block;width:100%;text-align:left;margin:4px 0 6px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:500 13px/1.45 Manrope,system-ui,sans-serif;cursor:pointer;}
+.ex-pin .ex-pin-h{display:flex;align-items:center;gap:4px;font:700 11px Manrope,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:2px;}
+.ex-pin .ex-pin-t{display:block;white-space:pre-wrap;}
+.ex-pin.edit{cursor:default;}
+.ex-pin-a{display:flex;gap:8px;margin-top:6px;}
+.ex-pin-a button,.g-pinbtn{border:none;border-radius:10px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;}
+.g-pinbtn{margin-top:6px;}
+.g-pinbtn:disabled{opacity:.45;}
+.ex-grp-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 10px;font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);}
+.ex-grp-row select{width:auto;min-width:140px;height:38px;padding:0 10px;}
+.ex-grp-h .n{font-weight:800!important;}
+.ex-grp-c{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);min-width:22px;text-align:right;}
+.ex-grp-h[aria-expanded="true"]{background:var(--surf2);}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
 [data-palette="soitin"] #view-log .stepper-row>div>span,[data-palette="soitin"] .sleep-hm small{color:#7FC07F!important;opacity:1!important;}
@@ -1950,7 +1965,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.54</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.55</span>
       </div>
     </div>
   </div>
@@ -1984,6 +1999,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.55", d:"lokakuu 2026", items:[
+    "Treeni: liikkeen huomion voi kiinnittää liikkeeseen (Huomio → Kiinnitä liikkeeseen). Kiinnitetty huomio, esimerkiksi laitteen säätö, näkyy liikkeen kohdalla jokaisessa treenissä, kunnes irrotat sen. Tavallinen huomio koskee yhä vain sitä treeniä.",
+    "Liikkeiden kehitys on ryhmitelty lihasryhmittäin (rinta, selkä, olkapäät, kädet, jalat, muut). Ryhmät avautuvat napautuksella. Ryhmä päätellään liikkeen nimestä, ja väärän ryhmän voi vaihtaa liikkeen sivulla. Haku näyttää osumat kaikista ryhmistä."
+  ]},
   {v:"2.18.54", d:"lokakuu 2026", items:[
     "Lasi: viikkonauhan päiväpallot ovat samoja lasikuplia kuin napit."
   ]},
@@ -2552,7 +2571,7 @@ const CARDIO_TYPES=[
   "Kävely","Juoksu","Pyöräily","Uinti","HIIT","Soutu","Muu",
 ];
 // ═══ IKONIT (v2.11.1): oma viivaikonisarja emojien tilalle, väri currentColor ═══
-const ICONS={"scale": "<rect x=\"3.5\" y=\"4\" width=\"17\" height=\"16\" rx=\"4\"/><path d=\"M8 10.5a4.6 4.6 0 0 1 8 0\"/><path d=\"M12 11.5l1.8-2.6\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z\"/>", "steps": "<path d=\"M8.2 3.5c1.6 0 2.6 1.9 2.6 4.4 0 2.2-.9 3.6-2.4 3.6S5.8 10 5.8 7.8c0-2.4.9-4.3 2.4-4.3z\"/><path d=\"M6.4 14.5h3.9v1.6a1.95 1.95 0 0 1-3.9 0z\"/><path d=\"M15.8 7.5c1.5 0 2.4 1.9 2.4 4.3 0 2.2-1.1 3.7-2.6 3.7s-2.4-1.4-2.4-3.6c0-2.5 1-4.4 2.6-4.4z\"/><path d=\"M13.7 18.5h3.9v.6a1.95 1.95 0 0 1-3.9 0z\"/>", "ruler": "<rect x=\"2.5\" y=\"8\" width=\"19\" height=\"8\" rx=\"1.6\"/><path d=\"M6.5 8v3M10 8v4M13.5 8v3M17 8v4\"/>", "battery": "<rect x=\"2.5\" y=\"7\" width=\"16.5\" height=\"10\" rx=\"2.5\"/><path d=\"M21.5 10.5v3\"/><path d=\"M6 10.5v3M9.5 10.5v3M13 10.5v3\"/>", "bolt": "<path d=\"M13 2.8 5 13.4h6.6l-1 7.8 8-10.7h-6.7z\"/>", "dumbbell": "<path d=\"M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11\"/>", "bike": "<circle cx=\"5.8\" cy=\"16.2\" r=\"3.3\"/><circle cx=\"18.2\" cy=\"16.2\" r=\"3.3\"/><path d=\"M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8\"/>", "bandage": "<rect x=\"2.6\" y=\"8.4\" width=\"18.8\" height=\"7.2\" rx=\"3.6\" transform=\"rotate(-45 12 12)\"/><path d=\"M10.2 10.2h.01M13.8 13.8h.01M10.2 13.8h.01M13.8 10.2h.01\"/>", "heart": "<path d=\"M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z\"/><path d=\"M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2\"/>", "drop": "<path d=\"M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.6 12 3.2 12 3.2z\"/><path d=\"M9.3 14.4a2.8 2.8 0 0 0 2.4 2.6\"/>", "head": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M7.4 10.6 9.6 8.8l2 2.8 2.3-2.8 2.7 1.8\"/><path d=\"M9.2 15.6h5.6\"/>", "flower": "<circle cx=\"12\" cy=\"12\" r=\"2.3\"/><path d=\"M12 9.7c-1.6-2.6-1.6-4.6 0-6.2 1.6 1.6 1.6 3.6 0 6.2M14.3 12c2.6-1.6 4.6-1.6 6.2 0-1.6 1.6-3.6 1.6-6.2 0M12 14.3c1.6 2.6 1.6 4.6 0 6.2-1.6-1.6-1.6-3.6 0-6.2M9.7 12c-2.6 1.6-4.6 1.6-6.2 0 1.6-1.6 3.6-1.6 6.2 0\"/>", "pill": "<rect x=\"2.5\" y=\"9\" width=\"11.5\" height=\"6\" rx=\"3\"/><path d=\"M8.25 9v6\"/><circle cx=\"17.5\" cy=\"12\" r=\"3.8\"/><path d=\"M14.9 14.6l5.2-5.2\"/>", "note": "<path d=\"M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z\"/><path d=\"M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5\"/>", "sparkle": "<path d=\"M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z\"/><path d=\"M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 4.5v-.8a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 3.7v.8M8.8 10.5h6.4M8.8 14.5h4.2\"/>", "save": "<path d=\"M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z\"/><path d=\"M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.6\"/><circle cx=\"12\" cy=\"12\" r=\".9\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "user": "<circle cx=\"12\" cy=\"8.2\" r=\"4\"/><path d=\"M4.6 20.5a7.4 7.4 0 0 1 14.8 0\"/>", "palette": "<path d=\"M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z\"/><circle cx=\"7.6\" cy=\"11.2\" r=\".9\"/><circle cx=\"10\" cy=\"7.4\" r=\".9\"/><circle cx=\"14.6\" cy=\"7.4\" r=\".9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3\"/>", "phone": "<rect x=\"6.5\" y=\"2.8\" width=\"11\" height=\"18.4\" rx=\"2.5\"/><path d=\"M11 17.6h2\"/>", "sliders": "<path d=\"M4 6h10M4 12h4M12 12h8M4 18h12\"/><circle cx=\"17\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>", "flame": "<path d=\"M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z\"/><path d=\"M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z\"/>", "trophy": "<path d=\"M7.5 4.5h9v5a4.5 4.5 0 0 1-9 0z\"/><path d=\"M7.5 6.3H4.6a3 3 0 0 0 3.2 3.8M16.5 6.3h2.9a3 3 0 0 1-3.2 3.8M12 14v3.4M8.5 20.5h7M9.6 17.4h4.8\"/>", "trend_down": "<path d=\"M3 7.5l6 6 4-4 8 8\"/><path d=\"M15.2 17.5H21v-5.8\"/>", "trend_up": "<path d=\"M3 16.5l6-6 4 4 8-8\"/><path d=\"M15.2 6.5H21v5.8\"/>", "chart": "<path d=\"M3.5 20.5h17\"/><path d=\"M7 16.5V11M12 16.5V6.5M17 16.5v-4.5\"/>", "alert": "<path d=\"M10.3 4.3 2.9 17.6A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-2.9L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.2M12 16.8h.01\"/>", "bulb": "<path d=\"M9.2 18h5.6M10.2 21h3.6\"/><path d=\"M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/><path d=\"M13.5 6.5l4 4\"/>", "coin": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M15.2 8.8a4.1 4.1 0 1 0 0 6.4M7.6 11h5.6M7.6 13.4h5.6\"/>", "check": "<path d=\"M4.5 12.5l4.6 4.5L19.5 7\"/>", "activity": "<path d=\"M3 12h4l2.5-6.5 5 13L17 12h4\"/>", "nav_log": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/>"};
+const ICONS={"scale": "<rect x=\"3.5\" y=\"4\" width=\"17\" height=\"16\" rx=\"4\"/><path d=\"M8 10.5a4.6 4.6 0 0 1 8 0\"/><path d=\"M12 11.5l1.8-2.6\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z\"/>", "steps": "<path d=\"M8.2 3.5c1.6 0 2.6 1.9 2.6 4.4 0 2.2-.9 3.6-2.4 3.6S5.8 10 5.8 7.8c0-2.4.9-4.3 2.4-4.3z\"/><path d=\"M6.4 14.5h3.9v1.6a1.95 1.95 0 0 1-3.9 0z\"/><path d=\"M15.8 7.5c1.5 0 2.4 1.9 2.4 4.3 0 2.2-1.1 3.7-2.6 3.7s-2.4-1.4-2.4-3.6c0-2.5 1-4.4 2.6-4.4z\"/><path d=\"M13.7 18.5h3.9v.6a1.95 1.95 0 0 1-3.9 0z\"/>", "ruler": "<rect x=\"2.5\" y=\"8\" width=\"19\" height=\"8\" rx=\"1.6\"/><path d=\"M6.5 8v3M10 8v4M13.5 8v3M17 8v4\"/>", "battery": "<rect x=\"2.5\" y=\"7\" width=\"16.5\" height=\"10\" rx=\"2.5\"/><path d=\"M21.5 10.5v3\"/><path d=\"M6 10.5v3M9.5 10.5v3M13 10.5v3\"/>", "bolt": "<path d=\"M13 2.8 5 13.4h6.6l-1 7.8 8-10.7h-6.7z\"/>", "dumbbell": "<path d=\"M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11\"/>", "bike": "<circle cx=\"5.8\" cy=\"16.2\" r=\"3.3\"/><circle cx=\"18.2\" cy=\"16.2\" r=\"3.3\"/><path d=\"M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8\"/>", "bandage": "<rect x=\"2.6\" y=\"8.4\" width=\"18.8\" height=\"7.2\" rx=\"3.6\" transform=\"rotate(-45 12 12)\"/><path d=\"M10.2 10.2h.01M13.8 13.8h.01M10.2 13.8h.01M13.8 10.2h.01\"/>", "heart": "<path d=\"M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z\"/><path d=\"M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2\"/>", "drop": "<path d=\"M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.6 12 3.2 12 3.2z\"/><path d=\"M9.3 14.4a2.8 2.8 0 0 0 2.4 2.6\"/>", "head": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M7.4 10.6 9.6 8.8l2 2.8 2.3-2.8 2.7 1.8\"/><path d=\"M9.2 15.6h5.6\"/>", "flower": "<circle cx=\"12\" cy=\"12\" r=\"2.3\"/><path d=\"M12 9.7c-1.6-2.6-1.6-4.6 0-6.2 1.6 1.6 1.6 3.6 0 6.2M14.3 12c2.6-1.6 4.6-1.6 6.2 0-1.6 1.6-3.6 1.6-6.2 0M12 14.3c1.6 2.6 1.6 4.6 0 6.2-1.6-1.6-1.6-3.6 0-6.2M9.7 12c-2.6 1.6-4.6 1.6-6.2 0 1.6-1.6 3.6-1.6 6.2 0\"/>", "pill": "<rect x=\"2.5\" y=\"9\" width=\"11.5\" height=\"6\" rx=\"3\"/><path d=\"M8.25 9v6\"/><circle cx=\"17.5\" cy=\"12\" r=\"3.8\"/><path d=\"M14.9 14.6l5.2-5.2\"/>", "note": "<path d=\"M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z\"/><path d=\"M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5\"/>", "sparkle": "<path d=\"M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z\"/><path d=\"M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 4.5v-.8a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 3.7v.8M8.8 10.5h6.4M8.8 14.5h4.2\"/>", "save": "<path d=\"M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z\"/><path d=\"M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.6\"/><circle cx=\"12\" cy=\"12\" r=\".9\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "user": "<circle cx=\"12\" cy=\"8.2\" r=\"4\"/><path d=\"M4.6 20.5a7.4 7.4 0 0 1 14.8 0\"/>", "palette": "<path d=\"M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z\"/><circle cx=\"7.6\" cy=\"11.2\" r=\".9\"/><circle cx=\"10\" cy=\"7.4\" r=\".9\"/><circle cx=\"14.6\" cy=\"7.4\" r=\".9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3\"/>", "phone": "<rect x=\"6.5\" y=\"2.8\" width=\"11\" height=\"18.4\" rx=\"2.5\"/><path d=\"M11 17.6h2\"/>", "sliders": "<path d=\"M4 6h10M4 12h4M12 12h8M4 18h12\"/><circle cx=\"17\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>", "flame": "<path d=\"M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z\"/><path d=\"M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z\"/>", "trophy": "<path d=\"M7.5 4.5h9v5a4.5 4.5 0 0 1-9 0z\"/><path d=\"M7.5 6.3H4.6a3 3 0 0 0 3.2 3.8M16.5 6.3h2.9a3 3 0 0 1-3.2 3.8M12 14v3.4M8.5 20.5h7M9.6 17.4h4.8\"/>", "trend_down": "<path d=\"M3 7.5l6 6 4-4 8 8\"/><path d=\"M15.2 17.5H21v-5.8\"/>", "trend_up": "<path d=\"M3 16.5l6-6 4 4 8-8\"/><path d=\"M15.2 6.5H21v5.8\"/>", "chart": "<path d=\"M3.5 20.5h17\"/><path d=\"M7 16.5V11M12 16.5V6.5M17 16.5v-4.5\"/>", "alert": "<path d=\"M10.3 4.3 2.9 17.6A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-2.9L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.2M12 16.8h.01\"/>", "bulb": "<path d=\"M9.2 18h5.6M10.2 21h3.6\"/><path d=\"M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/><path d=\"M13.5 6.5l4 4\"/>", "coin": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M15.2 8.8a4.1 4.1 0 1 0 0 6.4M7.6 11h5.6M7.6 13.4h5.6\"/>", "check": "<path d=\"M4.5 12.5l4.6 4.5L19.5 7\"/>", "pin": "<path d=\"M9 3.5h6l-1 5 3.5 3.5v1.5h-11V12L10 8.5z\"/><path d=\"M12 13.5v7\"/>", "activity": "<path d=\"M3 12h4l2.5-6.5 5 13L17 12h4\"/>", "nav_log": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/>"};
 function ico(n,s=18,cls=""){ const p=ICONS[n]; if(!p) return ""; return `<svg class="ico${cls?" "+cls:""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`; }
 function icoTile(n){ return `<span class="ico-tile">${ico(n,18)}</span>`; }
 const MEAS_FIELDS = [
@@ -8133,10 +8152,10 @@ function renderSaveInsight(insight){
 // Periaatteet: haamuarvot (edellinen kerta) eivät tallennu ilman ✓-kuittausta, puuttuvia sarjoja ei täytetä,
 // treeni tallentaa aloitushetken ohjelmarakenteen (ohjelman myöhempi muokkaus ei muuta historiaa).
 const GYM_KEY="jarkale-gym";
-let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
+let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,exMeta:{},timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
 let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehdessä → piirretään palatessa
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
-const GU={exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
+const GU={pinEdit:{},exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
 function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
 function gymLoad(){
@@ -8144,6 +8163,39 @@ function gymLoad(){
   if(!Array.isArray(G.programs)) G.programs=[];
   if(!Array.isArray(G.sessions)) G.sessions=[];
 }
+// v2.18.55 Liikekohtaiset lisätiedot (avain = liikkeen key): pin = kiinnitetty huomio, grp = käsin valittu lihasryhmä.
+// updatedAt synkronointia varten; tyhjennys tallennetaan tyhjänä arvona, jotta se kulkee myös toiselle laitteelle.
+function exMeta(key){ return (G.exMeta&&G.exMeta[key])||{}; }
+function exMetaSet(key,patch){ G.exMeta=G.exMeta||{}; G.exMeta[key]={...exMeta(key),...patch,updatedAt:Date.now()}; gymSave(); }
+const EX_GROUPS=["Rinta","Selkä","Olkapäät","Kädet","Jalat","Muut"];
+const EX_GROUP_RULES=[
+  ["Muut",/vatsa|rutistu|istumaan|jalannost|lankku|plank|crunch|russian twist|pallof|sisäänveto/],
+  ["Olkapäät",/vipunost|sivunost|etunost|takaolk|reverse (pec|fly)|rear delt|face ?pull|pystypunn|olkapääpunn|military|arnold|shoulder press|lateral|kelso|shrug|epäkä|hartiankoh|pystysoutu|upright/],
+  ["Jalat",/kyykky|squat|jalkapr|leg press|reiden|reisi|koukistu|lähentä|loitonta|pohje|pohkeet|calf|askelky|lunge|rdl|romanian|suorin jaloin|hip thrust|lantionnost|pakara|glute|bulgar|step ?up|nordic|leg (curl|extension)/],
+  ["Kädet",/hauis|ojentaj|curl|kääntö|tricep|kick ?back|scott|vasara|ranskal|skull|dippi|dips|diamond|pushdown|french/],
+  ["Rinta",/penkki|rinta|pec deck|ristikkäis|\bfly|flye|punner|push ?up|bench|chest|crossover/],
+  ["Selkä",/leuanveto|ylätalja|alatalja|soutu|pullover|maastaveto|deadlift|\brow\b|pull ?down|pull ?up|chin|selk|selän|hyperext|good morning/]
+];
+function exGroupAuto(name){ const n=String(name||"").toLowerCase(); for(const [g,re] of EX_GROUP_RULES) if(re.test(n)) return g; return "Muut"; }
+function exGroup(key,name){ const g=exMeta(key).grp; return EX_GROUPS.includes(g)?g:exGroupAuto(name||key); }
+function gPinFromNote(sid,ei){ const s=gSession(sid), ex=s.exercises[ei], t=(ex.userNote||"").trim(); if(!t) return;
+  const oldPin=exMeta(ex.key).pin||""; exMetaSet(ex.key,{pin:t}); ex.userNote=""; GU.note[ex.id]=false; gymSave(); renderGym();
+  showUndoToast("Kiinnitetty – näkyy liikkeen kohdalla joka treenissä",()=>{ exMetaSet(ex.key,{pin:oldPin}); ex.userNote=t; GU.note[ex.id]=true; gymSave(); renderGym(); }); }
+function gPinSet(key,v){ exMetaSet(key,{pin:v}); }
+function gPinDone(key){ GU.pinEdit[key]=false; const m=exMeta(key); if(m.pin!=null&&!String(m.pin).trim()) exMetaSet(key,{pin:""}); renderGym(); }
+function gUnpin(key){ const old=exMeta(key).pin||""; exMetaSet(key,{pin:""}); GU.pinEdit[key]=false; renderGym();
+  if(typeof showUndoToast==="function") showUndoToast("Kiinnitys poistettu",()=>{ exMetaSet(key,{pin:old}); renderGym(); }); }
+function gPinHTML(key){
+  const m=exMeta(key), pin=(m.pin||"").trim(), k=esc(JSON.stringify(key));
+  if(GU.pinEdit[key]) return `<div class="ex-pin edit"><div class="ex-pin-h">${ico("pin",14)} Kiinnitetty huomio</div><textarea class="g-note" rows="2" placeholder="Esim. penkki 4, kahva keskelle" oninput="gPinSet(${k},this.value)">${esc(m.pin||"")}</textarea>
+    <div class="ex-pin-a"><button onclick="gPinDone(${k})">Valmis</button><button onclick="gUnpin(${k})">Irrota</button></div></div>`;
+  if(!pin) return "";
+  return `<button class="ex-pin" onclick="GU.pinEdit[${k}]=true;renderGym()" aria-label="Kiinnitetty huomio, muokkaa"><span class="ex-pin-h">${ico("pin",14)} Kiinnitetty</span><span class="ex-pin-t">${esc(pin)}</span></button>`;
+}
+const EXGRP_KEY="jarkale-exgrp-open";
+function exGrpOpen(){ try{ return JSON.parse(localStorage.getItem(EXGRP_KEY)||"{}")||{}; }catch(_){ return {}; } }
+function exGrpToggle(g){ const o=exGrpOpen(); o[g]=!o[g]; try{ localStorage.setItem(EXGRP_KEY,JSON.stringify(o)); }catch(_){} const el=document.getElementById("g-exlist"); if(el) el.innerHTML=gymExListHTML(); }
+function gSetGroup(key,g){ exMetaSet(key,{grp:g===exGroupAuto(exerciseHistory(key).slice(-1)[0]?.ex.name||key)?"":g}); renderGym(); }
 function gymSave(){
   // Synkronointia varten: katsottava/käynnissä oleva treeni saa muokkausajan
   if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||s.id===GU.sessionId) s.updatedAt=now; }); }
@@ -8901,7 +8953,12 @@ function gymExListHTML(){
   const q=exKey(GU.exSearch);
   const list=exerciseIndex().filter(o=>!q||o.key.includes(q));
   if(!list.length) return `<div class="tr-row"><div class="t"><div class="s">Ei osumia</div></div></div>`;
-  const shown=q||GU.exAll?list:list.slice(0,12);
+  // v2.18.55: ilman hakua liikkeet lihasryhmittäin avattaviin ryhmiin; haulla tasainen lista
+  if(!q){ const open=exGrpOpen(), by={}; list.forEach(o=>{ const g=exGroup(o.key,o.name); (by[g]=by[g]||[]).push(o); });
+    return EX_GROUPS.filter(g=>by[g]).map(g=>`<button class="tr-row tr-btn ex-grp-h" aria-expanded="${!!open[g]}" onclick="exGrpToggle('${g}')"><div class="t"><div class="n">${g}</div></div><span class="ex-grp-c">${by[g].length}</span><span class="chev">${open[g]?"▾":"▸"}</span></button>`+(open[g]?gExRowsHTML(by[g]):"")).join(""); }
+  return gExRowsHTML(list);
+}
+function gExRowsHTML(shown){
   let h=shown.map(o=>{
     const tr=exerciseTrend(o.key);
     const top=tr.last?setOneTxt(tr.last.top):"";
@@ -8910,7 +8967,6 @@ function gymExListHTML(){
     const prevTop=tr.prev?setOneTxt(tr.prev.top):"";
     return `<button class="tr-row tr-btn" onclick="GU.mode='exercise';GU.exKey=${esc(JSON.stringify(o.key))};renderGym();gTop()"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${gDay(o.last)}${top?` · ${top}`:""}${prevTop?`, edellinen ${prevTop}`:` · ${o.n} ${o.n===1?"kerta":"kertaa"}`}${stall}</div></div>${badge}<span class="chev">›</span></button>`;
   }).join("");
-  if(shown.length<list.length) h+=`<button class="tr-row tr-btn" onclick="GU.exAll=true;document.getElementById('g-exlist').innerHTML=gymExListHTML()"><div class="t"><div class="n" style="font-weight:600;color:var(--dim)">Näytä kaikki (${list.length})</div></div></button>`;
   return h;
 }
 // Liikkeen suunta: viimeisin kerta vs. edellinen (paras sarja, arvioitu 1RM tai kehonpainossa toistot).
@@ -9051,6 +9107,7 @@ function gymSessionHTML(s){
     }
     const gt=goalTxt(ex.goal);
     if(gt) h+=`<div class="ex-goal">Tavoite ${gt}</div>`;
+    h+=gPinHTML(ex.key);
     // v2.18.25: supersarja näkyvänä merkkinä, ei pienenä huomiotekstinä
     if(ex.note){ const m=/^Supersarja:\s*(.+)$/i.exec(ex.note); h+=m?`<div class="ex-ss">⇄ Supersarja: ${esc(m[1])}</div>`:`<div class="ex-prev">${esc(ex.note)}</div>`; }
     if(prev){
@@ -9075,7 +9132,7 @@ function gymSessionHTML(s){
       ${live&&!done.length?`<button onclick="gSkip('${sid}',${ei})">Ohita</button>`:""}
       ${done.length&&live?`<button style="margin-left:auto" onclick="GU.expanded['${ex.id}']=false;G_FLASH.add('mini-${ex.id}');renderGym()">Pienennä</button>`:""}</div>`;
     if(done.length) h+=`<div class="ex-feel"><span>Tuntuma</span>${FEELS.map(f=>`<button class="${ex.feel===f.id?"on":""}${G_FLASH.has("feel-"+ex.id+"-"+f.id)?" pop":""}" aria-pressed="${ex.feel===f.id}" onclick="gFeel('${sid}',${ei},'${f.id}')">${f.l}</button>`).join("")}</div>`;
-    if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value)">${esc(ex.userNote||"")}</textarea>`;
+    if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value);this.nextElementSibling&&(this.nextElementSibling.disabled=!this.value.trim())">${esc(ex.userNote||"")}</textarea><button class="g-pinbtn" ${(ex.userNote||"").trim()?"":"disabled"} onclick="gPinFromNote('${sid}',${ei})">${ico("pin",14)} Kiinnitä liikkeeseen${exMeta(ex.key).pin?" (korvaa nykyisen)":""}</button>`;
     h+=`</div>`;
   });
   h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div>`;
@@ -9286,6 +9343,10 @@ function gymExerciseHTML(key){
   const name=H.length?H[H.length-1].ex.name:key;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(name)}</div><div class="tr-h2">${H.length} kertaa</div></div><button class="tr-pill" onclick="gBack()">Takaisin</button></div></div>`;
   if(!H.length) return h+`<div class="g-hint">Ei kirjattuja sarjoja.</div>`;
+  { const g=exGroup(key,name), k=esc(JSON.stringify(key));
+    h+=`<div class="ex-grp-row"><span>Lihasryhmä</span><select class="g-in" onchange="gSetGroup(${k},this.value)" aria-label="Lihasryhmä">${EX_GROUPS.map(x=>`<option${x===g?" selected":""}>${x}</option>`).join("")}</select></div>`;
+    const ph=gPinHTML(key);
+    h+=ph||`<button class="g-pinbtn" onclick="GU.pinEdit[${k}]=true;renderGym()">${ico("pin",14)} Lisää kiinnitetty huomio</button>`; }
   const withKg=H.filter(x=>x.top.kg!=null);
   const best=H.reduce((b,x)=>x.e1>b.e1?x:b,H[0]);
   // v2.17.12: tunnuslukulaatikot keskitettyinä kuten treenin yhteenvedossa (luku ensin, selite alla)
@@ -9465,7 +9526,9 @@ function syncMerge(local,remote,localDirtySinceSync){
   const curProgramId=(localDirtySinceSync?local.gym&&local.gym.curProgramId:remote.gym&&remote.gym.curProgramId)||(local.gym&&local.gym.curProgramId)||null;
   // Vanhat poistomerkinnät pois. v2.18.19: 180 pv → 2 vuotta (pitkään käyttämätön laite ei palauta poistettua)
   const cut=Date.now()-730*864e5; Object.values(tombs).forEach(t=>Object.keys(t).forEach(k=>{ if(t[k]<cut) delete t[k]; }));
-  return {format:"jarkale-sync",version:1,savedAt:Date.now(),entries,measurements:meas,settings,gym:{...(local.gym||{}),programs,sessions,curProgramId,v:1},tombs};
+  // v2.18.55 liikekohtaiset lisätiedot (kiinnitetty huomio, lihasryhmä): uudempi voittaa liikkeittäin
+  const exMetaM=mergeMaps(local.gym&&local.gym.exMeta,remote.gym&&remote.gym.exMeta,x=>x&&x.updatedAt||0);
+  return {format:"jarkale-sync",version:1,savedAt:Date.now(),entries,measurements:meas,settings,gym:{...(local.gym||{}),programs,sessions,curProgramId,exMeta:exMetaM,v:1},tombs};
 }
 function syncApply(m){
   SYNC_APPLYING=true;
@@ -9473,7 +9536,7 @@ function syncApply(m){
     S.entries=m.entries||{}; S.measurements=m.measurements||[];
     if(m.settings) S.settings={...S.settings,...m.settings};
     const keepActive=G.activeId&&m.gym.sessions.some(s=>s.id===G.activeId&&!s.endedAt)?G.activeId:null;
-    G={...G,programs:m.gym.programs,sessions:m.gym.sessions,curProgramId:m.gym.curProgramId,activeId:keepActive};
+    G={...G,programs:m.gym.programs,sessions:m.gym.sessions,curProgramId:m.gym.curProgramId,exMeta:m.gym.exMeta||G.exMeta||{},activeId:keepActive};
     try{ localStorage.setItem(SYNC_TOMB_KEY,JSON.stringify(m.tombs)); }catch(_){}
     saveAll(); gymSave();
     clearAllAnalysisCaches();
