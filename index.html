@@ -2093,7 +2093,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.76</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.77</span>
       </div>
     </div>
   </div>
@@ -2127,6 +2127,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.77", d:"lokakuu 2026", items:[
+    "Pilotti: uutiskortti uudesta ilmeestä. Esittelysivun Uutta-osio päivitetty."
+  ]},
   {v:"2.18.76", d:"lokakuu 2026", items:[
     "Ennätys-merkki vain kerran: jos teet saman ennätyssarjan useasti, merkki näkyy ensimmäisessä. Parempi sarja samassa treenissä saa uuden merkin."
   ]},
@@ -10047,6 +10050,8 @@ function renderSyncUI(){
 // v2.18.14: pilotin uutiskortti. Vain isot, käyttäjän kielellä kirjoitetut uutiset (ei jokaista versiota).
 // Näytetään kerran Kirjaa-näkymässä; ohitetaan uutinen, jonka ominaisuus on jo käytössä.
 const PILOT_NEWS=[
+  {id:"2026-10-ilme",title:"Uusi ilme",text:"Uusi logo ja nimi Järkäle, kelluva alapalkki ja yläreuna teeman väreissä. Kirjattu kipu pienenee yhdeksi riviksi, ja treenin ennätysmerkki näkyy sen kentän kohdalla, joka parani.",
+   act:null,go:null},
   {id:"2026-10-drive",title:"Varmuuskopio Google Driveen",text:"Kirjaukset, mitat ja treenit voi tallentaa omaan Driveen. Ne säilyvät, vaikka puhelin vaihtuisi. Kukaan muu ei näe niitä.",
    act:"Yhdistä Driveen",go:"data",skip:()=>syncState().enabled},
   {id:"2026-10-sali",title:"Saliohjelma ja treenien kirjaus",text:"Oma ohjelma sisään tekstinä, sarjat ja kilot kirjataan salilla, ja edellisen kerran tulokset näkyvät valmiina. Vapaaehtoinen.",
