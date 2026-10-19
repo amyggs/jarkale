@@ -2093,7 +2093,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.75</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.76</span>
       </div>
     </div>
   </div>
@@ -2127,6 +2127,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.76", d:"lokakuu 2026", items:[
+    "Ennätys-merkki vain kerran: jos teet saman ennätyssarjan useasti, merkki näkyy ensimmäisessä. Parempi sarja samassa treenissä saa uuden merkin."
+  ]},
   {v:"2.18.75", d:"lokakuu 2026", items:[
     "Ennätys-merkki näkyy sen kentän kohdalla, joka parani: uusi raskain paino kg-kentässä, enemmän toistoja samalla painolla toistokentässä."
   ]},
@@ -9477,7 +9480,8 @@ function gymSessionHTML(s){
     const adjRi=live?ex.sets.findIndex(x=>!x.done):-1;
     ex.sets.forEach((r,ri)=>{
       const gh=ghostFor(s,ex,ri), adj=ri===adjRi; // v2.18.65: − / + kg-kentän sisällä seuraavana vuorossa olevalla sarjalla
-      const pr=isPR(r,prevSets);
+      // v2.18.76: merkki vain sarjalle, joka on parempi kuin aiemmat treenit JA tämän treenin aiemmat sarjat (3 × sama ennätys = yksi merkki)
+      const pr=isPR(r,prevSets)&&isPR(r,ex.sets.slice(0,ri).filter(x=>x.done).concat(prevSets));
       const sgx=ex.goal&&ex.goal.groups&&ex.goal.groups.length>1?setGoal(ex.goal,ri):null;
       h+=`<div class="set${r.done?" done":""}${G_FLASH.has("set-"+ex.id+"-"+ri)?" pop":""}" data-set="${ei}-${ri}"><span class="no">${ri+1}${sgx?`<small>${repsTxt(sgx)}</small>`:""}</span>
         ${adj?`<div class="kgw"><button class="kgb" aria-label="Paino −${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},-kgStep())">−</button><input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${ri+1} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)"><button class="kgb" aria-label="Paino +${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},kgStep())">+</button></div>`:`<input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${ri+1} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)">`}
