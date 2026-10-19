@@ -2015,7 +2015,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.66</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.67</span>
       </div>
     </div>
   </div>
@@ -2049,6 +2049,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.67", d:"lokakuu 2026", items:[
+    "Pilotti: uutiskortti treenin uudistuksista (näkyy, kun saliosio on käytössä). Esittelysivun Uutta-osio päivitetty."
+  ]},
   {v:"2.18.66", d:"lokakuu 2026", items:[
     "Käytettävyys: treenin + Sarja, − Sarja, Huomio ja Ohita -napit ovat korkeampia, edellisen kerran huomio -nappi on selkeä painike, ja painon − / + -napit ovat leveämpiä. Pienten ohjainten (info-napit, teemanvaihto, kytkimet, paluulinkki) napautusalue on suurempi kuin miltä ne näyttävät."
   ]},
@@ -9910,6 +9913,8 @@ const PILOT_NEWS=[
    act:"Yhdistä Driveen",go:"data",skip:()=>syncState().enabled},
   {id:"2026-10-sali",title:"Saliohjelma ja treenien kirjaus",text:"Oma ohjelma sisään tekstinä, sarjat ja kilot kirjataan salilla, ja edellisen kerran tulokset näkyvät valmiina. Vapaaehtoinen.",
    act:"Ota käyttöön",go:"training",skip:()=>gymOn()},
+  {id:"2026-10-treeni3",title:"Treeni sujuvammaksi",text:"Painoa voi säätää − / + -napeilla suoraan kentässä, ja liikkeeseen voi kiinnittää pysyvän huomion, esim. laitteen säädön. Liikkeiden kehitys on ryhmitelty lihasryhmittäin, ja treenin voi jakaa kuvana. Tallennettu treeni avautuu luettavaksi, joten sitä ei muokkaa vahingossa.",
+   act:null,go:null,skip:()=>!gymOn()},
   {id:"2026-10-treeni2",title:"Treeniin ennätykset ja 1RM-arvio",text:"Ennätyssarjasta tulee värinä ja ilmoitus, ja liikkeen kohdalla näkyy arvioitu 1RM. Treenipäivistä seuraava kierrossa on korostettu. Kirjauksen voi nyt myös poistaa.",
    act:null,go:null,skip:()=>!gymOn()},
   {id:"2026-10-teemat5",title:"Kuusi uutta teemaa",text:"Uusin on Lasi: huurrettuja lasipintoja pehmeän valon päällä. Lisäksi Fosfori, Kuusnelonen, Teksti-TV, Manageri ja Soitin. Jokaisessa on vaalea ja tumma versio sekä oma käynnistysanimaatio.",
