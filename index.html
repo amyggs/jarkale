@@ -1453,7 +1453,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .jdlg-ok.danger{background:var(--red);color:var(--bg);}
 @media (prefers-reduced-motion:reduce){.jdlg,.jdlg-c{transition:none;}}
 /* v2.18.58 tallennusleima */
-[data-palette="kuusnelonen"] .g-sum-kpi b{font-size:min(17px,4.3vw)!important;white-space:nowrap;}
+[data-palette="kuusnelonen"] .g-sum-kpi b{font-size:min(15px,3.8vw)!important;white-space:nowrap;}
 .g-sum{position:relative;}
 .g-stamp{flex:none;width:76px;height:76px;margin:-6px 4px -4px -4px;color:var(--orange);opacity:.9;transform:rotate(-12deg);pointer-events:none;}
 .g-stamp svg{width:100%;height:100%;display:block;overflow:visible;}
@@ -1996,7 +1996,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.59</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.60</span>
       </div>
     </div>
   </div>
@@ -2030,6 +2030,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.60", d:"lokakuu 2026", items:[
+    "Kuusnelonen: treenin yhteenvedon tunnusluvut mahtuvat laatikoihinsa myös kapealla näytöllä (esim. 125 min)."
+  ]},
   {v:"2.18.59", d:"lokakuu 2026", items:[
     "Treenin tallennus karsittu yhteen merkkiin: leima ja värinä. Erillinen Treeni tallennettu -ilmoitus, otsikkoteksti ja korostusreunus poistettu. Leima näkyy vain juuri tallennetussa treenissä, ei myöhemmin avatuissa."
   ]},
