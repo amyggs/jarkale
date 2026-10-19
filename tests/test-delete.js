@@ -30,7 +30,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{window.__jdlgAuto=false;}); await p.locator('#log-del').click();
   ok(await p.evaluate(Y=>!!S.entries[Y],Y)&&/Poistetaanko .*kirjaus\?/.test((await DLG())[0]),'vahvistuksen peruutus ei poista ('+(await DLG())[0]+')');
   await p.evaluate(()=>{window.__jdlgAuto=true;}); await p.evaluate(()=>{window.__jdlgLog=[];}); await p.locator('#log-del').click(); await p.waitForTimeout(100);
-  const r1=await p.evaluate(Y=>({gone:!S.entries[Y], stored:!JSON.parse(localStorage.getItem('seuranta-entries'))[Y], tomb:!!syncTombs().e[Y], form:S.weight==null&&S.recovery==null, link:document.getElementById('log-del').style.display}),Y);
+  const r1=await p.evaluate(Y=>({gone:!S.entries[Y], stored:!JSON.parse(localStorage.getItem('seuranta-entries'))[Y], tomb:!!syncTombs().e[Y], form:S.weight==null&&S.recovery==null, link:document.getElementById('log-del-wrap').style.display}),Y);
   ok(r1.gone&&r1.stored&&r1.tomb,'kirjaus poistuu muistista ja tallennuksesta, synkronoinnille tombstone');
   ok(r1.form&&r1.link==='none','lomake tyhjenee ja linkki piiloutuu');
   ok(await p.locator('#undo-toast.on').isVisible(),'Kumoa-ilmoitus näkyy');
@@ -45,7 +45,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   console.log('\nPäivä, jolla on salitreeni');
   await p.evaluate(D2=>{S.date=D2;loadDayIntoForm(D2);renderLog();},D2);
   await p.evaluate(()=>{window.__jdlgLog=[];}); await p.locator('#log-del').click(); await p.waitForTimeout(100);
-  const r3=await p.evaluate(D2=>{ const e=S.entries[D2]; return {msg:true, e, tomb:!!syncTombs().e[D2], ses:G.sessions.length, link:document.getElementById('log-del').style.display}; },D2);
+  const r3=await p.evaluate(D2=>{ const e=S.entries[D2]; return {msg:true, e, tomb:!!syncTombs().e[D2], ses:G.sessions.length, link:document.getElementById('log-del-wrap').style.display}; },D2);
   ok(/salitreeni säilyy/.test((await DLG())[0]),'vahvistus kertoo, että salitreeni säilyy');
   ok(r3.e&&r3.e.training_done&&r3.e.training_auto&&r3.e.workout_ids[0]==='g1'&&r3.e.weight==null&&r3.e.recovery==null&&r3.e.training_load==null&&r3.e.training_type==='Jalat','muut tiedot poistuvat, salitreenin Treeni-merkintä jää');
   ok(!r3.tomb&&r3.ses===1,'ei tombstonea, salitreeni ennallaan');
