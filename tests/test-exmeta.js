@@ -21,8 +21,8 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.reload(); await p.waitForTimeout(600);
 
   console.log('\nLuokittelu');
-  const cls=await p.evaluate(()=>["Penkkipunnerrus","Hack kyykky","Ylätalja rusettikahvalla","Hauiskääntö KP","Vipunostolaite sivuille","Farmer walk","Selänojennus","Punnerrukset","Reverse Pec Deck","RDL","Dippi omalla painolla","Rutistukset taljassa","Pec deck rinnalle","Ojentajat taljassa","Reiden ojennukset"].map(exGroupAuto));
-  ok(JSON.stringify(cls)===JSON.stringify(["Rinta","Jalat","Selkä","Kädet","Olkapäät","Muut","Selkä","Rinta","Olkapäät","Jalat","Kädet","Muut","Rinta","Kädet","Jalat"]),'nimistä oikeat ryhmät ('+cls.join(', ')+')');
+  const cls=await p.evaluate(()=>["Penkkipunnerrus","Hack kyykky","Ylätalja rusettikahvalla","Hauiskääntö KP","Vipunostolaite sivuille","Farmer walk","Selänojennus","Punnerrukset","Reverse Pec Deck","RDL","Dippi omalla painolla","Rutistukset taljassa","Pec deck rinnalle","Ojentajat taljassa","Reiden ojennukset","JM press","JM-press"].map(exGroupAuto));
+  ok(JSON.stringify(cls)===JSON.stringify(["Rinta","Jalat","Selkä","Kädet","Olkapäät","Muut","Selkä","Rinta","Olkapäät","Jalat","Kädet","Muut","Rinta","Kädet","Jalat","Kädet","Kädet"]),'nimistä oikeat ryhmät ('+cls.join(', ')+')');
 
   console.log('\nLiikkeiden kehitys ryhmittäin');
   await p.evaluate(()=>{setTab('treeni');GU.mode='home';renderGym();});await p.waitForTimeout(300);
@@ -71,6 +71,20 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.locator('#undo-toast button, .undo-toast button').first().click();await p.waitForTimeout(150);
   ok(await p.evaluate(()=>G.exMeta['penkkipunnerrus'].pin==='Penkki 5'),'irrotuksen voi kumota');
 
+
+  console.log('\nTehdyt treenit');
+  await p.evaluate(()=>{const a=activeSession();if(a){a.endedAt=Date.now();G.activeId=null;gymSave();}GU.mode='home';renderGym();});await p.waitForTimeout(200);
+  ok(await p.locator('.tr-sec',{hasText:'Tehdyt treenit'}).count()===1,'otsikko Tehdyt treenit');
+  const hb=p.locator('.tr-sec:has-text("Tehdyt treenit") + .tr-list');
+  ok(await hb.locator('.tr-row').count()===1&&(await hb.innerText()).includes('Viimeksi'),'laatikko oletuksena kiinni, otsikossa viimeisin');
+  await hb.locator('.ex-grp-h').click();await p.waitForTimeout(150);
+  ok(await hb.locator('.tr-row').count()>1,'avautuu napautuksella');
+  await hb.locator('.tr-row').nth(1).click();await p.waitForTimeout(200);
+  ok(await p.locator('.g-sum').isVisible()&&await p.locator('.ex .set input').count()===0,'tallennettu treeni avautuu vain luettavaksi');
+  await p.locator('.g-editpast').click();await p.waitForTimeout(150);
+  ok(await p.locator('.ex .set input').count()>0&&await p.locator('.g-editbar').isVisible(),'Muokkaa treeniä avaa muokkauksen');
+  await p.locator('.g-editbar .tr-go').click();await p.waitForTimeout(150);
+  ok(await p.locator('.ex .set input').count()===0,'Valmis palauttaa lukutilaan');
   console.log('\nSynkronointi ja varmuuskopio');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('jarkale-gym')).exMeta.penkkipunnerrus.pin==='Penkki 5'),'tallentuu laitteelle salidatan mukana (myös varmuuskopioon)');
   const mg=await p.evaluate(()=>{

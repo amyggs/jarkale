@@ -120,6 +120,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
 
   console.log('\nMuokkaus jälkikäteen ja linkitys');
   await p.evaluate(sid=>openSession(sid),sid);
+  await p.locator('.g-editpast').click(); // v2.18.56: tallennettu treeni avautuu lukutilaan
   await p.locator('[data-set="1-0"] .ck').click();
   const e2=await p.evaluate(T=>JSON.parse(localStorage.getItem('seuranta-entries'))[T],T);
   ok(e2.workout_ids.length===1,'saman treenin muokkaus ei tuplaa merkintää');
@@ -131,6 +132,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   ok(ey.training_type==='Alakroppa'&&ey.training_load===4&&ey.training_outcome==='normal'&&ey.workout_ids[0]==='man1','käsin kirjattua treeniä ei korvata, tunniste lisätään');
   await p.evaluate(()=>{GU.mode='home';setTab('treeni');});
   await p.evaluate(()=>openSession('man1'));
+  await p.locator('.g-editpast').click();
   await p.getByRole('button',{name:'Poista treeni'}).click();
   const ey2=await p.evaluate(Y=>JSON.parse(localStorage.getItem('seuranta-entries'))[Y],Y);
   ok(ey2&&ey2.training_done===true&&ey2.training_load===4&&!ey2.workout_ids,'treenin poisto ei nollaa käsin kirjattua');
@@ -149,7 +151,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
   await p.getByRole('button',{name:'Tallenna treeni'}).click();
   await p.evaluate(()=>gBack());
-  ok((await p.locator('.tr-sec',{hasText:'Historia'}).count())===1,'historia näkyy');
+  ok((await p.locator('.tr-sec',{hasText:'Tehdyt treenit'}).count())===1,'historia (Tehdyt treenit) näkyy');
   await p.locator('#g-exlist .ex-grp-h',{hasText:'Rinta'}).click(); // v2.18.55: liikkeet lihasryhmittäin, ryhmät oletuksena kiinni
   const exl=await p.locator('#g-exlist .tr-row',{hasText:'Penkkipunnerrus'}).innerText();
   ok(exl.includes('edellinen 82,5 × 7')&&exl.includes('85 × 8')&&(await p.locator('#g-exlist .tr-row',{hasText:'Penkkipunnerrus'}).locator('.g-trend.up').count())===1,'liikelistassa suunta: '+exl.replace(/\n/g,' | '));
@@ -443,7 +445,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
     const secs=[...v.querySelectorAll('.tr-sec')].map(x=>x.textContent);
     const rows=[...v.querySelectorAll('.tr-sec')].find(x=>x.textContent==='Ohjelmat')?.nextElementSibling?.querySelectorAll('button.tr-row:not(.tr-add):not(.tr-sub)')||[];
     const r={full:h&&h.textContent.includes('2026 volyymin nosto pitkä nimi'), wraps:h&&h.getBoundingClientRect().height>30, noSel:!v.querySelector('select'),
-      order:secs.indexOf('Ohjelmat')>secs.indexOf('Valitse treenipäivä')&&(secs.indexOf('Historia')<0||secs.indexOf('Ohjelmat')<secs.indexOf('Historia')), names:[...rows].map(x=>x.querySelector('.n').textContent)};
+      order:secs.indexOf('Ohjelmat')>secs.indexOf('Valitse treenipäivä')&&(secs.indexOf('Tehdyt treenit')<0||secs.indexOf('Ohjelmat')<secs.indexOf('Tehdyt treenit')), names:[...rows].map(x=>x.querySelector('.n').textContent)};
     [...rows].find(x=>x.textContent.includes('Toinen')).click(); r.switched=G.curProgramId===b2.id&&v.querySelector('.view-hero .tr-h1').textContent==='Toinen';
     G.programs=G.programs.filter(x=>x!==a&&x!==b2); G.curProgramId=cur; gymSave(); renderGym(); return r; });
   ok(ttl.full&&ttl.wraps&&ttl.noSel,'pitkä ohjelman nimi rivittyy, ei pudotusvalikkoa '+JSON.stringify(ttl));
@@ -455,7 +457,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   ok(await p.evaluate(()=>{ const np=newProgram('Uusi ohjelma'); np.days[0].exercises.push(newEx({name:'Z',sets:1})); GU.mode='home'; renderGym(); const kept=G.programs.includes(np); G.programs=G.programs.filter(x=>x!==np); G.curProgramId=G.programs[0].id; gymSave(); renderGym(); return kept; }),'ohjelma, jossa on liikkeitä, säilyy');
 
   ok(await p.evaluate(()=>{ GU.mode='home'; renderGym(); const v=document.getElementById('view-treeni'); const np=v.querySelector('.tr-add'), secs=[...v.querySelectorAll('.tr-sec')];
-    const hist=secs.find(x=>/Historia/i.test(x.textContent)); const before=!!np&&(!hist||(np.compareDocumentPosition(hist)&Node.DOCUMENT_POSITION_FOLLOWING));
+    const hist=secs.find(x=>/Tehdyt treenit/i.test(x.textContent)); const before=!!np&&(!hist||(np.compareDocumentPosition(hist)&Node.DOCUMENT_POSITION_FOLLOWING));
     np.click(); const subs=[...document.querySelectorAll('#view-treeni .tr-sub .n')].map(x=>x.textContent).join('|'); GU.newOpen=false; renderGym();
     return before&&subs==='Tuo tekstistä|Aloita tyhjästä'; }),'+ Uusi ohjelma ohjelmalistan lopussa ennen historiaa, avaa vaihtoehdot');
   console.log('\nLiikenimien täsmäys tuonnissa (v2.18.27)');

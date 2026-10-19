@@ -1432,6 +1432,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ex-grp-h .n{font-weight:800!important;}
 .ex-grp-c{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);min-width:22px;text-align:right;}
 .ex-grp-h[aria-expanded="true"]{background:var(--surf2);}
+.g-editpast{width:100%;height:46px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.g-editbar{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
+.g-editbar span{flex:1;}
+.g-editbar .tr-go{height:38px;padding:0 16px;}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
 [data-palette="soitin"] #view-log .stepper-row>div>span,[data-palette="soitin"] .sleep-hm small{color:#7FC07F!important;opacity:1!important;}
@@ -1965,7 +1969,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.55</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.56</span>
       </div>
     </div>
   </div>
@@ -1999,6 +2003,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.56", d:"lokakuu 2026", items:[
+    "Treeni: tallennettu treeni avautuu nyt vain luettavaksi yhteenvedoksi. Sarjoja voi muuttaa Muokkaa treeniä -napista, joten vanhaa treeniä ei muokkaa vahingossa.",
+    "Historia on nimeltään Tehdyt treenit, ja se on avattava laatikko. Laatikko on oletuksena kiinni, ja otsikossa näkyy viimeisin treeni.",
+    "Liikkeiden tulokset ja kehitys -osion selite kertoo, mitä rivit näyttävät.",
+    "JM press luokitellaan käsiin."
+  ]},
   {v:"2.18.55", d:"lokakuu 2026", items:[
     "Treeni: liikkeen huomion voi kiinnittää liikkeeseen (Huomio → Kiinnitä liikkeeseen). Kiinnitetty huomio, esimerkiksi laitteen säätö, näkyy liikkeen kohdalla jokaisessa treenissä, kunnes irrotat sen. Tavallinen huomio koskee yhä vain sitä treeniä.",
     "Liikkeiden kehitys on ryhmitelty lihasryhmittäin (rinta, selkä, olkapäät, kädet, jalat, muut). Ryhmät avautuvat napautuksella. Ryhmä päätellään liikkeen nimestä, ja väärän ryhmän voi vaihtaa liikkeen sivulla. Haku näyttää osumat kaikista ryhmistä."
@@ -8155,7 +8165,7 @@ const GYM_KEY="jarkale-gym";
 let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,exMeta:{},timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
 let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehdessä → piirretään palatessa
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
-const GU={pinEdit:{},exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
+const GU={pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
 function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
 function gymLoad(){
@@ -8172,7 +8182,7 @@ const EX_GROUP_RULES=[
   ["Muut",/vatsa|rutistu|istumaan|jalannost|lankku|plank|crunch|russian twist|pallof|sisäänveto/],
   ["Olkapäät",/vipunost|sivunost|etunost|takaolk|reverse (pec|fly)|rear delt|face ?pull|pystypunn|olkapääpunn|military|arnold|shoulder press|lateral|kelso|shrug|epäkä|hartiankoh|pystysoutu|upright/],
   ["Jalat",/kyykky|squat|jalkapr|leg press|reiden|reisi|koukistu|lähentä|loitonta|pohje|pohkeet|calf|askelky|lunge|rdl|romanian|suorin jaloin|hip thrust|lantionnost|pakara|glute|bulgar|step ?up|nordic|leg (curl|extension)/],
-  ["Kädet",/hauis|ojentaj|curl|kääntö|tricep|kick ?back|scott|vasara|ranskal|skull|dippi|dips|diamond|pushdown|french/],
+  ["Kädet",/jm[ -]?press|hauis|ojentaj|curl|kääntö|tricep|kick ?back|scott|vasara|ranskal|skull|dippi|dips|diamond|pushdown|french/],
   ["Rinta",/penkki|rinta|pec deck|ristikkäis|\bfly|flye|punner|push ?up|bench|chest|crossover/],
   ["Selkä",/leuanveto|ylätalja|alatalja|soutu|pullover|maastaveto|deadlift|\brow\b|pull ?down|pull ?up|chin|selk|selän|hyperext|good morning/]
 ];
@@ -8192,6 +8202,9 @@ function gPinHTML(key){
   if(!pin) return "";
   return `<button class="ex-pin" onclick="GU.pinEdit[${k}]=true;renderGym()" aria-label="Kiinnitetty huomio, muokkaa"><span class="ex-pin-h">${ico("pin",14)} Kiinnitetty</span><span class="ex-pin-t">${esc(pin)}</span></button>`;
 }
+const HIST_KEY="jarkale-hist-open";
+function histOpen(){ try{ return localStorage.getItem(HIST_KEY)==="1"; }catch(_){ return false; } }
+function histToggle(){ try{ localStorage.setItem(HIST_KEY,histOpen()?"0":"1"); }catch(_){} renderGym(); }
 const EXGRP_KEY="jarkale-exgrp-open";
 function exGrpOpen(){ try{ return JSON.parse(localStorage.getItem(EXGRP_KEY)||"{}")||{}; }catch(_){ return {}; } }
 function exGrpToggle(g){ const o=exGrpOpen(); o[g]=!o[g]; try{ localStorage.setItem(EXGRP_KEY,JSON.stringify(o)); }catch(_){} const el=document.getElementById("g-exlist"); if(el) el.innerHTML=gymExListHTML(); }
@@ -8868,7 +8881,7 @@ function renderLogGymCard(){
   // v2.18.17: ei Aloita-tilaa (näkyi myös lepopäivinä, käytännössä kehote). Treeni aloitetaan Treeni-välilehdeltä.
   el.innerHTML=h; el.style.display=h?"":"none";
 }
-function openSession(id){ GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
+function openSession(id){ GU.editPast=null; GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
 
 // ── Treeni-välilehti
 function renderGym(){
@@ -8932,13 +8945,15 @@ function gymHomeHTML(){
   }
   const hist=G.sessions.filter(s=>s.endedAt).sort((a,b)=>b.startedAt-a.startedAt);
   if(hist.length){
-    h+=`<div class="tr-sec">Historia</div><div class="tr-list">`;
-    h+=hist.slice(0,GU.histN).map(s=>{ const st=sessionStats(s); return `<button class="tr-row tr-btn" onclick="openSession('${s.id}')"><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${gDay(s.date)} · ${st.done<st.exN?`${st.done}/${st.exN}`:st.done} liikettä · ${st.sets} sarjaa${s.endedAt-s.startedAt>60000&&s.endedAt-s.startedAt<6*3600000?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><span class="chev">›</span></button>`; }).join("");
-    if(hist.length>GU.histN) h+=`<button class="tr-row tr-btn" onclick="GU.histN+=20;renderGym()"><div class="t"><div class="n" style="font-weight:600;color:var(--dim)">Näytä lisää (${hist.length-GU.histN})</div></div></button>`;
+    // v2.18.56: "Tehdyt treenit" avattavana laatikkona (oletuksena kiinni, tila muistetaan)
+    const hOpen=histOpen();
+    h+=`<div class="tr-sec">Tehdyt treenit</div><div class="tr-list"><button class="tr-row tr-btn ex-grp-h" aria-expanded="${hOpen}" onclick="histToggle()"><div class="t"><div class="n">${hist.length} ${hist.length===1?"treeni":"treeniä"}</div><div class="s">Viimeksi ${gDay(hist[0].date)} · ${esc(hist[0].dayName)}</div></div><span class="chev">${hOpen?"▾":"▸"}</span></button>`;
+    if(hOpen) h+=hist.slice(0,GU.histN).map(s=>{ const st=sessionStats(s); return `<button class="tr-row tr-btn" onclick="openSession('${s.id}')"><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${gDay(s.date)} · ${st.done<st.exN?`${st.done}/${st.exN}`:st.done} liikettä · ${st.sets} sarjaa${s.endedAt-s.startedAt>60000&&s.endedAt-s.startedAt<6*3600000?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><span class="chev">›</span></button>`; }).join("");
+    if(hOpen&&hist.length>GU.histN) h+=`<button class="tr-row tr-btn" onclick="GU.histN+=20;renderGym()"><div class="t"><div class="n" style="font-weight:600;color:var(--dim)">Näytä lisää (${hist.length-GU.histN})</div></div></button>`;
     h+=`</div>`;
     const keys=exerciseIndex();
     if(keys.length){
-      h+=`<div class="tr-sec">Liikkeiden kehitys</div><div class="g-hint" style="margin:-4px 2px 8px;font-size:12px">Nuoli vertaa viimeisintä kertaa edelliseen (paras sarja, arvioitu 1RM). Se ei arvioi liikkeen koko kehitystä.</div><input class="g-in" id="g-exsearch" placeholder="Hae liike…" value="${esc(GU.exSearch)}" oninput="GU.exSearch=this.value;document.getElementById('g-exlist').innerHTML=gymExListHTML()" style="margin-bottom:8px">
+      h+=`<div class="tr-sec">Liikkeiden tulokset ja kehitys</div><div class="g-hint" style="margin:-4px 2px 8px;font-size:12px">Jokaisesta tehdystä liikkeestä viimeisin paras sarja ja edellinen kerta. Nuoli kertoo suunnan edelliseen kertaan verrattuna. Napauta liikettä, niin näet ennätykset ja kehityskäyrän.</div><input class="g-in" id="g-exsearch" placeholder="Hae liike…" value="${esc(GU.exSearch)}" oninput="GU.exSearch=this.value;document.getElementById('g-exlist').innerHTML=gymExListHTML()" style="margin-bottom:8px">
         <div class="tr-list" id="g-exlist">${gymExListHTML()}</div>`;
     }
   }
@@ -9078,6 +9093,9 @@ function gymSessionHTML(s){
     <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div></div>
     ${live?`<button class="tr-pill dark" onclick="gOpenFinish()">Lopeta</button>`:`<button class="tr-pill" onclick="gBack()">Valmis</button>`}</div>${live?gProgHTML(s):""}</div>`;
   if(!live) h+=gymSummaryHTML(s,GU.justFinished===s.id);
+  // v2.18.56: tallennettu treeni avautuu vain luettavaksi; muokkaus erikseen, ettei vanhaa treeniä muuteta vahingossa
+  if(!live&&GU.editPast!==s.id) return h+`<button class="tr-go ghost g-editpast" onclick="GU.editPast='${s.id}';renderGym()">${ico("edit",16)} Muokkaa treeniä</button><div style="height:24px"></div>`;
+  if(!live) h+=`<div class="g-editbar"><span>Muokkaat tallennettua treeniä. Muutokset tallentuvat heti.</span><button class="tr-go" onclick="GU.editPast=null;renderGym();gTop()">Valmis</button></div>`;
   if(live&&GU.finishing){
     const diff=sessionDiffersFromTemplate(s);
     h+=`<div class="g-finish"><div class="n">Lopetetaanko treeni?</div>
