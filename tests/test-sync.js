@@ -29,7 +29,7 @@ const byName=n=>Object.values(FILES).find(f=>f.name===n&&!f.trashed);
 const drive=()=>JSON.parse((byName('jarkale-data.json')||{}).content||'{}');
 (async()=>{
   const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(require('fs').existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
-  const mk=async(seed)=>{ const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block'}); await wire(ctx); const p=await ctx.newPage(); p.errs=[]; p.on('pageerror',e=>p.errs.push(e.message)); p.on('dialog',d=>d.accept());
+  const mk=async(seed)=>{ const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block'}); await wire(ctx); await ctx.addInitScript(()=>{window.__jdlgAuto=true;}); const p=await ctx.newPage(); p.errs=[]; p.on('pageerror',e=>p.errs.push(e.message)); p.on('dialog',d=>d.accept());
     await p.goto(APP); await p.evaluate(seed=>{localStorage.clear();localStorage.setItem('seuranta-setup-done','1');localStorage.setItem('lastExport',String(Date.now()));
       localStorage.setItem('seuranta-entries',JSON.stringify(seed.entries||{}));localStorage.setItem('seuranta-settings',JSON.stringify({palette:'ampiainen',theme:'light',gym:{enabled:true},goals:{sleepHours:7.5}}));},seed);
     await p.reload(); await p.waitForTimeout(600); return p; };
@@ -200,8 +200,8 @@ const drive=()=>JSON.parse((byName('jarkale-data.json')||{}).content||'{}');
   // d) väärä Google-tili: kysytään, kieltäytyminen ei kirjoita
   const wrong=await A.evaluate(async()=>{ setSyncState({email:'toinen@test.fi'}); localStorage.removeItem('jarkale-sync-token');
     const uploads=[]; const orig=driveUpload; driveUpload=async(a,b)=>{ uploads.push(1); return orig(a,b); };
-    let asked=''; const oc=window.confirm; window.confirm=m=>{ asked=m; return false; };
-    await syncNow(); window.confirm=oc; driveUpload=orig;
+    window.__jdlgLog=[]; window.__jdlgAuto=false;
+    await syncNow(); const asked=window.__jdlgLog.join('\n'); window.__jdlgAuto=true; driveUpload=orig;
     const r={asked,err:SYNC_ERR,uploads:uploads.length}; setSyncState({email:'aku@test.fi'}); await syncNow(); return r; });
   ok(/aku@test\.fi/.test(wrong.asked)&&/toinen@test\.fi/.test(wrong.asked),'eri Google-tili: käyttäjältä kysytään');
   ok(wrong.uploads===0&&/väärä Google-tili/.test(wrong.err||''),'kieltäytyminen: mitään ei kirjoiteta');

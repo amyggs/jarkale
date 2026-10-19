@@ -32,7 +32,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
 
 (async()=>{
   const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(require('fs').existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
-  const ctx=await b.newContext({...devices['Pixel 7'],hasTouch:true,acceptDownloads:true});
+  const ctx=await b.newContext({...devices['Pixel 7'],hasTouch:true,acceptDownloads:true}); await ctx.addInitScript(()=>{window.__jdlgAuto=true;});
   const p=await ctx.newPage();
   const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('dialog',d=>d.accept());
   const data=oldData(); const T=dAgo(0);
@@ -299,13 +299,13 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     const after=await p.evaluate(()=>JSON.parse(localStorage.getItem('seuranta-meas')).map(m=>m.date));
     ok(after.length===3&&after.includes(nd)&&!after.includes(dAgo(30)),'päivämäärän vaihto siirtää mittauksen (ei kaksoiskappaletta)');
     // Päällekkäinen päivä: kysytään, hylkäys ei muuta mitään
-    p.removeAllListeners('dialog'); p.on('dialog',d=>d.dismiss());
+    await p.evaluate(()=>{window.__jdlgAuto=false;});
     await p.evaluate(()=>startEditMeas(S.measurements[0].date));
     await p.evaluate(d=>{MEAS_FORM.date=d;saveMeasForm();},dAgo(2));
     ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('seuranta-meas')).length))===3,'olemassa olevan päivän päälle ei tallenneta ilman vahvistusta');
     await p.evaluate(()=>{MEAS_FORM={show:true,editing:null,date:S.measurements[2].date,values:{},comment:""};renderMeasurements();document.getElementById('mfd-wn').value='96';saveMeasForm();});
     ok((await p.evaluate(()=>S.measurements[2].wn))===97.5,'uusi mittaus samalle päivälle ei korvaa ilman vahvistusta');
-    p.removeAllListeners('dialog'); p.on('dialog',d=>d.accept());
+    await p.evaluate(()=>{window.__jdlgAuto=true;});
     await p.evaluate(()=>{cancelMeasForm();startEditMeas(S.measurements[0].date);});
     await p.getByRole('button',{name:'Poista mittaus',exact:true}).click(); await p.waitForTimeout(150);
     const left=await p.evaluate(()=>({n:JSON.parse(localStorage.getItem('seuranta-meas')).length,f:MEAS_FORM.show}));
@@ -392,7 +392,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
 
   console.log('\nViikkoyhteenveto');
   {
-    const ctx2=await b.newContext({...devices['Pixel 7']}); const q=await ctx2.newPage();
+    const ctx2=await b.newContext({...devices['Pixel 7']}); await ctx2.addInitScript(()=>{window.__jdlgAuto=true;}); const q=await ctx2.newPage();
     q.on('pageerror',e=>errs.push(e.message));
     await q.clock.install({time:new Date('2026-10-05T08:00:00')}); // maanantai
     const ents={}; const mk=(ds,o)=>{ents[ds]={date:ds,...o};};
@@ -532,7 +532,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
 
   console.log('\nSuunniteltu vs. toteutunut, varmuuskopiomuistutus, kipuosio');
   {
-    const ctx3=await b.newContext({...devices['Pixel 7']}); const q=await ctx3.newPage();
+    const ctx3=await b.newContext({...devices['Pixel 7']}); await ctx3.addInitScript(()=>{window.__jdlgAuto=true;}); const q=await ctx3.newPage();
     q.on('pageerror',e=>errs.push(e.message)); q.on('dialog',d=>d.accept());
     await q.clock.install({time:new Date('2026-10-05T08:00:00')});
     const E={}; const mk=(ds,o)=>{E[ds]={date:ds,weight:108,...o};};

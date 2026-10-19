@@ -7,7 +7,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(require('fs').existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
   const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block'});
   const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
-  let dlg=[]; let answer=true; p.on('dialog',d=>{ dlg.push(d.message()); answer?d.accept():d.dismiss(); });
+  await ctx.addInitScript(()=>{window.__jdlgAuto=true;}); const DLG=async()=>(await p.evaluate(()=>window.__jdlgLog||[]));
   await p.goto(URL);
   await p.evaluate(()=>{localStorage.clear();localStorage.setItem('seuranta-setup-done','1');localStorage.setItem('lastExport',String(Date.now()));
     localStorage.setItem('seuranta-settings',JSON.stringify({gender:'male',palette:'ampiainen',theme:'light',profile:{height:190,age:42},gym:{enabled:true}}));
@@ -27,9 +27,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.locator('#log-del').isVisible(),'kirjatulla päivällä poistolinkki näkyy');
 
   console.log('\nPeruutus ja poisto');
-  answer=false; await p.locator('#log-del').click();
-  ok(await p.evaluate(Y=>!!S.entries[Y],Y)&&/Poistetaanko .*kirjaus\?/.test(dlg[0]),'vahvistuksen peruutus ei poista ('+dlg[0]+')');
-  answer=true; dlg=[]; await p.locator('#log-del').click(); await p.waitForTimeout(100);
+  await p.evaluate(()=>{window.__jdlgAuto=false;}); await p.locator('#log-del').click();
+  ok(await p.evaluate(Y=>!!S.entries[Y],Y)&&/Poistetaanko .*kirjaus\?/.test((await DLG())[0]),'vahvistuksen peruutus ei poista ('+(await DLG())[0]+')');
+  await p.evaluate(()=>{window.__jdlgAuto=true;}); await p.evaluate(()=>{window.__jdlgLog=[];}); await p.locator('#log-del').click(); await p.waitForTimeout(100);
   const r1=await p.evaluate(Y=>({gone:!S.entries[Y], stored:!JSON.parse(localStorage.getItem('seuranta-entries'))[Y], tomb:!!syncTombs().e[Y], form:S.weight==null&&S.recovery==null, link:document.getElementById('log-del').style.display}),Y);
   ok(r1.gone&&r1.stored&&r1.tomb,'kirjaus poistuu muistista ja tallennuksesta, synkronoinnille tombstone');
   ok(r1.form&&r1.link==='none','lomake tyhjenee ja linkki piiloutuu');
@@ -44,9 +44,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
 
   console.log('\nPäivä, jolla on salitreeni');
   await p.evaluate(D2=>{S.date=D2;loadDayIntoForm(D2);renderLog();},D2);
-  dlg=[]; await p.locator('#log-del').click(); await p.waitForTimeout(100);
+  await p.evaluate(()=>{window.__jdlgLog=[];}); await p.locator('#log-del').click(); await p.waitForTimeout(100);
   const r3=await p.evaluate(D2=>{ const e=S.entries[D2]; return {msg:true, e, tomb:!!syncTombs().e[D2], ses:G.sessions.length, link:document.getElementById('log-del').style.display}; },D2);
-  ok(/salitreeni säilyy/.test(dlg[0]),'vahvistus kertoo, että salitreeni säilyy');
+  ok(/salitreeni säilyy/.test((await DLG())[0]),'vahvistus kertoo, että salitreeni säilyy');
   ok(r3.e&&r3.e.training_done&&r3.e.training_auto&&r3.e.workout_ids[0]==='g1'&&r3.e.weight==null&&r3.e.recovery==null&&r3.e.training_load==null&&r3.e.training_type==='Jalat','muut tiedot poistuvat, salitreenin Treeni-merkintä jää');
   ok(!r3.tomb&&r3.ses===1,'ei tombstonea, salitreeni ennallaan');
   ok(r3.link==='none','pelkälle salitreenimerkinnälle ei tarjota poistoa');
@@ -56,7 +56,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   console.log('\nTämän päivän kirjaus: otsikon tila päivittyy');
   await p.evaluate(()=>{ const t=today(), n=new Date().toISOString(); S.entries[t]={date:t,weight:90,recovery:4,created_at:n,updated_at:n}; saveAll(); S.date=t; loadDayIntoForm(t); renderAll(); });
   const before=await p.evaluate(()=>({tc:getComputedStyle(document.getElementById('today-check')).display, ws:document.getElementById('week-status').innerHTML}));
-  dlg=[]; await p.locator('#log-del').click(); await p.waitForTimeout(100);
+  await p.evaluate(()=>{window.__jdlgLog=[];}); await p.locator('#log-del').click(); await p.waitForTimeout(100);
   const after=await p.evaluate(()=>({tc:getComputedStyle(document.getElementById('today-check')).display, ws:document.getElementById('week-status').innerHTML}));
   ok(before.tc!=='none'&&after.tc==='none','"Kirjattu"-merkki poistuu otsikosta');
   ok(after.ws!==before.ws,'viikkonauha päivittyy');

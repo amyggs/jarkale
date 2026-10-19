@@ -1436,6 +1436,23 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .g-editbar{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
 .g-editbar span{flex:1;}
 .g-editbar .tr-go{height:38px;padding:0 16px;}
+/* v2.18.57 oma vahvistusikkuna */
+.jdlg{position:fixed;inset:0;z-index:99000;display:flex;align-items:flex-end;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,0);transition:background .16s;}
+.jdlg.in{background:rgba(0,0,0,.45);}
+.jdlg.out{background:rgba(0,0,0,0);}
+.jdlg-c{width:100%;max-width:440px;background:var(--surf);color:var(--text);border:1px solid var(--bord);border-radius:20px;padding:16px 16px 14px;box-shadow:0 18px 50px rgba(0,0,0,.35);transform:translateY(24px);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1),opacity .16s;font-family:Manrope,system-ui,sans-serif;}
+.jdlg.in .jdlg-c{transform:none;opacity:1;}
+.jdlg.out .jdlg-c{transform:translateY(16px);opacity:0;}
+.jdlg-h{display:flex;align-items:center;gap:8px;font:800 13px Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:10px;}
+.jdlg-h img{width:22px;height:22px;border-radius:6px;}
+.jdlg-t{font:700 17px/1.35 Manrope,system-ui,sans-serif;color:var(--text);}
+.jdlg-m{font:500 14px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:8px;white-space:pre-wrap;}
+.jdlg-a{display:flex;gap:8px;margin-top:16px;}
+.jdlg-a button{flex:1;height:48px;border-radius:12px;border:none;font:700 15px Manrope,system-ui,sans-serif;}
+.jdlg-no{background:var(--surf2);color:var(--text);}
+.jdlg-ok{background:var(--seg-on);color:var(--on-accent);}
+.jdlg-ok.danger{background:var(--red);color:var(--bg);}
+@media (prefers-reduced-motion:reduce){.jdlg,.jdlg-c{transition:none;}}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
 [data-palette="soitin"] #view-log .stepper-row>div>span,[data-palette="soitin"] .sleep-hm small{color:#7FC07F!important;opacity:1!important;}
@@ -1969,7 +1986,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.56</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.57</span>
       </div>
     </div>
   </div>
@@ -2003,6 +2020,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.57", d:"lokakuu 2026", items:[
+    "Vahvistukset ja ilmoitukset, kuten treenin tai kirjauksen poisto, näkyvät nyt Järkäleen omassa ikkunassa teeman väreissä selaimen valkoisen ikkunan sijaan. Poistonappi on punainen."
+  ]},
   {v:"2.18.56", d:"lokakuu 2026", items:[
     "Treeni: tallennettu treeni avautuu nyt vain luettavaksi yhteenvedoksi. Sarjoja voi muuttaa Muokkaa treeniä -napista, joten vanhaa treeniä ei muokkaa vahingossa.",
     "Historia on nimeltään Tehdyt treenit, ja se on avattava laatikko. Laatikko on oletuksena kiinni, ja otsikossa näkyy viimeisin treeni.",
@@ -3142,7 +3162,7 @@ function renderBodyOnlyNote(){
 }
 function completeSetup(){
   const anyOn=S.settings.tracking&&Object.values(S.settings.tracking).some(Boolean);
-  if(!anyOn){alert("Valitse ainakin yksi seuranta!");return;}
+  if(!anyOn){jAlert("Valitse ainakin yksi seuranta!");return;}
   try{localStorage.setItem("seuranta-setup-done","1");}catch(_){}
   try{ if(typeof renderNewsCard==="function") renderNewsCard(); }catch(_){}
   const el=document.getElementById("setup-screen"); if(el) el.style.display="none";
@@ -3237,9 +3257,9 @@ function loadAll() {
 function saveAll() {
   const quota = e => e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22;
   try { localStorage.setItem("seuranta-entries",JSON.stringify(S.entries)); }
-  catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
-  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nMittaus ei tallentunut. Lataa varmuuskopio Asetuksista."); }
-  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(e){ if(quota(e)) alert("⚠ Selaimen tallennustila täynnä!\nAsetukset eivät tallentuneet. Lataa varmuuskopio Asetuksista."); }
+  catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
+  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nMittaus ei tallentunut. Lataa varmuuskopio Asetuksista."); }
+  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nAsetukset eivät tallentuneet. Lataa varmuuskopio Asetuksista."); }
   if(typeof syncMarkDirty==="function") syncMarkDirty();
 }
 
@@ -3984,8 +4004,8 @@ function clearAllAnalysisCaches(){
   }
 }
 
-function resetAllData(){
-  if(!confirm("Nollaa kaikki kirjaukset ja mittaukset?")) return;
+async function resetAllData(){
+  if(!await jConfirm("Nollaa kaikki kirjaukset ja mittaukset?",{ok:"Nollaa",danger:true})) return;
   clearTimeout(AUTOSAVE_TIMER);
   AUTOSAVE_TIMER=null;
   S.entries={};
@@ -5911,7 +5931,7 @@ function cancelMeasForm(){
   MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
   renderMeasurements();
 }
-function saveMeasForm(){
+async function saveMeasForm(){
   clearAllAnalysisCaches();
   try {
     const f=MEAS_FORM;
@@ -5939,7 +5959,7 @@ function saveMeasForm(){
     // Yksi mittaus per päivä. Jos valitulla päivällä on jo toinen mittaus, kysytään ennen korvaamista
     // (myös muokkauksessa, kun päivämäärää on vaihdettu — aiemmin se jätti vanhan rivin rinnalle).
     const clash=f.date!==f.editing&&S.measurements.some(m=>m.date===f.date);
-    if(clash&&!confirm(`Päivälle ${f.date.split("-").reverse().join(".")} on jo mittaus. Korvataanko se?`)) return;
+    if(clash&&!await jConfirm(`Päivälle ${f.date.split("-").reverse().join(".")} on jo mittaus. Korvataanko se?`)) return;
     S.measurements=S.measurements.filter(m=>m.date!==f.date&&m.date!==f.editing);
     if(f.editing&&f.editing!==f.date) syncTomb("m",f.editing);
     entry.updated_at=new Date().toISOString();
@@ -5953,9 +5973,9 @@ function saveMeasForm(){
     console.error("saveMeasForm error:", e);
   }
 }
-function deleteMeas(date){
+async function deleteMeas(date){
   clearAllAnalysisCaches();
-  if(!confirm("Poista tämä mittaus?")) return;
+  if(!await jConfirm("Poista tämä mittaus?",{ok:"Poista",danger:true})) return;
   S.measurements=(S.measurements||[]).filter(m=>m.date!==date); syncTomb("m",date);
   if(MEAS_FORM.editing===date) MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
   saveAll();
@@ -6112,7 +6132,7 @@ function saveSeasonForm(){
   const startDate=document.getElementById("sf-date")?.value;
   const durRaw=(document.getElementById("sf-duration")?.value||"").trim();
   const durationWeeks=durRaw?Math.max(1,parseInt(durRaw,10)||0):null;
-  if(!name||!startDate){alert("Lisää nimi ja päivämäärä");return;}
+  if(!name||!startDate){jAlert("Lisää nimi ja päivämäärä");return;}
   if(!S.settings.seasons) S.settings.seasons=[];
   if(SEASON_FORM.editing){
     const s=S.settings.seasons.find(x=>x.id===SEASON_FORM.editing);
@@ -6126,8 +6146,8 @@ function saveSeasonForm(){
   renderSeasons();
   renderTrendit();
 }
-function deleteSeason(id){
-  if(!confirm("Poista kausi?")) return;
+async function deleteSeason(id){
+  if(!await jConfirm("Poista kausi?",{ok:"Poista",danger:true})) return;
   S.settings.seasons=(S.settings.seasons||[]).filter(s=>s.id!==id);
   saveAll();
   SEASON_FORM={show:false,editing:null,name:"",startDate:today(),durationWeeks:"",color:"#4ade80"};
@@ -6213,9 +6233,9 @@ function saveCType(){
   saveAll(); CTYPE_FORM={show:false,editing:null,value:""};
   renderCardioTypes();
 }
-function deleteCardioType(i){
-  if(S.settings.cardioTypes.length<=1){alert("Ainakin yksi laji täytyy olla.");return;}
-  if(!confirm("Poista kardiolaji?")) return;
+async function deleteCardioType(i){
+  if(S.settings.cardioTypes.length<=1){jAlert("Ainakin yksi laji täytyy olla.");return;}
+  if(!await jConfirm("Poista kardiolaji?",{ok:"Poista",danger:true})) return;
   S.settings.cardioTypes.splice(i,1);
   saveAll(); renderCardioTypes();
 }
@@ -6254,9 +6274,9 @@ function saveTType(){
   saveAll(); TTYPE_FORM={show:false,editing:null,value:""};
   renderTrainingTypes();
 }
-function deleteTrainingType(i){
-  if(S.settings.trainingTypes.length<=1){alert("Ainakin yksi tyyppi täytyy olla.");return;}
-  if(!confirm("Poista treenityyppi?")) return;
+async function deleteTrainingType(i){
+  if(S.settings.trainingTypes.length<=1){jAlert("Ainakin yksi tyyppi täytyy olla.");return;}
+  if(!await jConfirm("Poista treenityyppi?",{ok:"Poista",danger:true})) return;
   S.settings.trainingTypes.splice(i,1);
   saveAll(); renderTrainingTypes();
 }
@@ -6288,7 +6308,7 @@ function setSeasonGoal(seasonId, key, val){
 function setAnyGoal(key, val, seasonId){
   const value = val===""||val==null ? null : parseNum(val);
   if(key==='targetWeight'){
-    if(String(val??"").trim()!==""&&validTargetWeight(value)==null){ alert("Tavoitepainon pitää olla 30–300 kg. Jätä kenttä tyhjäksi, jos et halua tavoitepainoa."); renderGoals(); return; }
+    if(String(val??"").trim()!==""&&validTargetWeight(value)==null){ jAlert("Tavoitepainon pitää olla 30–300 kg. Jätä kenttä tyhjäksi, jos et halua tavoitepainoa."); renderGoals(); return; }
     if(seasonId){
       const season=(S.settings.seasons||[]).find(s=>String(s.id)===String(seasonId));
       if(!season) return;
@@ -6430,7 +6450,7 @@ function renderApiKeySection(){
       <div style="display:flex;gap:8px">
         <button onclick="API_KEY_EDITING=true;renderApiKeySection()"
           style="height:34px;padding:0 14px;border-radius:8px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;cursor:pointer">Muuta</button>
-        <button onclick="if(confirm('Poista API-avain?')){saveApiKey('');API_KEY_EDITING=false;}"
+        <button onclick="jConfirm('Poista API-avain?',{ok:'Poista',danger:true}).then(y=>{if(y){saveApiKey('');API_KEY_EDITING=false;}})"
           style="height:34px;padding:0 14px;border-radius:8px;border:1.5px solid rgba(248,113,113,.3);background:transparent;color:var(--red);font-size:13px;cursor:pointer">Poista</button>
       </div>
     </div>
@@ -6926,12 +6946,12 @@ function runCountUp(){
 
 // v2.18.30: Poista päivän kirjaus. Jos päivälle on tallennettu salitreeni, se säilyy, joten kirjaukseen jää vain
 // salitreenistä syntynyt Treeni-merkintä (muuten gymHealLinks loisi sen heti uudelleen). Kumoa palauttaa kirjauksen.
-function deleteDay(ds){
+async function deleteDay(ds){
   flushPendingAutoSave();
   const e=S.entries[ds]; if(!e) return;
   const gs=dayGymSessions(ds);
   const lbl=ds===today()?"tämän päivän":gDay(ds);
-  if(!confirm(`Poistetaanko ${lbl} kirjaus?`+(gs.length?"\n\nPäivän salitreeni säilyy Treeni-historiassa, joten Treeni-merkintä jää päivälle.":""))) return;
+  if(!await jConfirm(`Poistetaanko ${lbl} kirjaus?`+(gs.length?"\n\nPäivän salitreeni säilyy Treeni-historiassa, joten Treeni-merkintä jää päivälle.":""),{ok:"Poista",danger:true})) return;
   const copy=JSON.parse(JSON.stringify(e)), nowIso=new Date().toISOString();
   if(gs.length){
     const tt=(gs.find(x=>x.trainingType)||{}).trainingType||"";
@@ -6956,6 +6976,29 @@ function entryGymOnly(e){
   return Object.entries(e).every(([k,v])=>base.has(k)||v==null||v===""||v===false||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length));
 }
 function deleteDayRefresh(){ renderAll(); if(S.tab!=="log") LOG_STALE=true; }
+// v2.18.57 Järkäleen oma vahvistus- ja ilmoitusikkuna selaimen confirm/alert-ikkunoiden tilalle (teeman värit).
+// jConfirm palauttaa lupauksen (true = hyväksytty). Testit voivat ohittaa ikkunan: window.__jdlgAuto=true/false.
+function jConfirm(msg,o={}){
+  try{ (window.__jdlgLog=window.__jdlgLog||[]).push(String(msg)); }catch(_){}
+  if(window.__jdlgAuto!==undefined) return Promise.resolve(!!window.__jdlgAuto);
+  return new Promise(res=>{
+    const old=document.getElementById("jdlg"); if(old) old.remove();
+    const w=document.createElement("div"); w.id="jdlg"; w.className="jdlg"+(o.alert?" alert":""); w.setAttribute("role","dialog"); w.setAttribute("aria-modal","true");
+    const lines=String(msg).split("\n"); const first=lines.shift(); const rest=lines.join("\n").trim();
+    w.innerHTML=`<div class="jdlg-c"><div class="jdlg-h"><img src="./icon-192.png?v=2" alt=""><span>Järkäle</span></div>
+      <div class="jdlg-t">${esc(first)}</div>${rest?`<div class="jdlg-m">${esc(rest)}</div>`:""}
+      <div class="jdlg-a">${o.alert?"":`<button class="jdlg-no">${esc(o.cancel||"Peruuta")}</button>`}<button class="jdlg-ok${o.danger?" danger":""}">${esc(o.ok||"OK")}</button></div></div>`;
+    let done=false; const close=v=>{ if(done) return; done=true; document.removeEventListener("keydown",kd); w.classList.add("out"); setTimeout(()=>w.remove(),160); res(v); };
+    const kd=e=>{ if(e.key==="Escape") close(false); };
+    w.addEventListener("click",e=>{ if(e.target===w&&!o.alert) close(false); });
+    w.querySelector(".jdlg-ok").onclick=()=>close(true);
+    const no=w.querySelector(".jdlg-no"); if(no) no.onclick=()=>close(false);
+    document.addEventListener("keydown",kd);
+    document.body.appendChild(w); requestAnimationFrame(()=>w.classList.add("in"));
+    setTimeout(()=>{ try{ w.querySelector(".jdlg-ok").focus({preventScroll:true}); }catch(_){} },30);
+  });
+}
+function jAlert(msg){ return jConfirm(msg,{alert:true,ok:"Selvä"}); }
 function showUndoToast(msg,undo){
   let t=document.getElementById("undo-toast");
   if(!t){ t=document.createElement("div"); t.id="undo-toast"; t.className="undo-toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
@@ -6963,9 +7006,9 @@ function showUndoToast(msg,undo){
   t.querySelector("button").onclick=()=>{ clearTimeout(t._h); t.classList.remove("on"); undo(); };
   t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),7000);
 }
-function deleteEntry(ds){
+async function deleteEntry(ds){
   clearAllAnalysisCaches();
-  if(!confirm("Poista tämä kirjaus?")) return;
+  if(!await jConfirm("Poista tämä kirjaus?",{ok:"Poista",danger:true})) return;
   delete S.entries[ds]; syncTomb("e",ds);
   saveAll();
   renderHistoria();
@@ -7081,11 +7124,11 @@ function importData(input){
   flushPendingAutoSave();
   const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     try{
       let d=JSON.parse(e.target.result);
       const structErr=validateBackup(d);
-      if(structErr){alert("⚠ "+structErr);input.value="";return;}
+      if(structErr){jAlert("⚠ "+structErr);input.value="";return;}
       d=normalizeImportedData(d);
       const nowCount=Object.keys(S.entries).length;
       const importCount=d.entries?Object.keys(d.entries).length:0;
@@ -7102,7 +7145,7 @@ function importData(input){
           (d.gym?`Salitreenit: ${d.gym.programs.length} ohjelmaa, ${d.gym.sessions.length} treeniä.\n`:``)+
           (isNewer?`⚠ HUOMIO: nykyinen datasi on uudempaa kuin varmuuskopio!\n`:``) +
           `\nHaluatko korvata nykyisen datan varmuuskopiolla?`;
-        if(!confirm(msg)) return;
+        if(!await jConfirm(msg)) return;
       }
       if(d.entries) S.entries=d.entries;
       if(d.measurements) S.measurements=d.measurements;
@@ -7117,8 +7160,8 @@ function importData(input){
       applyTheme(S.settings.theme||"dark");
       loadDayIntoForm(S.date);
       renderAll(); applyGymVisibility();
-      alert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`);
-    }catch(_){alert("⚠ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
+      jAlert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`);
+    }catch(_){jAlert("⚠ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
   };
   reader.readAsText(file);
 }
@@ -7944,8 +7987,8 @@ function saveMedForm(){
   MED_FORM={show:false,editing:null,name:"",dose:"",unit:"mg",days:[]};
   renderMedSettings();
 }
-function deleteMed(id){
-  if(!confirm("Poista lääke?")) return;
+async function deleteMed(id){
+  if(!await jConfirm("Poista lääke?",{ok:"Poista",danger:true})) return;
   S.settings.medications=(S.settings.medications||[]).filter(m=>m.id!==id);
   saveAll();
   renderMedSettings();
@@ -8213,7 +8256,7 @@ function gymSave(){
   // Synkronointia varten: katsottava/käynnissä oleva treeni saa muokkausajan
   if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||s.id===GU.sessionId) s.updatedAt=now; }); }
   try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); if(typeof syncMarkDirty==="function") syncMarkDirty(); }
-  catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) alert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
+  catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) jAlert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
 }
 function gTop(){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=0; }
 const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -8490,9 +8533,9 @@ function exE1(ex,s){
   const b=pool.reduce((a,r)=>e1rm(r.kg,r.reps)>e1rm(a.kg,a.reps)?r:a);
   return {v:Math.round(e1rm(b.kg,b.reps)*2)/2,set:b,rough:!ok.length};
 }
-function startSession(progId,dayId){
+async function startSession(progId,dayId){
   const p=gProg(progId); const d=p&&p.days.find(x=>x.id===dayId); if(!p||!d) return;
-  if(activeSession()&&!confirm("Toinen treeni on kesken. Aloitetaanko uusi? Keskeneräinen treeni tallentuu sellaisenaan.")) return;
+  if(activeSession()&&!await jConfirm("Toinen treeni on kesken. Aloitetaanko uusi? Keskeneräinen treeni tallentuu sellaisenaan.")) return;
   if(activeSession()) finishSession(true);
   const now=Date.now();
   const s={id:gid(),programId:p.id,dayId:d.id,date:today(),startedAt:now,endedAt:null,
@@ -8595,7 +8638,7 @@ function gymApplyRating(s,load,outcome){
 }
 function gNote(sid,ei,v){ const s=gSession(sid); s.exercises[ei].userNote=v; gymSave(); }
 function gSkip(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; ex.skipped=!ex.skipped; GU.menu=null; gymSave(); renderGym(); }
-function gRemoveEx(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; if(doneSets(ex).length&&!confirm(`Poistetaanko ${ex.name} ja sen kirjatut sarjat tästä treenistä?`)) return; s.exercises.splice(ei,1); GU.menu=null; gymSave(); renderGym(); }
+async function gRemoveEx(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; if(doneSets(ex).length&&!await jConfirm(`Poistetaanko ${ex.name} ja sen kirjatut sarjat tästä treenistä?`,{ok:"Poista",danger:true})) return; s.exercises.splice(ei,1); GU.menu=null; gymSave(); renderGym(); }
 function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=ei+d; if(j<0||j>=a.length) return; [a[ei],a[j]]=[a[j],a[ei]]; GU.menu=null; gymSave(); renderGym(); }
 function gRenameEx(sid,ei){
   const inp=document.getElementById("g-rename"); const v=inp&&inp.value.trim(); if(!v) return;
@@ -8608,11 +8651,11 @@ function similarEx(s,name){
   const a=stem(String(name).trim().split(/\s+/)[0]); if(a.length<5) return -1;
   return s.exercises.findIndex(e=>!e.skipped&&!doneSets(e).length&&stem(e.name.split(/\s+/)[0])===a);
 }
-function gAddEx(sid){
+async function gAddEx(sid){
   const inp=document.getElementById("g-addex"); const p=parseExLine(inp&&inp.value); if(!p) return;
   const s=gSession(sid);
   const si=similarEx(s,p.name);
-  if(si>=0&&confirm(`Treenissä on jo liike "${s.exercises[si].name}". Kirjataanko siihen?\n\nOK = siirry siihen · Peruuta = lisää "${p.name}" uutena liikkeenä`)){
+  if(si>=0&&await jConfirm(`Treenissä on jo liike "${s.exercises[si].name}". Kirjataanko siihen?`,{ok:"Siirry siihen",cancel:`Lisää uutena`})){
     const ex=s.exercises[si]; inp.value=""; GU.expanded[ex.id]=true; GU.menu=null; renderGym();
     setTimeout(()=>{ const el=document.querySelector(`[data-ex="${ex.id}"]`); if(el){ el.scrollIntoView({behavior:"smooth",block:"start"}); G_FLASH.add("mini-"+ex.id); } },50);
     return;
@@ -8646,10 +8689,10 @@ function finishSession(silent){
   GU.finishing=false; GU.updateTpl=false;
   if(!silent){ GU.justFinished=s.id; GU.mode="session"; GU.sessionId=s.id; renderGym(); renderLogGymCard(); showSavedToast("Treeni tallennettu"); gTop(); }
 }
-function discardSession(id){
+async function discardSession(id){
   const s=gSession(id); if(!s) return;
   const n=sessionStats(s).sets;
-  if(!confirm(n?`Poistetaanko treeni ${s.dayName} (${gDay(s.date)}) ja sen ${n} sarjaa?`:`Hylätäänkö treeni ${s.dayName}?`)) return;
+  if(!await jConfirm(n?`Poistetaanko treeni ${s.dayName} (${gDay(s.date)}) ja sen ${n} sarjaa?`:`Hylätäänkö treeni ${s.dayName}?`,{ok:n?"Poista":"Hylkää",danger:true})) return;
   gymUnlinkEntry(s);
   G.sessions=G.sessions.filter(x=>x.id!==id); syncTomb("s",id);
   if(G.activeId===id){ G.activeId=null; G.timer.endsAt=null; G.timer.pausedLeft=null; gymWakeLock(false); }
@@ -9167,16 +9210,16 @@ function gOpenEdit(id,isNew){
   renderGym(); gTop();
 }
 function gDoneEdit(){ GU.editSnap=null; gBack(); }
-function gCancelEdit(){
+async function gCancelEdit(){
   const sn=GU.editSnap, p=gProg(GU.progId);
   if(!sn||!p||sn.id!==p.id){ gBack(); return; }
   const changed=JSON.stringify(p)!==sn.json;
   if(sn.isNew){
-    if(changed&&!confirm("Hylätäänkö uusi ohjelma?")) return;
+    if(changed&&!await jConfirm("Hylätäänkö uusi ohjelma?")) return;
     G.programs=G.programs.filter(x=>x.id!==p.id); syncTomb("p",p.id);
     if(G.curProgramId===p.id) G.curProgramId=sn.cur&&sn.cur!==p.id?sn.cur:null;
   } else if(changed){
-    if(!confirm("Hylätäänkö ohjelmaan tehdyt muutokset?")) return;
+    if(!await jConfirm("Hylätäänkö ohjelmaan tehdyt muutokset?")) return;
     const i=G.programs.findIndex(x=>x.id===p.id); G.programs[i]=JSON.parse(sn.json);
   }
   gymSave(); GU.editSnap=null; gBack();
@@ -9234,15 +9277,15 @@ function gSetGoal(di,xi,v){
 }
 function gMoveTplEx(di,xi,d){ gEdit(p=>{ const a=p.days[di].exercises; const j=xi+d; if(j<0||j>=a.length) return; [a[xi],a[j]]=[a[j],a[xi]]; }); renderGym(); }
 function gMoveDay(di,d){ gEdit(p=>{ const a=p.days; const j=di+d; if(j<0||j>=a.length) return; [a[di],a[j]]=[a[j],a[di]]; }); renderGym(); }
-function gDelDay(di){ const p=gProg(GU.progId); if(!confirm(`Poistetaanko treenipäivä ${p.days[di].name} ohjelmasta? Tehdyt treenit säilyvät historiassa.`)) return; gEdit(p=>p.days.splice(di,1)); renderGym(); }
+async function gDelDay(di){ const p=gProg(GU.progId); if(!await jConfirm(`Poistetaanko treenipäivä ${p.days[di].name} ohjelmasta? Tehdyt treenit säilyvät historiassa.`,{ok:"Poista",danger:true})) return; gEdit(p=>p.days.splice(di,1)); renderGym(); }
 function gCopyProg(){
   const p=gProg(GU.progId); const c=JSON.parse(JSON.stringify(p));
   c.id=gid(); c.name=p.name+" (kopio)"; c.createdAt=c.updatedAt=Date.now(); c.archived=false;
   c.days.forEach(d=>{ d.id=gid(); d.exercises.forEach(e=>e.id=gid()); });
   const prevCur=G.curProgramId; G.programs.push(c); G.curProgramId=c.id; gymSave(); gOpenEdit(c.id,true); GU.editSnap.cur=prevCur; showSavedToast("Ohjelma kopioitu");
 }
-function gArchiveProg(){
-  const p=gProg(GU.progId); if(!confirm(`Arkistoidaanko ${p.name}? Sen voi palauttaa Treeni-välilehden lopusta. Treenihistoria säilyy.`)) return;
+async function gArchiveProg(){
+  const p=gProg(GU.progId); if(!await jConfirm(`Arkistoidaanko ${p.name}? Sen voi palauttaa Treeni-välilehden lopusta. Treenihistoria säilyy.`)) return;
   p.archived=true; touchProg(p); G.curProgramId=null; gBack();
 }
 
@@ -9585,7 +9628,7 @@ async function syncNow(opts={}){
       const ar=await driveFetch("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)"); const aj=await ar.json();
       const em=aj&&aj.user&&aj.user.emailAddress;
       if(em&&em.toLowerCase()!==String(st.email).toLowerCase()){
-        if(!confirm(`Kirjauduit Google-tilillä ${em}, mutta Järkäle on synkronoitu tilille ${st.email}.\n\nJatketaanko tilillä ${em}? Tiedot tallentuvat silloin sen tilin Driveen.`)){
+        if(!await jConfirm(`Kirjauduit Google-tilillä ${em}, mutta Järkäle on synkronoitu tilille ${st.email}.\n\nJatketaanko tilillä ${em}? Tiedot tallentuvat silloin sen tilin Driveen.`)){
           try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
           SYNC_ERR="Synkronointi peruttu: väärä Google-tili. Paina Synkronoi ja valitse oikea tili."; return;
         }
@@ -9665,8 +9708,8 @@ function setPtCopy(on){
   setSyncState({ptCopy:!!on,ptErr:null});
   if(on) syncNow(); else renderSyncUI();
 }
-function syncDisable(){
-  if(!confirm("Lopetetaanko synkronointi tällä laitteella? Data säilyy puhelimessa ja Drivessa.")) return;
+async function syncDisable(){
+  if(!await jConfirm("Lopetetaanko synkronointi tällä laitteella? Data säilyy puhelimessa ja Drivessa.")) return;
   setSyncState({enabled:false,email:null,granted:""}); try{ localStorage.removeItem(SYNC_TOKEN_KEY); }catch(_){}
   renderSyncUI();
 }

@@ -7,7 +7,7 @@ const iso=d=>d.toISOString().slice(0,10);
 const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
 (async()=>{
   const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(require('fs').existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
-  const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block',acceptDownloads:true});
+  const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block',acceptDownloads:true}); await ctx.addInitScript(()=>{window.__jdlgAuto=true;});
   const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('dialog',d=>d.accept());
   await p.goto(URL);
   await p.evaluate(()=>{localStorage.clear();localStorage.setItem('seuranta-setup-done','1');localStorage.setItem('lastExport',String(Date.now()));
@@ -390,14 +390,14 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   ok(um.autoGone===false&&!um.flag,'salitreenin luoma merkintä poistuu treenin mukana');
 
   console.log('\nSupersarja ja samankaltainen liike (v2.18.25)');
-  const ss=await p.evaluate(()=>{ if(G.activeId) finishSession(true); setTab('treeni');
+  const ss=await p.evaluate(async()=>{ if(G.activeId) finishSession(true); setTab('treeni');
     const pr={id:gid(),name:'SS',updatedAt:Date.now(),days:[{id:gid(),name:'Rinta',exercises:[{id:gid(),key:'etunostot levypainolla',name:'Etunostot levypainolla',sets:4,repsMin:8,repsMax:12,note:'Supersarja: Pec deck rinnalle'},{id:gid(),key:'pec deck rinnalle',name:'Pec deck rinnalle',sets:4,repsMin:8,repsMax:12,note:'Supersarja: Etunostot levypainolla'}]}]};
     G.programs.push(pr); startSession(pr.id,pr.days[0].id); const s=gSession(G.activeId);
     const tag=document.querySelector('.ex-ss')?.innerText||'';
-    const oc=window.confirm; let asked=''; window.confirm=m=>{asked=m;return true;};
-    document.getElementById('g-addex').value='Etunosto 3x12'; gAddEx(s.id); const n1=s.exercises.length;
-    window.confirm=()=>false; document.getElementById('g-addex').value='Etunosto 3x12'; gAddEx(s.id); const n2=s.exercises.length;
-    window.confirm=oc; finishSession(true); G.programs=G.programs.filter(x=>x.id!==pr.id); gymSave();
+    window.__jdlgLog=[]; window.__jdlgAuto=true;
+    document.getElementById('g-addex').value='Etunosto 3x12'; await gAddEx(s.id); const n1=s.exercises.length; const asked=window.__jdlgLog[0]||'';
+    window.__jdlgAuto=false; document.getElementById('g-addex').value='Etunosto 3x12'; await gAddEx(s.id); const n2=s.exercises.length;
+    window.__jdlgAuto=true; finishSession(true); G.programs=G.programs.filter(x=>x.id!==pr.id); gymSave();
     return {tag,asked,n1,n2}; });
   ok(/Supersarja: Pec deck rinnalle/.test(ss.tag),'supersarja näkyy merkkinä');
   ok(/Etunostot levypainolla/.test(ss.asked)&&ss.n1===2,'samankaltainen liike: kysytään, OK ei lisää kaksoiskappaletta');

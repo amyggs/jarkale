@@ -85,6 +85,16 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.locator('.ex .set input').count()>0&&await p.locator('.g-editbar').isVisible(),'Muokkaa treeniä avaa muokkauksen');
   await p.locator('.g-editbar .tr-go').click();await p.waitForTimeout(150);
   ok(await p.locator('.ex .set input').count()===0,'Valmis palauttaa lukutilaan');
+
+  console.log('\nOma vahvistusikkuna');
+  const r1=p.evaluate(()=>jConfirm('Poistetaanko testi?\n\nLisätieto.',{ok:'Poista',danger:true}));
+  await p.waitForTimeout(250);
+  ok(await p.locator('#jdlg .jdlg-t').innerText()==='Poistetaanko testi?'&&(await p.locator('#jdlg .jdlg-m').innerText()).includes('Lisätieto')&&(await p.locator('#jdlg .jdlg-h').innerText()).includes('Järkäle'),'ikkunassa Järkäle-otsikko, kysymys ja lisätieto');
+  ok(await p.locator('#jdlg .jdlg-ok.danger').innerText()==='Poista','poistonappi punaisena omalla tekstillä');
+  await p.locator('#jdlg .jdlg-no').click(); ok(await r1===false,'Peruuta palauttaa false');
+  await p.waitForTimeout(250); ok(await p.locator('#jdlg').count()===0,'ikkuna sulkeutuu');
+  const r2=p.evaluate(()=>jConfirm('Jatketaanko?'));await p.waitForTimeout(200);
+  await p.locator('#jdlg .jdlg-ok').click(); ok(await r2===true,'OK palauttaa true');
   console.log('\nSynkronointi ja varmuuskopio');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('jarkale-gym')).exMeta.penkkipunnerrus.pin==='Penkki 5'),'tallentuu laitteelle salidatan mukana (myös varmuuskopioon)');
   const mg=await p.evaluate(()=>{
