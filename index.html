@@ -422,6 +422,12 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .tr-load{margin-top:0;}
 .inj-card{background:var(--surf);border-radius:16px;padding:12px 14px 10px;margin-bottom:10px;}
 .inj-card.res{opacity:.85;}
+.inj-mini{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 14px;border:none;color:var(--text);font:inherit;text-align:left;}
+.inj-mini .inj-name{flex:1;}
+.inj-sum{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);white-space:nowrap;}
+.inj-chev{font-size:22px;line-height:1;color:var(--dim);margin-right:-2px;}
+.inj-fold{border:none;background:transparent;color:var(--dim);font-size:16px;width:36px;height:36px;margin:-8px -6px -8px 0;position:relative;}
+.inj-fold::after{content:"";position:absolute;inset:-4px;}
 .inj-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .inj-name{display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px;flex:1;min-width:0;}
 .inj-name .ico{color:var(--orange);}
@@ -1340,15 +1346,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-theme="dark"] .kp-sub{color:#A09D93;}
 .tb-magnesium .kp-name{font-weight:600;letter-spacing:.02em;color:#15171A;} [data-theme="dark"] .tb-magnesium .kp-name{color:#E8EAEE;}
 @keyframes kpLogo{to{opacity:1;transform:none}} @keyframes kpChar{to{opacity:1;transform:none}} @keyframes kpLine{to{width:140px}} @keyframes kpFade{to{opacity:1}}
-.tb-ampiainen{background:#FFD23B;}
-.tb-ampiainen .by-stripes{position:absolute;inset:-20%;background:repeating-linear-gradient(-45deg,#181C1B 0 34px,#FFD23B 34px 68px);transform:translateX(-120%);animation:byWipe 1.1s cubic-bezier(.7,0,.3,1) forwards;}
-@keyframes byWipe{0%{transform:translateX(-120%)}45%{transform:translateX(0)}100%{transform:translateX(120%)}}
 .tb-ampiainen .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.by-c{text-align:center;font-family:Manrope,system-ui,sans-serif!important;opacity:0;animation:byIn .45s cubic-bezier(.2,1.3,.4,1) .75s forwards;}
-.by-c *{font-family:inherit!important;}
-.by-name{font-weight:800;font-size:min(15vw,64px);letter-spacing:-.02em;color:#181C1B;line-height:1;border-bottom:8px solid #181C1B;padding-bottom:6px;}
-.by-sub{margin-top:12px;font-weight:800;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#181C1B;}
-@keyframes byIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
 /* Teksti-TV: tiedot laatikoihin, jotta kokonaisuudet erottuvat */
 [data-palette="tekstitv"] :is(.card,.tr-list,.tw,.g-empty,.ed-day,.g-chart,.wr-banner,.ex,#view-log [id$="-wrap"]>div.stepper,#track-recovery-wrap,#track-motivation-wrap){border:2px solid var(--t-bar)!important;padding:10px!important;}
 [data-palette="tekstitv"] .tr-list{padding:0!important;}
@@ -1479,28 +1477,30 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 :is(#track-recovery-wrap>div:first-child>button,#track-motivation-wrap>div:first-child>button)::after{content:"";position:absolute;inset:-11px;}
 .ds-row::after{content:"";position:absolute;inset:-6px 0;}
 
-/* v2.18.68 Järkäle: putoava järkäle */
-.tb-ampiainen{background:#0B0B0A!important;}
-.tb-ampiainen .tb-scr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.tb-ampiainen.jk-hit .tb-scr,.tb-ampiainen.jk-hit .jk-floor{animation:jkShake .34s ease-out;}
-.tb-ampiainen .jk-floor{position:absolute;left:8%;right:8%;top:calc(50% + min(26vw,108px));height:2px;background:linear-gradient(90deg,transparent,#3A3F3C,transparent);}
-.tb-ampiainen .jk{position:relative;width:min(84vw,360px);height:min(60vw,252px);display:flex;align-items:center;justify-content:center;}
-.tb-ampiainen .jk-name{font:800 min(14vw,60px)/1 Manrope,system-ui,sans-serif!important;letter-spacing:.04em;color:#FFD23B;text-shadow:0 0 28px rgba(255,210,59,.45);opacity:0;transform:scale(.9);transition:opacity .35s ease .1s,transform .45s cubic-bezier(.2,1.3,.4,1) .1s;}
-.tb-ampiainen.jk-open .jk-name{opacity:1;transform:none;}
-.tb-ampiainen .jk-rock{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform:translateY(-120vh);animation:jkFall .56s cubic-bezier(.55,0,.85,.35) .05s forwards;}
-.tb-ampiainen .jk-rock polygon{fill:#232725;stroke:#151716;stroke-width:1.2;stroke-linejoin:round;}
-.tb-ampiainen .jk-rock polygon.hl{fill:#2F3431;stroke:none;}
-.tb-ampiainen .jk-crack{fill:none;stroke:#FFD23B;stroke-width:3;stroke-linejoin:round;stroke-dasharray:140;stroke-dashoffset:140;filter:drop-shadow(0 0 6px rgba(255,210,59,.9));}
-.tb-ampiainen.jk-hit .jk-crack{animation:jkCrack .45s ease-out .15s forwards;}
-.tb-ampiainen .jk-l,.tb-ampiainen .jk-r{transition:transform .6s cubic-bezier(.3,0,.2,1),opacity .5s ease .15s;transform-box:fill-box;}
-.tb-ampiainen.jk-open .jk-l{transform:translate(-46px,6px) rotate(-7deg);opacity:0;transform-origin:left bottom;}
-.tb-ampiainen.jk-open .jk-r{transform:translate(46px,6px) rotate(7deg);opacity:0;transform-origin:right bottom;}
-.tb-ampiainen.jk-open .jk-crack{opacity:0;transition:opacity .2s;}
-.tb-ampiainen .jk-dust{position:absolute;left:50%;bottom:4%;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle,rgba(150,150,140,.55),rgba(150,150,140,0) 70%);opacity:0;animation:jkDust .7s ease-out forwards;}
-@keyframes jkFall{to{transform:none}}
-@keyframes jkShake{0%,100%{transform:none}15%{transform:translateY(9px)}35%{transform:translate(-5px,-3px)}55%{transform:translate(4px,2px)}75%{transform:translate(-2px,-1px)}}
-@keyframes jkCrack{to{stroke-dashoffset:0}}
-@keyframes jkDust{0%{opacity:.9;transform:translate(0,0) scale(.4)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(2.6)}}
+/* v2.18.72 Järkäle: keltainen laatta putoaa ja tömähtää, J piirtyy, piste napsahtaa, nimi alle */
+.tb-ampiainen{background:#111312!important;}
+.tb-ampiainen .tb-scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.tb-ampiainen.jt-hit .tb-scr{animation:jtShake .3s ease-out;}
+.tb-ampiainen .jt{position:relative;width:min(42vw,176px);height:min(42vw,176px);}
+.tb-ampiainen .jt-tile{position:absolute;inset:0;transform:translateY(-110vh);animation:jtFall .48s cubic-bezier(.6,0,.9,.4) .08s forwards;}
+.tb-ampiainen .jt-tile svg{display:block;width:100%;height:100%;overflow:visible;}
+.tb-ampiainen.jt-hit .jt-tile svg{animation:jtSquash .38s cubic-bezier(.2,.9,.3,1);transform-origin:50% 100%;}
+.tb-ampiainen .jt-j{fill:none;stroke:#111312;stroke-width:52;stroke-linecap:butt;stroke-dasharray:470;stroke-dashoffset:470;}
+.tb-ampiainen.jt-draw .jt-j{transition:stroke-dashoffset .42s cubic-bezier(.55,0,.25,1);stroke-dashoffset:0;}
+.tb-ampiainen .jt-dot{fill:#111312;transform:translateY(-260px);opacity:0;}
+.tb-ampiainen.jt-dot-in .jt-dot{animation:jtDot .3s cubic-bezier(.5,0,.75,.2) forwards;}
+.tb-ampiainen .jt-ring{position:absolute;inset:0;border:3px solid #FFD23B;border-radius:22%;opacity:0;}
+.tb-ampiainen.jt-hit .jt-ring{animation:jtRing .5s ease-out forwards;}
+.tb-ampiainen .jt-floor{position:absolute;left:50%;bottom:-14px;width:0;height:3px;background:#FFD23B;transform:translateX(-50%);}
+.tb-ampiainen.jt-hit .jt-floor{animation:jtFloor .5s cubic-bezier(.2,.9,.3,1) forwards;}
+.tb-ampiainen .jt-name{font:800 min(9.5vw,40px)/1 Manrope,system-ui,sans-serif!important;letter-spacing:.06em;color:#F4F1E6;clip-path:inset(0 50% 0 50%);opacity:0;}
+.tb-ampiainen.jt-name-in .jt-name{transition:clip-path .45s cubic-bezier(.3,0,.1,1),opacity .15s;clip-path:inset(0 0 0 0);opacity:1;}
+@keyframes jtFall{to{transform:none}}
+@keyframes jtSquash{0%{transform:scale(1.07,.86)}55%{transform:scale(.98,1.03)}100%{transform:none}}
+@keyframes jtShake{0%,100%{transform:none}20%{transform:translateY(7px)}45%{transform:translateY(-3px)}70%{transform:translateY(1px)}}
+@keyframes jtRing{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
+@keyframes jtFloor{0%{width:0;opacity:1}60%{width:130%;opacity:1}100%{width:130%;opacity:0}}
+@keyframes jtDot{0%{transform:translateY(-260px);opacity:1}100%{transform:none;opacity:1}}
 
 /* v2.18.68 Kaurapuuro: värit valuvat */
 .tb-kaurapuuro .kpw{position:absolute;left:-5%;width:110%;height:100%;transform:translateY(60vh);animation:kpwPour 1.1s cubic-bezier(.3,.6,.25,1) forwards,kpwDrift 3s ease-in-out infinite alternate;}
@@ -2087,7 +2087,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.71</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.72</span>
       </div>
     </div>
   </div>
@@ -2121,6 +2121,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.72", d:"lokakuu 2026", items:[
+    "Järkäle-teeman aloitusanimaatio uusittu: keltainen laatta putoaa ja tömähtää, J piirtyy siihen ja piste napsahtaa paikalleen.",
+    "Kivut: kirjattu kipu (taso ja suunta valittu) näkyy tiiviinä rivinä. Napauta riviä muokataksesi."
+  ]},
   {v:"2.18.71", d:"lokakuu 2026", items:[
     "Kelluva alapalkki myös Kaurapuuro-teemassa (pehmeä) ja Järkäle-teemassa (terävä, paksu reuna). Sisältö rullaa sen alta kuten Lasissa."
   ]},
@@ -3509,20 +3513,18 @@ function themeBoot(pal){
       ${[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b],i)=>`<span class="ls2-pop" style="--dx:${a*120}px;--dy:${b*90}px;animation-delay:${1500+i*90}ms"></span>`).join("")}</div>`;
     at(2800,()=>bootEnd());
   } else if(pal==="ampiainen"){
-    // v2.18.68 Järkäle: musta järkäle (iso kivi) putoaa ja iskeytyy maahan, halkeaa keltaisesta saumasta ja paljastaa nimen
-    const L="8,78 30,34 78,12 100,8 92,40 108,70 94,100 104,134 64,134 20,120", R="100,8 132,8 176,30 194,74 182,118 130,134 104,134 94,100 108,70 92,40";
-    o.innerHTML=`<div class="jk-floor"></div><div class="tb-scr"><div class="jk">
-      <div class="jk-name">JÄRKÄLE</div>
-      <svg class="jk-rock" viewBox="0 0 200 140" aria-hidden="true">
-        <g class="jk-l"><polygon points="${L}"/><polygon class="hl" points="30,34 78,12 100,8 92,40 60,48"/></g>
-        <g class="jk-r"><polygon points="${R}"/><polygon class="hl" points="100,8 132,8 176,30 150,44 108,30"/></g>
-        <polyline class="jk-crack" points="100,8 92,40 108,70 94,100 104,134"/>
-      </svg>
-      ${[-1,1].map(sd=>[0,1,2].map(k=>`<i class="jk-dust" style="--x:${sd*(60+k*38)}px;--y:${-8-k*10}px;animation-delay:${560+k*40}ms"></i>`).join("")).join("")}
-    </div></div>`;
-    at(560,()=>{ o.classList.add("jk-hit"); try{haptic(25);}catch(_){} });
-    at(1150,()=>o.classList.add("jk-open"));
-    at(2500,()=>bootEnd());
+    // v2.18.72 Järkäle: keltainen laatta (sovelluksen ikoni) putoaa ja tömähtää, J piirtyy, neliöpiste napsahtaa, nimi avautuu alle
+    o.innerHTML=`<div class="tb-scr"><div class="jt"><i class="jt-floor"></i><div class="jt-tile"><svg viewBox="0 0 512 512" aria-hidden="true">
+      <rect width="512" height="512" rx="112" fill="#FFD23B"/>
+      <path class="jt-j" d="M302 98 V301.5 A83.5 83.5 0 0 1 135 301.5"/>
+      <rect class="jt-dot" x="355" y="359" width="54" height="54"/></svg></div><i class="jt-ring"></i></div>
+      <div class="jt-name">JÄRKÄLE</div></div>`;
+    at(560,()=>{ o.classList.add("jt-hit"); try{haptic(25);}catch(_){} });
+    at(760,()=>o.classList.add("jt-draw"));
+    at(1180,()=>o.classList.add("jt-dot-in"));
+    at(1480,()=>{ try{haptic(10);}catch(_){} });
+    at(1560,()=>o.classList.add("jt-name-in"));
+    at(2550,()=>bootEnd());
   } else if(pal==="soitin"){
     const pad2=x=>String(x).padStart(2,"0");
     o.innerHTML=`<div class="tb-scr"><div class="sp"><div class="sp-bar">JÄRKÄLE</div><div class="sp-lcd"><div class="sp-time">00:00</div><div class="sp-an">${Array.from({length:16},(_,i)=>`<i style="--h0:${8+((i*37)%30)}%;--h1:${40+((i*53)%60)}%;animation-delay:${(i*47)%400}ms"></i>`).join("")}</div>
@@ -7766,10 +7768,16 @@ function renderInjurySelector(){
   const existingHTML=items.map((item,idx)=>{
     const part=INJURY_PARTS.find(p=>p.id===item.bodyPart);
     const name=part?part.l:(INJURY_LEGACY[item.bodyPart]||"Tuntematon");
+    // v2.18.72: kirjattu kipu (taso + suunta) näkyy tiiviinä rivinä, napautus avaa muokkauksen
+    const done=!item.resolved&&item.painLevel&&item.direction, open=injOpen(item.bodyPart);
+    if(done&&!open) return `<button class="inj-card inj-mini" onclick="injToggle('${item.bodyPart}',true)" aria-expanded="false" aria-label="Muokkaa: ${esc(name)}">
+      <span class="inj-name">${ico("bandage",16)}${esc(name)}</span>
+      <span class="inj-sum">${item.painLevel}/5 · ${DIR_TXT[item.direction]||""}</span><span class="inj-chev" aria-hidden="true">›</span></button>`;
     return `<div class="inj-card${item.resolved?" res":""}">
       <div class="inj-head">
         <span class="inj-name">${ico("bandage",16)}${esc(name)}</span>
         ${item.resolved?`<span class="inj-ok">${ico("check",14)} Ohi</span>`:(item.painLevel?`<span class="inj-lv">${item.painLevel}/5</span>`:"")}
+        ${done?`<button class="inj-fold" aria-label="Pienennä ${esc(name)}" aria-expanded="true" onclick="injToggle('${item.bodyPart}',false)">⌃</button>`:""}
         <button class="pc-x" aria-label="Poista ${esc(name)}" onclick="removeInjuryItem(${idx})">×</button>
       </div>
       ${!item.resolved?`<span class="lbl-small">Taso</span>
@@ -7835,12 +7843,16 @@ function removeInjuryItem(idx){
 // Setterit korvaavat kipukohteen uudella objektilla eivätkä muokkaa sitä paikallaan. Muokkaus paikallaan muutti
 // myös S.entries-kirjausta (jaettu objekti), jolloin autosaven sisältövertailu ei nähnyt muutosta eikä
 // tallentanut sitä localStorageen (korjattu v2.9.4).
+// v2.18.72: avattujen kipukorttien tila (päivä + kipupaikka). Muokattu kortti pysyy auki, ettei se pienene kesken valinnan.
+const INJ_OPEN={};
+function injOpen(bp){ return !!INJ_OPEN[S.date+"|"+bp]; }
+function injToggle(bp,on){ INJ_OPEN[S.date+"|"+bp]=on; renderInjurySelector(); }
 function setInjuryPainLevel(idx,n){
-  const it=S.injury_items[idx]; S.injury_items[idx]={...it,painLevel:it.painLevel===n?null:n};
+  const it=S.injury_items[idx]; INJ_OPEN[S.date+"|"+it.bodyPart]=true; S.injury_items[idx]={...it,painLevel:it.painLevel===n?null:n};
   injuryChanged();
 }
 function setInjuryDir(idx,dir){
-  const it=S.injury_items[idx]; S.injury_items[idx]={...it,direction:it.direction===dir?null:dir};
+  const it=S.injury_items[idx]; INJ_OPEN[S.date+"|"+it.bodyPart]=true; S.injury_items[idx]={...it,direction:it.direction===dir?null:dir};
   injuryChanged();
 }
 function toggleInjuryResolved(idx){

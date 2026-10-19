@@ -19,7 +19,7 @@ TESTS=("$@"); [ ${#TESTS[@]} -eq 0 ] && TESTS=(test-gym.js test-sync.js test-r1.
 FAIL=0
 for t in "${TESTS[@]}"; do
   if [ "$t" = test-news.js ] && [ ! -f "$TMP/new/jarkale-pilotti/index.html" ]; then echo "$t: ohitettu (ei ../jarkale-pilotti)"; continue; fi
-  OUT=$(node "tests/$t" 2>&1); RES=$(echo "$OUT" | grep -E "läpi$" | tail -1)
+  OUT=$(node "tests/$t" 2>&1); [ -n "${DEBUG:-}" ] && echo "$OUT" | tail -15; RES=$(echo "$OUT" | grep -E "läpi$" | tail -1)
   echo "$t: ${RES:-KAATUI}"; echo "$OUT" | grep "✗"
   echo "$OUT" | grep -q "✗" || [ -z "$RES" ] && FAIL=1
 done
