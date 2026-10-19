@@ -1468,7 +1468,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 /* v2.18.63 painon pikasäätö */
 .set-adj{display:grid;grid-template-columns:28px 1fr 1fr 48px;gap:8px;margin:-2px 0 4px;}
 .set-adj>div{display:flex;gap:6px;}
-.set-adj button{flex:1;height:34px;border-radius:9px;border:none;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;}
+.set-adj button{flex:1;height:36px;border-radius:9px;border:none;background:var(--surf2);color:var(--text);font:700 20px/1 Manrope,system-ui,sans-serif;}
 .set-adj button:active{transform:scale(.95);}
 /* v2.18.44 luettavuuskorjaukset (auditointi: kontrasti ≥ 4,5 pientä tekstiä) */
 :is([data-palette="soitin"]) .gt .gt-l{color:var(--dim)!important;}
@@ -2007,7 +2007,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.63</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.64</span>
       </div>
     </div>
   </div>
@@ -2041,6 +2041,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.64", d:"lokakuu 2026", items:[
+    "Painon pikasäätö on nyt − ja + -napit kuten aamupainossa ja askelissa. Askeleen voi valita asetuksista (Treeni- ja kausiasetukset): 0,5, 1, 1,25, 2,5 tai 5 kg. Oletus 1,25 kg."
+  ]},
   {v:"2.18.63", d:"lokakuu 2026", items:[
     "Treeni: seuraavan sarjan painoa voi säätää napeilla −1,25 / +1,25 kg ilman näppäimistöä. Napit näkyvät vain sarjalle, joka on seuraavana vuorossa.",
     "Arvioitu 1RM ei enää vie tilaa jokaisen liikkeen alla treenin aikana. Se näkyy ennätyksen yhteydessä (ennätysilmoitus ja yhteenvedon ennätyslista) sekä liikkeen omalla sivulla."
@@ -8252,7 +8255,7 @@ let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehd
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
 const GU={pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
-function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,...(S.settings.gym||{})}; }
+function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,kgStep:1.25,...(S.settings.gym||{})}; }
 function gymLoad(){
   try{ const r=localStorage.getItem(GYM_KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==="object") G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; } }catch(_){}
   if(!Array.isArray(G.programs)) G.programs=[];
@@ -8601,6 +8604,8 @@ function ghostFor(s,ex,i){
   const g=ex.goal||{}, sg=setGoal(g,i)||{};
   return {kg:g.weight??null,reps:sg.max?null:(sg.repsMin??null)};
 }
+const KG_STEPS=[0.5,1,1.25,2.5,5];
+function kgStep(){ const v=+gymCfg().kgStep; return KG_STEPS.includes(v)?v:1.25; }
 function gAdjKg(sid,ei,ri,d){
   const s=gSession(sid); if(!s) return; const ex=s.exercises[ei], r=ex.sets[ri];
   const base=r.kg!=null?r.kg:(ghostFor(s,ex,ri).kg??0);
@@ -8953,6 +8958,10 @@ function renderGymSettings(){
     if(c.sound){ const lv=c.soundLevel||"normal";
       h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶</button></div>`; }
     h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
+    // v2.18.64 painon pikasäädön askel
+    { const st=KG_STEPS.includes(+c.kgStep)?+c.kgStep:1.25;
+      h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
+        <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
   } else if(G.programs.length||G.sessions.length){
     h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
   }
@@ -9324,7 +9333,7 @@ function gymSessionHTML(s){
         <button class="ck" aria-label="Sarja ${ri+1} ${r.done?"tehty, peru":"tehty"}" aria-pressed="${r.done}" onclick="gToggleSet('${sid}',${ei},${ri})">${ico("check",20)}</button>
         ${pr?`<span class="pr${G_FLASH.has("pr-"+ex.id+"-"+ri)?" pop":""}" title="Et ole aiemmin tehnyt tätä painoa näin monella toistolla">Ennätys</span>`:""}</div>`;
       // v2.18.63: painon pikasäätö ±1,25 kg vain ensimmäiselle tekemättömälle sarjalle (ei jokaiselle riville)
-      if(live&&!r.done&&ri===ex.sets.findIndex(x=>!x.done)) h+=`<div class="set-adj"><span></span><div><button aria-label="Paino −1,25 kg" onclick="gAdjKg('${sid}',${ei},${ri},-1.25)">−1,25</button><button aria-label="Paino +1,25 kg" onclick="gAdjKg('${sid}',${ei},${ri},1.25)">+1,25</button></div></div>`;
+      if(live&&!r.done&&ri===ex.sets.findIndex(x=>!x.done)) h+=`<div class="set-adj"><span></span><div><button aria-label="Paino −${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},-kgStep())">−</button><button aria-label="Paino +${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},kgStep())">+</button></div></div>`;
     });
     if(GU.prMsg[ex.id]) h+=`<div class="ex-prmsg${G_FLASH.has("prmsg-"+ex.id)?" in":""}" data-prmsg="${ex.id}" role="status">★ ${esc(GU.prMsg[ex.id])}</div>`;
     h+=`</div><div class="ex-act"><button onclick="gAddSet('${sid}',${ei})">+ Sarja</button>${ex.sets.length&&!ex.sets[ex.sets.length-1].done?`<button onclick="gRemoveSet('${sid}',${ei})">− Sarja</button>`:""}

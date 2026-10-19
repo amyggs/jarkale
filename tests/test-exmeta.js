@@ -111,6 +111,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(old.stamp===0&&old.lbl==='Yhteenveto','myöhemmin avatussa treenissä ei leimaa, otsikko Yhteenveto');
   const nt=await p.evaluate(()=>{const s=G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0];s.exercises[0].userNote='Tuntui hyvältä';gymSave();openSession(s.id);return {view:document.querySelector('.g-sum-list').innerText.includes('Tuntui hyvältä'),txt:sessionShareText(s).includes('(Tuntui hyvältä)')};});
   ok(nt.view&&nt.txt,'tehdyn liikkeen huomio näkyy yhteenvedossa ja jaettavassa tekstissä');
+
+  console.log('\nPainon askel');
+  const ks=await p.evaluate(()=>{ setGymOpt('kgStep',2.5); const pr=curProgram(); GU.mode='home'; if(G.activeId) finishSession(true); startSession(pr.id,pr.days[0].id); const a=activeSession(); GU.expanded={}; a.exercises.forEach(e=>GU.expanded[e.id]=true); a.exercises[0].sets[0].kg=80; renderGym();
+    const btns=[...document.querySelectorAll('.ex')[0].querySelectorAll('.set-adj button')].map(b=>b.textContent); document.querySelectorAll('.ex')[0].querySelectorAll('.set-adj button')[1].click(); const up=a.exercises[0].sets[0].kg;
+    setGymOpt('kgStep',1.25); finishSession(true); return {btns,up,def:kgStep()}; });
+  ok(ks.btns.join('|')==='−|+'&&ks.up===82.5,'− / + -napit, askel asetuksesta (2,5 kg: 80 → 82,5)');
+  ok(ks.def===1.25,'oletusaskel 1,25 kg');
   console.log('\nSynkronointi ja varmuuskopio');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('jarkale-gym')).exMeta.penkkipunnerrus.pin==='Penkki 5'),'tallentuu laitteelle salidatan mukana (myös varmuuskopioon)');
   const mg=await p.evaluate(()=>{
