@@ -10,9 +10,9 @@ setTab('asetukset');SETTINGS_TOGGLES.technical=true;renderAsetukset();document.g
 const segs=document.querySelectorAll('#haptics-section .g-seg button').length;
 [...document.querySelectorAll('#haptics-section .g-seg button')].find(b=>b.innerText==='Voimakas').click(); v.length=0; haptic(8); const strong=v.pop(); haptic(20); const strongEm=v.pop();
 document.querySelector('#haptics-section .g-sw').click(); v.length=0; haptic(8); const off=v.length;
-SETTINGS_TOGGLES.training=true;renderAsetukset();document.getElementById('stgl-content-training').style.display='';
-const sl=[...document.querySelectorAll('#gym-settings .g-seg button')].map(b=>b.innerText);
-[...document.querySelectorAll('#gym-settings .g-seg button')].find(b=>b.innerText==='Kova').click();
+openGymSettings();
+const sl=[...document.querySelectorAll('#g-settings-body .g-seg button')].map(b=>b.innerText);
+[...document.querySelectorAll('#g-settings-body .g-seg button')].find(b=>b.innerText==='Kova').click();
 return {def,st,segs,strong,strongEm,off,sl,lvl:gymCfg().soundLevel,saved:JSON.parse(localStorage.getItem('seuranta-settings')).gym.soundLevel};});
 ok(r.def===30,'oletus: normaali 30 ms ('+r.def+')');
 ok(r.st===30,'painon +/− värisee');

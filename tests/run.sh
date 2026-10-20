@@ -15,7 +15,7 @@ git show 46c3ab1:index.html > "$TMP/old/index.html"
 (cd "$TMP/new" && exec python3 -m http.server 8765 >/dev/null 2>&1) & P1=$!
 (cd "$TMP/old" && exec python3 -m http.server 8766 >/dev/null 2>&1) & P2=$!
 sleep 1
-TESTS=("$@"); [ ${#TESTS[@]} -eq 0 ] && TESTS=(test-gym.js test-sync.js test-r1.js test-delete.js test-haptics.js test-news.js test-exmeta.js test-safety.js test-fonts.js test-restore.js test-onboarding.js test-gymonly.js test-effort.js)
+TESTS=("$@"); [ ${#TESTS[@]} -eq 0 ] && TESTS=(test-gym.js test-sync.js test-r1.js test-delete.js test-haptics.js test-news.js test-exmeta.js test-safety.js test-fonts.js test-restore.js test-onboarding.js test-gymonly.js test-effort.js test-gymsettings.js)
 FAIL=0
 for t in "${TESTS[@]}"; do
   if [ "$t" = test-news.js ] && [ ! -f "$TMP/new/jarkale-pilotti/index.html" ]; then echo "$t: ohitettu (ei ../jarkale-pilotti)"; continue; fi

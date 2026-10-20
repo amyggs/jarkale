@@ -23,10 +23,11 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.evaluate(()=>effTxt(gSession(G.activeId).exercises[0].sets)===''),'ei tekstiä ilman tilaa');
 
   console.log('\nAsetus');
-  await p.evaluate(()=>{ GU.mode='home'; SETTINGS_TOGGLES.training=true; setTab('asetukset'); renderAsetukset(); });
-  const st=await p.locator('#gym-settings').innerText();
+  await p.evaluate(()=>{ GU.mode='home'; setTab('treeni'); openGymSettings(); });
+  await p.waitForTimeout(150);
+  const st=await p.locator('#g-settings-body').innerText();
   ok(/Ponnistuksen kirjaus/.test(st)&&/RIR/.test(st)&&/RPE/.test(st),'Asetuksissa on valinta Pois / RIR / RPE');
-  await p.locator('#gym-settings .g-seg button',{hasText:'RIR'}).last().click(); await p.waitForTimeout(100);
+  await p.locator('#g-settings-body .g-seg button',{hasText:'RIR'}).last().click(); await p.waitForTimeout(100);
   ok(await p.evaluate(()=>gymCfg().effort==='rir'),'RIR-valinta tallentuu');
 
   console.log('\nRIR: − / + -säädin');

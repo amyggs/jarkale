@@ -2123,7 +2123,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.86</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.87</span>
       </div>
     </div>
   </div>
@@ -2157,6 +2157,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.87", d:"lokakuu 2026", items:[
+    "Treeniasetukset siirtyivät Treeni-välilehdelle: Treeni-kodin Asetukset-nappi avaa taukoajastimen, äänen, värinän, näytön, painon askeleen ja ponnistuksen kirjauksen valinnat selityksineen. Pääasetuksissa on enää vain Saliohjelmat-kytkin, jolla treeniosion saa päälle."
+  ]},
   {v:"2.18.86", d:"lokakuu 2026", items:[
     "Treeniin valinnainen ponnistuksen kirjaus: Asetukset → Treeni- ja kausiasetukset → Ponnistuksen kirjaus → RIR tai RPE. Oletuksena pois. Kun päällä, sarjan alle tulee − / + -säädin (RIR 0–4+ tai RPE ≤6–10), jonka harmaa ehdotus tulee edellisestä sarjasta tai viime kerrasta.",
     "Sarjarivin koko mukautuu: ilman ponnistuksen kirjausta kentät ja napit ovat isompia, ja kun se on päällä, rivi tiivistyy säätimen tieltä.",
@@ -9288,30 +9291,42 @@ function setGymEnabled(v){
   saveAll(); applyGymVisibility(); renderGymSettings();
 }
 function setGymOpt(k,v){ S.settings.gym={...gymCfg(),[k]:v}; saveAll(); renderGymSettings(); if(k==="wakeLock") gymWakeLock(!!v); }
-function renderGymSettings(){
-  const el=document.getElementById("gym-settings"); if(!el) return;
-  const c=gymCfg();
-  const tg=(on,fn,lbl,sub)=>`<div class="g-set-row"><span><span style="font-size:14px;color:var(--text);font-weight:600">${lbl}</span>${sub?`<span style="display:block;font-size:12px;color:var(--dim);margin-top:2px">${sub}</span>`:""}</span>
+const gSetRow=(on,fn,lbl,sub)=>`<div class="g-set-row"><span><span style="font-size:14px;color:var(--text);font-weight:600">${lbl}</span>${sub?`<span style="display:block;font-size:12px;color:var(--dim);margin-top:2px">${sub}</span>`:""}</span>
     <button onclick="${fn}" role="switch" aria-checked="${on}" class="g-sw${on?" on":""}"><span></span></button></div>`;
-  let h=tg(c.enabled,`setGymEnabled(${!c.enabled})`,"Saliohjelmat ja treeniseuranta","Omat ohjelmat, sarjakirjaus ja taukoajastin. Tuo Treeni-välilehden.");
-  if(c.enabled){
+// v2.18.87: treeniasetukset (ajastin, ääni, värinä, näyttö, painon askel, ponnistus) asuvat Treeni-välilehdellä (GU.mode "settings").
+// Pääasetuksissa on vain pääkytkin ja linkki sinne, jotta salilla käytettävät valinnat ovat siellä, missä niitä käytetään.
+function gymSettingsHTML(){
+  const c=gymCfg(), tg=gSetRow; let h="";
     h+=tg(c.wakeLock,`setGymOpt('wakeLock',${!c.wakeLock})`,"Näyttö päällä treenin ajan","Taukoajastin hälyttää vain, kun näyttö on päällä.");
-    h+=tg(c.autoRest,`setGymOpt('autoRest',${!c.autoRest})`,"Käynnistä tauko automaattisesti","Sarjan kuittaus käynnistää viimeksi käytetyn tauon. Ei liikkeen viimeisen sarjan jälkeen.");
-    h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
-    if(c.sound){ const lv=c.soundLevel||"normal";
-      h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶</button></div>`; }
-    h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
-    // v2.18.64 painon pikasäädön askel
-    { const st=KG_STEPS.includes(+c.kgStep)?+c.kgStep:1.25;
-      h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
-        <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
-    { const ef=c.effort||"";
-      h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Ponnistuksen kirjaus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
-        <div class="g-seg" role="radiogroup" aria-label="Ponnistuksen kirjaus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
-  } else if(G.programs.length||G.sessions.length){
-    h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
+  h+=tg(c.autoRest,`setGymOpt('autoRest',${!c.autoRest})`,"Käynnistä tauko automaattisesti","Sarjan kuittaus käynnistää viimeksi käytetyn tauon. Ei liikkeen viimeisen sarjan jälkeen.");
+  h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
+  if(c.sound){ const lv=c.soundLevel||"normal";
+    h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶</button></div>`; }
+  h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
+  // v2.18.64 painon pikasäädön askel
+  { const st=KG_STEPS.includes(+c.kgStep)?+c.kgStep:1.25;
+    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
+      <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
+  { const ef=c.effort||"";
+    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Ponnistuksen kirjaus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
+      <div class="g-seg" role="radiogroup" aria-label="Ponnistuksen kirjaus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
+  return h;
+}
+function openGymSettings(){ GU.mode="settings"; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); }
+function gymSettingsViewHTML(){
+  return `<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0"><div class="tr-h1">Treeniasetukset</div><div class="tr-h2">Muutokset tallentuvat heti.</div></div></div></div>
+    <div class="card" id="g-settings-body">${gymSettingsHTML()}</div><div style="height:30px"></div>`;
+}
+function renderGymSettings(){
+  const c=gymCfg();
+  const el=document.getElementById("gym-settings");
+  if(el){
+    let h=gSetRow(c.enabled,`setGymEnabled(${!c.enabled})`,"Saliohjelmat ja treeniseuranta","Omat ohjelmat, sarjakirjaus ja taukoajastin. Tuo Treeni-välilehden.");
+    if(c.enabled) h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ajastin, ääni, värinä, näyttö, painon askel ja ponnistuksen kirjaus: Treeni-välilehden Asetukset-nappi.</div>`;
+    else if(G.programs.length||G.sessions.length) h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
+    el.innerHTML=h;
   }
-  el.innerHTML=h;
+  if(S.tab==="treeni"&&GU.mode==="settings"&&gymOn()) renderGym();
 }
 
 // ── Kirjaa-näkymän tiivis kortti (vain kun ominaisuus on päällä)
@@ -9342,6 +9357,7 @@ function renderGym(){
     :GU.mode==="edit"?gymEditHTML(gProg(GU.progId))
     :GU.mode==="exercise"?gymExerciseHTML(GU.exKey)
     :GU.mode==="import"?gymImportHTML()
+    :GU.mode==="settings"?gymSettingsViewHTML()
     :gymHomeHTML(); } finally { PREV_MEMO=null; G_FLASH.clear(); }
   renderTimer(); timerLoop();
   navUpdate();
@@ -9359,7 +9375,7 @@ function gymHomeHTML(){
   // v2.18.78: yhdellä ohjelmalla Ohjelmat-osio piilossa; ohjelmalista avautuu otsikon alta
   const progSingle=!!p&&active.length<=1&&!archived.length;
   h+=`<div class="tr-h2">${p?`${p.days.length} treenipäivää`:"Ei vielä ohjelmaa"}${progSingle?` · <button class="tr-proglink" aria-expanded="${!!GU.progOpen}" onclick="GU.progOpen=!GU.progOpen;GU.newOpen=!!GU.progOpen&&GU.newOpen;renderGym()">Ohjelmat ${GU.progOpen?"▾":"▸"}</button>`:""}</div></div>`;
-  if(p) h+=`<button class="tr-pill" onclick="gOpenEdit('${p.id}',false)">Muokkaa</button>`;
+  h+=`<div style="display:flex;gap:8px;flex-shrink:0">${p?`<button class="tr-pill" onclick="gOpenEdit('${p.id}',false)">Muokkaa</button>`:""}<button class="tr-pill" onclick="openGymSettings()">Asetukset</button></div>`;
   h+=`</div></div><!--PROGS-->`;
   if(act){
     const st=sessionStats(act);

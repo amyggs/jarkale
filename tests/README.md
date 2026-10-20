@@ -19,6 +19,7 @@ tests/run.sh test-gym.js
 | `test-news.js` | Pilotin uutiskortti (tarvitsee `../jarkale-pilotti`) |
 | `test-gymonly.js` | Pelkkää treeniä kirjaavan polku: Trendit, Mitat piilossa, ensimmäinen yhteenveto, tuonnin nimi ja Tallenna-nappi, viikkorivin selite |
 | `test-effort.js` | Valinnainen ponnistuksen kirjaus (RIR/RPE): asetus, valinta kuitatun sarjan alla, tallennus RPE:nä, yhteenveto, edellinen kerta, jako |
+| `test-gymsettings.js` | Treeniasetukset Treeni-välilehdellä, pääasetuksissa vain pääkytkin, takaisin-ele, kapea näyttö |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
