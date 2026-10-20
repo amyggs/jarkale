@@ -500,7 +500,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     await p.evaluate(()=>{localStorage.setItem('seuranta-coach-2026-09-28','{"text":"x"}');});
     await p.reload(); await p.waitForTimeout(500);
     ok(await p.evaluate(()=>localStorage.getItem('seuranta-coach-2026-09-28')===null),'vanhat valmentajaraporttien välimuistit siivotaan');
-    await p.evaluate(()=>{setTab('trendit');S.rangeId='vko';S.periodOffset=-1;S.trendToggles={analysis:true};renderTrendit();});
+    await p.evaluate(()=>{localStorage.setItem('seuranta-apikey','sk-ant-test-123456');setTab('trendit');S.rangeId='vko';S.periodOffset=-1;S.trendToggles={analysis:true};renderTrendit();}); // v2.18.82: kortti näkyy vain avaimen kanssa
     const vk=await p.locator('#trendit-content').innerText();
     ok(!/Valmentaja/.test(vk)&&!/Viikkokooste/.test(vk),'Valmentajalle-raportti ja erillinen viikkokooste poistettu');
     ok(/Kirjallinen yhteenveto/.test(vk),'viikkonäkymässä kirjallinen yhteenveto');
