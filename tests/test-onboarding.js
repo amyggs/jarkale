@@ -56,6 +56,15 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.evaluate(()=>gymOn()&&getComputedStyle(document.getElementById('nav-treeni')).display!=='none'&&S.tab!=='treeni'),'"Molempia" ottaa treenimoduulin käyttöön ja jää Kirjaa-näkymään');
   ok(await p.evaluate(()=>!!document.getElementById('nav-trendit')),'päänavigointi toimii');
 
+  console.log('\nTekoälykortti Trendeissä (oikea näkymä)');
+  await p.evaluate(()=>{ localStorage.removeItem('seuranta-apikey'); setTab('trendit'); S.rangeId='d28'; renderTrendit(); });
+  await p.waitForTimeout(500);
+  ok(!/Kirjallinen yhteenveto/.test(await p.locator('#trendit-content').innerText()),'28 pv -näkymässä ei AI-korttia ilman avainta');
+  await p.evaluate(()=>{ S.rangeId='vko'; S.periodOffset=-1; S.trendToggles={analysis:true}; renderTrendit(); }); await p.waitForTimeout(500);
+  ok(!/Kirjallinen yhteenveto/.test(await p.locator('#trendit-content').innerText()),'viikkonäkymässä ei AI-korttia ilman avainta');
+  await p.evaluate(()=>{ localStorage.setItem('seuranta-apikey','sk-ant-test-123456'); S.rangeId='d28'; renderTrendit(); }); await p.waitForTimeout(500);
+  ok(/Kirjallinen yhteenveto/.test(await p.locator('#trendit-content').innerText()),'avaimen kanssa 28 pv -näkymässä kortti näkyy');
+  await p.evaluate(()=>{ localStorage.removeItem('seuranta-apikey'); });
   console.log('\nTekoälykortti');
   const c=await p.evaluate(()=>{ localStorage.removeItem('seuranta-apikey'); const a=buildAnalysisSectionHTML([], '2026-09-01','r',100,'2026-09-01','2026-09-30'); localStorage.setItem('seuranta-apikey','sk-ant-test-123456'); const b2=buildAnalysisSectionHTML([], '2026-09-01','r',100,'2026-09-01','2026-09-30'); localStorage.removeItem('seuranta-apikey'); return {no:a, yes:b2}; });
   ok(c.no==='','ilman API-avainta korttia ei näytetä');

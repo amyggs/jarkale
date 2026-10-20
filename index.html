@@ -2108,7 +2108,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.83</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.84</span>
       </div>
     </div>
   </div>
@@ -2142,6 +2142,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.84", d:"lokakuu 2026", items:[
+    "Trendit: \"Kirjallinen yhteenveto – tarvitsee vähintään 7 kirjausta\" -ilmoitus ei enää näy ilman API-avainta. Aiempi korjaus (2.18.82) piilotti kortin vain viikkonäkymästä."
+  ]},
   {v:"2.18.83", d:"lokakuu 2026", items:[
     "Versioteksti Asetusten alareunassa luettavammaksi (aiemmin lähes taustan värinen)."
   ]},
@@ -5254,6 +5257,12 @@ ${dayLines?`\nPÄIVÄKOHTAISET KIRJAUKSET (taustaksi, erilliset merkinnät | -me
 }
 
 function initPeriodSummaryCard(start,end,rangeLabel,curr){
+  // v2.18.84: ilman API-avainta ei näytetä "tarvitaan 7 kirjausta" -korttia (umpikuja); aiemmin tehty yhteenveto näytetään silti
+  if(!getApiKey()){
+    let cached=null; try{ const raw=localStorage.getItem(periodCacheKey(start,end)); if(raw){ const c=JSON.parse(raw); if(c&&c.text) cached=c.text; } }catch(_){}
+    if(cached) renderPeriodSummaryCard(start,end,"done",cached); else renderPeriodSummaryCard(start,end,"empty");
+    return;
+  }
   const ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end);
   const minN=summaryMinEntries(start,end);
   if(ue.length<minN){
