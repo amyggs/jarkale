@@ -26,10 +26,17 @@
   set(); window.addEventListener("orientationchange",function(){setTimeout(set,200);}); window.addEventListener("resize",set);
 }catch(_){}})();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet" crossorigin>
+<link rel="preload" href="fonts/manrope-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* v2.18.80: kaikki fontit omalta palvelimelta (ei Google Fontsia): ei render-blokkausta heikolla verkolla, toimii offline, ei IP:n luovutusta Googlelle */
+@font-face{font-family:"Manrope";font-weight:400;src:url(fonts/manrope-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Manrope";font-weight:500;src:url(fonts/manrope-latin-500-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Manrope";font-weight:600;src:url(fonts/manrope-latin-600-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Manrope";font-weight:700;src:url(fonts/manrope-latin-700-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Manrope";font-weight:800;src:url(fonts/manrope-latin-800-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"Share Tech Mono";src:url(fonts/share-tech-mono-latin-400-normal.woff2) format("woff2");font-display:swap;}
+@font-face{font-family:"VT323";src:url(fonts/vt323-latin-400-normal.woff2) format("woff2");font-display:swap;}
 :root{
   --bg:#0B0B0A;
   --surf:#151513;
@@ -2095,7 +2102,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.79</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.80</span>
       </div>
     </div>
   </div>
@@ -2129,6 +2136,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.80", d:"lokakuu 2026", items:[
+    "Sovellus avautuu nopeasti myös heikolla verkolla: fontit tulevat sovelluksen omalta palvelimelta eikä Google Fontsista. Aiemmin hidas yhteys saattoi jättää ruudun tyhjäksi useiksi sekunneiksi.",
+    "Päivitys ei enää lataa sivua uudelleen kesken treenin tai kentän muokkauksen. Ensimmäisellä avauksella ylimääräinen uudelleenlataus jää pois."
+  ]},
   {v:"2.18.79", d:"lokakuu 2026", items:[
     "Korjaus: Asetusten perustavoitteet (uni, treenit viikossa, cardio, mittausväli) tallentuvat taas. Ne eivät tallentuneet 12.10. jälkeen.",
     "Vioittunut tallenne ei enää katoa hiljaa: jos tallennettua dataa ei saa auki, se säilytetään erillisenä ja ilmoitetaan.",
@@ -10358,11 +10369,20 @@ if('serviceWorker' in navigator){
       // v2.17.7: tarkista uusi versio myös, kun sovellus palaa taustalta (kotinäytön sovellus voi olla auki päiviä)
       document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') reg.update().catch(()=>{}); });
     }).catch(err=>console.warn('SW rekisteröinti epäonnistui:',err));
-    // Lataa sivu uudelleen kun uusi SW ottaa hallinnan
-    let refreshing=false;
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      if(!refreshing){refreshing=true;window.location.reload();}
-    });
+    // Lataa sivu uudelleen kun uusi SW ottaa hallinnan.
+    // v2.18.80: ei ensiasennuksessa (sivu on jo ajan tasalla), eikä kesken treenin tai kentän muokkauksen:
+    // silloin lataus odottaa, kunnes sovellus menee taustalle.
+    const hadController=!!navigator.serviceWorker.controller;
+    let refreshing=false, reloadPending=false;
+    window.jSwReload=function(){
+      if(refreshing) return "done";
+      const a=document.activeElement;
+      const busy=(typeof G!=="undefined"&&G&&G.activeId)||(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+      if(busy){ reloadPending=true; return "deferred"; }
+      refreshing=true; window.location.reload(); return "reload";
+    };
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(hadController) window.jSwReload(); });
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&reloadPending&&!refreshing){ refreshing=true; window.location.reload(); } });
   });
 }
 
