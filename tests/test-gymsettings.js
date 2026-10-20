@@ -18,7 +18,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ SETTINGS_TOGGLES.training=true; setTab('asetukset'); renderAsetukset(); document.getElementById('stgl-content-training').style.display=''; });
   const main=await p.locator('#gym-settings').innerText();
   ok(/Saliohjelmat ja treeniseuranta/.test(main),'pääasetuksissa on Saliohjelmat-kytkin');
-  ok(!/Ajastimen ääni|Painon − \/ \+ -askel|Ponnistuksen kirjaus|Näyttö päällä/.test(main),'ajastin-, ääni-, askel- ja ponnistusvalintoja ei ole pääasetuksissa');
+  ok(!/Ajastimen ääni|Painon − \/ \+ -askel|Koettu rasittavuus|Näyttö päällä/.test(main),'ajastin-, ääni-, askel- ja rasittavuusvalintoja ei ole pääasetuksissa');
   ok(/Treeni-välilehden Asetukset-nappi/.test(main),'ohje kertoo, mistä treeniasetukset löytyvät');
   await p.locator('#gym-settings .g-sw').first().click(); await p.waitForTimeout(100);
   ok(await p.evaluate(()=>!gymOn()&&getComputedStyle(document.getElementById('nav-treeni')).display==='none'),'kytkin pois: Treeni-välilehti piiloutuu');
@@ -31,13 +31,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.getByRole('button',{name:'Asetukset',exact:true}).first().isVisible(),'Treeni-kodissa on Asetukset-nappi (myös ilman ohjelmaa)');
   await p.locator('#view-treeni .tr-pill',{hasText:'Asetukset'}).click(); await p.waitForTimeout(150);
   let t=await p.locator('#view-treeni').innerText();
-  ok(/Treeniasetukset/.test(t)&&/Näyttö päällä treenin ajan/.test(t)&&/Käynnistä tauko automaattisesti/.test(t)&&/Ajastimen ääni/.test(t)&&/Ajastimen värinä/.test(t)&&/Painon − \/ \+ -askel/.test(t)&&/Ponnistuksen kirjaus/.test(t),'näkymässä kaikki treeniasetukset selityksineen');
+  ok(/Treeniasetukset/.test(t)&&/Näyttö päällä treenin ajan/.test(t)&&/Käynnistä tauko automaattisesti/.test(t)&&/Ajastimen ääni/.test(t)&&/Ajastimen värinä/.test(t)&&/Painon − \/ \+ -askel/.test(t)&&/Koettu rasittavuus/.test(t),'näkymässä kaikki treeniasetukset selityksineen');
   ok(!/Saliohjelmat ja treeniseuranta/.test(t),'pääkytkin ei ole tässä näkymässä');
   await p.locator('#g-settings-body .g-set-row',{hasText:'Ajastimen ääni'}).locator('.g-sw').click(); await p.waitForTimeout(150);
   ok(await p.evaluate(()=>gymCfg().sound===false&&GU.mode==='settings'),'kytkin tallentuu ja näkymä pysyy auki');
   ok(!/Hiljainen/.test(await p.locator('#view-treeni').innerText()),'äänen ollessa pois äänitasot piiloutuvat');
   await p.locator('#g-settings-body .g-seg button',{hasText:'RPE'}).click(); await p.waitForTimeout(150);
-  ok(await p.evaluate(()=>gymCfg().effort==='rpe'),'ponnistuksen valinta tallentuu');
+  ok(await p.evaluate(()=>gymCfg().effort==='rpe'),'rasittavuuden valinta tallentuu');
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('seuranta-settings')).gym.effort==='rpe'),'ja päätyy localStorageen');
   await p.locator('.g-back').click(); await p.waitForTimeout(150);
   ok(await p.evaluate(()=>GU.mode==='home'),'paluulinkki vie Treeni-kotiin');

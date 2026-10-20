@@ -898,7 +898,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .set-eff .eb{flex:0 0 52px;}
 .set-eff .ev{flex:1;background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);font-variant-numeric:tabular-nums;}
 .set-eff .ev.ghost{background:transparent;border-color:var(--bord);color:var(--text);opacity:.45;}
-/* Ponnistus pois: isommat kentät ja napit. Päällä: tiiviimpi sarjarivi. :where() pitää spesifisyyden matalana, jotta teemojen omat mitat voittavat. */
+/* Rasittavuuden kirjaus pois: isommat kentät ja napit. Päällä: tiiviimpi sarjarivi. :where() pitää spesifisyyden matalana, jotta teemojen omat mitat voittavat. */
 :where(.sets:not(.eff)) .set .f{height:52px;font-size:20px;}
 :where(.sets:not(.eff)) .set .ck{width:52px;height:52px;}
 :where(.sets:not(.eff)) :is(.set,.set-h){grid-template-columns:28px 1.4fr 1fr 52px;}
@@ -2123,7 +2123,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.87</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.88</span>
       </div>
     </div>
   </div>
@@ -2157,12 +2157,15 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.88", d:"lokakuu 2026", items:[
+    "Ponnistuksen kirjaus nimettiin oikein: asetus on nyt Koettu rasittavuus (RIR = toistovara, RPE = koettu rasittavuus). Toiminta ei muuttunut."
+  ]},
   {v:"2.18.87", d:"lokakuu 2026", items:[
-    "Treeniasetukset siirtyivät Treeni-välilehdelle: Treeni-kodin Asetukset-nappi avaa taukoajastimen, äänen, värinän, näytön, painon askeleen ja ponnistuksen kirjauksen valinnat selityksineen. Pääasetuksissa on enää vain Saliohjelmat-kytkin, jolla treeniosion saa päälle."
+    "Treeniasetukset siirtyivät Treeni-välilehdelle: Treeni-kodin Asetukset-nappi avaa taukoajastimen, äänen, värinän, näytön, painon askeleen ja koetun rasittavuuden (RIR/RPE) valinnat selityksineen. Pääasetuksissa on enää vain Saliohjelmat-kytkin, jolla treeniosion saa päälle."
   ]},
   {v:"2.18.86", d:"lokakuu 2026", items:[
-    "Treeniin valinnainen ponnistuksen kirjaus: Asetukset → Treeni- ja kausiasetukset → Ponnistuksen kirjaus → RIR tai RPE. Oletuksena pois. Kun päällä, sarjan alle tulee − / + -säädin (RIR 0–4+ tai RPE ≤6–10), jonka harmaa ehdotus tulee edellisestä sarjasta tai viime kerrasta.",
-    "Sarjarivin koko mukautuu: ilman ponnistuksen kirjausta kentät ja napit ovat isompia, ja kun se on päällä, rivi tiivistyy säätimen tieltä.",
+    "Treeniin valinnainen koetun rasittavuuden kirjaus: Treeni → Asetukset → Koettu rasittavuus → RIR tai RPE. Oletuksena pois. Kun päällä, sarjan alle tulee − / + -säädin (RIR 0–4+ tai RPE ≤6–10), jonka harmaa ehdotus tulee edellisestä sarjasta tai viime kerrasta.",
+    "Sarjarivin koko mukautuu: ilman rasittavuuden kirjausta kentät ja napit ovat isompia, ja kun se on päällä, rivi tiivistyy säätimen tieltä.",
     "Arvo näkyy liikkeen edellisen kerran rivillä, tehdyn treenin yhteenvedossa, liikkeen historiassa ja jaossa. Tallennus on aina RPE:nä, joten tilan vaihto ei riko vanhoja merkintöjä."
   ]},
   {v:"2.18.85", d:"lokakuu 2026", items:[
@@ -9293,7 +9296,7 @@ function setGymEnabled(v){
 function setGymOpt(k,v){ S.settings.gym={...gymCfg(),[k]:v}; saveAll(); renderGymSettings(); if(k==="wakeLock") gymWakeLock(!!v); }
 const gSetRow=(on,fn,lbl,sub)=>`<div class="g-set-row"><span><span style="font-size:14px;color:var(--text);font-weight:600">${lbl}</span>${sub?`<span style="display:block;font-size:12px;color:var(--dim);margin-top:2px">${sub}</span>`:""}</span>
     <button onclick="${fn}" role="switch" aria-checked="${on}" class="g-sw${on?" on":""}"><span></span></button></div>`;
-// v2.18.87: treeniasetukset (ajastin, ääni, värinä, näyttö, painon askel, ponnistus) asuvat Treeni-välilehdellä (GU.mode "settings").
+// v2.18.87: treeniasetukset (ajastin, ääni, värinä, näyttö, painon askel, koettu rasittavuus) asuvat Treeni-välilehdellä (GU.mode "settings").
 // Pääasetuksissa on vain pääkytkin ja linkki sinne, jotta salilla käytettävät valinnat ovat siellä, missä niitä käytetään.
 function gymSettingsHTML(){
   const c=gymCfg(), tg=gSetRow; let h="";
@@ -9308,8 +9311,8 @@ function gymSettingsHTML(){
     h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
       <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
   { const ef=c.effort||"";
-    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Ponnistuksen kirjaus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
-      <div class="g-seg" role="radiogroup" aria-label="Ponnistuksen kirjaus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
+    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Koettu rasittavuus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = toistovara, eli montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
+      <div class="g-seg" role="radiogroup" aria-label="Koettu rasittavuus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
   return h;
 }
 function openGymSettings(){ GU.mode="settings"; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); }
@@ -9322,7 +9325,7 @@ function renderGymSettings(){
   const el=document.getElementById("gym-settings");
   if(el){
     let h=gSetRow(c.enabled,`setGymEnabled(${!c.enabled})`,"Saliohjelmat ja treeniseuranta","Omat ohjelmat, sarjakirjaus ja taukoajastin. Tuo Treeni-välilehden.");
-    if(c.enabled) h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ajastin, ääni, värinä, näyttö, painon askel ja ponnistuksen kirjaus: Treeni-välilehden Asetukset-nappi.</div>`;
+    if(c.enabled) h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ajastin, ääni, värinä, näyttö, painon askel ja koettu rasittavuus (RIR/RPE): Treeni-välilehden Asetukset-nappi.</div>`;
     else if(G.programs.length||G.sessions.length) h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
     el.innerHTML=h;
   }
@@ -9472,7 +9475,7 @@ function exerciseTrend(key){
 }
 
 const FEELS=[{id:"light",l:"Kevyt"},{id:"ok",l:"Sopiva"},{id:"hard",l:"Raskas"}];
-// v2.18.86: valinnainen ponnistuksen kirjaus (RIR tai RPE, asetus gym.effort). Tallennetaan aina RPE:nä (r.rpe 6–10; RIR = 10 − RPE, "4+" = 6),
+// v2.18.86: valinnainen koetun rasittavuuden kirjaus (RIR tai RPE, asetus gym.effort). Tallennetaan aina RPE:nä (r.rpe 6–10; RIR = 10 − RPE, "4+" = 6),
 // joten tilan vaihto Asetuksista ei riko vanhoja merkintöjä. Mittari näytetään vain valitussa tilassa; data säilyy, vaikka tila otetaan pois.
 function effTxt(sets){
   const m=gymCfg().effort; if(!m) return "";

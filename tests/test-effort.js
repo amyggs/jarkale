@@ -1,4 +1,4 @@
-// Järkäle Tracking v2.18.86 – valinnainen ponnistuksen kirjaus (RIR / RPE)
+// Järkäle Tracking v2.18.86 – valinnainen koetun rasittavuuden kirjaus (RIR / RPE)
 const { chromium, devices } = require('playwright');
 const fs = require('fs');
 const URL='http://localhost:8765/index.html';
@@ -19,14 +19,14 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
 
   console.log('\nOletus: pois');
   await doSet(0,80,8);
-  ok(await p.locator('.set-eff').count()===0,'oletuksena sarjan alla ei ponnistusvalintaa');
+  ok(await p.locator('.set-eff').count()===0,'oletuksena sarjan alla ei rasittavuusvalintaa');
   ok(await p.evaluate(()=>effTxt(gSession(G.activeId).exercises[0].sets)===''),'ei tekstiä ilman tilaa');
 
   console.log('\nAsetus');
   await p.evaluate(()=>{ GU.mode='home'; setTab('treeni'); openGymSettings(); });
   await p.waitForTimeout(150);
   const st=await p.locator('#g-settings-body').innerText();
-  ok(/Ponnistuksen kirjaus/.test(st)&&/RIR/.test(st)&&/RPE/.test(st),'Asetuksissa on valinta Pois / RIR / RPE');
+  ok(/Koettu rasittavuus/.test(st)&&/RIR/.test(st)&&/RPE/.test(st),'Asetuksissa on valinta Pois / RIR / RPE');
   await p.locator('#g-settings-body .g-seg button',{hasText:'RIR'}).last().click(); await p.waitForTimeout(100);
   ok(await p.evaluate(()=>gymCfg().effort==='rir'),'RIR-valinta tallentuu');
 
@@ -75,7 +75,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
       await p.evaluate(m=>{ setGymOpt('effort',m); setTab('treeni'); renderGym(); },mode); await p.waitForTimeout(120);
       await p.fill('[data-set="0-2"] input[data-f="kg"]','103,75'); await p.fill('[data-set="0-2"] input[data-f="reps"]','12');
       const g=await p.evaluate(()=>{ const row=document.querySelector('[data-set="0-2"]'); const rr=row.getBoundingClientRect(); const bad=[...row.querySelectorAll('input,button')].filter(e=>{ const r=e.getBoundingClientRect(); return r.right>rr.right+0.5||r.left<rr.left-0.5||(e.tagName==='INPUT'&&e.scrollWidth>e.clientWidth+1); }).length; return {bad, fh:Math.round(row.querySelector('.f').getBoundingClientRect().height), ck:Math.round(row.querySelector('.ck').getBoundingClientRect().height), kgw:row.querySelector('input[data-f=kg]').value, docW:document.documentElement.scrollWidth}; });
-      ok(g.bad===0&&g.docW<=w,`${w} px, ${mode?'ponnistus päällä':'pois'}: ei ylivuotoa (kentän korkeus ${g.fh}, nappi ${g.ck})`);
+      ok(g.bad===0&&g.docW<=w,`${w} px, ${mode?'rasittavuus päällä':'pois'}: ei ylivuotoa (kentän korkeus ${g.fh}, nappi ${g.ck})`);
       if(mode==='') ok(g.fh>=50,`${w} px: pois-tilassa kentät isompia (${g.fh} px)`); else ok(g.fh<=44,`${w} px: päällä-tilassa rivi tiiviimpi (${g.fh} px)`);
     }
   }
