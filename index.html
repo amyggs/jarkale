@@ -2,7 +2,7 @@
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Järkäle">
@@ -2095,7 +2095,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.78</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.79</span>
       </div>
     </div>
   </div>
@@ -2129,6 +2129,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.79", d:"lokakuu 2026", items:[
+    "Korjaus: Asetusten perustavoitteet (uni, treenit viikossa, cardio, mittausväli) tallentuvat taas. Ne eivät tallentuneet 12.10. jälkeen.",
+    "Vioittunut tallenne ei enää katoa hiljaa: jos tallennettua dataa ei saa auki, se säilytetään erillisenä ja ilmoitetaan.",
+    "Zoomaus sallittu (saavutettavuus)."
+  ]},
   {v:"2.18.78", d:"lokakuu 2026", items:[
     "Treeni-välilehti tiiviimmäksi: kun ohjelmia on yksi, Ohjelmat-osio on piilossa ja avautuu ohjelman nimen alta (Ohjelmat ▸). Liikkeiden tulokset -osion ohje lyhennetty yhteen riviin."
   ]},
@@ -3401,13 +3406,27 @@ let S = {
 };
 
 // ═══ LOCALSTORAGE ════════════════════════════════════════════════
+// v2.18.79: jos tallenne ei jäsenny, raakateksti säilytetään ennen kuin seuraava tallennus ylikirjoittaa sen
+var CORRUPT_FOUND=[];
+function keepCorrupt(key,raw){
+  try{ const k=key+"-corrupt-"+Date.now(); localStorage.setItem(k,raw); CORRUPT_FOUND.push(key); }catch(_){ CORRUPT_FOUND.push(key); }
+}
+function parseStored(key){
+  let raw=null; try{ raw=localStorage.getItem(key); }catch(_){ return null; }
+  if(raw==null||raw==="") return null;
+  try{ return JSON.parse(raw); }catch(_){ keepCorrupt(key,raw); return null; }
+}
+function warnCorrupt(){
+  if(!CORRUPT_FOUND.length) return;
+  const w=CORRUPT_FOUND.slice(); CORRUPT_FOUND=[];
+  setTimeout(()=>jAlert("⚠ Osa tallennetusta datasta ei avautunut ("+w.join(", ")+").\nVioittunut tieto on tallessa erillisenä, eikä sitä ole ylikirjoitettu. Palauta varmuuskopiosta Asetuksista tai kerro tekijälle."),600);
+}
 function loadAll() {
-  try { const e=localStorage.getItem("seuranta-entries"); if(e) S.entries=JSON.parse(e); } catch(_){}
-  try { const m=localStorage.getItem("seuranta-meas"); if(m) S.measurements=JSON.parse(m); } catch(_){}
+  { const e=parseStored("seuranta-entries"); if(e&&typeof e==="object"&&!Array.isArray(e)) S.entries=e; }
+  { const m=parseStored("seuranta-meas"); if(Array.isArray(m)) S.measurements=m; }
   try {
-    const raw=localStorage.getItem("seuranta-settings");
-    if(raw){
-      const parsed=JSON.parse(raw);
+    const parsed=parseStored("seuranta-settings");
+    if(parsed&&typeof parsed==="object"){
       S.settings={...S.settings,...parsed};
       if(!S.settings.profile) S.settings.profile={height:null,targetWeight:null};
       if(!S.settings.seasons) S.settings.seasons=[];
@@ -8417,7 +8436,7 @@ const GU={pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
 function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,kgStep:1.25,...(S.settings.gym||{})}; }
 function gymLoad(){
-  try{ const r=localStorage.getItem(GYM_KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==="object") G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; } }catch(_){}
+  { const d=parseStored(GYM_KEY); if(d&&typeof d==="object"&&!Array.isArray(d)) G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; }
   if(!Array.isArray(G.programs)) G.programs=[];
   if(!Array.isArray(G.sessions)) G.sessions=[];
 }
@@ -8537,7 +8556,7 @@ function goalTxt(g){
 }
 function goalInputTxt(g){ if(!g.sets) return ""; const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets}x${repsTxt(x,"-")}`).join(" & "):`${g.sets}x${repsTxt(g,"-")}`; return `${body}${g.weight!=null?" "+fmtKg(g.weight):""}`; }
 // Sarjan oma tavoite (sarjakohtaisissa tavoitteissa ryhmän mukaan), muuten liikkeen tavoite
-function setGoal(g,i){
+function setGoalAt(g,i){
   if(!g) return null;
   if(g.groups&&g.groups.length>1){ let n=0; for(const x of g.groups){ n+=x.sets; if(i<n) return x; } return g.groups[g.groups.length-1]; }
   return g.sets?g:null;
@@ -8763,7 +8782,7 @@ function ghostFor(s,ex,i){
   const prev=prevFor(ex.key,s);
   const pr=prev&&prev.sets[Math.min(i,prev.sets.length-1)];
   if(pr) return {kg:pr.kg,reps:pr.reps};
-  const g=ex.goal||{}, sg=setGoal(g,i)||{};
+  const g=ex.goal||{}, sg=setGoalAt(g,i)||{};
   return {kg:g.weight??null,reps:sg.max?null:(sg.repsMin??null)};
 }
 const KG_STEPS=[0.5,1,1.25,2.5,5];
@@ -9494,7 +9513,7 @@ function gymSessionHTML(s){
       const gh=ghostFor(s,ex,ri), adj=ri===adjRi; // v2.18.65: − / + kg-kentän sisällä seuraavana vuorossa olevalla sarjalla
       // v2.18.76: merkki vain sarjalle, joka on parempi kuin aiemmat treenit JA tämän treenin aiemmat sarjat (3 × sama ennätys = yksi merkki)
       const pr=isPR(r,prevSets)&&isPR(r,ex.sets.slice(0,ri).filter(x=>x.done).concat(prevSets));
-      const sgx=ex.goal&&ex.goal.groups&&ex.goal.groups.length>1?setGoal(ex.goal,ri):null;
+      const sgx=ex.goal&&ex.goal.groups&&ex.goal.groups.length>1?setGoalAt(ex.goal,ri):null;
       h+=`<div class="set${r.done?" done":""}${G_FLASH.has("set-"+ex.id+"-"+ri)?" pop":""}" data-set="${ei}-${ri}"><span class="no">${ri+1}${sgx?`<small>${repsTxt(sgx)}</small>`:""}</span>
         ${adj?`<div class="kgw"><button class="kgb" aria-label="Paino −${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},-kgStep())">−</button><input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${ri+1} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)"><button class="kgb" aria-label="Paino +${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},kgStep())">+</button></div>`:`<input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${ri+1} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)">`}
         <input class="f" data-f="reps" inputmode="numeric" enterkeyhint="done" aria-label="Sarja ${ri+1} toistot" value="${r.reps!=null?r.reps:""}" placeholder="${gh.reps!=null?gh.reps:"–"}" oninput="gSetVal('${sid}',${ei},${ri},'reps',this.value)" onkeydown="if(event.key==='Enter'){this.blur();gToggleSet('${sid}',${ei},${ri})}">
@@ -10154,6 +10173,7 @@ function navInit(){ try{ history.replaceState({jk:0},""); }catch(_){} NAV_LEN=0;
 // ═══ INIT ═══════════════════════════════════════════════════════
 loadAll();
 gymLoad();
+warnCorrupt();
 // v2.9.1: poistetun tekoälyn päivähavainnon välimuistirivit pois (kertaluonteinen siivous, vaaraton toistaa)
 try{ for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith("jarkale-daily-")||k.startsWith("seuranta-coach-")||k.startsWith("seuranta-wsummary-"))) localStorage.removeItem(k); } }catch(_){} // v2.11.6: poistettujen viikkokoosteen ja valmentajaraportin välimuistit
 // Trendit-näkymän muistetut valinnat (jakso + avatut osiot). Vapaa-jaksoa ei palauteta, koska sen päivämäärät eivät säily.

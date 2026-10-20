@@ -15,6 +15,7 @@ tests/run.sh test-gym.js
 | `test-r1.js` | Päiväkirjaus, Päivän tila, PT-vienti ja taaksepäinyhteensopivuus vanhaan versioon (v2.9.3, haetaan gitistä) |
 | `test-delete.js` | Päivän kirjauksen poisto, Kumoa, salitreenipäivä |
 | `test-haptics.js` | Kosketusvärinän tasot |
+| `test-safety.js` | Eheys: ei kaksoismäärittelyjä, perustavoitteet tallentuvat, vioittunut tallenne säilyy, (myöhemmin) nollaus/palautus synkronoinnin kanssa, fontit paikallisesti |
 | `test-news.js` | Pilotin uutiskortti (tarvitsee `../jarkale-pilotti`) |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
