@@ -892,6 +892,20 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ex-feel span{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-right:2px;}
 .ex-feel button{flex:1;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 13px Manrope,system-ui,sans-serif;min-height:36px;}
 .ex-feel button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
+.set-eff{display:flex;align-items:center;gap:6px;margin:-1px 0 8px 36px;}
+.set-eff .lb{font:700 11px Manrope,system-ui,sans-serif;color:var(--dim);min-width:28px;}
+.set-eff button{border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 18px Manrope,system-ui,sans-serif;min-height:38px;padding:0;}
+.set-eff .eb{flex:0 0 52px;}
+.set-eff .ev{flex:1;background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);font-variant-numeric:tabular-nums;}
+.set-eff .ev.ghost{background:transparent;border-color:var(--bord);color:var(--text);opacity:.45;}
+/* Ponnistus pois: isommat kentät ja napit. Päällä: tiiviimpi sarjarivi. :where() pitää spesifisyyden matalana, jotta teemojen omat mitat voittavat. */
+:where(.sets:not(.eff)) .set .f{height:52px;font-size:20px;}
+:where(.sets:not(.eff)) .set .ck{width:52px;height:52px;}
+:where(.sets:not(.eff)) :is(.set,.set-h){grid-template-columns:28px 1.4fr 1fr 52px;}
+:where(.sets.eff) .set .f{height:42px;font-size:16px;}
+:where(.sets.eff) .set .ck{width:44px;height:42px;}
+:where(.sets.eff) :is(.set,.set-h){grid-template-columns:24px 1.4fr 1fr 44px;gap:6px;}
+.g-sum-list .v .g-eff{display:block;font:500 11px Manrope,system-ui,sans-serif;margin-top:1px;}
 .g-note{width:100%;box-sizing:border-box;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:500 14px/1.45 Manrope,system-ui,sans-serif;padding:10px 12px;outline:none;resize:vertical;margin:4px 0 6px;}
 .g-addrow,.ed-addrow{display:flex;gap:8px;align-items:center;margin-top:6px;}
 .g-finish{background:var(--surf);border-radius:16px;padding:16px;margin:4px 0 12px;box-shadow:inset 0 0 0 2px var(--text);}
@@ -2109,7 +2123,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.85</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.86</span>
       </div>
     </div>
   </div>
@@ -2143,6 +2157,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.86", d:"lokakuu 2026", items:[
+    "Treeniin valinnainen ponnistuksen kirjaus: Asetukset → Treeni- ja kausiasetukset → Ponnistuksen kirjaus → RIR tai RPE. Oletuksena pois. Kun päällä, sarjan alle tulee − / + -säädin (RIR 0–4+ tai RPE ≤6–10), jonka harmaa ehdotus tulee edellisestä sarjasta tai viime kerrasta.",
+    "Sarjarivin koko mukautuu: ilman ponnistuksen kirjausta kentät ja napit ovat isompia, ja kun se on päällä, rivi tiivistyy säätimen tieltä.",
+    "Arvo näkyy liikkeen edellisen kerran rivillä, tehdyn treenin yhteenvedossa, liikkeen historiassa ja jaossa. Tallennus on aina RPE:nä, joten tilan vaihto ei riko vanhoja merkintöjä."
+  ]},
   {v:"2.18.85", d:"lokakuu 2026", items:[
     "Pelkkää treeniä kirjaavalle: Trendit näyttää vain treenit (ei tyhjiä kehoseurannan kortteja), ja Mitat-välilehti piiloutuu, kunnes kehon seuranta otetaan käyttöön Asetuksista.",
     "Ensimmäisen treenin yhteenveto sanoo \"Ensimmäinen treeni tallennettu\" eikä \"Ei ennätyksiä\". Vertailu alkaa toisesta kerrasta.",
@@ -8576,7 +8595,7 @@ let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehd
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
 const GU={pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
-function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,kgStep:1.25,...(S.settings.gym||{})}; }
+function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,kgStep:1.25,effort:"",...(S.settings.gym||{})}; }
 function gymLoad(){
   { const d=parseStored(GYM_KEY); if(d&&typeof d==="object"&&!Array.isArray(d)) G={...G,...d,timer:{...G.timer,...(d.timer||{})}}; }
   if(!Array.isArray(G.programs)) G.programs=[];
@@ -9286,6 +9305,9 @@ function renderGymSettings(){
     { const st=KG_STEPS.includes(+c.kgStep)?+c.kgStep:1.25;
       h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
         <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
+    { const ef=c.effort||"";
+      h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Ponnistuksen kirjaus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
+        <div class="g-seg" role="radiogroup" aria-label="Ponnistuksen kirjaus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
   } else if(G.programs.length||G.sessions.length){
     h+=`<div style="font-size:12px;color:var(--dim);margin-top:6px">Ohjelmat ja treenihistoria säilyvät, vaikka ominaisuus on pois päältä.</div>`;
   }
@@ -9434,6 +9456,43 @@ function exerciseTrend(key){
 }
 
 const FEELS=[{id:"light",l:"Kevyt"},{id:"ok",l:"Sopiva"},{id:"hard",l:"Raskas"}];
+// v2.18.86: valinnainen ponnistuksen kirjaus (RIR tai RPE, asetus gym.effort). Tallennetaan aina RPE:nä (r.rpe 6–10; RIR = 10 − RPE, "4+" = 6),
+// joten tilan vaihto Asetuksista ei riko vanhoja merkintöjä. Mittari näytetään vain valitussa tilassa; data säilyy, vaikka tila otetaan pois.
+function effTxt(sets){
+  const m=gymCfg().effort; if(!m) return "";
+  const v=(sets||[]).filter(x=>x&&x.done&&x.rpe!=null).map(x=>m==="rir"?10-x.rpe:x.rpe); if(!v.length) return "";
+  const lbl=n=>m==="rir"?(n>=4?"4+":String(n)):(n<=6?"≤6":String(n));
+  const lo=Math.min(...v), hi=Math.max(...v);
+  return `${m.toUpperCase()} ${lo===hi?lbl(lo):`${lbl(lo)}–${lbl(hi)}`}`;
+}
+// +/- -säädin kuten painossa: harmaa arvo = ehdotus (edellinen merkitty sarja, viimeksi samalla sarjanumerolla, muuten RIR 2 / RPE 8), ei tallennu ennen napautusta.
+// Napautus harmaaseen arvoon hyväksyy sen, napautus valittuun arvoon tyhjentää.
+function effUi(m,rpe){ return m==="rir"?Math.min(4,Math.max(0,10-rpe)):Math.min(10,Math.max(6,rpe)); }
+function effFromUi(m,u){ return m==="rir"?10-u:u; }
+function effLbl(m,u){ return m==="rir"?(u>=4?"4+":String(u)):(u<=6?"≤6":String(u)); }
+function effGhost(s,ex,ri,m){
+  for(let i=ri-1;i>=0;i--){ if(ex.sets[i].rpe!=null) return effUi(m,ex.sets[i].rpe); }
+  const pv=prevFor(ex.key,s), q=pv&&pv.sets.length?pv.sets[Math.min(ri,pv.sets.length-1)]:null;
+  if(q&&q.rpe!=null) return effUi(m,q.rpe);
+  return m==="rir"?2:8;
+}
+function effRowHTML(s,ex,sid,ei,ri,r,m){
+  const has=r.rpe!=null, u=has?effUi(m,r.rpe):effGhost(s,ex,ri,m), M=m.toUpperCase();
+  return `<div class="set-eff" role="group" aria-label="Sarja ${ri+1} ${M}"><span class="lb">${M}</span>
+    <button class="eb" aria-label="${M} pienemmäksi" onclick="gEffStep('${sid}',${ei},${ri},-1)">−</button>
+    <button class="ev${has?"":" ghost"}" aria-label="${has?`${M} ${effLbl(m,u)}, tyhjennä`:`Hyväksy ehdotus ${M} ${effLbl(m,u)}`}" onclick="gEffTap('${sid}',${ei},${ri})">${effLbl(m,u)}</button>
+    <button class="eb" aria-label="${M} suuremmaksi" onclick="gEffStep('${sid}',${ei},${ri},1)">+</button></div>`;
+}
+function gEffSave(s){ s.dirtyAt=Date.now(); haptic(10); gymSave(); renderGym(); }
+function gEffStep(sid,ei,ri,d){
+  const s=gSession(sid); if(!s) return; const ex=s.exercises[ei], r=ex.sets[ri], m=gymCfg().effort; if(!m||!r) return;
+  const lo=m==="rir"?0:6, hi=m==="rir"?4:10, base=r.rpe!=null?effUi(m,r.rpe):effGhost(s,ex,ri,m);
+  r.rpe=effFromUi(m,Math.min(hi,Math.max(lo,base+d))); gEffSave(s);
+}
+function gEffTap(sid,ei,ri){
+  const s=gSession(sid); if(!s) return; const ex=s.exercises[ei], r=ex.sets[ri], m=gymCfg().effort; if(!m||!r) return;
+  r.rpe=r.rpe!=null?null:effFromUi(m,effGhost(s,ex,ri,m)); gEffSave(s);
+}
 const feelTxt=f=>(FEELS.find(x=>x.id===f)||{}).l||"";
 // v2.18.17: peräkkäiset saman painon sarjat ryhmitellään: "105 × 10, 10, 10 · 65 × 13".
 // Ryhmän sisällä sitovat välilyönnit (\u00a0), joten rivi katkeaa vain ryhmien välistä.
@@ -9499,7 +9558,7 @@ function gymSummaryHTML(s,fresh){
   h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
   if(S2.prs.length) h+=`<div class="g-sum-pr">${S2.prs.map(p=>`<div><span class="pr-tag">Ennätys</span><span><b>${esc(p.ex.name)}</b> ${setOneTxt(p.set)}${p.was?`<small>${p.was}</small>`:""}${p.set.kg&&p.set.reps&&p.set.reps<=12?`<small>arv. 1RM ~${fmtKg(Math.round(e1rm(p.set.kg,p.set.reps)*2)/2)} kg</small>`:""}</span></div>`).join("")}</div>`;
   h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
-    :`<div><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</span></div>`).join("")}</div>
+    :`<div><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}${effTxt(r.done)?`<small class="g-eff">${effTxt(r.done)}</small>`:""}</span></div>`).join("")}</div>
     <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla."}</div></div>`;
   return h;
 }
@@ -9510,7 +9569,7 @@ function sessionShareText(s){
   L.push(`${S2.st.done}/${S2.st.exN} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`);
   if(S2.prs.length){ L.push("",`Ennätykset (${S2.prs.length}):`); S2.prs.forEach(p=>L.push(`• ${p.ex.name} ${setOneTxt(p.set)}${p.was?` (${p.was})`:""}`)); }
   L.push("");
-  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else L.push(`${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); });
+  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else L.push(`${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); });
   L.push("","Järkäle tracking");
   return L.join("\n");
 }
@@ -9563,7 +9622,7 @@ async function gSessionImage(s){
     if(S2.prs.length) y+=6;
     S2.rows.forEach(r=>{
       if(draw){ x.fillStyle=C.bord; x.globalAlpha=.6; x.fillRect(P+16,y,IW-32,1); x.globalAlpha=1; } y+=10;
-      const val=r.skipped?(r.ex.skipped?"ohitettu":"ei tehty"):setsTxt(r.done)+(r.dir?` ${DIR_SYM[r.dir]}`:"");
+      const val=r.skipped?(r.ex.skipped?"ohitettu":"ei tehty"):setsTxt(r.done)+(r.dir?` ${DIR_SYM[r.dir]}`:"")+(effTxt(r.done)?` · ${effTxt(r.done)}`:"");
       font(600,14,FB); const vl=wrap(val,(IW-32)*.48); const vw=Math.max(...vl.map(l=>x.measureText(l).width));
       font(700,15,FB); const nl=wrap(r.ex.name,IW-32-vw-12);
       const y0=y;
@@ -9647,12 +9706,13 @@ function gymSessionHTML(s){
     // v2.18.25: supersarja näkyvänä merkkinä, ei pienenä huomiotekstinä
     if(ex.note){ const m=/^Supersarja:\s*(.+)$/i.exec(ex.note); h+=m?`<div class="ex-ss">⇄ Supersarja: ${esc(m[1])}</div>`:`<div class="ex-prev">${esc(ex.note)}</div>`; }
     if(prev){
-      h+=`<div class="ex-prev">Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${prev.note?` <button class="nt" onclick="GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}</div>`;
+      h+=`<div class="ex-prev">Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${effTxt(prev.sets)?` · ${effTxt(prev.sets)}`:""}${prev.note?` <button class="nt" onclick="GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}</div>`;
       if(prev.note&&GU.prevNote[ex.id]) h+=`<div class="ex-pnote">${esc(prev.note)}</div>`;
     }
     // v2.18.63: arvioitu 1RM ei enää treenikortissa; näkyy ennätyksen yhteydessä ja liikkeen sivulla
-    h+=`<div class="sets"><div class="set-h"><span>#</span><span>kg</span><span>toistot</span><span></span></div>`;
+    h+=`<div class="sets${gymCfg().effort?" eff":""}"><div class="set-h"><span>#</span><span>kg</span><span>toistot</span><span></span></div>`;
     const adjRi=live?ex.sets.findIndex(x=>!x.done):-1;
+    const effMode=gymCfg().effort||"";
     ex.sets.forEach((r,ri)=>{
       const gh=ghostFor(s,ex,ri), adj=ri===adjRi; // v2.18.65: − / + kg-kentän sisällä seuraavana vuorossa olevalla sarjalla
       // v2.18.76: merkki vain sarjalle, joka on parempi kuin aiemmat treenit JA tämän treenin aiemmat sarjat (3 × sama ennätys = yksi merkki)
@@ -9663,6 +9723,7 @@ function gymSessionHTML(s){
         <input class="f" data-f="reps" inputmode="numeric" enterkeyhint="done" aria-label="Sarja ${ri+1} toistot" value="${r.reps!=null?r.reps:""}" placeholder="${gh.reps!=null?gh.reps:"–"}" oninput="gSetVal('${sid}',${ei},${ri},'reps',this.value)" onkeydown="if(event.key==='Enter'){this.blur();gToggleSet('${sid}',${ei},${ri})}">
         <button class="ck" aria-label="Sarja ${ri+1} ${r.done?"tehty, peru":"tehty"}" aria-pressed="${r.done}" onclick="gToggleSet('${sid}',${ei},${ri})">${ico("check",20)}</button>
         ${pr?`<span class="pr${prOnKg(r,prevSets)?" on-kg":""}${G_FLASH.has("pr-"+ex.id+"-"+ri)?" pop":""}" title="${prOnKg(r,prevSets)?"Raskain paino, jolla olet tehnyt tämän liikkeen":"Et ole aiemmin tehnyt tätä painoa näin monella toistolla"}">Ennätys</span>`:""}</div>`;
+      if(effMode&&(r.done||ri===adjRi)) h+=effRowHTML(s,ex,sid,ei,ri,r,effMode);
     });
     if(GU.prMsg[ex.id]) h+=`<div class="ex-prmsg${G_FLASH.has("prmsg-"+ex.id)?" in":""}" data-prmsg="${ex.id}" role="status">★ ${esc(GU.prMsg[ex.id])}</div>`;
     h+=`</div><div class="ex-act"><button onclick="gAddSet('${sid}',${ei})">+ Sarja</button>${ex.sets.length&&!ex.sets[ex.sets.length-1].done?`<button onclick="gRemoveSet('${sid}',${ei})">− Sarja</button>`:""}
@@ -9902,7 +9963,7 @@ function gymExerciseHTML(key){
     <div class="g-stats-note">Sarjat muodossa ${unit}.${best.top.kg!=null?" Arvioitu 1RM on laskennallinen ja järkevä noin 1–12 toiston sarjoista.":""}</div>`;
   h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
-  h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
+  h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}${effTxt(x.sets)?` · ${effTxt(x.sets)}`:""}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
   return h+`</div><div style="height:30px"></div>`;
 }
 
