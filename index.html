@@ -2090,6 +2090,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
           <div style="font-size:12px;color:var(--dim);line-height:1.5;margin:-4px 0 12px">Varmuuskopio palauttaa kaiken: kirjaukset, mittaukset ja asetukset. CSV on analyysia varten, eikä sovellusta voi palauttaa siitä.</div>
           <div id="persist-status" style="font-size:12px;color:var(--dim);line-height:1.5;margin:-4px 0 12px"></div>
           <button onclick="resetAllData()" style="width:100%;height:38px;border-radius:8px;border:1.5px solid rgba(239,68,68,.3);background:transparent;color:var(--red);font-size:13px">Nollaa kirjaukset</button>
+          <div id="safety-copy-row"></div>
         </div>
       </div>
 
@@ -2102,7 +2103,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.80</span>
+        <span style="color:var(--bord)">Järkäle tracking v2.18.81</span>
       </div>
     </div>
   </div>
@@ -2136,6 +2137,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.81", d:"lokakuu 2026", items:[
+    "Nollaus ja varmuuskopion palautus toimivat nyt Drive-synkronoinnin kanssa: nollatut kirjaukset eivät palaa Drivesta, ja palautettu tila voittaa Driven uudemmat kopiot.",
+    "Turvakopio: ennen nollausta ja palautusta nykyisestä tilasta otetaan kopio. Nollauksen voi perua heti Kumoa-napilla, ja myöhemmin Asetukset → Data → Palauta tila ennen…"
+  ]},
   {v:"2.18.80", d:"lokakuu 2026", items:[
     "Sovellus avautuu nopeasti myös heikolla verkolla: fontit tulevat sovelluksen omalta palvelimelta eikä Google Fontsista. Aiemmin hidas yhteys saattoi jättää ruudun tyhjäksi useiksi sekunneiksi.",
     "Päivitys ei enää lataa sivua uudelleen kesken treenin tai kentän muokkauksen. Ensimmäisellä avauksella ylimääräinen uudelleenlataus jää pois."
@@ -4225,10 +4230,38 @@ function clearAllAnalysisCaches(){
   }
 }
 
+// v2.18.81: turvakopio ennen nollausta ja palautusta. Yksi kopio, joka vaihtuu aina uusimpaan.
+const SAFETY_KEY="jarkale-safety-copy";
+function safetyCopy(reason){
+  try{
+    flushPendingAutoSave();
+    localStorage.setItem(SAFETY_KEY,JSON.stringify({at:Date.now(),reason,entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym:G}));
+    renderSafetyRow(); return true;
+  }catch(_){ return false; }
+}
+function readSafetyCopy(){ try{ return JSON.parse(localStorage.getItem(SAFETY_KEY)||"null"); }catch(_){ return null; } }
+function renderSafetyRow(){
+  const el=document.getElementById("safety-copy-row"); if(!el) return;
+  const c=readSafetyCopy();
+  if(!c||!c.at){ el.innerHTML=""; return; }
+  const d=new Date(c.at), when=`${d.getDate()}.${d.getMonth()+1}. klo ${String(d.getHours()).padStart(2,"0")}.${String(d.getMinutes()).padStart(2,"0")}`;
+  el.innerHTML=`<button onclick="restoreSafetyCopy()" style="width:100%;margin-top:8px;min-height:44px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--text);font-size:13px;font-weight:600">↶ Palauta tila ennen: ${esc(c.reason||"muutos")} (${when})</button>`;
+}
+async function restoreSafetyCopy(fromUndo){
+  const c=readSafetyCopy(); if(!c) return;
+  if(!fromUndo&&!await jConfirm(`Palautetaanko tila ennen: ${c.reason||"muutos"}?\n\nNykyinen tila tallennetaan turvakopioksi, joten palautuksen voi perua.`,{ok:"Palauta"})) return;
+  safetyCopy("palautus");
+  applyBackupData({entries:c.entries,measurements:c.measurements,settings:c.settings,gym:c.gym});
+  showSavedToast("Tila palautettu");
+}
+function syncIsOn(){ try{ return !!syncState().enabled; }catch(_){ return false; } }
 async function resetAllData(){
-  if(!await jConfirm("Nollaa kaikki kirjaukset ja mittaukset?",{ok:"Nollaa",danger:true})) return;
+  if(!await jConfirm("Nollaa kaikki kirjaukset ja mittaukset?"+(syncIsOn()?"\n\nSynkronointi on päällä: kirjaukset poistuvat myös Drivesta seuraavalla synkronoinnilla. Turvakopio säilyy tässä puhelimessa.":"\n\nNykyisestä tilasta otetaan turvakopio, jonka saa takaisin Asetuksista."),{ok:"Nollaa",danger:true})) return;
+  const saved=safetyCopy("nollaus");
   clearTimeout(AUTOSAVE_TIMER);
   AUTOSAVE_TIMER=null;
+  // Poistomerkit: ilman niitä Drive toisi nollatut kirjaukset takaisin seuraavassa synkronoinnissa
+  { const t=syncTombs(), now=Date.now(); Object.keys(S.entries).forEach(k=>{ t.e[k]=now; }); (S.measurements||[]).forEach(m=>{ t.m[m.date]=now; }); try{ localStorage.setItem(SYNC_TOMB_KEY,JSON.stringify(t)); }catch(_){} }
   S.entries={};
   S.measurements=[];
   LAST_SAVED_JSON="";
@@ -4239,6 +4272,7 @@ async function resetAllData(){
   loadDayIntoForm(S.date);
   saveAll();
   renderAll();
+  showUndoToast(saved?"Kirjaukset nollattu":"Kirjaukset nollattu (turvakopiota ei voitu tallentaa)",()=>{ if(saved) restoreSafetyCopy(true); });
 }
 
 function flushPendingAutoSave(){
@@ -6773,6 +6807,7 @@ function renderPersistStatus(){
 }
 function renderAsetukset(){
   renderPersistStatus();
+  renderSafetyRow();
   try{ renderHapticsSection(); }catch(_){}
   renderSyncUI();
   renderProfile();
@@ -7342,6 +7377,39 @@ function normalizeImportedData(d){
   return d;
 }
 
+// Korvaa tilan varmuuskopion sisällöllä (tuonti ja turvakopion palautus).
+// v2.18.81: synkronoinnin ollessa päällä palautetut tietueet saavat uuden aikaleiman ja kopiosta puuttuvat poistomerkin,
+// jotta Driven uudemmat kopiot eivät kumoa palautusta eikä poistettu data palaa.
+function applyBackupData(d){
+  const sync=syncIsOn();
+  const prev={e:Object.keys(S.entries),m:(S.measurements||[]).map(m=>m.date),s:(G.sessions||[]).map(x=>x.id),p:(G.programs||[]).map(x=>x.id)};
+  if(d.entries) S.entries=d.entries;
+  if(d.measurements) S.measurements=d.measurements;
+  if(d.settings) S.settings={...S.settings,...d.settings};
+  // v2.17.0: salitreenit palautetaan vain, jos varmuuskopiossa on niitä (versio 6). Vanha varmuuskopio ei koske niihin.
+  if(d.gym){ G={...G,...d.gym,activeId:d.gym.activeId||null,timer:{...G.timer,endsAt:null,pausedLeft:null}}; GU.mode="home"; }
+  if(sync){
+    const now=Date.now(), iso=new Date(now).toISOString(), t=syncTombs();
+    const mark=(kind,before,after)=>{ after.forEach(id=>{ delete t[kind][id]; }); before.filter(id=>!after.includes(id)).forEach(id=>{ t[kind][id]=now; }); };
+    if(d.entries){ Object.values(S.entries).forEach(e=>{ e.updated_at=iso; }); mark("e",prev.e,Object.keys(S.entries)); }
+    if(d.measurements){ S.measurements.forEach(m=>{ m.updated_at=iso; }); mark("m",prev.m,S.measurements.map(m=>m.date)); }
+    if(d.gym){
+      G.sessions.forEach(x=>{ x.updatedAt=now; }); G.programs.forEach(x=>{ x.updatedAt=now; });
+      Object.values(G.exMeta||{}).forEach(x=>{ if(x&&typeof x==="object") x.updatedAt=now; });
+      mark("s",prev.s,G.sessions.map(x=>x.id)); mark("p",prev.p,G.programs.map(x=>x.id));
+    }
+    try{ localStorage.setItem(SYNC_TOMB_KEY,JSON.stringify(t)); }catch(_){}
+  }
+  if(d.gym) gymSave();
+  clearAllAnalysisCaches();
+  clearDraft();
+  try{localStorage.setItem("seuranta-setup-done","1");}catch(_){}
+  LAST_SAVED_JSON=""; LAST_INSIGHT_SIGNATURE=""; LAST_EVENING_NOTE_SIG="";
+  saveAll();
+  applyTheme(S.settings.theme||"dark");
+  loadDayIntoForm(S.date);
+  renderAll(); applyGymVisibility();
+}
 function importData(input){
   flushPendingAutoSave();
   const file=input.files[0]; if(!file) return;
@@ -7366,23 +7434,13 @@ function importData(input){
           `Sinulla on nyt ${nowCount} kirjausta (viimeisin ${nowLatest||"—"}).\n`+
           (d.gym?`Salitreenit: ${d.gym.programs.length} ohjelmaa, ${d.gym.sessions.length} treeniä.\n`:``)+
           (isNewer?`⚠ HUOMIO: nykyinen datasi on uudempaa kuin varmuuskopio!\n`:``) +
-          `\nHaluatko korvata nykyisen datan varmuuskopiolla?`;
+          `\nHaluatko korvata nykyisen datan varmuuskopiolla? Nykyisestä tilasta otetaan turvakopio.`+
+          (syncIsOn()?`\n\nSynkronointi on päällä: palautettu tila siirtyy seuraavalla synkronoinnilla myös Driveen.`:``);
         if(!await jConfirm(msg)) return;
       }
-      if(d.entries) S.entries=d.entries;
-      if(d.measurements) S.measurements=d.measurements;
-      if(d.settings) S.settings={...S.settings,...d.settings};
-      // v2.17.0: salitreenit palautetaan vain, jos varmuuskopiossa on niitä (versio 6). Vanha varmuuskopio ei koske niihin.
-      if(d.gym){ G={...G,...d.gym,activeId:d.gym.activeId||null,timer:{...G.timer,endsAt:null,pausedLeft:null}}; gymSave(); GU.mode="home"; }
-      clearAllAnalysisCaches();
-      clearDraft();
-      try{localStorage.setItem("seuranta-setup-done","1");}catch(_){}
-      LAST_SAVED_JSON=""; LAST_INSIGHT_SIGNATURE=""; LAST_EVENING_NOTE_SIG="";
-      saveAll();
-      applyTheme(S.settings.theme||"dark");
-      loadDayIntoForm(S.date);
-      renderAll(); applyGymVisibility();
-      jAlert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`);
+      const saved=safetyCopy("varmuuskopion palautus");
+      applyBackupData(d);
+      jAlert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`+(saved?"":"\n(Turvakopiota ei voitu tallentaa: tallennustila on täynnä.)"));
     }catch(_){jAlert("⚠ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
   };
   reader.readAsText(file);
