@@ -17,6 +17,7 @@ tests/run.sh test-gym.js
 | `test-haptics.js` | Kosketusvärinän tasot |
 | `test-safety.js` | Eheys: ei kaksoismäärittelyjä, perustavoitteet tallentuvat, vioittunut tallenne säilyy, (myöhemmin) nollaus/palautus synkronoinnin kanssa, fontit paikallisesti |
 | `test-news.js` | Pilotin uutiskortti (tarvitsee `../jarkale-pilotti`) |
+| `test-gymonly.js` | Pelkkää treeniä kirjaavan polku: Trendit, Mitat piilossa, ensimmäinen yhteenveto, tuonnin nimi ja Tallenna-nappi, viikkorivin selite |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

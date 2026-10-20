@@ -773,6 +773,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .g-title-in{color:var(--hi-ink);}
 .g-back{border:none;background:transparent;font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);padding:6px 0 0;min-height:32px;}
 [data-palette="ampiainen"][data-theme="light"] #view-treeni .view-hero .g-back{color:var(--hi-ink);opacity:.8;}
+.g-save-dock{position:sticky;bottom:-24px;z-index:5;margin:14px -16px 0;padding:14px 16px 36px;background:linear-gradient(to top,var(--bg) 82%,transparent);}
 .g-edit-bar{display:flex;gap:8px;justify-content:flex-end;padding-bottom:6px;}
 .g-sum{background:var(--surf);border-radius:16px;padding:14px;margin:4px 0 14px;}
 .g-sum-h{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -2108,7 +2109,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.84</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.85</span>
       </div>
     </div>
   </div>
@@ -2142,6 +2143,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.85", d:"lokakuu 2026", items:[
+    "Pelkkää treeniä kirjaavalle: Trendit näyttää vain treenit (ei tyhjiä kehoseurannan kortteja), ja Mitat-välilehti piiloutuu, kunnes kehon seuranta otetaan käyttöön Asetuksista.",
+    "Ensimmäisen treenin yhteenveto sanoo \"Ensimmäinen treeni tallennettu\" eikä \"Ei ennätyksiä\". Vertailu alkaa toisesta kerrasta.",
+    "Tuodun ohjelman oletusnimi on \"Oma ohjelma\" (ei \"Tuotu ohjelma\"). Tuonnin jälkeen päädytään suoraan Treeni-kotiin eikä muokkaustilaan, ja Tallenna-nappi pysyy näkyvissä pitkälläkin ohjelmalla.",
+    "Viikkorivin \"kirjattu\"-selite näkyy vain, kun jokin päivä on kirjattu."
+  ]},
   {v:"2.18.84", d:"lokakuu 2026", items:[
     "Trendit: \"Kirjallinen yhteenveto – tarvitsee vähintään 7 kirjausta\" -ilmoitus ei enää näy ilman API-avainta. Aiempi korjaus (2.18.82) piilotti kortin vain viikkonäkymästä."
   ]},
@@ -3265,6 +3272,7 @@ function renderTrackingSection(){
 }
 
 function applyTrackingVisibility(){
+  applyNavVisibility();
   ['weight','sleep','steps','recovery','motivation'].forEach(k=>{
     const el=document.getElementById("track-"+k+"-wrap");
     if(el) el.style.display=trk(k)?"":"none";
@@ -3383,6 +3391,15 @@ function toggleTrackingSetup(key){
 function isBodyOnly(){
   const t=S.settings.tracking; if(!t||t.body!==true) return false;
   return Object.entries(t).every(([k,v])=>k==="body"||v!==true);
+}
+// v2.18.85: pelkkää treeniä kirjaava (treenimoduuli päällä, mikään päiväseuranta ei). Trendit näyttää vain treenit,
+// eikä Mitat-välilehteä tarjota ennen kuin kehon seuranta otetaan käyttöön tai mittauksia on jo olemassa.
+function isGymOnly(){ const t=S.settings.tracking; return gymOn()&&!!t&&!Object.values(t).some(Boolean); }
+function applyNavVisibility(){
+  const h=document.getElementById("nav-historia"); if(!h) return;
+  const hide=isGymOnly()&&!(S.measurements||[]).length;
+  h.style.display=hide?"none":"";
+  if(hide&&S.tab==="historia") setTab("log");
 }
 function renderBodyOnlyNote(){
   const el=document.getElementById("body-only-note"); if(!el) return;
@@ -4796,7 +4813,7 @@ function renderWeekStatus(ds){
 
   el.innerHTML=`<div class="ws-head"><span class="lbl-small" style="margin:0">Kirjatut päivät</span><span style="font-size:12px;color:var(--dim);font-weight:600">${loggedCnt}/${pastCnt}</span></div>
     <div class="ws-days">${days}</div>
-    <div class="ws-legend"><span>${ico("check",12)} kirjattu</span>${anyTr?`<span>${ico("dumbbell",12)} treeni</span>`:""}</div>
+    ${loggedCnt||anyTr?`<div class="ws-legend">${loggedCnt?`<span>${ico("check",12)} kirjattu</span>`:""}${anyTr?`<span>${ico("dumbbell",12)} treeni</span>`:""}</div>`:""}
     ${stats.length?`<div class="ws-stats" style="${stats.length===1?"grid-template-columns:1fr":""}">${stats.join("")}</div>`:""}`;
   el.style.display="block";
   if(pop&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){ const d=el.querySelector(`.ws-day:nth-child(${((new Date(t+"T00:00:00").getDay()+6)%7)+1}) .ws-dot`); if(d&&d.animate) d.animate([{transform:"scale(.6)"},{transform:"scale(1.18)"},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1.4)"}); }
@@ -5661,6 +5678,14 @@ function renderTrendit() {
   }
 
   const contentEl=document.getElementById("trendit-content");
+
+  if(isGymOnly()){
+    const g=gymTrendHTML(start,end);
+    contentEl.innerHTML=g||`<div style="text-align:center;padding:40px 0">
+      <div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:6px">Ei tallennettuja treenejä valitulla aikavälillä</div>
+      <div style="color:var(--dim);font-size:13px">Tallennetut treenit ja liikkeiden kehitys näkyvät tässä.</div></div>`;
+    return;
+  }
 
   // Compute summary + previous period
   const curr=computeSummary(start,end);
@@ -9235,6 +9260,7 @@ function applyGymVisibility(){
   const on=gymOn();
   const nb=document.getElementById("nav-treeni"); if(nb) nb.style.display=on?"":"none";
   if(!on&&S.tab==="treeni") setTab("log");
+  applyNavVisibility();
   renderLogGymCard();
   renderTimer();
 }
@@ -9448,7 +9474,8 @@ function sessionSummary(s){
     }
     rows.push({ex,done,dir,prev});
   });
-  return {st,rows,prs,dur:s.endedAt?s.endedAt-s.startedAt:Date.now()-s.startedAt};
+  const first=!G.sessions.some(x=>x.id!==s.id&&x.endedAt&&x.startedAt<s.startedAt);
+  return {st,rows,prs,first,dur:s.endedAt?s.endedAt-s.startedAt:Date.now()-s.startedAt};
 }
 const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.57 Tallennusleima: yksi Järkäle-leima, väri teemasta. Iskee tallennettaessa kerran, jälki jää yhteenvetoon.
@@ -9469,11 +9496,11 @@ function gymSummaryHTML(s,fresh){
   let h=`<div class="g-sum${hit?" stamped":""}">
     <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
-  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:"Ei ennätyksiä tällä kertaa"}</div>`;
+  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
   if(S2.prs.length) h+=`<div class="g-sum-pr">${S2.prs.map(p=>`<div><span class="pr-tag">Ennätys</span><span><b>${esc(p.ex.name)}</b> ${setOneTxt(p.set)}${p.was?`<small>${p.was}</small>`:""}${p.set.kg&&p.set.reps&&p.set.reps<=12?`<small>arv. 1RM ~${fmtKg(Math.round(e1rm(p.set.kg,p.set.reps)*2)/2)} kg</small>`:""}</span></div>`).join("")}</div>`;
   h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
     :`<div><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</span></div>`).join("")}</div>
-    <div class="g-sum-foot">Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla.</div></div>`;
+    <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla."}</div></div>`;
   return h;
 }
 function sessionShareText(s){
@@ -9531,7 +9558,7 @@ async function gSessionImage(s){
     const gap=8, kw=(IW-32-gap*(kp.length-1))/kp.length;
     kp.forEach((k,i)=>{ const X=P+16+i*(kw+gap); if(draw){ rr(X,y,kw,62,12,C.surf2); x.textAlign="center"; let fz=22; font(800,fz,FN); while(x.measureText(k[0]).width>kw-10&&fz>11){ fz--; font(800,fz,FN); } x.fillStyle=C.text; x.fillText(k[0],X+kw/2,y+10); font(600,12,FB); x.fillStyle=C.dim; x.fillText(k[1],X+kw/2,y+40); x.textAlign="left"; } });
     y+=76;
-    font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`ENNÄTYKSET (${S2.prs.length})`:"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
+    font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`ENNÄTYKSET (${S2.prs.length})`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
     S2.prs.forEach(pr=>{ font(700,14,FB); const t=`★ ${pr.ex.name} ${setOneTxt(pr.set)}`; wrap(t,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.text; x.fillText(l,P+16,y); } y+=20; }); });
     if(S2.prs.length) y+=6;
     S2.rows.forEach(r=>{
@@ -9759,8 +9786,9 @@ function gymImportHTML(){
       const nm=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.match&&!e.match.auto).length,0);
       if(nm) h=h.replace(`<div class="tr-sec">Esikatselu`,`<div class="g-hint warn">${ico("alert",15)} ${nm} liikkeen nimi muistuttaa aiempaa liikettä. Tarkista alta, onko kyse samasta liikkeestä. Silloin liikkeen historia jatkuu.</div><div class="tr-sec">Esikatselu`);
       const cur=G.programs.find(x=>x.id===G.curProgramId&&!x.archived);
-      h+=`<button class="tr-go" style="width:100%;height:46px" ${inc.length?"":"disabled"} onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
+      h+=`<div class="g-save-dock"><button class="tr-go" style="width:100%;height:46px" ${inc.length?"":"disabled"} onclick="gImportSave(false)">Tallenna uudeksi ohjelmaksi</button>`;
       if(cur) h+=`<button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" ${inc.length?"":"disabled"} onclick="gImportSave(true)">Lisää päivät ohjelmaan ${esc(cur.name)}</button>`;
+      h+=`</div>`;
     }
   }
   return h+`<div style="height:30px"></div>`;
@@ -9778,10 +9806,14 @@ function gImportSave(append){
   if(append&&(p=curProgram())){ p.days.push(...days); p.sourceText=(p.sourceText?p.sourceText+"\n\n":"")+GU.importText; touchProg(p); }
   else{ const sk=(GU.importPreview&&GU.importPreview.skipped)||[];
     const first=String(GU.importText||"").split(/\r?\n/).map(cleanLine).filter(Boolean).slice(0,2).find(x=>sk.includes(x)&&x.split(" ").length<=6);
-    p=newProgram(first||"Tuotu ohjelma"); p.days=days; p.sourceText=GU.importText; touchProg(p); }
+    // v2.18.85: oletusnimi "Oma ohjelma", tai numeroitu jos sellainen on jo
+    let nm=first||"Oma ohjelma"; const used=G.programs.map(x=>x.name);
+    if(!first&&used.includes(nm)){ let n=2; while(used.includes(`${nm} ${n}`)) n++; nm=`${nm} ${n}`; }
+    p=newProgram(nm); p.days=days; p.sourceText=GU.importText; touchProg(p); }
   GU.importPreview=null; GU.importText=null;
-  gOpenEdit(p.id,!append);
-  if(append&&GU.editSnap){ GU.editSnap=null; }
+  // v2.18.85: tuonnin jälkeen päädytään suoraan Treeni-kotiin, ei muokkaustilaan. Muokkaus on kotinäkymän Muokkaa-napin takana.
+  GU.editSnap=null; GU.mode="home"; GU.menu=null; GU.progOpen=false; GU.newOpen=false; renderGym(); gTop();
+  showSavedToast(append?`${days.length} ${days.length===1?"päivä":"päivää"} lisätty ohjelmaan ${esc(p.name)}`:`Ohjelma tallennettu: ${esc(p.name)}`);
 }
 
 // ── Liikkeen kehitys: paras sarja kerralta, ei volyymia eikä tonnagea
