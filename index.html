@@ -2108,7 +2108,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--bord)">Järkäle tracking v2.18.82</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.83</span>
       </div>
     </div>
   </div>
@@ -2142,6 +2142,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.83", d:"lokakuu 2026", items:[
+    "Versioteksti Asetusten alareunassa luettavammaksi (aiemmin lähes taustan värinen)."
+  ]},
   {v:"2.18.82", d:"lokakuu 2026", items:[
     "Uusi aloitusnäyttö: ensin valitaan, tuleeko kirjaamaan treenejä, seuraamaan kehoa vai molempia. Treenivalinta ottaa Treeni-välilehden käyttöön heti eikä vaadi muuta täytettävää.",
     "Aloituslistan \"Salitreeni\" nimettiin \"Treenipäivän merkinnäksi\", jotta se ei sekoitu Treeni-välilehden ohjelmiin ja sarjakirjaukseen.",
