@@ -2124,7 +2124,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.89</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.90</span>
       </div>
     </div>
   </div>
@@ -2158,6 +2158,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.90", d:"lokakuu 2026", items:[
+    "Koettu rasittavuus: harmaa ehdotus tulee enää vain saman treenin edellisestä sarjasta (ensimmäisellä sarjalla RIR 2 / RPE 8). Viime kerran arvo ei esitäytä ehdotusta, jotta kirjaus pysyy omana arviona. Se näkyy edelleen Viimeksi-rivillä."
+  ]},
   {v:"2.18.89", d:"lokakuu 2026", items:[
     "Trendien Yhteenveto: painon alateksti (esim. \"nouseva · vähän dataa\") rivittyy eikä enää katkea kolmeen pisteeseen."
   ]},
@@ -9493,10 +9496,9 @@ function effTxt(sets){
 function effUi(m,rpe){ return m==="rir"?Math.min(4,Math.max(0,10-rpe)):Math.min(10,Math.max(6,rpe)); }
 function effFromUi(m,u){ return m==="rir"?10-u:u; }
 function effLbl(m,u){ return m==="rir"?(u>=4?"4+":String(u)):(u<=6?"≤6":String(u)); }
-function effGhost(s,ex,ri,m){
+function effGhost(s,ex,ri,m){ // ehdotus: edellinen merkitty sarja tässä treenissä, muuten oletus RIR 2 / RPE 8
   for(let i=ri-1;i>=0;i--){ if(ex.sets[i].rpe!=null) return effUi(m,ex.sets[i].rpe); }
-  const pv=prevFor(ex.key,s), q=pv&&pv.sets.length?pv.sets[Math.min(ri,pv.sets.length-1)]:null;
-  if(q&&q.rpe!=null) return effUi(m,q.rpe);
+  // Viime kerran arvoa ei käytetä ehdotuksena (ankkurointi: kopioitu arvo ei ole mittaus). Se näkyy "Viimeksi"-rivillä viitteenä.
   return m==="rir"?2:8;
 }
 function effRowHTML(s,ex,sid,ei,ri,r,m){

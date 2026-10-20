@@ -96,8 +96,10 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
 
   console.log('\nEdellinen kerta');
   await p.evaluate(()=>setGymOpt('effort','rir'));
+  await p.evaluate(()=>{ G.sessions.filter(x=>x.endedAt).at(-1).exercises[0].sets[0].rpe=10; });
   await p.evaluate(()=>{ gBack(); const pr=G.programs[0]; startSession(pr.id,pr.days[0].id); }); await p.waitForTimeout(200);
-  ok(/Viimeksi[^\n]*RIR 2/.test(await p.locator('.ex-prev').first().innerText()),'edellisen kerran rivillä RIR 2');
+  ok(/Viimeksi[^\n]*RIR/.test(await p.locator('.ex-prev').first().innerText()),'edellisen kerran rivillä näkyy RIR viitteenä');
+  ok((await p.locator('.set-eff').first().locator('.ev').innerText())==='2'&&await p.locator('.set-eff').first().locator('.ev').evaluate(e=>e.classList.contains('ghost')),'viime kerran RIR 0 ei esitäytä ehdotusta: ensimmäisen sarjan ehdotus on RIR 2');
   await p.evaluate(()=>{ finishSession(true); });
 
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));
