@@ -791,10 +791,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-sum-pr small{display:block;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:1px;}
 .pr-tag{flex-shrink:0;font:800 10px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:3px 6px;margin-top:2px;}
 .g-sum-list{margin-top:12px;border-top:1px solid var(--surf2);}
-.g-sum-list>div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 14px Manrope,system-ui,sans-serif;color:var(--text);}
-.g-sum-list .nm{flex:1 1 40%;min-width:0;overflow-wrap:break-word;hyphens:manual;}
+.g-sum-list>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 14px Manrope,system-ui,sans-serif;color:var(--text);}
+.g-sum-list .nm{flex:1 1 auto;min-width:0;max-width:100%;overflow-wrap:break-word;hyphens:manual;}
 .g-sum-list .nm small{display:block;font:500 12px/1.35 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
-.g-sum-list .v{flex:0 1 auto;max-width:60%;color:var(--dim);text-align:right;}
+.g-sum-list .v{flex:1 1 auto;max-width:100%;color:var(--dim);text-align:right;}
 .g-sum-list .sk{color:var(--dim);}
 .g-dir{display:inline-block;min-width:18px;text-align:center;font-weight:800;color:var(--text);}
 .g-dir.up{color:var(--green);}
@@ -2131,7 +2131,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.94</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.95</span>
       </div>
     </div>
   </div>
@@ -2165,6 +2165,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.95", d:"lokakuu 2026", items:[
+    "Treenin yhteenvedon liikerivit rivittyvät oikein: liikkeen nimi ei enää katkea kesken sanan (esim. Vinopenkkipunnerrus|laite), vaan pitkä sarjarivi siirtyy nimen alle."
+  ]},
   {v:"2.18.94", d:"lokakuu 2026", items:[
     "Liikkeen vaihto kesken treenin (Vaihda liike) tyhjentää vanhan liikkeen painot: ohjelman tavoitepainon ja tekemättömiin sarjoihin kirjoitetut kilot. Ehdotus tulee uuden liikkeen omasta historiasta, jos sellainen on, muuten kenttä on tyhjä. Tehdyt sarjat säilyvät."
   ]},
