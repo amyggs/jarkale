@@ -785,14 +785,12 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .g-sum-kpi div{background:var(--surf2);border-radius:12px;padding:12px 6px 10px;min-width:0;text-align:center;}
 .g-sum-kpi b{display:block;font:800 clamp(17px,5.6vw,25px)/1.1 Manrope,system-ui,sans-serif;color:var(--text);white-space:nowrap;letter-spacing:-.01em;}
 .g-sum-kpi span{display:block;font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;}
-.g-sum-pr{margin-top:6px;display:grid;gap:8px;}
-.g-sum-pr>div{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.35 Manrope,system-ui,sans-serif;color:var(--text);}
-.g-sum-pr b{font-weight:800;}
-.g-sum-pr small{display:block;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:1px;}
 .pr-tag{flex-shrink:0;font:800 10px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:3px 6px;margin-top:2px;}
 .g-sum-list{margin-top:12px;border-top:1px solid var(--surf2);}
 .g-sum-list>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 14px Manrope,system-ui,sans-serif;color:var(--text);}
 .g-sum-list .nm{flex:1 1 auto;min-width:0;max-width:100%;overflow-wrap:break-word;hyphens:manual;}
+.g-sum-list .nm small.prd{color:var(--text);opacity:.85;line-height:1.7;margin-top:4px;}
+.g-sum-list .nm small.prd .pr-tag{margin:0 6px 0 0;vertical-align:1px;}
 .g-sum-list .nm small{display:block;font:500 12px/1.35 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
 .g-sum-list .v{flex:1 1 auto;max-width:100%;color:var(--dim);text-align:right;}
 .g-sum-list .sk{color:var(--dim);}
@@ -2131,7 +2129,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.95</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.96</span>
       </div>
     </div>
   </div>
@@ -2165,6 +2163,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.96", d:"lokakuu 2026", items:[
+    "Treenin yhteenvedossa ennätys näkyy liikkeen omalla rivillä: merkki, ennätyssarja, aiempi paras ja arvioitu 1RM. Erillinen ennätyslista, jossa samat liikkeet olivat toiseen kertaan, poistui. Sama jaettavassa tekstissä ja kuvassa."
+  ]},
   {v:"2.18.95", d:"lokakuu 2026", items:[
     "Treenin yhteenvedon liikerivit rivittyvät oikein: liikkeen nimi ei enää katkea kesken sanan (esim. Vinopenkkipunnerrus|laite), vaan pitkä sarjarivi siirtyy nimen alle."
   ]},
@@ -9591,12 +9592,15 @@ function sessionSummary(s){
       } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`aiemmin ${mx} toistoa`; }
       prs.push({ex,set:best,was});
     }
-    rows.push({ex,done,dir,prev});
+    rows.push({ex,done,dir,prev,pr:prSets.length?prs[prs.length-1]:null});
   });
   const first=!G.sessions.some(x=>x.id!==s.id&&x.endedAt&&x.startedAt<s.startedAt);
   return {st,rows,prs,first,dur:s.endedAt?s.endedAt-s.startedAt:Date.now()-s.startedAt};
 }
 const DIR_SYM={up:"↑",down:"↓",same:"→"};
+// v2.18.96: ennätys näkyy liikkeen omalla rivillä (ei erillistä ennätyslistaa): ennätyssarja, aiempi paras ja arvioitu 1RM
+function prParts(p){ return [setOneTxt(p.set),[p.was||"",(p.set.kg&&p.set.reps&&p.set.reps<=12)?`arv.\u00a01RM\u00a0~${fmtKg(Math.round(e1rm(p.set.kg,p.set.reps)*2)/2)}\u00a0kg`:""].filter(Boolean).join(" · ")]; }
+function prDetail(p){ return prParts(p).filter(Boolean).join(" · "); }
 // v2.18.57 Tallennusleima: yksi Järkäle-leima, väri teemasta. Iskee tallennettaessa kerran, jälki jää yhteenvetoon.
 function gStampHTML(s,hit){
   const [y,m,d]=String(s.date||"").split("-"); const dt=d&&m?`${+d}.${+m}.`:"";
@@ -9615,10 +9619,9 @@ function gymSummaryHTML(s,fresh){
   let h=`<div class="g-sum${hit?" stamped":""}">
     <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
-  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Ennätykset (${S2.prs.length})`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
-  if(S2.prs.length) h+=`<div class="g-sum-pr">${S2.prs.map(p=>`<div><span class="pr-tag">Ennätys</span><span><b>${esc(p.ex.name)}</b> ${setOneTxt(p.set)}${p.was?`<small>${p.was}</small>`:""}${p.set.kg&&p.set.reps&&p.set.reps<=12?`<small>arv. 1RM ~${fmtKg(Math.round(e1rm(p.set.kg,p.set.reps)*2)/2)} kg</small>`:""}</span></div>`).join("")}</div>`;
+  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Liikkeet · ennätyksiä ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
   h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
-    :`<div><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}${effTxt(r.done)?`<small class="g-eff">${effTxt(r.done)}</small>`:""}</span></div>`).join("")}</div>
+    :`<div><span class="nm">${esc(r.ex.name)}${r.pr?`<small class="prd"><span class="pr-tag">Ennätys</span>${esc(prParts(r.pr)[0])}${prParts(r.pr)[1]?`<br>${esc(prParts(r.pr)[1])}`:""}</small>`:""}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}${effTxt(r.done)?`<small class="g-eff">${effTxt(r.done)}</small>`:""}</span></div>`).join("")}</div>
     <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla."}</div></div>`;
   return h;
 }
@@ -9627,9 +9630,9 @@ function sessionShareText(s){
   const L=[`${s.dayName} · ${gDay(s.date)}`];
   const durOk=S2.dur>60000&&S2.dur<6*3600000;
   L.push(`${S2.st.done}/${S2.st.exN} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`);
-  if(S2.prs.length){ L.push("",`Ennätykset (${S2.prs.length}):`); S2.prs.forEach(p=>L.push(`• ${p.ex.name} ${setOneTxt(p.set)}${p.was?` (${p.was})`:""}`)); }
+  if(S2.prs.length) L.push(`Ennätyksiä: ${S2.prs.length}`);
   L.push("");
-  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else L.push(`${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); });
+  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else { L.push(`${r.pr?"★ ":""}${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); if(r.pr) L.push(`   Ennätys: ${prDetail(r.pr)}`); } });
   L.push("","Järkäle tracking");
   return L.join("\n");
 }
@@ -9677,18 +9680,21 @@ async function gSessionImage(s){
     const gap=8, kw=(IW-32-gap*(kp.length-1))/kp.length;
     kp.forEach((k,i)=>{ const X=P+16+i*(kw+gap); if(draw){ rr(X,y,kw,62,12,C.surf2); x.textAlign="center"; let fz=22; font(800,fz,FN); while(x.measureText(k[0]).width>kw-10&&fz>11){ fz--; font(800,fz,FN); } x.fillStyle=C.text; x.fillText(k[0],X+kw/2,y+10); font(600,12,FB); x.fillStyle=C.dim; x.fillText(k[1],X+kw/2,y+40); x.textAlign="left"; } });
     y+=76;
-    font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`ENNÄTYKSET (${S2.prs.length})`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
-    S2.prs.forEach(pr=>{ font(700,14,FB); const t=`★ ${pr.ex.name} ${setOneTxt(pr.set)}`; wrap(t,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.text; x.fillText(l,P+16,y); } y+=20; }); });
-    if(S2.prs.length) y+=6;
+    font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`LIIKKEET · ENNÄTYKSIÄ ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
     S2.rows.forEach(r=>{
       if(draw){ x.fillStyle=C.bord; x.globalAlpha=.6; x.fillRect(P+16,y,IW-32,1); x.globalAlpha=1; } y+=10;
       const val=r.skipped?(r.ex.skipped?"ohitettu":"ei tehty"):setsTxt(r.done)+(r.dir?` ${DIR_SYM[r.dir]}`:"")+(effTxt(r.done)?` · ${effTxt(r.done)}`:"");
-      font(600,14,FB); const vl=wrap(val,(IW-32)*.48); const vw=Math.max(...vl.map(l=>x.measureText(l).width));
-      font(700,15,FB); const nl=wrap(r.ex.name,IW-32-vw-12);
+      const label=(r.pr?"★ ":"")+r.ex.name, AW=IW-32;
+      font(600,14,FB); let vl=wrap(val,AW*.48); let vw=Math.max(...vl.map(l=>x.measureText(l).width));
+      font(700,15,FB); let nl=wrap(label,AW-vw-12);
+      // v2.18.96: jos nimen pisin rivi (esim. yksi pitkä sana) ei mahdu arvojen viereen, arvot siirtyvät nimen alle
+      const stack=nl.length>1||Math.max(...nl.map(l=>x.measureText(l).width))+vw+12>AW;
+      if(stack){ nl=wrap(label,AW); font(600,14,FB); vl=wrap(val,AW); }
       const y0=y;
       nl.forEach(l=>{ if(draw){ x.fillStyle=r.skipped?C.dim:C.text; x.fillText(l,P+16,y); } y+=20; });
-      font(600,14,FB); let yv=y0; vl.forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.textAlign="right"; x.fillText(l,W-P-16,yv+1); x.textAlign="left"; } yv+=19; });
+      font(600,14,FB); let yv=stack?y:y0; vl.forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.textAlign="right"; x.fillText(l,W-P-16,yv+1); x.textAlign="left"; } yv+=19; });
       y=Math.max(y,yv);
+      if(r.pr){ font(700,12,FB); prParts(r.pr).filter(Boolean).map((t,i)=>i?t:"Ennätys "+t).forEach(t=>wrap(t,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.acc; x.fillText(l,P+16,y); } y+=17; })); }
       if(r.ex.userNote){ font("italic 500",13,FB); wrap(r.ex.userNote,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=18; }); }
       y+=6;
     });
