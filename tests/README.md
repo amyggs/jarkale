@@ -22,6 +22,7 @@ tests/run.sh test-gym.js
 | `test-gymsettings.js` | Treeniasetukset Treeni-välilehdellä, pääasetuksissa vain pääkytkin, takaisin-ele, kapea näyttö |
 | `test-backup.js` | Varmuuskopiomuistutus Treeni-kodissa (ehdot, sulkeminen) ja napin siirtymä Asetusten Drive-osioon (ei suoraa latausta); Kirjaa-muistutus |
 | `test-setrow.js` | Toistojen − / + aktiivisella sarjalla (lähtö harmaasta ehdotuksesta), mahtuminen 360/412 px, pienennetyn liikerivin rivitys (nimi ei katkea kesken sanan) |
+| `test-swap.js` | Vaihda liike kesken treenin: vanhan liikkeen tavoitepaino ja kirjoitetut kilot tyhjenevät, tehdyt sarjat säilyvät, ehdotus uuden liikkeen historiasta |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

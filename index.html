@@ -2131,7 +2131,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.93</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.94</span>
       </div>
     </div>
   </div>
@@ -2165,6 +2165,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.94", d:"lokakuu 2026", items:[
+    "Liikkeen vaihto kesken treenin (Vaihda liike) tyhjentää vanhan liikkeen painot: ohjelman tavoitepainon ja tekemättömiin sarjoihin kirjoitetut kilot. Ehdotus tulee uuden liikkeen omasta historiasta, jos sellainen on, muuten kenttä on tyhjä. Tehdyt sarjat säilyvät."
+  ]},
   {v:"2.18.93", d:"lokakuu 2026", items:[
     "Treenin aikana tehdyn liikkeen pienennetty rivi ei enää puristu: liikkeen nimi ei katkea kesken sanan, vaan pitkä sarjateksti siirtyy tarvittaessa nimen alle.",
     "Toistoille − / + -napit samalla tavalla kuin painolle (seuraavana vuorossa olevalla sarjalla). Harmaa ehdotus toimii lähtöarvona, joten esim. 10 → 11 yhdellä napautuksella."
@@ -9071,7 +9074,12 @@ function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=
 function gRenameEx(sid,ei){
   const inp=document.getElementById("g-rename"); const v=inp&&inp.value.trim(); if(!v) return;
   const s=gSession(sid); const ex=s.exercises[ei];
-  ex.name=v; ex.key=exKey(v); ex.renamed=true; GU.rename=null; GU.menu=null; gymSave(); renderGym();
+  const oldKey=ex.key;
+  ex.name=v; ex.key=exKey(v); ex.renamed=true; GU.rename=null; GU.menu=null;
+  // v2.18.94: kun liike vaihtuu toiseen, vanhan liikkeen painot eivät päde (esim. tanko → käsipainot): ohjelman tavoitepaino ja tekemättömiin sarjoihin kirjoitetut kilot tyhjennetään.
+  // Ehdotus tulee tämän jälkeen uuden liikkeen omasta historiasta, jos sellainen on. Tehdyt sarjat ja toistotavoite säilyvät.
+  if(ex.key!==oldKey){ if(ex.goal) ex.goal.weight=null; ex.sets.forEach(r=>{ if(!r.done) r.kg=null; }); }
+  gymSave(); renderGym();
 }
 // v2.18.25: onko treenissä jo samankaltainen liike, jota ei ole vielä tehty (esim. "Etunosto" vs. "Etunostot levypainolla")
 function similarEx(s,name){
