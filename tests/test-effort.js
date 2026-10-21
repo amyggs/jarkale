@@ -35,16 +35,16 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.waitForTimeout(200);
   ok(await p.locator('.set-eff').count()===2,'säädin kuitatun ja seuraavana vuorossa olevan sarjan alla');
   const ev0=()=>p.locator('.set-eff').nth(0).locator('.ev');
-  ok((await ev0().innerText())==='2'&&await ev0().evaluate(e=>e.classList.contains('ghost')),'oletuksena harmaa ehdotus RIR 2, ei tallennettu');
+  ok((await ev0().innerText())==='–'&&await ev0().evaluate(e=>e.classList.contains('ghost')),'ensimmäisellä sarjalla ei ehdotusta (–), ei tallennettu');
   ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe==null),'ehdotus ei tallennu ennen napautusta');
   await p.locator('.set-eff').nth(0).locator('.eb').nth(1).click(); await p.waitForTimeout(80);
-  ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===7),'+ nostaa ehdotuksesta: RIR 3 = RPE 7');
+  ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===7),'+ tyhjästä lähtee oletuksesta: RIR 3 = RPE 7');
   await p.locator('.set-eff').nth(0).locator('.eb').nth(0).click(); await p.waitForTimeout(80);
   ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===8)&&(await ev0().innerText())==='2'&&!(await ev0().evaluate(e=>e.classList.contains('ghost'))),'− laskee: RIR 2 = RPE 8, arvo korostuu');
   await ev0().click(); await p.waitForTimeout(80);
   ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe==null),'napautus valittuun arvoon tyhjentää');
   await ev0().click(); await p.waitForTimeout(80);
-  ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===8),'napautus harmaaseen hyväksyy ehdotuksen');
+  ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===8),'napautus tyhjään valitsee oletuksen RIR 2 = RPE 8');
   for(let i=0;i<6;i++){ await p.locator('.set-eff').nth(0).locator('.eb').nth(0).click(); await p.waitForTimeout(40); }
   ok(await p.evaluate(()=>gSession(G.activeId).exercises[0].sets[0].rpe===10),'alaraja RIR 0 = RPE 10');
   ok((await p.locator('.set-eff').nth(1).locator('.ev').innerText())==='0','seuraavan sarjan ehdotus seuraa edellistä (RIR 0)');
@@ -99,7 +99,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ G.sessions.filter(x=>x.endedAt).at(-1).exercises[0].sets[0].rpe=10; });
   await p.evaluate(()=>{ gBack(); const pr=G.programs[0]; startSession(pr.id,pr.days[0].id); }); await p.waitForTimeout(200);
   ok(/Viimeksi[^\n]*RIR/.test(await p.locator('.ex-prev').first().innerText()),'edellisen kerran rivillä näkyy RIR viitteenä');
-  ok((await p.locator('.set-eff').first().locator('.ev').innerText())==='2'&&await p.locator('.set-eff').first().locator('.ev').evaluate(e=>e.classList.contains('ghost')),'viime kerran RIR 0 ei esitäytä ehdotusta: ensimmäisen sarjan ehdotus on RIR 2');
+  ok((await p.locator('.set-eff').first().locator('.ev').innerText())==='–'&&await p.locator('.set-eff').first().locator('.ev').evaluate(e=>e.classList.contains('ghost')),'viime kerran RIR 0 ei esitäytä: ensimmäisellä sarjalla ei ehdotusta (–)');
   await p.evaluate(()=>{ finishSession(true); });
 
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));

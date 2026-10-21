@@ -2124,7 +2124,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.90</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.91</span>
       </div>
     </div>
   </div>
@@ -2158,6 +2158,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.91", d:"lokakuu 2026", items:[
+    "Koettu rasittavuus: ensimmäisellä sarjalla ei ole enää harmaata ehdotusta (näkyy −). Oma ohjelma voi vaatia esim. RPE 7, ja oletus 8 ehdotti väärää arvoa. Napautus tyhjään arvoon valitsee RIR 2 / RPE 8, − ja + säätävät siitä. Seuraavan sarjan ehdotus tulee edelleen edellisestä merkitystä sarjasta."
+  ]},
   {v:"2.18.90", d:"lokakuu 2026", items:[
     "Koettu rasittavuus: harmaa ehdotus tulee enää vain saman treenin edellisestä sarjasta (ensimmäisellä sarjalla RIR 2 / RPE 8). Viime kerran arvo ei esitäytä ehdotusta, jotta kirjaus pysyy omana arviona. Se näkyy edelleen Viimeksi-rivillä."
   ]},
@@ -9496,27 +9499,30 @@ function effTxt(sets){
 function effUi(m,rpe){ return m==="rir"?Math.min(4,Math.max(0,10-rpe)):Math.min(10,Math.max(6,rpe)); }
 function effFromUi(m,u){ return m==="rir"?10-u:u; }
 function effLbl(m,u){ return m==="rir"?(u>=4?"4+":String(u)):(u<=6?"≤6":String(u)); }
-function effGhost(s,ex,ri,m){ // ehdotus: edellinen merkitty sarja tässä treenissä, muuten oletus RIR 2 / RPE 8
+// v2.18.91: ehdotus (harmaa arvo) vain saman treenin edellisestä merkitystä sarjasta, muuten null (näkyy "–").
+// Ensimmäisellä sarjalla ei ehdoteta mitään: ohjelman oma RPE-tavoite (esim. 7) voi poiketa oletuksesta 8, ja väärä ehdotus johtaisi väärään kirjaukseen.
+// Viime kerran arvoa ei käytetä ehdotuksena (ankkurointi); se näkyy "Viimeksi"-rivillä viitteenä.
+function effGhost(s,ex,ri,m){
   for(let i=ri-1;i>=0;i--){ if(ex.sets[i].rpe!=null) return effUi(m,ex.sets[i].rpe); }
-  // Viime kerran arvoa ei käytetä ehdotuksena (ankkurointi: kopioitu arvo ei ole mittaus). Se näkyy "Viimeksi"-rivillä viitteenä.
-  return m==="rir"?2:8;
+  return null;
 }
+const effDefault=m=>m==="rir"?2:8; // lähtökohta, kun tyhjää arvoa napautetaan tai säädetään
 function effRowHTML(s,ex,sid,ei,ri,r,m){
-  const has=r.rpe!=null, u=has?effUi(m,r.rpe):effGhost(s,ex,ri,m), M=m.toUpperCase();
+  const has=r.rpe!=null, g=has?null:effGhost(s,ex,ri,m), u=has?effUi(m,r.rpe):g, M=m.toUpperCase(), lbl=u==null?"–":effLbl(m,u);
   return `<div class="set-eff" role="group" aria-label="Sarja ${ri+1} ${M}"><span class="lb">${M}</span>
     <button class="eb" aria-label="${M} pienemmäksi" onclick="gEffStep('${sid}',${ei},${ri},-1)">−</button>
-    <button class="ev${has?"":" ghost"}" aria-label="${has?`${M} ${effLbl(m,u)}, tyhjennä`:`Hyväksy ehdotus ${M} ${effLbl(m,u)}`}" onclick="gEffTap('${sid}',${ei},${ri})">${effLbl(m,u)}</button>
+    <button class="ev${has?"":" ghost"}" aria-label="${has?`${M} ${lbl}, tyhjennä`:u==null?`Valitse ${M} (${effLbl(m,effDefault(m))})`:`Hyväksy ehdotus ${M} ${lbl}`}" onclick="gEffTap('${sid}',${ei},${ri})">${lbl}</button>
     <button class="eb" aria-label="${M} suuremmaksi" onclick="gEffStep('${sid}',${ei},${ri},1)">+</button></div>`;
 }
 function gEffSave(s){ s.dirtyAt=Date.now(); haptic(10); gymSave(); renderGym(); }
 function gEffStep(sid,ei,ri,d){
   const s=gSession(sid); if(!s) return; const ex=s.exercises[ei], r=ex.sets[ri], m=gymCfg().effort; if(!m||!r) return;
-  const lo=m==="rir"?0:6, hi=m==="rir"?4:10, base=r.rpe!=null?effUi(m,r.rpe):effGhost(s,ex,ri,m);
+  const lo=m==="rir"?0:6, hi=m==="rir"?4:10, gh=effGhost(s,ex,ri,m), base=r.rpe!=null?effUi(m,r.rpe):(gh!=null?gh:effDefault(m));
   r.rpe=effFromUi(m,Math.min(hi,Math.max(lo,base+d))); gEffSave(s);
 }
 function gEffTap(sid,ei,ri){
   const s=gSession(sid); if(!s) return; const ex=s.exercises[ei], r=ex.sets[ri], m=gymCfg().effort; if(!m||!r) return;
-  r.rpe=r.rpe!=null?null:effFromUi(m,effGhost(s,ex,ri,m)); gEffSave(s);
+  const gh=effGhost(s,ex,ri,m); r.rpe=r.rpe!=null?null:effFromUi(m,gh!=null?gh:effDefault(m)); gEffSave(s);
 }
 const feelTxt=f=>(FEELS.find(x=>x.id===f)||{}).l||"";
 // v2.18.17: peräkkäiset saman painon sarjat ryhmitellään: "105 × 10, 10, 10 · 65 × 13".
