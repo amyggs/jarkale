@@ -21,6 +21,7 @@ tests/run.sh test-gym.js
 | `test-effort.js` | Valinnainen koetun rasittavuuden kirjaus (RIR/RPE): asetus, valinta kuitatun sarjan alla, tallennus RPE:nä, yhteenveto, edellinen kerta, jako |
 | `test-gymsettings.js` | Treeniasetukset Treeni-välilehdellä, pääasetuksissa vain pääkytkin, takaisin-ele, kapea näyttö |
 | `test-backup.js` | Varmuuskopiomuistutus Treeni-kodissa (ehdot, sulkeminen) ja napin siirtymä Asetusten Drive-osioon (ei suoraa latausta); Kirjaa-muistutus |
+| `test-setrow.js` | Toistojen − / + aktiivisella sarjalla (lähtö harmaasta ehdotuksesta), mahtuminen 360/412 px, pienennetyn liikerivin rivitys (nimi ei katkea kesken sanan) |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
