@@ -69,6 +69,30 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>setTab('asetukset')); await p.waitForTimeout(150);
   ok(/Mitä seuraat \(\d+\/\d+\)/.test(await label('tracking')),'valinnoilla määrä otsikossa: '+await label('tracking'));
 
+  console.log('\nMitat: puuttuvat laskentatiedot');
+  await fresh();
+  await p.evaluate(()=>{ S.settings.tracking={...initTracking(),body:true,weight:true}; S.settings.profile={}; S.settings.gender=null;
+    S.measurements=[{date:today(),wn:95,neck:40,updated_at:Date.now()}]; S.entries[today()]={date:today(),weight:100};
+    localStorage.setItem('seuranta-setup-done','1'); saveAll(); applyNavVisibility&&applyNavVisibility(); setTab('historia'); renderMeasurements(); }); await p.waitForTimeout(200);
+  let mt=await p.locator('#historia-content').innerText();
+  ok(/Laskentaan puuttuu pituus ja sukupuoli/.test(mt),'kortti kertoo, mitä puuttuu');
+  ok(/ei lasketa Navy-rasvaprosenttia ja FFMI:tä/.test(mt)&&!/ihopoimu/i.test(mt.split('Kokonaiskuva')[0]),'kertoo seurauksen, ei mainitse ihopoimua ilman ihopoimuja');
+  ok(!/Rasvaprosentti · Navy/.test(mt),'Navy puuttuu ennen täyttöä');
+  await p.locator('.mo-needs input').first().fill('190'); await p.locator('.mo-needs input').first().dispatchEvent('change'); await p.waitForTimeout(150);
+  mt=await p.locator('#historia-content').innerText();
+  ok(/Laskentaan puuttuu sukupuoli/.test(mt)&&await p.evaluate(()=>S.settings.profile.height===190),'pituus tallentui Profiiliin');
+  await p.locator('.mo-needs button',{hasText:'Mies'}).click(); await p.waitForTimeout(150);
+  mt=await p.locator('#historia-content').innerText();
+  ok(!(await p.locator('.mo-needs').count())&&(await p.evaluate(()=>S.settings.gender))==='male','kortti poistuu, sukupuoli tallentui');
+  ok(/Rasvaprosentti · Navy/.test(mt)&&/FFMI/.test(mt),'Navy ja FFMI laskettu täytön jälkeen');
+  await p.evaluate(()=>{ S.measurements[0].sf_chest=10; S.measurements[0].sf_abd=20; S.measurements[0].sf_thigh=15; saveAll(); renderMeasurements(); }); await p.waitForTimeout(150);
+  mt=await p.locator('#historia-content').innerText();
+  ok(/Laskentaan puuttuu ikä/.test(mt)&&/ihopoimuarviota/.test(mt),'ihopoimuilla kysytään ikää');
+  await p.evaluate(()=>{ S.settings.profile.age=40; saveAll(); showMeasForm(); }); await p.waitForTimeout(150);
+  ok(!(await p.locator('.mo-needs').count()),'kaikki tiedossa: lomakkeessa ei puutekorttia');
+  await p.evaluate(()=>{ S.settings.profile.height=null; saveAll(); renderMeasurements(); }); await p.waitForTimeout(150);
+  ok(await p.locator('#historia-content .mo-needs').count()===1&&/pituus/.test(await p.locator('.mo-needs').innerText()),'lomakkeessa sama kortti, kun pituus puuttuu');
+
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

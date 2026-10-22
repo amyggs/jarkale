@@ -497,6 +497,17 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .wr-insight .ico-tile{background:var(--surf);}
 .wr-note{font-size:13px;color:var(--dim);line-height:1.5;}
 .wr-link{border:none;background:transparent;color:var(--orange);font:700 13px Manrope,system-ui,sans-serif;padding:12px 0 0;min-height:40px;}
+.mo-needs{margin-bottom:12px;border:1.5px solid var(--orange)!important}
+.mo-needs .mn-h{display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px}
+.mo-needs .mn-t{font-size:12px;color:var(--dim);line-height:1.5}
+.mo-needs .mn-row{display:flex;gap:10px;margin-top:10px}
+.mo-needs .mn-f{flex:1;min-width:0}
+.mo-needs .mn-in{display:flex;align-items:center;gap:6px}
+.mo-needs .mn-in input{flex:1;min-width:0;height:44px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:15px;text-align:center;outline:none}
+.mo-needs .mn-in small{color:var(--dim);font-size:11px}
+.mo-needs .mn-g{display:flex;gap:8px}
+.mo-needs .mn-g button{flex:1;height:44px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:600 14px Manrope,system-ui,sans-serif}
+.mo-needs .mn-s{font-size:11px;color:var(--dim);margin-top:6px}
 .mo-add{width:100%;min-height:46px;border-radius:12px;border:1.5px dashed var(--bord);background:transparent;color:var(--orange);font:700 14px Manrope,system-ui,sans-serif;margin-bottom:12px;}
 .mo-kpi{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bord);}
 .mo-kpi:first-of-type{border-top:none;}
@@ -2137,7 +2148,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.98</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.99</span>
       </div>
     </div>
   </div>
@@ -2171,6 +2182,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.99", d:"lokakuu 2026", items:[
+    "Mitat kertoo, jos rasvaprosentin tai FFMI:n laskennasta puuttuu pituus, sukupuoli tai (ihopoimuille) ikä, ja tiedot voi täyttää suoraan siinä. Ennen nämä luvut vain jäivät pois ilman selitystä. Tiedot tallentuvat Profiiliin."
+  ]},
   {v:"2.18.98", d:"lokakuu 2026", items:[
     "Asetukset järjestetty uudelleen: Varmuuskopio ja Drive heti Mitä seuraat -kohdan jälkeen, ja sen otsikko kertoo, onko Drive käytössä. Teemat löytyvät omasta Ulkoasu-osiosta. Profiili on nyt avattava osio eikä täytä Asetusten alkua.",
     "Selkeämmät nimet: Asetusten treeniosio on nyt \"Treenit, cardio ja kaudet\" ja Treeni-välilehden asetusnäkymä \"Treenin asetukset\". Entiset Tekniset asetukset ovat nyt Muut asetukset.",
@@ -6147,6 +6161,27 @@ function measSpark(vals){
   const last=xy[xy.length-1].split(",");
   return `<svg class="mo-spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${xy.join(" ")}" fill="none" stroke="var(--dim)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity=".6"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="var(--orange)"/></svg>`;
 }
+// v2.18.99: Mitat kertoo, mikä laskennasta puuttuu, ja tiedot täytetään tässä (tallentuvat Profiiliin, yksi lähde).
+// Navy ja FFMI: pituus + sukupuoli (mies/nainen). Ihopoimu (JP): sukupuoli + ikä, kysytään vain jos ihopoimuja on kirjattu tai lomake auki.
+function measNeeds(all,formOpen){
+  const p=S.settings.profile||{}, g=S.settings.gender;
+  const hasSf=formOpen||(all||[]).some(m=>SKINFOLD_FIELDS_ALL.some(f=>m[f.k]!=null));
+  return {height:!p.height, gender:g!=="male"&&g!=="female", age:hasSf&&!p.age, sf:hasSf};
+}
+function measNeedsHTML(n){
+  if(!n.height&&!n.gender&&!n.age) return "";
+  const miss=[n.height&&"pituus",n.gender&&"sukupuoli",n.age&&"ikä"].filter(Boolean);
+  const what=[(n.height||n.gender)&&"Navy-rasvaprosenttia ja FFMI:tä",(n.age||(n.gender&&n.sf))&&"ihopoimuarviota"].filter(Boolean);
+  const inp=(k,l,u,ph)=>`<label class="mn-f"><span class="lbl-small">${l}</span><span class="mn-in"><input type="text" inputmode="decimal" placeholder="${ph}" onchange="measSetProfile('${k}',this.value)"><small>${u}</small></span></label>`;
+  return `<div class="card mo-needs">
+    <div class="mn-h">${ico("alert",15)} Laskentaan puuttuu ${miss.join(" ja ").replace(/ ja (?=.* ja )/,", ")}</div>
+    <div class="mn-t">Ilman ${miss.length>1?"näitä":"tätä"} ei lasketa ${what.join(" eikä ")}. Mittaukset tallentuvat silti. Tiedot tallentuvat Profiiliin (Asetukset), ja niitä voi muuttaa myöhemmin siellä.</div>
+    ${n.height||n.age?`<div class="mn-row">${n.height?inp("height","Pituus","cm","esim. 178"):""}${n.age?inp("age","Ikä","v","esim. 40"):""}</div>`:""}
+    ${n.gender?`<div class="lbl-small" style="margin-top:10px">Laskentakaava</div><div class="mn-g"><button onclick="measSetGender('male')">Mies</button><button onclick="measSetGender('female')">Nainen</button></div><div class="mn-s">Kaavat on laadittu erikseen miehille ja naisille.</div>`:""}
+  </div>`;
+}
+function measSetProfile(k,v){ const n=parseNum(v); if(n==null||!(n>0)) return; setProfile(k,k==="age"?Math.round(n):n); renderMeasurements(); }
+function measSetGender(g){ setGender(g); renderMeasurements(); }
 // v2.15.2: "Lisää mittaus" sivun yläosaan (Ampiaisessa keltaiselle pohjalle); lomakkeen ollessa auki yläosa on tyhjä
 function renderMeasurements(){
   const r=renderMeasurementsInner();
@@ -6168,6 +6203,7 @@ function renderMeasurementsInner(){
   h+=MEAS_FORM.show ? buildMeasFormHTML()
     : `<button onclick="showMeasForm()" class="mo-add">+ Lisää mittaus</button>`;
 
+  if(all.length&&!MEAS_FORM.show) h+=measNeedsHTML(measNeeds(all,false));
   if(all.length){
     const first=all[0], last=all[all.length-1];
     const multiYear=first.date.slice(0,4)!==last.date.slice(0,4)||last.date.slice(0,4)!==today().slice(0,4);
@@ -6259,15 +6295,16 @@ function buildMeasFormHTML(){
   const f=MEAS_FORM;
   const isFemale=(S.settings.gender==="female");
   const genderSet=(S.settings.gender==="male"||S.settings.gender==="female");
+  const needs=measNeedsHTML(measNeeds([...HIST_MEAS,...(S.measurements||[])],true));
   const bfHint=!genderSet
-    ? `${ico("alert",13)} Valitse sukupuoli Asetuksista (Profiili) laskeaksesi rasvaprosentti- ja FFMI-arvion. Mittaukset tallentuvat silti normaalisti.`
+    ? `${ico("alert",13)} Rasvaprosentti- ja FFMI-arvio tarvitsevat sukupuolen (laskentakaava) ja pituuden. Mittaukset tallentuvat silti normaalisti.`
     : `${ico("bulb",13)} Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>${ico("dumbbell",13)} FFMI: lasketaan automaattisesti painosta, Navy-rasvaprosentista ja pituudesta. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
   return `<div class="card" style="margin-bottom:14px;border-color:rgba(249,115,22,.4)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <span style="color:var(--text);font-weight:600">${f.editing?"Muokkaa mittausta":"Uusi mittaus"}</span>
       <button onclick="cancelMeasForm()" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer">×</button>
     </div>
-    <div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.5">${bfHint}</div>
+    ${needs||`<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.5">${bfHint}</div>`}
     <div style="margin-bottom:12px">
       <div class="lbl-small">Päivämäärä</div>
       <input type="date" id="mfd-date" value="${f.date}" max="${today()}" onchange="MEAS_FORM.date=this.value" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
@@ -6283,10 +6320,10 @@ function buildMeasFormHTML(){
     </div>
     ${(()=>{
       const sfFields=skinfoldFields();
-      if(!sfFields) return `<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px">${ico("alert",13)} Valitse sukupuoli Asetuksista, jotta voit kirjata ihopoimumittauksen (Jackson-Pollock).</div>`;
+      if(!sfFields) return `<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px">${ico("alert",13)} Ihopoimumittaus (Jackson-Pollock) tulee näkyviin, kun laskentakaava on valittu yllä.</div>`;
       const ageOk=!!S.settings.profile?.age;
       return `<div style="margin-bottom:14px">
-        <div style="font-size:12px;color:var(--dim);margin-bottom:4px">${ico("ruler",14)} Ihopoimu (Jackson-Pollock 3-kohta) — vaihtoehtoinen rasvaprosenttiarvio, ei korvaa Navya${ageOk?"":". Aseta ikä Profiilissa, jotta tulos lasketaan."}</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:4px">${ico("ruler",14)} Ihopoimu (Jackson-Pollock 3-kohta) — vaihtoehtoinen rasvaprosenttiarvio, ei korvaa Navya${ageOk?"":". Tulos lasketaan, kun ikä on annettu yllä."}</div>
         <div style="font-size:10px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:7px 9px;margin-bottom:9px;line-height:1.5">
           Lähde: Jackson & Pollock 1978 (miehet) / Jackson, Pollock & Ward 1980 (naiset), ACSM-protokolla.
           Mittaa aina kehon oikealta puolelta, mittari 1 cm sormista poimun puolivälistä, kohtisuoraan poimuun nähden.
