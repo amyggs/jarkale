@@ -1,0 +1,76 @@
+// Järkäle Tracking v2.18.98 – Asetusten järjestys ja nimet, pelkän treenin vihje Kirjaa-näkymässä
+const { chromium, devices } = require('playwright');
+const fs = require('fs');
+const URL='http://localhost:8765/index.html';
+let pass=0, fail=0;
+const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+msg); };
+(async()=>{
+  const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||(fs.existsSync('/opt/pw-browsers/chromium')?'/opt/pw-browsers/chromium':undefined)});
+  const ctx=await b.newContext({...devices['Pixel 7'],serviceWorkers:'block'});
+  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.abort());
+  await ctx.addInitScript(()=>{ window.__jdlgAuto=true; });
+  const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+  await p.goto(URL);
+  const fresh=async()=>{ await p.evaluate(()=>{ localStorage.clear(); }); await p.reload(); await p.waitForTimeout(500); };
+  const vis=sel=>p.evaluate(s=>{ const e=document.querySelector(s); return !!e&&getComputedStyle(e).display!=='none'&&e.offsetParent!==null; },sel);
+  const toggleOrder=()=>p.evaluate(()=>[...document.querySelectorAll('#view-asetukset [id^="stgl-"]:not([id^="stgl-content-"])')].map(e=>e.id.slice(5)));
+  const label=key=>p.evaluate(k=>document.getElementById('stgl-'+k).innerText.trim(),key);
+
+  console.log('\nAsetusten järjestys ja nimet');
+  await fresh();
+  await p.locator('.su-choice',{hasText:'Kirjata treenejä'}).click(); await p.waitForTimeout(300);
+  await p.evaluate(()=>setTab('asetukset')); await p.waitForTimeout(200);
+  const order=await toggleOrder();
+  ok(JSON.stringify(order)===JSON.stringify(['tracking','data','appearance','goals','training','profile','technical','changelog']),'järjestys: seuranta, Drive, ulkoasu, tavoitteet, treenit, profiili, muut, uutta ('+order.join(',')+')');
+  ok(!(await vis('#prof-section')),'profiililomake ei ole auki Asetusten alussa');
+  const first=await p.evaluate(()=>{ const v=document.getElementById('view-asetukset'); const c=[...v.children].find(e=>getComputedStyle(e).display!=='none'&&e.offsetHeight>0); return c&&c.id; });
+  ok(first==='stgl-tracking','ensimmäinen näkyvä on Mitä seuraat ('+first+')');
+  ok(/Varmuuskopio ja Drive · Drive ei käytössä/.test(await label('data')),'Drive-tila otsikossa: '+await label('data'));
+  ok(/Ulkoasu · Järkäle/.test(await label('appearance')),'Ulkoasu näyttää teeman: '+await label('appearance'));
+  ok(/Treenit, cardio ja kaudet/.test(await label('training')),'treeniosion nimi');
+  ok(/Muut asetukset/.test(await label('technical')),'Tekniset → Muut asetukset');
+  ok(/vain treenit/.test(await label('tracking'))&&!/ei valintoja/.test(await label('tracking')),'pelkkä treeni: "'+await label('tracking')+'"');
+
+  console.log('\nOsioiden sisältö');
+  await p.evaluate(()=>{ SETTINGS_TOGGLES.appearance=true; renderAsetukset(); }); await p.waitForTimeout(100);
+  ok(await vis('#theme-section')&&(await p.locator('#theme-section button').count())>=9,'Ulkoasu-osio näyttää teemat');
+  ok(await p.evaluate(()=>!document.getElementById('stgl-content-technical').contains(document.getElementById('theme-section'))),'teemat eivät ole Muut asetukset -osiossa');
+  await p.evaluate(()=>applyPalette('magnesium')); await p.waitForTimeout(300);
+  ok(/Ulkoasu · Magnesium/.test(await label('appearance')),'otsikko päivittyy teeman vaihdossa: '+await label('appearance'));
+  await p.evaluate(()=>{ SETTINGS_TOGGLES.technical=true; renderAsetukset(); }); await p.waitForTimeout(100);
+  ok(await vis('#haptics-section')&&await vis('#api-key-section'),'Muut asetukset: värinä ja Claude API');
+  await p.evaluate(()=>{ SETTINGS_TOGGLES.profile=true; renderAsetukset(); }); await p.waitForTimeout(100);
+  ok(await vis('#prof-section'),'Profiili avautuu');
+  await p.evaluate(()=>{ const s=syncState(); s.enabled=true; localStorage.setItem('jarkale-sync',JSON.stringify(s)); try{ saveSyncState&&saveSyncState(s);}catch(_){}; renderSyncUI(); });
+  const dl=await label('data');
+  ok(/Drive käytössä/.test(dl)||!(await p.evaluate(()=>syncState().enabled)),'Drive päällä näkyy otsikossa: '+dl);
+  await p.evaluate(()=>{ SETTINGS_TOGGLES.training=true; renderAsetukset(); }); await p.waitForTimeout(100);
+  ok(/Treeni → Asetukset/.test(await p.locator('#gym-settings').innerText()),'treeniosio ohjaa Treeni → Asetukset');
+
+  console.log('\nTreenin asetukset');
+  await p.evaluate(()=>openGymSettings()); await p.waitForTimeout(200);
+  ok(/Treenin asetukset/.test(await p.locator('#view-treeni .tr-h1').first().innerText()),'Treeni-välilehden asetusnäkymän otsikko');
+
+  console.log('\nKirjaa: pelkkä treeni');
+  await p.evaluate(()=>setTab('log')); await p.waitForTimeout(200);
+  ok(await vis('#body-only-note'),'vihje näkyy');
+  const note=await p.locator('#body-only-note').innerText();
+  ok(/Treeni-välilehdellä/.test(note)&&/vapaaehtoista/.test(note),'vihjeen teksti');
+  await p.locator('#body-only-note button',{hasText:'Valitse seurannat'}).click(); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>S.tab==='asetukset'&&getComputedStyle(document.getElementById('stgl-content-tracking')).display!=='none'),'Valitse seurannat avaa Mitä seuraat -osion');
+  await p.evaluate(()=>{ S.settings.tracking.weight=true; saveAll(); setTab('log'); renderLog(); }); await p.waitForTimeout(200);
+  ok(!(await vis('#body-only-note')),'vihje poistuu, kun päiväseuranta valitaan');
+
+  console.log('\nKirjaa: kehoa seuraava ei näe treenivihjettä');
+  await fresh();
+  await p.locator('.su-choice',{hasText:/kehoa|Kehoa/}).first().click().catch(()=>{}); await p.waitForTimeout(200);
+  await p.evaluate(()=>{ if(localStorage.getItem('seuranta-setup-done')!=='1'){ S.settings.tracking={...initTracking(),weight:true}; localStorage.setItem('seuranta-setup-done','1'); saveAll(); } setTab('log'); renderLog(); }); await p.waitForTimeout(200);
+  ok(!/Kirjaat treenejä/.test(await p.locator('#body-only-note').innerText().catch(()=>'')),'ei treenivihjettä');
+  await p.evaluate(()=>setTab('asetukset')); await p.waitForTimeout(150);
+  ok(/Mitä seuraat \(\d+\/\d+\)/.test(await label('tracking')),'valinnoilla määrä otsikossa: '+await label('tracking'));
+
+  ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
+  await b.close();
+  console.log(`\n${pass}/${pass+fail} läpi`);
+  process.exit(fail?1:0);
+})();

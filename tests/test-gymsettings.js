@@ -19,7 +19,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const main=await p.locator('#gym-settings').innerText();
   ok(/Saliohjelmat ja treeniseuranta/.test(main),'pääasetuksissa on Saliohjelmat-kytkin');
   ok(!/Ajastimen ääni|Painon − \/ \+ -askel|Koettu rasittavuus|Näyttö päällä/.test(main),'ajastin-, ääni-, askel- ja rasittavuusvalintoja ei ole pääasetuksissa');
-  ok(/Treeni-välilehden Asetukset-nappi/.test(main),'ohje kertoo, mistä treeniasetukset löytyvät');
+  ok(/Treeni → Asetukset/.test(main),'ohje kertoo, mistä treeniasetukset löytyvät');
   await p.locator('#gym-settings .g-sw').first().click(); await p.waitForTimeout(100);
   ok(await p.evaluate(()=>!gymOn()&&getComputedStyle(document.getElementById('nav-treeni')).display==='none'),'kytkin pois: Treeni-välilehti piiloutuu');
   await p.locator('#gym-settings .g-sw').first().click(); await p.waitForTimeout(100);
@@ -31,7 +31,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.getByRole('button',{name:'Asetukset',exact:true}).first().isVisible(),'Treeni-kodissa on Asetukset-nappi (myös ilman ohjelmaa)');
   await p.locator('#view-treeni .tr-pill',{hasText:'Asetukset'}).click(); await p.waitForTimeout(150);
   let t=await p.locator('#view-treeni').innerText();
-  ok(/Treeniasetukset/.test(t)&&/Näyttö päällä treenin ajan/.test(t)&&/Käynnistä tauko automaattisesti/.test(t)&&/Ajastimen ääni/.test(t)&&/Ajastimen värinä/.test(t)&&/Painon − \/ \+ -askel/.test(t)&&/Koettu rasittavuus/.test(t),'näkymässä kaikki treeniasetukset selityksineen');
+  ok(/Treenin asetukset/.test(t)&&/Näyttö päällä treenin ajan/.test(t)&&/Käynnistä tauko automaattisesti/.test(t)&&/Ajastimen ääni/.test(t)&&/Ajastimen värinä/.test(t)&&/Painon − \/ \+ -askel/.test(t)&&/Koettu rasittavuus/.test(t),'näkymässä kaikki treeniasetukset selityksineen');
   ok(!/Saliohjelmat ja treeniseuranta/.test(t),'pääkytkin ei ole tässä näkymässä');
   await p.locator('#g-settings-body .g-set-row',{hasText:'Ajastimen ääni'}).locator('.g-sw').click(); await p.waitForTimeout(150);
   ok(await p.evaluate(()=>gymCfg().sound===false&&GU.mode==='settings'),'kytkin tallentuu ja näkymä pysyy auki');
