@@ -2129,7 +2129,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.96</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.97</span>
       </div>
     </div>
   </div>
@@ -2163,6 +2163,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.97", d:"lokakuu 2026", items:[
+    "Korjattu: Kehon mittaus -muistutus saattoi ilmestyä Kirjaa-näkymään sivuun siirtyneenä, kun päivää oli vaihdettu pyyhkäisyllä ja palattiin takaisin tähän päivään."
+  ]},
   {v:"2.18.96", d:"lokakuu 2026", items:[
     "Treenin yhteenvedossa ennätys näkyy liikkeen omalla rivillä: merkki, ennätyssarja, aiempi paras ja arvioitu 1RM. Erillinen ennätyslista, jossa samat liikkeet olivat toiseen kertaan, poistui. Sama jaettavassa tekstissä ja kuvassa."
   ]},
@@ -10550,7 +10553,14 @@ function turnParts(zoneId){
   return [...zone.children].filter(el=>el.id!=="date-nav"&&!el.classList.contains("view-hero")&&el.offsetParent!==null);
 }
 function dayParts(){ return turnParts("view-log"); }
-function setPartsX(x,op,zoneId){ turnParts(zoneId||"view-log").forEach(el=>{ el.style.transform=x?`translateX(${x}px)`:""; el.style.opacity=op==null?"":String(op); }); }
+// v2.18.97: nollaus koskee myös osia, jotka ehtivät piiloutua vedon aikana (esim. Kehon mittaus -kortti, joka näkyy vain tänään).
+// Aiemmin vain näkyvät osat nollattiin, jolloin piilotettu kortti jäi sivuun siirretyksi ja ilmestyi vinoon, kun palattiin tähän päivään.
+const _turnedParts=new Set();
+function setPartsX(x,op,zoneId){
+  const clr=el=>{ el.style.transform=""; el.style.opacity=""; };
+  turnParts(zoneId||"view-log").forEach(el=>{ if(x){ _turnedParts.add(el); el.style.transform=`translateX(${x}px)`; el.style.opacity=op==null?"":String(op); } else { el.style.transform=""; el.style.opacity=op==null?"":String(op); } });
+  if(!x){ _turnedParts.forEach(clr); _turnedParts.clear(); }
+}
 function pageTurn(zoneId,labelId,delta,fromX,swap){
   // delta: +1 = seuraava (sisältö menee vasemmalle), -1 = edellinen
   const zone=document.getElementById(zoneId);

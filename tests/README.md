@@ -24,6 +24,7 @@ tests/run.sh test-gym.js
 | `test-setrow.js` | Toistojen − / + aktiivisella sarjalla (lähtö harmaasta ehdotuksesta), mahtuminen 360/412 px, pienennetyn liikerivin rivitys (nimi ei katkea kesken sanan) |
 | `test-swap.js` | Vaihda liike kesken treenin: vanhan liikkeen tavoitepaino ja kirjoitetut kilot tyhjenevät, tehdyt sarjat säilyvät, ehdotus uuden liikkeen historiasta |
 | `test-sumwrap.js` | Yhteenvedon liikerivit: nimi ei katkea, pitkä sarjarivi siirtyy nimen alle; ennätys liikkeen omalla rivillä, ei erillistä listaa (näkymä, jaettava teksti) |
+| `test-swipereset.js` | Päivän vaihto pyyhkäisyllä: kesken vedon piiloutuva kortti (Kehon mittaus) ei jää sivuun siirretyksi, kun palataan tähän päivään |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
