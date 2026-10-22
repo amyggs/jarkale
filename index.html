@@ -1410,6 +1410,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="soitin"] #app *:not(.ws-dot){border-radius:1px!important;}
 [data-palette="soitin"] :is(#track-weight-wrap,#track-sleep-wrap) .stepper input{text-align:center!important;padding:0 24px 0 4px!important;}
 [data-palette="soitin"] #track-sleep-wrap .sleep-hm{left:0;right:0;justify-content:center;}
+/* v2.18.100: Soitin ja Manageri kehystävät paino-, uni- ja askelkentän omaksi paneelikseen; otsikko sisennetään kuten muissa korteissa (Verenpaine) */
+:is([data-palette="soitin"],[data-palette="manageri"]) :is(#track-weight-wrap,#track-sleep-wrap)>.stepper>div:first-child{padding:10px 12px 6px;}
+:is([data-palette="soitin"],[data-palette="manageri"]) #track-steps-wrap>.stepper>.lbl-small{padding-left:12px;}
 [data-palette="soitin"] :is(#track-recovery-wrap,#track-motivation-wrap)>div:first-child{min-height:2.7em;align-items:flex-start!important;}
 [data-palette="soitin"] #view-log .lbl-small{min-width:0;flex:1 1 auto;white-space:normal!important;}
 [data-palette="soitin"] #nav button svg,[data-palette="soitin"] #nav button svg *{stroke:currentColor!important;}
@@ -2148,7 +2151,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.99</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.100</span>
       </div>
     </div>
   </div>
@@ -2182,6 +2185,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.100", d:"lokakuu 2026", items:[
+    "Soitin- ja Manageri-teemat: Aamupaino-, Uni- ja Askeleet-otsikot eivät enää ole kiinni laatikon reunassa, vaan sisennetty kuten muissa korteissa."
+  ]},
   {v:"2.18.99", d:"lokakuu 2026", items:[
     "Mitat kertoo, jos rasvaprosentin tai FFMI:n laskennasta puuttuu pituus, sukupuoli tai (ihopoimuille) ikä, ja tiedot voi täyttää suoraan siinä. Ennen nämä luvut vain jäivät pois ilman selitystä. Tiedot tallentuvat Profiiliin."
   ]},
