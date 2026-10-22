@@ -600,6 +600,11 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 #view-log .lbl-small{font-size:13px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;}
 /* paino ja uni: iso luku, napit alla */
 #track-weight-wrap .stepper,#track-sleep-wrap .stepper{display:block;border:none;min-height:0;}
+/* v2.18.101: paino ja uni rinnakkain samankorkuisiksi. Painon otsikossa on usein toinen rivi (muutos eilisestä), unen ei:
+   luku ja napit kortin alareunaan molemmissa, otsikkoalue joustaa. Teksti-TV:llä oma ratkaisu (otsikkopalkin min-korkeus). */
+#view-log>:is(#track-weight-wrap,#track-sleep-wrap){display:flex;flex-direction:column;}
+#view-log>:is(#track-weight-wrap,#track-sleep-wrap)>.stepper{flex:1 1 auto;display:flex!important;flex-direction:column;align-items:stretch!important;}
+#view-log>:is(#track-weight-wrap,#track-sleep-wrap)>.stepper>.stepper-row{margin-top:auto!important;}
 #track-weight-wrap .stepper>div:first-child,#track-sleep-wrap .stepper>div:first-child{display:flex!important;flex-direction:column;align-items:flex-start!important;gap:1px;min-height:34px;margin:0!important;}
 #view-log .ghost-hint,#weight-ma-hint{font-size:12px!important;}
 #track-weight-wrap .stepper-row,#track-sleep-wrap .stepper-row{display:grid!important;grid-template-columns:1fr 1fr;gap:6px;flex:none!important;margin-top:2px;}
@@ -2151,7 +2156,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.100</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.101</span>
       </div>
     </div>
   </div>
@@ -2185,6 +2190,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.101", d:"lokakuu 2026", items:[
+    "Aamupaino- ja Uni-laatikot ovat rinnakkain samankokoiset kaikissa teemoissa: luku ja − / + -napit ovat samalla korkeudella, vaikka painon otsikossa on muutos eilisestä ja unen otsikossa ei."
+  ]},
   {v:"2.18.100", d:"lokakuu 2026", items:[
     "Soitin- ja Manageri-teemat: Aamupaino-, Uni- ja Askeleet-otsikot eivät enää ole kiinni laatikon reunassa, vaan sisennetty kuten muissa korteissa."
   ]},
