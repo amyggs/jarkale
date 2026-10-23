@@ -13,7 +13,8 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   let downloads=0; p.on('download',()=>downloads++);
   await p.goto(URL);
   await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1');
-    localStorage.setItem('seuranta-settings',JSON.stringify({theme:'dark',tracking:{},gym:{enabled:true}})); });
+    localStorage.setItem('seuranta-settings',JSON.stringify({theme:'dark',tracking:{},gym:{enabled:true}}));
+    localStorage.setItem('jarkale-fb-later',String(Date.now())); /* v2.18.102: ensimmäisen varmuuskopion kortti ohitettu, testataan tavallinen muistutus */ });
   await p.reload(); await p.waitForTimeout(500);
   const mk=n=>p.evaluate(n=>{
     const pr=G.programs[0]||newProgram('T'); if(!pr.days[0].exercises.length) pr.days[0].exercises.push(newEx({name:'Penkki',sets:2})); touchProg(pr);
@@ -66,6 +67,21 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.locator('#backup-reminder').click(); await p.waitForTimeout(700);
   ok(await p.evaluate(()=>S.tab==='asetukset')&&await p.evaluate(()=>getComputedStyle(document.getElementById('stgl-content-data')).display!=='none'),'Kirjaa-muistutus avaa myös Varmuuskopiot-osion');
   ok(downloads===0,'eikä lataa tiedostoa');
+
+  console.log('\nEnsimmäisen varmuuskopion kortti (v2.18.102)');
+  await p.evaluate(()=>{ localStorage.removeItem('lastExport'); localStorage.removeItem('jarkale-sync'); localStorage.removeItem('jarkale-fb-later'); GU.bkHide=false; GU.mode='home'; setTab('treeni'); renderGym(); }); await p.waitForTimeout(200);
+  ok(await p.locator('#view-treeni .fb-card').count()===1,'Treeni-koti: kortti näkyy, kun varmuuskopiota ei ole koskaan tehty');
+  ok(await nudge()===0,'ei samaan aikaan pientä muistutusta');
+  ok(/Yhdistä Google Driveen/.test(await p.locator('#view-treeni .fb-card').innerText()),'kortissa Yhdistä Google Driveen');
+  await p.evaluate(()=>setTab('log')); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('first-backup')).display!=='none'),'Kirjaa: kortti näkyy');
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('backup-reminder')).display)==='none','Kirjaa: pieni muistutus piilossa');
+  await p.locator('#first-backup .fb-later').click(); await p.waitForTimeout(200);
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('first-backup')).display)==='none'&&await p.evaluate(()=>!!localStorage.getItem('jarkale-fb-later')),'Myöhemmin piilottaa ja muistaa');
+  await p.evaluate(()=>{ localStorage.setItem('jarkale-fb-later',String(Date.now()-4*864e5)); renderLog(); }); await p.waitForTimeout(150);
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('first-backup')).display)!=='none','palaa 3 vuorokauden jälkeen');
+  await p.evaluate(()=>{ localStorage.setItem('lastExport',String(Date.now())); renderLog(); }); await p.waitForTimeout(150);
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('first-backup')).display)==='none','varmuuskopion jälkeen ei korttia');
 
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));
   await b.close();

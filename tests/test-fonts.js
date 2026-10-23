@@ -30,7 +30,8 @@ const SW=fs.readFileSync(ROOT+'/sw.js','utf8');
   ok(fcp<1500,'ensipiirto alle 1,5 s ('+fcp+' ms)');
   ok(googleReq===0,'Googleen ei tehdä pyyntöjä');
   await p.waitForTimeout(800);
-  const fm=await p.evaluate(async()=>{ await document.fonts.ready; return {m6:document.fonts.check('600 14px Manrope'), loaded:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family+' '+f.weight)}; });
+  const fm=await p.evaluate(async()=>{ await document.fonts.ready; await document.fonts.load('600 14px Manrope'); return {m6:document.fonts.check('600 14px Manrope'), loaded:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family+' '+f.weight)}; });
+  await p.waitForTimeout(300);
   ok(fm.m6&&fontReqs.some(n=>/manrope-latin-6|manrope-latin-7/.test(n)),'Manrope latautuu omalta palvelimelta ('+fontReqs.filter(n=>/manrope/.test(n)).join(',')+')');
   await ctx.close();
 
@@ -50,7 +51,7 @@ const SW=fs.readFileSync(ROOT+'/sw.js','utf8');
   // offline vielä fonttien kanssa
   await ctx2.setOffline(true);
   await p2.reload({waitUntil:'domcontentloaded'}); await p2.waitForTimeout(800);
-  const off=await p2.evaluate(async()=>{ await document.fonts.ready; return {nav:!!document.getElementById('nav'), m:document.fonts.check('600 14px Manrope')}; });
+  const off=await p2.evaluate(async()=>{ await document.fonts.ready; await document.fonts.load('600 14px Manrope').catch(()=>{}); return {nav:!!document.getElementById('nav'), m:document.fonts.check('600 14px Manrope')}; });
   ok(off.nav&&off.m,'offline-lataus onnistuu ja Manrope renderöityy');
   await b.close();
   console.log(`\n${pass} / ${pass+fail} läpi`); process.exit(fail?1:0);

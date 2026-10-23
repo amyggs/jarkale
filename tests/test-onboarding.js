@@ -57,7 +57,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.evaluate(()=>!!document.getElementById('nav-trendit')),'päänavigointi toimii');
 
   console.log('\nTekoälykortti Trendeissä (oikea näkymä)');
+  // v2.18.102: Trendit näyttää tilastot vasta 7 kirjauspäivästä
+  await p.evaluate(()=>{ setTab('trendit'); S.rangeId='d28'; renderTrendit(); }); await p.waitForTimeout(200);
+  ok(/0 \/ 7 kirjauspäivää/.test(await p.locator('#trendit-content').innerText())&&!/Vaihteluväli|Yhteenveto/.test(await p.locator('#trendit-content').innerText()),'alle 7 kirjauksella edistyminen, ei tilastoja');
+  await p.evaluate(()=>{ for(let i=1;i<=8;i++){ const d=new Date(Date.now()-i*864e5); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); S.entries[k]={date:k,weight:80+i/10,sleep:7.25}; } saveAll(); });
   await p.evaluate(()=>{ localStorage.removeItem('seuranta-apikey'); setTab('trendit'); S.rangeId='d28'; renderTrendit(); });
+  await p.waitForTimeout(200);
+  ok(/Uni ka\s*7\s*h\s*15\s*min/.test(await p.locator('#trendit-content').innerText()),'uni muodossa 7 h 15 min');
   await p.waitForTimeout(500);
   ok(!/Kirjallinen yhteenveto/.test(await p.locator('#trendit-content').innerText()),'28 pv -näkymässä ei AI-korttia ilman avainta');
   await p.evaluate(()=>{ S.rangeId='vko'; S.periodOffset=-1; S.trendToggles={analysis:true}; renderTrendit(); }); await p.waitForTimeout(500);

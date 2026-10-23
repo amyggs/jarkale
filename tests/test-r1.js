@@ -597,7 +597,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     const u=await p.evaluate(()=>({ph:document.getElementById('inp-sleep').placeholder,gh:document.getElementById('sleep-ghost-hint').textContent,
       wgh:document.getElementById('weight-ghost-hint').textContent,
       a:parseSleep('6:12'),b:parseSleep('6,5'),c:parseSleep('6h 30min'),d:parseSleep('6:75'),e:fmtSleepHM(6.2),f:fmtSleepHM(7.999),g:fmtSleepHM(parseSleep('6.55')),h:fmtSleepHM(parseSleep('6,55')),i:fmtSleepHM(parseSleep('655')),j:fmtSleepHM(parseSleep('6.75')),k:fmtSleepHM(parseSleep('6:59')),l:parseSleep('7')}));
-    ok(u.ph==='7:00'&&/harmaa = eilen/.test(u.gh)&&/eilen/.test(u.wgh),'tyhjänä päivänä harmaana edellinen uni ja paino, lähde kerrotaan ('+u.ph+' / '+u.gh+')');
+    ok(u.ph==='7:00'&&/himmeä = eilen/.test(u.gh)&&/eilen/.test(u.wgh),'tyhjänä päivänä harmaana edellinen uni ja paino, lähde kerrotaan ('+u.ph+' / '+u.gh+')');
     { const f=await p.evaluate(()=>{const e=document.getElementById('inp-weight');e.focus();e.value='108,5';S.weight=null;renderSteppers();const r={v:e.value,c:getComputedStyle(e,'::placeholder').color};e.blur();return r;});
       ok(f.v===''&&/0\.28\)$|28%/.test(f.c),'tyhjä paino tyhjentää kentän myös aktiivisena, eilinen arvo haalea ('+f.c+')'); }
     ok(u.a===6.2&&u.b===6.5&&u.c===6.5&&u.d===null&&u.e==='6:12'&&u.f==='8:00','unen syöte ja esitys h:mm');
