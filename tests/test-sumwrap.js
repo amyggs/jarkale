@@ -31,31 +31,34 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     const sid=G.activeId; finishSession(true); setTab('treeni'); openSession(sid);
   }); await p.waitForTimeout(400);
   console.log('\nYhteenvedon liikerivit (Pixel 7, 412 px)');
+  // v2.18.106: rivin muoto nimi → sarjat alla → ennätys → huomio
   const rows=await p.evaluate(()=>{
     const out=[];
-    document.querySelectorAll('.g-sum-list>div').forEach(r=>{
+    document.querySelectorAll('.g-sum-list>.gs-row').forEach(r=>{
       const nm=r.querySelector('.nm'); const was=nm.style.overflowWrap; nm.style.overflowWrap='normal';
       const fits=nm.scrollWidth<=nm.clientWidth+1; nm.style.overflowWrap=was;
-      const v=r.querySelector('.v'); const rr=r.getBoundingClientRect(), vr=v.getBoundingClientRect(), nr=nm.getBoundingClientRect();
-      out.push({name:nm.textContent.trim(),fits,vInside:vr.right<=rr.right+1&&vr.left>=rr.left-1,stacked:vr.top>=nr.bottom-2});
+      const v=r.querySelector('.gs-sets'); const rr=r.getBoundingClientRect(), vr=v.getBoundingClientRect(), nr=nm.getBoundingClientRect();
+      out.push({name:nm.textContent.trim(),fits,vInside:vr.right<=rr.right+1&&vr.left>=rr.left-1,below:vr.top>=nr.bottom-2,left:Math.abs(vr.left-nr.left)<2});
     });
     return out;
   });
   ok(rows.length===5,'viisi liikeriviä');
   rows.forEach(r=>ok(r.fits,`ei sanan katkeamista: ${r.name}`));
   rows.forEach(r=>ok(r.vInside,`sarjarivi pysyy rivin sisällä: ${r.name}`));
-  const long=rows.find(r=>/Tasapenkki/.test(r.name)); ok(long&&long.stacked,'pitkä nimi + pitkä sarjarivi: sarjat nimen alle');
-  const short=rows.find(r=>/Vipunostot/.test(r.name)); ok(short&&!short.stacked,'lyhyt nimi: sarjat samalla rivillä oikealla');
+  ok(rows.every(r=>r.below&&r.left),'sarjat aina nimen alla, samassa linjassa');
   console.log('\nEnnätys liikkeen omalla rivillä');
-  const pr=await p.evaluate(()=>{ const t=document.querySelector('.g-sum').innerText; const rows=[...document.querySelectorAll('.g-sum-list>div')];
-    return {sep:document.querySelectorAll('.g-sum-pr').length, tags:document.querySelectorAll('.g-sum-list .prd .pr-tag').length,
+  const pr=await p.evaluate(()=>{ const t=document.querySelector('.g-sum').innerText; const rows=[...document.querySelectorAll('.g-sum-list>.gs-row')];
+    const rt=re=>rows.find(r=>re.test(r.textContent));
+    return {sep:document.querySelectorAll('.g-sum-pr').length, tags:document.querySelectorAll('.g-sum-list .gs-pr .pr-tag').length,
       cnt:(t.match(/Tasapenkkipunnerrus/g)||[]).length, lbl:document.querySelector('.g-sum-prh').textContent,
-      tasa:rows.find(r=>/Tasapenkki/.test(r.textContent)).querySelector('.prd')?.textContent||'', vipu:!!rows.find(r=>/Vipunostot/.test(r.textContent)).querySelector('.prd')};
+      tasa:rt(/Tasapenkki/).querySelector('.gs-pr')?.textContent||'', tasaDir:!!rt(/Tasapenkki/).querySelector('.g-dir'), rm:/1RM/.test(t)};
   });
   ok(pr.sep===0,'erillistä ennätyslistaa ei ole');
   ok(pr.cnt===1,'liike näkyy yhteenvedossa vain kerran');
   ok(pr.tags>=2&&/ennätyksiä \d/.test(pr.lbl),'ennätysmerkit riveillä ja määrä otsikossa: '+pr.lbl+' / '+pr.tags);
-  ok(/110 × 3/.test(pr.tasa)&&/aiemmin/.test(pr.tasa),'rivillä ennätyssarja ja aiempi paras: '+pr.tasa);
+  ok(/110 × 3/.test(pr.tasa)&&/aiemmin/.test(pr.tasa),'rivillä ennätyssarja ja vertailu: '+pr.tasa);
+  ok(!pr.tasaDir,'ennätysrivillä ei nuolta');
+  ok(!pr.rm,'yhteenvedossa ei arvioitua 1RM:ää');
   const sh=await p.evaluate(()=>sessionShareText(G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0]));
   ok(/Ennätyksiä: \d/.test(sh)&&/★ Tasapenkki/.test(sh)&&!/^•/m.test(sh),'jaettava teksti: ★ rivillä, ei erillistä listaa');
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));

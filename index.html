@@ -804,6 +804,18 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .pr-tag{flex-shrink:0;font:800 10px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:3px 6px;margin-top:2px;}
 .g-sum-list{margin-top:12px;border-top:1px solid var(--surf2);}
 .g-sum-list>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--surf2);font:600 14px Manrope,system-ui,sans-serif;color:var(--text);}
+.g-sum-list>.gs-row{display:block;padding:10px 0;}
+.gs-row .gs-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.gs-row .gs-h .nm{flex:1 1 auto;min-width:0;overflow-wrap:break-word;}
+.gs-row .gs-h .g-dir{flex:none;font-size:16px;}
+.gs-row .gs-st{flex:none;color:var(--dim);font-weight:500;}
+.gs-row .gs-sets{margin-top:3px;font:600 14px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);}
+.gs-row .gs-sets .g-eff{font-weight:500;font-size:12px;}
+.gs-row .gs-pr{margin-top:6px;font:500 12px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);}
+.gs-row .gs-pr .pr-tag{margin:0 6px 0 0;vertical-align:1px;}
+.gs-row .gs-note{display:flex;gap:6px;align-items:flex-start;margin-top:6px;font:italic 500 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);opacity:.8;}
+.gs-row .gs-note .ico{flex:none;margin-top:2px;}
+.gs-row.sk .nm{color:var(--dim);}
 .g-sum-list .nm{flex:1 1 auto;min-width:0;max-width:100%;overflow-wrap:break-word;hyphens:manual;}
 .g-sum-list .nm small.prd{color:var(--text);opacity:.85;line-height:1.7;margin-top:4px;}
 .g-sum-list .nm small.prd .pr-tag{margin:0 6px 0 0;vertical-align:1px;}
@@ -2185,7 +2197,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.105</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.106</span>
       </div>
     </div>
   </div>
@@ -2219,6 +2231,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.106", d:"lokakuu 2026", items:[
+    "Treenin yhteenveto selkeämmäksi: jokaisella liikkeellä sama järjestys – nimi, sarjat heti alla, ennätys yhdellä rivillä ja huomio omalla rivillään. Sarjaa ei enää toisteta, ennätysriveillä ei ole nuolta, ja arvioitu 1RM näkyy liikkeen sivulla ja ennätyshetkellä treenin aikana.",
+    "Korjattu harhaanjohtava ennätysteksti: kun ennätys tehtiin kevyemmällä painolla mutta useammalla toistolla, yhteenveto sanoi \"uusi paino, aiemmin raskain …\". Nyt se näyttää vertailukohdan (esim. \"aiemmin 165 × 12\"), ja \"raskain tähän asti\" vain kun paino oli oikeasti raskain. Sama jaettavassa kuvassa ja tekstissä."
+  ]},
   {v:"2.18.105", d:"lokakuu 2026", items:[
     "Kaksi treeniä samana päivänä: toisen treenin lopetuskysely kertoo, että rasitus ja kulku arvioidaan koko päivälle (molemmat treenit), ja arvio korvaa päivän aiemman arvion.",
     "Viikkotavoite on nyt \"Treenipäiviä viikossa\", koska se laskee päiviä: kaksi treeniä samana päivänä on yksi treenipäivä. Sama nimi viikkoyhteenvedossa ja Trendien havainnoissa."
@@ -9911,7 +9927,13 @@ function sessionSummary(s){
       if(best.kg!=null){
         const same=before.filter(p=>p.kg===best.kg);
         if(same.length) was=`aiemmin ${fmtKg(best.kg)} × ${Math.max(...same.map(p=>p.reps))}`;
-        else { const hv=before.filter(p=>p.kg!=null).sort((x,y)=>y.kg-x.kg||y.reps-x.reps)[0]; was=hv?`uusi paino, aiemmin raskain ${fmtKg(hv.kg)} × ${hv.reps}`:"uusi paino"; }
+        else {
+          // v2.18.106: "uusi paino, aiemmin raskain 165 × 12" oli harhaanjohtava, kun ennätyspaino (150) oli kevyempi kuin aiempi raskain.
+          const hv=before.filter(p=>p.kg!=null).sort((x,y)=>y.kg-x.kg||y.reps-x.reps)[0];
+          if(!hv) was="";
+          else if(best.kg>hv.kg) was=`raskain tähän asti · aiemmin ${fmtKg(hv.kg)} × ${hv.reps}`;
+          else { const ref=before.filter(p=>p.kg!=null&&p.kg>=best.kg).sort((x,y)=>y.reps-x.reps||x.kg-y.kg)[0]||hv; was=`aiemmin ${fmtKg(ref.kg)} × ${ref.reps}`; }
+        }
       } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`aiemmin ${mx} toistoa`; }
       prs.push({ex,set:best,was});
     }
@@ -9922,6 +9944,11 @@ function sessionSummary(s){
 }
 const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.96: ennätys näkyy liikkeen omalla rivillä (ei erillistä ennätyslistaa): ennätyssarja, aiempi paras ja arvioitu 1RM
+// v2.18.106: ennätysrivi yhteenvetoon ja jakoon: sarja vain, jos liikkeessä oli eri painoja/toistoja (muuten se on jo sarjarivillä), ja vertailu
+function prLine(r){
+  const multi=new Set((r.done||[]).map(x=>(x.kg??"")+"|"+x.reps)).size>1;
+  return [multi?setOneTxt(r.pr.set):"",r.pr.was||""].filter(Boolean).join(" · ");
+}
 function prParts(p){ return [setOneTxt(p.set),[p.was||"",(p.set.kg&&p.set.reps&&p.set.reps<=12)?`arv.\u00a01RM\u00a0~${fmtKg(Math.round(e1rm(p.set.kg,p.set.reps)*2)/2)}\u00a0kg`:""].filter(Boolean).join(" · ")]; }
 function prDetail(p){ return prParts(p).filter(Boolean).join(" · "); }
 // v2.18.57 Tallennusleima: yksi Järkäle-leima, väri teemasta. Iskee tallennettaessa kerran, jälki jää yhteenvetoon.
@@ -9943,9 +9970,14 @@ function gymSummaryHTML(s,fresh){
     <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
   h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Liikkeet · ennätyksiä ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
-  h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="sk"><span class="nm">${esc(r.ex.name)}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>`
-    :`<div><span class="nm">${esc(r.ex.name)}${r.pr?`<small class="prd"><span class="pr-tag">Ennätys</span>${esc(prParts(r.pr)[0])}${prParts(r.pr)[1]?`<br>${esc(prParts(r.pr)[1])}`:""}</small>`:""}${r.ex.userNote?`<small>${esc(r.ex.userNote)}</small>`:""}</span><span class="v">${setsTxt(r.done)}${r.dir?` <span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}${effTxt(r.done)?`<small class="g-eff">${effTxt(r.done)}</small>`:""}</span></div>`).join("")}</div>
-    <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna. Ennätys: aiemmin ei yhtä paljon painoa yhtä monella toistolla."}</div></div>`;
+  // v2.18.106: jokaisella liikkeellä sama muoto: nimi (+ nuoli), sarjat heti alla, ennätys yhdellä rivillä, huomio omalla rivillään.
+  // Ennätysriveillä ei nuolta (kaksi eri mittaria hämäsi), ei arvioitua 1RM:ää (se on liikkeen sivulla ja ennätyshetken ilmoituksessa).
+  const noteH=r=>r.ex.userNote?`<div class="gs-note">${ico("note",13)}<span>${esc(r.ex.userNote)}</span></div>`:"";
+  h+=`<div class="g-sum-list">${S2.rows.map(r=>r.skipped?`<div class="gs-row sk"><div class="gs-h"><span class="nm">${esc(r.ex.name)}</span><span class="gs-st">${r.ex.skipped?"ohitettu":"ei tehty"}</span></div>${noteH(r)}</div>`
+    :`<div class="gs-row"><div class="gs-h"><span class="nm">${esc(r.ex.name)}</span>${!r.pr&&r.dir?`<span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</div>
+      <div class="gs-sets">${setsTxt(r.done)}${effTxt(r.done)?` <span class="g-eff">· ${effTxt(r.done)}</span>`:""}</div>
+      ${r.pr?`<div class="gs-pr"><span class="pr-tag">Ennätys</span>${esc(prLine(r))}</div>`:""}${noteH(r)}</div>`).join("")}</div>
+    <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna."}</div></div>`;
   return h;
 }
 function sessionShareText(s){
@@ -9955,7 +9987,7 @@ function sessionShareText(s){
   L.push(`${S2.st.done}/${S2.st.exN} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`);
   if(S2.prs.length) L.push(`Ennätyksiä: ${S2.prs.length}`);
   L.push("");
-  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else { L.push(`${r.pr?"★ ":""}${r.ex.name}: ${setsTxt(r.done)}${r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); if(r.pr) L.push(`   Ennätys: ${prDetail(r.pr)}`); } });
+  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else { L.push(`${r.pr?"★ ":""}${r.ex.name}: ${setsTxt(r.done)}${!r.pr&&r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); if(r.pr) L.push(`   Ennätys${prLine(r)?": "+prLine(r):""}`); } });
   L.push("","Järkäle tracking");
   return L.join("\n");
 }
@@ -10006,19 +10038,14 @@ async function gSessionImage(s){
     font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`LIIKKEET · ENNÄTYKSIÄ ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
     S2.rows.forEach(r=>{
       if(draw){ x.fillStyle=C.bord; x.globalAlpha=.6; x.fillRect(P+16,y,IW-32,1); x.globalAlpha=1; } y+=10;
-      const val=r.skipped?(r.ex.skipped?"ohitettu":"ei tehty"):setsTxt(r.done)+(r.dir?` ${DIR_SYM[r.dir]}`:"")+(effTxt(r.done)?` · ${effTxt(r.done)}`:"");
-      const label=(r.pr?"★ ":"")+r.ex.name, AW=IW-32;
-      font(600,14,FB); let vl=wrap(val,AW*.48); let vw=Math.max(...vl.map(l=>x.measureText(l).width));
-      font(700,15,FB); let nl=wrap(label,AW-vw-12);
-      // v2.18.96: jos nimen pisin rivi (esim. yksi pitkä sana) ei mahdu arvojen viereen, arvot siirtyvät nimen alle
-      const stack=nl.length>1||Math.max(...nl.map(l=>x.measureText(l).width))+vw+12>AW;
-      if(stack){ nl=wrap(label,AW); font(600,14,FB); vl=wrap(val,AW); }
-      const y0=y;
-      nl.forEach(l=>{ if(draw){ x.fillStyle=r.skipped?C.dim:C.text; x.fillText(l,P+16,y); } y+=20; });
-      font(600,14,FB); let yv=stack?y:y0; vl.forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.textAlign="right"; x.fillText(l,W-P-16,yv+1); x.textAlign="left"; } yv+=19; });
-      y=Math.max(y,yv);
-      if(r.pr){ font(700,12,FB); prParts(r.pr).filter(Boolean).map((t,i)=>i?t:"Ennätys "+t).forEach(t=>wrap(t,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.acc; x.fillText(l,P+16,y); } y+=17; })); }
-      if(r.ex.userNote){ font("italic 500",13,FB); wrap(r.ex.userNote,IW-32).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=18; }); }
+      // v2.18.106: sama muoto kuin näytöllä: nimi (+ nuoli oikealla), sarjat alla, ennätysrivi, huomio
+      const AW=IW-32, dirS=!r.skipped&&!r.pr&&r.dir?DIR_SYM[r.dir]:"", stTxt=r.skipped?(r.ex.skipped?"ohitettu":"ei tehty"):"";
+      font(700,15,FB); const rightW=(dirS||stTxt)?(font(600,14,FB),x.measureText(dirS||stTxt).width+12):0; font(700,15,FB);
+      const nl=wrap((r.pr?"★ ":"")+r.ex.name,AW-rightW);
+      nl.forEach((l,i)=>{ if(draw){ x.fillStyle=r.skipped?C.dim:C.text; x.fillText(l,P+16,y); if(i===0&&(dirS||stTxt)){ font(600,14,FB); x.fillStyle=dirS==="↑"?(v("--green")||C.acc):dirS==="↓"?(v("--red")||C.dim):C.dim; x.textAlign="right"; x.fillText(dirS||stTxt,W-P-16,y+1); x.textAlign="left"; font(700,15,FB); } } y+=20; });
+      if(!r.skipped){ font(600,14,FB); wrap(setsTxt(r.done)+(effTxt(r.done)?` · ${effTxt(r.done)}`:""),AW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=19; }); }
+      if(r.pr){ font(700,12,FB); wrap("Ennätys"+(prLine(r)?" · "+prLine(r):""),AW).forEach(l=>{ if(draw){ x.fillStyle=C.acc; x.fillText(l,P+16,y); } y+=17; }); }
+      if(r.ex.userNote){ font("italic 500",13,FB); wrap(r.ex.userNote,AW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=18; }); }
       y+=6;
     });
     y+=10;
