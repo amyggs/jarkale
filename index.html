@@ -1541,6 +1541,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .jdlg-t{font:700 17px/1.35 Manrope,system-ui,sans-serif;color:var(--text);}
 .jdlg-m{font:500 14px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:8px;white-space:pre-wrap;}
 .jdlg-a{display:flex;gap:8px;margin-top:16px;}
+.jdlg-chk{display:flex;align-items:center;gap:10px;margin-top:14px;min-height:44px;font:600 14px Manrope,system-ui,sans-serif;color:var(--text);cursor:pointer;}
+.jdlg-chk input{width:20px;height:20px;accent-color:var(--orange);}
+.g-sum-hero{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--orange);color:var(--bg);}
+.g-sum-hero b{font:800 34px/1 Manrope,system-ui,sans-serif;}
+.g-sum-hero span{font:800 15px/1.2 Manrope,system-ui,sans-serif;min-width:0;}
+.g-sum-hero small{display:block;font:600 12px/1.35 Manrope,system-ui,sans-serif;margin-top:3px;opacity:.9;overflow-wrap:break-word;}
 .jdlg-a button{flex:1;height:48px;border-radius:12px;border:none;font:700 15px Manrope,system-ui,sans-serif;}
 .jdlg-no{background:var(--surf2);color:var(--text);}
 .jdlg-ok{background:var(--seg-on);color:var(--on-accent);}
@@ -2197,7 +2203,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.106</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.107</span>
       </div>
     </div>
   </div>
@@ -2231,6 +2237,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.107", d:"lokakuu 2026", items:[
+    "Treenin jako: liikkeiden huomiot eivät enää lähde jaettuun kuvaan tai tekstiin, ellei valitse \"Näytä liikkeiden huomiot\" jakovalinnassa (huomioissa voi olla esim. kiputietoa).",
+    "Ennätykset näkyvät isona yhteenvedon ja jaetun kuvan yläosassa (määrä ja paras ennätys). Kuvassa on myös ohjelman nimi, selitys ennätyksestä ja alareunassa \"Järkäle · treeni- ja hyvinvointiseuranta\".",
+    "Vertailuluvut (esim. \"aiemmin 150 × 12\") eivät enää katkea kesken rivin. Kesto näytetään \"1 h\" eikä \"1 h 0 min\"."
+  ]},
   {v:"2.18.106", d:"lokakuu 2026", items:[
     "Treenin yhteenveto selkeämmäksi: jokaisella liikkeellä sama järjestys – nimi, sarjat heti alla, ennätys yhdellä rivillä ja huomio omalla rivillään. Sarjaa ei enää toisteta, ennätysriveillä ei ole nuolta, ja arvioitu 1RM näkyy liikkeen sivulla ja ennätyshetkellä treenin aikana.",
     "Korjattu harhaanjohtava ennätysteksti: kun ennätys tehtiin kevyemmällä painolla mutta useammalla toistolla, yhteenveto sanoi \"uusi paino, aiemmin raskain …\". Nyt se näyttää vertailukohdan (esim. \"aiemmin 165 × 12\"), ja \"raskain tähän asti\" vain kun paino oli oikeasti raskain. Sama jaettavassa kuvassa ja tekstissä."
@@ -7541,8 +7552,9 @@ function jConfirm(msg,o={}){
     const lines=String(msg).split("\n"); const first=lines.shift(); const rest=lines.join("\n").trim();
     w.innerHTML=`<div class="jdlg-c"><div class="jdlg-h"><img src="./icon-192.png?v=3" alt=""><span>Järkäle</span></div>
       <div class="jdlg-t">${esc(first)}</div>${rest?`<div class="jdlg-m">${esc(rest)}</div>`:""}
+      ${o.check?`<label class="jdlg-chk"><input type="checkbox"${o.check.value?" checked":""}> ${esc(o.check.label)}</label>`:""}
       <div class="jdlg-a">${o.alert?"":`<button class="jdlg-no">${esc(o.cancel||"Peruuta")}</button>`}<button class="jdlg-ok${o.danger?" danger":""}">${esc(o.ok||"OK")}</button></div></div>`;
-    let done=false; const close=v=>{ if(done) return; done=true; document.removeEventListener("keydown",kd); w.classList.add("out"); setTimeout(()=>w.remove(),160); res(v); };
+    let done=false; const close=v=>{ if(done) return; done=true; if(o.check){ const cb=w.querySelector(".jdlg-chk input"); if(cb) o.check.value=cb.checked; } document.removeEventListener("keydown",kd); w.classList.add("out"); setTimeout(()=>w.remove(),160); res(v); };
     const kd=e=>{ if(e.key==="Escape") close(o.choice?null:false); };
     w.addEventListener("click",e=>{ if(e.target===w&&!o.alert) close(o.choice?null:false); });
     w.querySelector(".jdlg-ok").onclick=()=>close(true);
@@ -8855,7 +8867,7 @@ const gNum=v=>{ if(v==null||v==="") return null; const n=parseFloat(String(v).re
 const fmtKg=v=>v==null?"":String(Math.round(v*100)/100).replace(".",",");
 const hhmm=ms=>{ const d=new Date(ms); return `${d.getHours()}.${String(d.getMinutes()).padStart(2,"0")}`; };
 function durShort(ms){ return `${Math.max(0,Math.round(ms/60000))} min`; }
-function durTxt(ms){ const m=Math.max(0,Math.round(ms/60000)); if(m<60) return `${m} min`; return `${Math.floor(m/60)} h ${m%60} min`; }
+function durTxt(ms){ const m=Math.max(0,Math.round(ms/60000)); if(m<60) return `${m} min`; return m%60?`${Math.floor(m/60)} h ${m%60} min`:`${Math.floor(m/60)} h`; }
 function gDay(ds){ const a=new Date(ds+"T00:00:00"); return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`; }
 // Sarjan vertailuluku: painollisille arvioitu 1RM (Epley kg × (1 + toistot/30)), kehonpainoliikkeille toistot (pieni luku,
 // ei sekoitu painoihin). Toistoja ei katkaista (v2.17.5): luku on saman liikkeen kertojen välinen vertailuluku, ei maksimiennuste,
@@ -9837,7 +9849,7 @@ function gExRowsHTML(shown){
 }
 // Liikkeen suunta: viimeisin kerta vs. edellinen (paras sarja, arvioitu 1RM tai kehonpainossa toistot).
 // sinceBest = montako kertaa on tehty parhaan kerran jälkeen (0 = viimeisin on paras).
-const setOneTxt=r=>r.kg!=null?`${fmtKg(r.kg)} × ${r.reps}`:`${r.reps} toistoa`;
+const setOneTxt=r=>r.kg!=null?`${fmtKg(r.kg)}\u00a0×\u00a0${r.reps}`:`${r.reps}\u00a0toistoa`;
 function exerciseTrend(key){
   const H=exerciseHistory(key);
   if(!H.length) return {dir:null,last:null,sinceBest:0};
@@ -9926,15 +9938,15 @@ function sessionSummary(s){
       let was="";
       if(best.kg!=null){
         const same=before.filter(p=>p.kg===best.kg);
-        if(same.length) was=`aiemmin ${fmtKg(best.kg)} × ${Math.max(...same.map(p=>p.reps))}`;
+        if(same.length) was=`aiemmin ${fmtKg(best.kg)}\u00a0×\u00a0${Math.max(...same.map(p=>p.reps))}`;
         else {
           // v2.18.106: "uusi paino, aiemmin raskain 165 × 12" oli harhaanjohtava, kun ennätyspaino (150) oli kevyempi kuin aiempi raskain.
           const hv=before.filter(p=>p.kg!=null).sort((x,y)=>y.kg-x.kg||y.reps-x.reps)[0];
           if(!hv) was="";
-          else if(best.kg>hv.kg) was=`raskain tähän asti · aiemmin ${fmtKg(hv.kg)} × ${hv.reps}`;
-          else { const ref=before.filter(p=>p.kg!=null&&p.kg>=best.kg).sort((x,y)=>y.reps-x.reps||x.kg-y.kg)[0]||hv; was=`aiemmin ${fmtKg(ref.kg)} × ${ref.reps}`; }
+          else if(best.kg>hv.kg) was=`raskain tähän asti · aiemmin ${fmtKg(hv.kg)}\u00a0×\u00a0${hv.reps}`;
+          else { const ref=before.filter(p=>p.kg!=null&&p.kg>=best.kg).sort((x,y)=>y.reps-x.reps||x.kg-y.kg)[0]||hv; was=`aiemmin ${fmtKg(ref.kg)}\u00a0×\u00a0${ref.reps}`; }
         }
-      } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`aiemmin ${mx} toistoa`; }
+      } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`aiemmin ${mx}\u00a0toistoa`; }
       prs.push({ex,set:best,was});
     }
     rows.push({ex,done,dir,prev,pr:prSets.length?prs[prs.length-1]:null});
@@ -9945,6 +9957,21 @@ function sessionSummary(s){
 const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.96: ennätys näkyy liikkeen omalla rivillä (ei erillistä ennätyslistaa): ennätyssarja, aiempi paras ja arvioitu 1RM
 // v2.18.106: ennätysrivi yhteenvetoon ja jakoon: sarja vain, jos liikkeessä oli eri painoja/toistoja (muuten se on jo sarjarivillä), ja vertailu
+// v2.18.107: jaon apufunktiot
+const SHARE_FOOT="Järkäle · treeni- ja hyvinvointiseuranta";
+const PR_EXPLAIN="★ Ennätys: näin raskasta painoa ei ole ennen nostettu näin monta kertaa.";
+// Tekstin väri korostusvärin päälle: tumma vaalealle, valkoinen tummalle (kontrasti ≥ 4,5 kaikissa teemoissa)
+function accentInk(){
+  try{ const el=document.createElement("i"); el.style.color="var(--orange)"; document.body.appendChild(el); const c=getComputedStyle(el).color; el.remove();
+    const m=c.match(/[\d.]+/g).map(Number), f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+    const L=.2126*f(m[0])+.7152*f(m[1])+.0722*f(m[2]); return (L+.05)/.05 >= 1.05/(L+.05) ? "#111312" : "#ffffff"; }catch(_){ return "#111312"; }
+}
+function bestPR(S2){
+  const rows=S2.rows.filter(r=>r.pr); if(!rows.length) return null;
+  return rows.slice().sort((a,b)=>(/^raskain/.test(b.pr.was)-/^raskain/.test(a.pr.was))||(e1rm(b.pr.set.kg,b.pr.set.reps)-e1rm(a.pr.set.kg,a.pr.set.reps)))[0];
+}
+function bestPRTxt(r){ return `${r.ex.name} ${setOneTxt(r.pr.set)}${/^raskain/.test(r.pr.was)?" · raskain tähän asti":""}`; }
+function sessionProgLine(s){ return s.programName&&s.programName!==s.dayName?s.programName:""; }
 function prLine(r){
   const multi=new Set((r.done||[]).map(x=>(x.kg??"")+"|"+x.reps)).size>1;
   return [multi?setOneTxt(r.pr.set):"",r.pr.was||""].filter(Boolean).join(" · ");
@@ -9969,7 +9996,10 @@ function gymSummaryHTML(s,fresh){
   let h=`<div class="g-sum${hit?" stamped":""}">
     <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
-  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?`Liikkeet · ennätyksiä ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
+  // v2.18.107: ennätykset näkyviksi heti tunnuslukujen alle (paras uutinen ylimmäksi)
+  const bp=bestPR(S2);
+  if(bp) h+=`<div class="g-sum-hero" style="color:${accentInk()}"><b>${S2.prs.length}</b><span>${S2.prs.length===1?"ennätys":"ennätystä"}<small>Paras: ${esc(bestPRTxt(bp))}</small></span></div>`;
+  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?"Liikkeet":S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
   // v2.18.106: jokaisella liikkeellä sama muoto: nimi (+ nuoli), sarjat heti alla, ennätys yhdellä rivillä, huomio omalla rivillään.
   // Ennätysriveillä ei nuolta (kaksi eri mittaria hämäsi), ei arvioitua 1RM:ää (se on liikkeen sivulla ja ennätyshetken ilmoituksessa).
   const noteH=r=>r.ex.userNote?`<div class="gs-note">${ico("note",13)}<span>${esc(r.ex.userNote)}</span></div>`:"";
@@ -9977,30 +10007,34 @@ function gymSummaryHTML(s,fresh){
     :`<div class="gs-row"><div class="gs-h"><span class="nm">${esc(r.ex.name)}</span>${!r.pr&&r.dir?`<span class="g-dir ${r.dir}" aria-label="edelliseen verrattuna ${r.dir==="up"?"nousi":r.dir==="down"?"laski":"ennallaan"}">${DIR_SYM[r.dir]}</span>`:""}</div>
       <div class="gs-sets">${setsTxt(r.done)}${effTxt(r.done)?` <span class="g-eff">· ${effTxt(r.done)}</span>`:""}</div>
       ${r.pr?`<div class="gs-pr"><span class="pr-tag">Ennätys</span>${esc(prLine(r))}</div>`:""}${noteH(r)}</div>`).join("")}</div>
-    <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":"Nuoli: paras sarja edelliseen kertaan verrattuna."}</div></div>`;
+    <div class="g-sum-foot">${S2.first?"Vertailu edelliseen kertaan ja ennätykset alkavat näkyä, kun sama liike on tehty uudelleen.":`Nuoli: paras sarja edelliseen kertaan verrattuna.${S2.prs.length?"<br>"+esc(PR_EXPLAIN.replace("★ ","")):""}`}</div></div>`;
   return h;
 }
-function sessionShareText(s){
+function sessionShareText(s,opt){
+  const notes=!!(opt&&opt.notes);
   const S2=sessionSummary(s);
-  const L=[`${s.dayName} · ${gDay(s.date)}`];
+  const L=[`${s.dayName} · ${gDay(s.date)}`]; if(sessionProgLine(s)) L.push(sessionProgLine(s));
   const durOk=S2.dur>60000&&S2.dur<6*3600000;
   L.push(`${S2.st.done}/${S2.st.exN} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`);
-  if(S2.prs.length) L.push(`Ennätyksiä: ${S2.prs.length}`);
+  if(S2.prs.length){ L.push(`Ennätyksiä: ${S2.prs.length}`); const bp=bestPR(S2); if(bp) L.push(`Paras: ${bestPRTxt(bp)}`); }
   L.push("");
-  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${r.ex.userNote?` (${r.ex.userNote})`:""}`); else { L.push(`${r.pr?"★ ":""}${r.ex.name}: ${setsTxt(r.done)}${!r.pr&&r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${r.ex.userNote?` (${r.ex.userNote})`:""}`); if(r.pr) L.push(`   Ennätys${prLine(r)?": "+prLine(r):""}`); } });
-  L.push("","Järkäle tracking");
+  const nt=r=>notes&&r.ex.userNote?` (${r.ex.userNote})`:"";
+  S2.rows.forEach(r=>{ if(r.skipped) L.push(`${r.ex.name}: ${r.ex.skipped?"ohitettu":"ei tehty"}${nt(r)}`); else { L.push(`${r.pr?"★ ":""}${r.ex.name}: ${setsTxt(r.done)}${!r.pr&&r.dir?` ${DIR_SYM[r.dir]}`:""}${effTxt(r.done)?` · ${effTxt(r.done)}`:""}${nt(r)}`); if(r.pr) L.push(`   Ennätys${prLine(r)?": "+prLine(r):""}`); } });
+  if(S2.prs.length) L.push("",PR_EXPLAIN);
+  L.push("",SHARE_FOOT);
   return L.join("\n");
 }
 // v2.18.61 Treenin yhteenveto kuvana. Piirretään canvasiin nykyisen teeman väreillä ja fonteilla (ei ulkoisia kirjastoja).
-async function gShareImage(s){
-  const blob=await gSessionImage(s);
+async function gShareImage(s,opt){
+  const blob=await gSessionImage(s,opt);
   const fname=`jarkale-treeni-${s.date}.png`;
   const file=new File([blob],fname,{type:"image/png"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:`Treeni: ${s.dayName}`}); return; }
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
   showSavedToast("Kuva tallennettu latauksiin");
 }
-async function gSessionImage(s){
+async function gSessionImage(s,opt){
+  const notes=!!(opt&&opt.notes);
   try{ await document.fonts.ready; }catch(_){}
   const S2=sessionSummary(s), cs=getComputedStyle(document.documentElement), v=n=>cs.getPropertyValue(n).trim();
   const C={bg:getComputedStyle(document.body).backgroundColor||v("--bg"),surf:v("--surf")||"#fff",surf2:v("--surf2")||"#eee",text:v("--text")||"#111",dim:v("--dim")||"#666",acc:v("--orange")||"#c90",bord:v("--bord")||"#ccc"};
@@ -10028,14 +10062,23 @@ async function gSessionImage(s){
     y+=46;
     font(800,24,FH); const tl=wrap(s.dayName,IW-90); x.textBaseline="top";
     tl.forEach(l=>{ if(draw){ x.fillStyle=C.text; x.fillText(l,P,y); } y+=30; });
+    if(sessionProgLine(s)){ font(700,14,FB); wrap(sessionProgLine(s),IW-90).forEach(l=>{ if(draw){ x.fillStyle=C.text; x.fillText(l,P,y+2); } y+=20; }); }
     font(600,14,FB); if(draw){ x.fillStyle=C.dim; x.fillText(`${gDay(s.date)} · ${S2.st.done} liikettä · ${S2.st.sets} sarjaa${durOk?` · ${durTxt(S2.dur)}`:""}`,P,y+2); } y+=30;
+    // v2.18.107: ennätykset isona ylös
+    const bp=bestPR(S2);
+    if(bp){ const hy=y; font(800,44,FN); const nw=x.measureText(String(S2.prs.length)).width;
+      const ink=accentInk();
+      if(draw){ rr(P,hy,IW,74,16,C.acc); x.fillStyle=ink; x.fillText(String(S2.prs.length),P+16,hy+14); }
+      font(800,17,FB); if(draw){ x.fillStyle=ink; x.fillText(S2.prs.length===1?"ennätys":"ennätystä",P+28+nw,hy+14); }
+      font(600,13,FB); const bl=wrap("Paras: "+bestPRTxt(bp),IW-44-nw); if(draw){ x.fillStyle=ink; bl.slice(0,2).forEach((l,i)=>x.fillText(l,P+28+nw,hy+38+i*16)); }
+      y+=74+(bl.length>2?16:0)+14; }
     // kortti
     const cardY=y; y+=16;
     const kp=[[`${S2.st.done}/${S2.st.exN}`,"liikettä"],[String(S2.st.sets),"sarjaa"],...(durOk?[[durShort(S2.dur),"kesto"]]:[])];
     const gap=8, kw=(IW-32-gap*(kp.length-1))/kp.length;
     kp.forEach((k,i)=>{ const X=P+16+i*(kw+gap); if(draw){ rr(X,y,kw,62,12,C.surf2); x.textAlign="center"; let fz=22; font(800,fz,FN); while(x.measureText(k[0]).width>kw-10&&fz>11){ fz--; font(800,fz,FN); } x.fillStyle=C.text; x.fillText(k[0],X+kw/2,y+10); font(600,12,FB); x.fillStyle=C.dim; x.fillText(k[1],X+kw/2,y+40); x.textAlign="left"; } });
     y+=76;
-    font(700,12,FB); if(draw){ x.fillStyle=S2.prs.length?C.acc:C.dim; x.fillText(S2.prs.length?`LIIKKEET · ENNÄTYKSIÄ ${S2.prs.length}`:S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
+    font(700,12,FB); if(draw){ x.fillStyle=C.dim; x.fillText(S2.prs.length?"LIIKKEET":S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa",P+16,y); } y+=22;
     S2.rows.forEach(r=>{
       if(draw){ x.fillStyle=C.bord; x.globalAlpha=.6; x.fillRect(P+16,y,IW-32,1); x.globalAlpha=1; } y+=10;
       // v2.18.106: sama muoto kuin näytöllä: nimi (+ nuoli oikealla), sarjat alla, ennätysrivi, huomio
@@ -10045,12 +10088,14 @@ async function gSessionImage(s){
       nl.forEach((l,i)=>{ if(draw){ x.fillStyle=r.skipped?C.dim:C.text; x.fillText(l,P+16,y); if(i===0&&(dirS||stTxt)){ font(600,14,FB); x.fillStyle=dirS==="↑"?(v("--green")||C.acc):dirS==="↓"?(v("--red")||C.dim):C.dim; x.textAlign="right"; x.fillText(dirS||stTxt,W-P-16,y+1); x.textAlign="left"; font(700,15,FB); } } y+=20; });
       if(!r.skipped){ font(600,14,FB); wrap(setsTxt(r.done)+(effTxt(r.done)?` · ${effTxt(r.done)}`:""),AW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=19; }); }
       if(r.pr){ font(700,12,FB); wrap("Ennätys"+(prLine(r)?" · "+prLine(r):""),AW).forEach(l=>{ if(draw){ x.fillStyle=C.acc; x.fillText(l,P+16,y); } y+=17; }); }
-      if(r.ex.userNote){ font("italic 500",13,FB); wrap(r.ex.userNote,AW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=18; }); }
+      if(notes&&r.ex.userNote){ font("italic 500",13,FB); wrap(r.ex.userNote,AW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P+16,y); } y+=18; }); }
       y+=6;
     });
     y+=10;
     const cardH=y-cardY;
-    y+=14; font(600,12,FB); if(draw){ x.fillStyle=C.dim; x.fillText("Järkäle tracking",P,y); } y+=18+P;
+    y+=14;
+    if(S2.prs.length){ font(500,12,FB); wrap(PR_EXPLAIN,IW).forEach(l=>{ if(draw){ x.fillStyle=C.dim; x.fillText(l,P,y); } y+=16; }); y+=6; }
+    font(700,12,FB); if(draw){ x.fillStyle=C.dim; x.fillText(SHARE_FOOT,P,y); } y+=18+P;
     return {h:y,cardY,cardH};
   };
   cv.width=W*K; cv.height=4000; x.scale(K,K);
@@ -10062,10 +10107,14 @@ async function gSessionImage(s){
 async function gShareSession(id){
   const s=gSession(id); if(!s) return;
   // v2.18.61: kuvana (teeman väreissä) tai tekstinä
-  const how=await jConfirm("Jaetaanko treeni kuvana vai tekstinä?\nKuva tehdään nykyisen teeman väreillä.",{ok:"Kuvana",cancel:"Tekstinä",choice:true});
+  // v2.18.107: liikkeiden huomiot (voivat sisältää esim. kiputietoa) eivät lähde jakoon, ellei niitä valita erikseen
+  const hasNotes=s.exercises.some(e=>(e.userNote||"").trim());
+  const o={ok:"Kuvana",cancel:"Tekstinä",choice:true}; if(hasNotes) o.check={label:"Näytä liikkeiden huomiot",value:false};
+  const how=await jConfirm("Jaetaanko treeni kuvana vai tekstinä?\nKuva tehdään nykyisen teeman väreillä.",o);
   if(how===null) return;
-  if(how===true){ try{ await gShareImage(s); return; }catch(e){ if(e&&e.name==="AbortError") return; jAlert("Kuvan teko ei onnistunut. Jaetaan tekstinä."); } }
-  const text=sessionShareText(s);
+  const opt={notes:!!(o.check&&o.check.value)};
+  if(how===true){ try{ await gShareImage(s,opt); return; }catch(e){ if(e&&e.name==="AbortError") return; jAlert("Kuvan teko ei onnistunut. Jaetaan tekstinä."); } }
+  const text=sessionShareText(s,opt);
   try{ if(navigator.share){ await navigator.share({title:`Treeni: ${s.dayName}`,text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(text); showSavedToast("Yhteenveto kopioitu"); }
   catch(_){ prompt("Kopioi yhteenveto:",text); }

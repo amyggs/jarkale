@@ -59,6 +59,20 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.goals=true; renderAsetukset(); }); await p.waitForTimeout(150);
   ok(/Treenipäiviä viikossa/.test(await p.locator('#goals-section').innerText()),'tavoite "Treenipäiviä viikossa"');
 
+  console.log('\nTreenin jako (v2.18.107)');
+  const sh=await p.evaluate(()=>{ const pr=newProgram('Ohjelma X'); pr.days[0].name='Jalat'; pr.days[0].exercises.push(newEx({name:'RDL',sets:2,repsMin:8})); pr.days[0].exercises.push(newEx({name:'Hack',sets:1,repsMin:8})); touchProg(pr); gymSave();
+    const mk=(d,kg,reps,note)=>{ const s={id:gid(),programId:pr.id,dayId:pr.days[0].id,date:new Date(Date.now()-d*864e5).toISOString().slice(0,10),startedAt:Date.now()-d*864e5,endedAt:Date.now()-d*864e5+3600e3,programName:'Ohjelma X',dayName:'Jalat',
+      exercises:[{id:gid(),key:'rdl',name:'RDL',goal:{},note:'',skipped:false,added:false,feel:null,userNote:note,sets:[{kg,reps,done:true}]},{id:gid(),key:'hack',name:'Hack',goal:{},note:'',skipped:d===0,added:false,feel:null,userNote:d===0?'Polvikipu':'',sets:d===0?[]:[{kg:100,reps:8,done:true}]}]}; G.sessions.push(s); return s; };
+    mk(9,150,12,''); const s=mk(0,160,4,'Kevyt päivä'); gymSave();
+    return {off:sessionShareText(s), on:sessionShareText(s,{notes:true}), sid:s.id}; });
+  ok(!/Polvikipu|Kevyt päivä/.test(sh.off),'huomiot eivät lähde jakoon oletuksena');
+  ok(/Polvikipu/.test(sh.on)&&/Kevyt päivä/.test(sh.on),'valinnalla huomiot mukaan');
+  ok(/^Jalat · .+\nOhjelma X\n/.test(sh.off)&&/Paras: RDL 160\u00a0×\u00a04 · raskain tähän asti/.test(sh.off),'ohjelman nimi ja paras ennätys jakotekstissä');
+  ok(/näin raskasta painoa ei ole ennen nostettu näin monta kertaa/.test(sh.off)&&/Järkäle · treeni- ja hyvinvointiseuranta$/.test(sh.off),'selitys ja alatunniste');
+  ok(/aiemmin 150\u00a0×\u00a012/.test(sh.off),'vertailuluku ei katkea (sitovat välit)');
+  await p.evaluate(sid=>{ setTab('treeni'); openSession(sid); },sh.sid); await p.waitForTimeout(200);
+  ok(/1\s*ennätys/.test(await p.locator('.g-sum-hero').innerText()),'yhteenvedossa ennätyskaista');
+
   console.log('\nMitä uutta');
   await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); }); await p.waitForTimeout(200);
   const n1=await p.evaluate(()=>[...document.querySelectorAll('#changelog-content > div')].length);

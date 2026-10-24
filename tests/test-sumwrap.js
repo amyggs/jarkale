@@ -50,12 +50,12 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const pr=await p.evaluate(()=>{ const t=document.querySelector('.g-sum').innerText; const rows=[...document.querySelectorAll('.g-sum-list>.gs-row')];
     const rt=re=>rows.find(r=>re.test(r.textContent));
     return {sep:document.querySelectorAll('.g-sum-pr').length, tags:document.querySelectorAll('.g-sum-list .gs-pr .pr-tag').length,
-      cnt:(t.match(/Tasapenkkipunnerrus/g)||[]).length, lbl:document.querySelector('.g-sum-prh').textContent,
-      tasa:rt(/Tasapenkki/).querySelector('.gs-pr')?.textContent||'', tasaDir:!!rt(/Tasapenkki/).querySelector('.g-dir'), rm:/1RM/.test(t)};
+      cnt:(document.querySelector('.g-sum-list').innerText.match(/Tasapenkkipunnerrus/g)||[]).length, lbl:(document.querySelector('.g-sum-hero')||{}).textContent||'',
+      tasa:(rt(/Tasapenkki/).querySelector('.gs-pr')?.textContent||'').replace(/\u00a0/g,' '), tasaDir:!!rt(/Tasapenkki/).querySelector('.g-dir'), rm:/1RM/.test(t)};
   });
   ok(pr.sep===0,'erillistä ennätyslistaa ei ole');
-  ok(pr.cnt===1,'liike näkyy yhteenvedossa vain kerran');
-  ok(pr.tags>=2&&/ennätyksiä \d/.test(pr.lbl),'ennätysmerkit riveillä ja määrä otsikossa: '+pr.lbl+' / '+pr.tags);
+  ok(pr.cnt===1,'liike näkyy liikelistassa vain kerran');
+  ok(pr.tags>=2&&/\d\s*ennätys/.test(pr.lbl),'ennätysmerkit riveillä ja määrä kaistassa: '+pr.lbl+' / '+pr.tags);
   ok(/110 × 3/.test(pr.tasa)&&/aiemmin/.test(pr.tasa),'rivillä ennätyssarja ja vertailu: '+pr.tasa);
   ok(!pr.tasaDir,'ennätysrivillä ei nuolta');
   ok(!pr.rm,'yhteenvedossa ei arvioitua 1RM:ää');

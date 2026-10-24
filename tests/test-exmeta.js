@@ -109,8 +109,8 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(!stp.edit,'muokkaus ei lyö leimaa uudelleen');
   const old=await p.evaluate(()=>{const id=G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0].id;gBack();openSession(id);return {stamp:document.querySelectorAll('.g-sum .g-stamp').length,lbl:document.querySelector('.g-sum-h .lbl-small').textContent,toast:document.body.innerText.includes('Treeni tallennettu')};});
   ok(old.stamp===0&&old.lbl==='Yhteenveto','myöhemmin avatussa treenissä ei leimaa, otsikko Yhteenveto');
-  const nt=await p.evaluate(()=>{const s=G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0];s.exercises[0].userNote='Tuntui hyvältä';gymSave();openSession(s.id);return {view:document.querySelector('.g-sum-list').innerText.includes('Tuntui hyvältä'),txt:sessionShareText(s).includes('(Tuntui hyvältä)')};});
-  ok(nt.view&&nt.txt,'tehdyn liikkeen huomio näkyy yhteenvedossa ja jaettavassa tekstissä');
+  const nt=await p.evaluate(()=>{const s=G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0];s.exercises[0].userNote='Tuntui hyvältä';gymSave();openSession(s.id);return {view:document.querySelector('.g-sum-list').innerText.includes('Tuntui hyvältä'),txt:sessionShareText(s,{notes:true}).includes('(Tuntui hyvältä)')&&!sessionShareText(s).includes('Tuntui hyvältä')};});
+  ok(nt.view&&nt.txt,'tehdyn liikkeen huomio näkyy yhteenvedossa ja jaossa vain valittaessa');
 
   console.log('\nPainon askel');
   const ks=await p.evaluate(()=>{ setGymOpt('kgStep',2.5); const pr=curProgram(); GU.mode='home'; if(G.activeId) finishSession(true); startSession(pr.id,pr.days[0].id); const a=activeSession(); GU.expanded={}; a.exercises.forEach(e=>GU.expanded[e.id]=true); a.exercises[0].sets[0].kg=80; renderGym();
