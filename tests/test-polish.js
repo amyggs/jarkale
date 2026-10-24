@@ -51,6 +51,14 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ const id=G.activeId; finishSession(true); GU.mode='session'; GU.sessionId=id; renderGym(); }); await p.waitForTimeout(200);
   ok(await shown('#nav'),'tallennetun treenin yhteenvedossa alapalkki näkyy');
 
+  console.log('\nKaksi treeniä samana päivänä (v2.18.105)');
+  await p.evaluate(async()=>{ S.settings.tracking={...(S.settings.tracking||{}),training:true}; saveAll(); const pr=G.programs[0]; await startSession(pr.id,pr.days[0].id); { const s0=gSession(G.activeId); s0.exercises[0].sets[0].kg=40; s0.exercises[0].sets[0].reps=10; s0.exercises[0].sets[0].done=true; finishSession(true); } await startSession(pr.id,pr.days[0].id); GU.mode='session'; GU.sessionId=G.activeId; const s=gSession(G.activeId); s.exercises[0].sets[0].kg=50; s.exercises[0].sets[0].reps=8; s.exercises[0].sets[0].done=true; GU.finishing=true; renderGym(); }); await p.waitForTimeout(200);
+  const ft=await p.locator('.g-finish').innerText();
+  ok(/Päivän rasitus, molemmat treenit/.test(ft)&&/Arvio korvaa päivän aiemman arvion/.test(ft),'toisen treenin lopetuskysely kertoo arvion koskevan päivää');
+  await p.evaluate(()=>{ finishSession(true); GU.finishing=false; }); 
+  await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.goals=true; renderAsetukset(); }); await p.waitForTimeout(150);
+  ok(/Treenipäiviä viikossa/.test(await p.locator('#goals-section').innerText()),'tavoite "Treenipäiviä viikossa"');
+
   console.log('\nMitä uutta');
   await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); }); await p.waitForTimeout(200);
   const n1=await p.evaluate(()=>[...document.querySelectorAll('#changelog-content > div')].length);

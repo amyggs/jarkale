@@ -827,6 +827,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .hi-map select{width:100%;min-height:44px;border-radius:10px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:500 14px Manrope,system-ui,sans-serif;padding:0 10px}
 .hi-undo{display:block;margin-top:8px;background:none;border:none;color:var(--red);font:600 13px Manrope,system-ui,sans-serif;min-height:40px;padding:0;text-decoration:underline}
 .hi-emptylink{display:block;text-align:center;margin-top:12px;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;text-decoration:underline;cursor:pointer;min-height:40px;line-height:40px}
+.g-rate-note{font-size:12px;color:var(--dim);line-height:1.45;margin:-2px 0 8px;}
 .cl-more{display:block;width:100%;margin-top:14px;min-height:44px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font:600 13px Manrope,system-ui,sans-serif;}
 .fb-card{border:1.5px solid var(--orange)!important;margin-bottom:12px;}
 .fb-card .fb-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;}
@@ -2184,7 +2185,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.104</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.105</span>
       </div>
     </div>
   </div>
@@ -2218,6 +2219,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.105", d:"lokakuu 2026", items:[
+    "Kaksi treeniä samana päivänä: toisen treenin lopetuskysely kertoo, että rasitus ja kulku arvioidaan koko päivälle (molemmat treenit), ja arvio korvaa päivän aiemman arvion.",
+    "Viikkotavoite on nyt \"Treenipäiviä viikossa\", koska se laskee päiviä: kaksi treeniä samana päivänä on yksi treenipäivä. Sama nimi viikkoyhteenvedossa ja Trendien havainnoissa."
+  ]},
   {v:"2.18.104", d:"lokakuu 2026", items:[
     "Vaihda liike kesken treenin: jo tehdyt sarjat jäävät alkuperäiselle liikkeelle, ja uusi liike lisätään sen perään jäljellä olevilla sarjoilla. Uudessa liikkeessä ei näy vanhan liikkeen painoja, toistoja eikä tavoitetta; ehdotus tulee uuden liikkeen omasta historiasta, jos sellainen on. Aiempien treenien historia ei muutu.",
     "Kun kirjoitat sarjalle kilot ja toistot (esim. 80 × 12), ne näkyvät heti seuraavien sarjojen ehdotuksena. Säädä − / + -napeilla tai kuittaa sellaisenaan."
@@ -4852,7 +4857,7 @@ function weekRecapHTML(R,{compact=false,dismissable=false}={}){
     const sub=d!=null?(d===0?"±0 edelliseen":`${d>0?"+":"−"}${Math.abs(d)} kg edelliseen`):(R.weight.avg==null?`${R.weight.n} punnitusta`:"ei vertailuviikkoa");
     tiles.push(tile("scale","Paino ka",R.weight.avg??"–","kg",sub));
   }
-  if(R.training) tiles.push(tile("dumbbell","Treenit",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`${R.training.goal-R.training.n} alle tavoitteen`):"kirjattu"));
+  if(R.training) tiles.push(tile("dumbbell","Treenipäivät",R.training.n,R.training.goal?`/ ${R.training.goal}`:"",R.training.goal?(R.training.n>=R.training.goal?"tavoite täynnä":`${R.training.goal-R.training.n} alle tavoitteen`):"kirjattu"));
   if(R.sleep) tiles.push(tile("moon","Uni ka",R.sleep.avg!=null?fmtSleepText(R.sleep.avg):"–","",R.sleep.n?`${R.sleep.below}/${R.sleep.n} yötä alle ${fmtSleepText(R.sleep.goal)}`:"ei kirjattu"));
   if(R.recovery) tiles.push(tile("battery","Palautuminen",R.recovery.avg??"–","/ 5",R.recovery.n?(R.recovery.low?`matala ${R.recovery.low} pv`:"ei matalia päiviä"):"ei kirjattu"));
   const sec=(icon,title,body)=>`<div class="wr-sec"><div class="wr-sec-h">${ico(icon,15)}<span>${title}</span></div>${body}</div>`;
@@ -5330,7 +5335,7 @@ function summaryFacts(start,end){
   if(trk("motivation")&&C.mot!=null) L.push(`Yleinen vire: keskimäärin ${fi(C.mot)}/5${P.mot!=null?` (edellinen jakso ${fi(P.mot)}/5)`:""}.`);
   // Treeni
   if(trk("training")){
-    let t=`Salitreenit: ${C.trN} kpl eli ${fi(C.perWeek)}/vko${g.workoutsPerWeek?`, tavoite ${g.workoutsPerWeek}/vko`:""}${C.load!=null?`, rasitus keskimäärin ${fi(C.load)}/5`:""}${P.n&&P.trN!=null?` (edellinen jakso ${P.trN} kpl)`:""}.`;
+    let t=`Treenipäiviä: ${C.trN} eli ${fi(C.perWeek)}/vko${g.workoutsPerWeek?`, tavoite ${g.workoutsPerWeek}/vko`:""}${C.load!=null?`, rasitus keskimäärin ${fi(C.load)}/5`:""}${P.n&&P.trN!=null?` (edellinen jakso ${P.trN} kpl)`:""}.`;
     const oc={worse:0,normal:0,better:0}; C.tr.forEach(e=>{ if(oc[e.training_outcome]!=null) oc[e.training_outcome]++; });
     const ocN=oc.worse+oc.normal+oc.better;
     if(ocN) t+=` Treenin kulku omaan normaaliin nähden: heikommin ${oc.worse}, normaalisti ${oc.normal}, paremmin ${oc.better} (arvioitu ${ocN}/${C.trN} treenistä).`;
@@ -5392,7 +5397,7 @@ function buildPeriodPrompt(start,end,rangeLabel,curr){
   const F=summaryFacts(start,end);
   const ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end).sort((a,b)=>a.date.localeCompare(b.date));
   const g=getActiveGoals(end), prof=S.settings.profile||{};
-  const goalsStr=[g.sleepHours?`uni ${g.sleepHours} h/yö`:"",g.workoutsPerWeek?`treeniä ${g.workoutsPerWeek}/vko`:"",g.cardioPerWeek?`cardioa ${g.cardioPerWeek}/vko`:"",getActiveTargetWeight(end)!=null?`tavoitepaino ${getActiveTargetWeight(end)} kg`:""].filter(Boolean).join(", ");
+  const goalsStr=[g.sleepHours?`uni ${g.sleepHours} h/yö`:"",g.workoutsPerWeek?`treenipäiviä ${g.workoutsPerWeek}/vko`:"",g.cardioPerWeek?`cardioa ${g.cardioPerWeek}/vko`:"",getActiveTargetWeight(end)!=null?`tavoitepaino ${getActiveTargetWeight(end)} kg`:""].filter(Boolean).join(", ");
   // Päivärivit vain lyhyille jaksoille (pitkillä viikkoerittely riittää ja pitää syötteen kohtuullisena)
   const dayLines=F.totalDays<=31?ue.map(e=>`  ${e.date} (${DAYS[new Date(e.date+"T00:00:00").getDay()]}): ${aiDayLine(e)}`).join("\n"):"";
   return `Kirjoita käyttäjälle kirjallinen yhteenveto hänen omasta seurantajaksostaan. Tavoite on, että hän näkee kokonaiskuvan ja oppii jotain, mitä ei huomaisi vain lukuja selaamalla. Pelkkä lukujen toistaminen lauseina ei riitä.
@@ -5766,9 +5771,9 @@ function buildInsightsHTML(start, effEnd, curr) {
     const pw=curr.trainingDays/weeks, avg=Number.isInteger(pw)?String(pw):pw.toFixed(1);
     const target=g.workoutsPerWeek;
     if(pw<target*0.75)
-      insights.push(`Treenejä ${avg} viikossa, tavoite ${target}.`);
+      insights.push(`Treenipäiviä ${avg} viikossa, tavoite ${target}.`);
     else
-      insights.push(`Treenejä ${avg} viikossa, tavoitteen (${target}) mukaisesti.`);
+      insights.push(`Treenipäiviä ${avg} viikossa, tavoitteen (${target}) mukaisesti.`);
   }
 
   // 5. Cardio vs tavoite
@@ -6892,7 +6897,7 @@ function renderGoals() {
   el.innerHTML =
     seasonBanner + targetRow +
     row('sleepHours',       'Unitavoite',          'h',   '7') +
-    row('workoutsPerWeek',  'Treeniä viikossa',    'krt', '4') +
+    row('workoutsPerWeek',  'Treenipäiviä viikossa', 'pv', '4') + // v2.18.105: laskenta on päiviä (kaksi treeniä samana päivänä = 1)
     (()=>{ const td=Array.isArray(g.trainingDays)?g.trainingDays:[]; const DL=[[1,"ma"],[2,"ti"],[3,"ke"],[4,"to"],[5,"pe"],[6,"la"],[0,"su"]];
       return `<div style="padding:9px 0;border-bottom:1px solid var(--bord)">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="color:var(--dim);font-size:13px">Treenipäivät (viikkorytmi)</span><span style="color:var(--dim);font-size:11px">${td.length?`${td.length} pv/vko`:"ei asetettu"}</span></div>
@@ -10059,10 +10064,12 @@ function gymSessionHTML(s){
   if(!live) h+=`<div class="g-editbar"><span>Muokkaat tallennettua treeniä. Muutokset tallentuvat heti.</span><button class="tr-go" onclick="GU.editPast=null;renderGym();gTop()">Valmis</button></div>`;
   if(live&&GU.finishing){
     const diff=sessionDiffersFromTemplate(s);
+    // v2.18.105: rasitus ja kulku ovat päiväkohtaisia. Jos samalle päivälle on jo tallennettu treeni, otsikko kertoo, että arvio koskee molempia.
+    const dayTwo=G.sessions.some(x=>x.id!==s.id&&x.endedAt&&x.date===s.date&&sessionStats(x).sets>0);
     h+=`<div class="g-finish"><div class="n">Lopetetaanko treeni?</div>
       <div class="s">${st.done}/${st.exN} liikettä · ${st.sets} sarjaa · ${durTxt(Date.now()-s.startedAt)}${st.done<st.exN?`<br>Tekemättömiä sarjoja ei tallenneta.`:""}</div>
-      ${trk("training")&&st.sets?`<div class="g-rate"><span class="lbl">Rasitus (valinnainen)</span><div class="row">${[1,2,3,4,5].map(n=>`<button class="${GU.finLoad===n?"on":""}${G_FLASH.has("finLoad-"+n)?" pop":""}" aria-pressed="${GU.finLoad===n}" onclick="gFinRate('finLoad',${n})">${n}</button>`).join("")}</div></div>
-      <div class="g-rate"><span class="lbl">Treenin kulku omaan normaaliin nähden (valinnainen)</span><div class="row">${TRAINING_OUTCOMES.map(o=>`<button class="${GU.finOutcome===o.id?"on":""}${G_FLASH.has("finOutcome-"+o.id)?" pop":""}" aria-pressed="${GU.finOutcome===o.id}" onclick="gFinRate('finOutcome','${o.id}')">${o.short}</button>`).join("")}</div></div>`:""}
+      ${trk("training")&&st.sets?`<div class="g-rate"><span class="lbl">${dayTwo?"Päivän rasitus, molemmat treenit (valinnainen)":"Rasitus (valinnainen)"}</span><div class="row">${[1,2,3,4,5].map(n=>`<button class="${GU.finLoad===n?"on":""}${G_FLASH.has("finLoad-"+n)?" pop":""}" aria-pressed="${GU.finLoad===n}" onclick="gFinRate('finLoad',${n})">${n}</button>`).join("")}</div></div>
+      <div class="g-rate"><span class="lbl">${dayTwo?"Päivän treenien kulku omaan normaaliin nähden (valinnainen)":"Treenin kulku omaan normaaliin nähden (valinnainen)"}</span>${dayTwo?`<div class="g-rate-note">Päivälle on jo tallennettu treeni. Arvio korvaa päivän aiemman arvion.</div>`:""}<div class="row">${TRAINING_OUTCOMES.map(o=>`<button class="${GU.finOutcome===o.id?"on":""}${G_FLASH.has("finOutcome-"+o.id)?" pop":""}" aria-pressed="${GU.finOutcome===o.id}" onclick="gFinRate('finOutcome','${o.id}')">${o.short}</button>`).join("")}</div></div>`:""}
       ${diff?`<label class="g-check"><input type="checkbox" ${GU.updateTpl?"checked":""} onchange="GU.updateTpl=this.checked"> Päivitä ohjelmapohja tämän treenin liikkeillä</label>`:""}
       <div style="display:flex;gap:8px;margin-top:12px"><button class="tr-go" style="flex:1;height:46px" data-synctap onclick="finishSession()">Tallenna treeni</button><button class="tr-go ghost" style="flex:1;height:46px" onclick="GU.finishing=false;renderGym()">Jatka treeniä</button></div>
       <button class="g-link danger" onclick="discardSession('${s.id}')">Hylkää treeni</button></div>`;
