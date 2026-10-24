@@ -41,7 +41,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.fill(`${row(0)} input[data-f="kg"]`,'80');
   await p.locator(`${row(0)} .ck`).click(); await p.waitForTimeout(150);
   ok(await p.locator(`${row(1)} .rpw`).count()===1&&await p.locator(`${row(0)} .rpw`).count()===0,'nappi siirtyy seuraavalle sarjalle kuittauksen jälkeen');
-  ok(await p.locator(`${row(1)} input[data-f="reps"]`).getAttribute('placeholder')==='8','toisen sarjan ehdotus 8');
+  ok(await p.locator(`${row(1)} input[data-f="reps"]`).getAttribute('placeholder')==='12'&&await p.locator(`${row(1)} input[data-f="kg"]`).getAttribute('placeholder')==='80','toisen sarjan ehdotus kopioituu ensimmäisestä: 80 × 12 (v2.18.104)');
 
   console.log('\nMahtuminen 360 / 412 px (toistot 100, RPE päällä ja pois)');
   for(const w of [360,412]){

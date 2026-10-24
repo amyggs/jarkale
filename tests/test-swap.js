@@ -1,4 +1,4 @@
-// Järkäle Tracking v2.18.94 – Vaihda liike kesken treenin tyhjentää vanhan liikkeen painot
+// Järkäle Tracking v2.18.94/v2.18.104 – Vaihda liike kesken treenin: tehdyt sarjat jäävät vanhalle liikkeelle, uusi liike tyhjänä
 const { chromium, devices } = require('playwright');
 const fs = require('fs');
 const URL='http://localhost:8765/index.html';
@@ -38,20 +38,33 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.fill('#g-rename','penkkipunnerrus'); await p.evaluate(()=>gRenameEx(G.activeId,0)); await p.waitForTimeout(100);
   const same=await ex(); ok(same.goalW===80&&same.kgs[1]===85,'avain ei muuttunut: tavoitepaino 80 ja kirjoitettu 85 säilyvät');
 
-  console.log('\nEri liike, jolla ei ole historiaa');
+  console.log('\nEri liike, kun vanhalla on jo tehty sarja');
   await p.evaluate(()=>{ const e=gSession(G.activeId).exercises[0]; GU.rename=e.id; renderGym(); });
   await p.fill('#g-rename','Käsipainopunnerrus'); await p.evaluate(()=>gRenameEx(G.activeId,0)); await p.waitForTimeout(150);
-  const sw=await ex();
-  ok(sw.name==='Käsipainopunnerrus'&&sw.goalW===null,'tavoitepaino tyhjennetty');
-  ok(sw.kgs[1]===null&&sw.kgs[2]===null,'tekemättömiin sarjoihin kirjoitetut kilot tyhjennetty');
-  ok(sw.kgs[0]===82.5&&sw.done[0],'tehty sarja säilyy');
-  ok(sw.reps===6,'toistotavoite säilyy');
-  ok((await ph(1))==='–','kg-kentässä ei vanhaa ehdotusta (–)');
+  const all=await p.evaluate(()=>gSession(G.activeId).exercises.map(e=>({name:e.name,sets:e.sets.map(x=>[x.kg,x.reps,x.done]),goal:e.goal})));
+  ok(all.length===2&&all[0].name.toLowerCase()==='penkkipunnerrus'&&all[0].sets.length===1&&all[0].sets[0][0]===82.5&&all[0].sets[0][2],'tehty sarja jää Penkkipunnerrukselle (82,5 × 8)');
+  ok(all[1].name==='Käsipainopunnerrus'&&all[1].sets.length===2&&all[1].sets.every(x=>x[0]===null&&x[1]===null&&!x[2]),'uusi liike perään 2 tyhjällä sarjalla');
+  ok(all[1].goal.weight===null&&all[1].goal.repsMin===null&&all[1].goal.sets===2,'uudella liikkeellä ei vanhaa tavoitepainoa eikä toistotavoitetta');
+  ok((await p.locator('[data-set="1-0"] input[data-f="kg"]').getAttribute('placeholder'))==='–'&&(await p.locator('[data-set="1-0"] input[data-f="reps"]').getAttribute('placeholder'))==='–','uuden liikkeen kentissä ei vanhoja ehdotuksia');
+  ok(/Tavoite 2 sarjaa/.test(await p.locator('#view-treeni').innerText()),'tavoiterivi "2 sarjaa" (ei "× null")');
+  const hist=await p.evaluate(()=>exerciseHistory(exKey('Penkkipunnerrus')).length+'|'+exerciseHistory(exKey('Cable press')).length);
+  ok(hist==='0|1','aiempien treenien historia ennallaan');
 
-  console.log('\nEri liike, jolla on historia: ehdotus sen omasta historiasta');
-  await p.evaluate(()=>{ const e=gSession(G.activeId).exercises[0]; GU.rename=e.id; renderGym(); });
-  await p.fill('#g-rename','Cable press'); await p.evaluate(()=>gRenameEx(G.activeId,0)); await p.waitForTimeout(150);
-  ok((await ph(1))==='25','ehdotus Cable pressin viimeisestä kerrasta (25)');
+  console.log('\nEri liike ennen yhtään tehtyä sarjaa: vaihtuu paikallaan, tyhjänä');
+  await p.evaluate(()=>{ const e=gSession(G.activeId).exercises[1]; e.sets[0].reps=9; GU.rename=e.id; renderGym(); });
+  await p.fill('#g-rename','Cable press'); await p.evaluate(()=>gRenameEx(G.activeId,1)); await p.waitForTimeout(150);
+  const c=await p.evaluate(()=>{ const s=gSession(G.activeId); return {n:s.exercises.length,e:s.exercises[1]}; });
+  ok(c.n===2&&c.e.name==='Cable press'&&c.e.sets.every(x=>x.kg===null&&x.reps===null),'vaihtuu paikallaan, kirjoitetut toistot tyhjennetty');
+  ok((await p.locator('[data-set="1-0"] input[data-f="kg"]').getAttribute('placeholder'))==='25','ehdotus Cable pressin viimeisestä kerrasta (25)');
+
+  console.log('\nKopioituminen seuraaville sarjoille');
+  await p.fill('[data-set="1-0"] input[data-f="kg"]','30'); await p.fill('[data-set="1-0"] input[data-f="reps"]','12'); await p.waitForTimeout(80);
+  ok((await p.locator('[data-set="1-1"] input[data-f="kg"]').getAttribute('placeholder'))==='30'&&(await p.locator('[data-set="1-1"] input[data-f="reps"]').getAttribute('placeholder'))==='12','kirjoitettu 30 × 12 näkyy heti seuraavan sarjan ehdotuksena');
+  await p.locator('[data-set="1-0"] .ck').click(); await p.waitForTimeout(100);
+  await p.locator('[data-set="1-1"] .kgb').nth(1).click(); await p.waitForTimeout(60);
+  ok(await p.evaluate(()=>gSession(G.activeId).exercises[1].sets[1].kg===31.25),'+ lähtee kopioidusta painosta (30 → 31,25)');
+  await p.locator('[data-set="1-1"] .ck').click(); await p.waitForTimeout(100);
+  ok(await p.evaluate(()=>{ const r=gSession(G.activeId).exercises[1].sets[1]; return r.done&&r.reps===12; }),'kuittaus ilman kirjoittamista tallentaa kopioidut toistot (12)');
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));
   await b.close();
   console.log(`\n${pass} / ${pass+fail} läpi`); process.exit(fail?1:0);

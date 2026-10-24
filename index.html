@@ -2184,7 +2184,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.103</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.104</span>
       </div>
     </div>
   </div>
@@ -2218,6 +2218,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.104", d:"lokakuu 2026", items:[
+    "Vaihda liike kesken treenin: jo tehdyt sarjat jäävät alkuperäiselle liikkeelle, ja uusi liike lisätään sen perään jäljellä olevilla sarjoilla. Uudessa liikkeessä ei näy vanhan liikkeen painoja, toistoja eikä tavoitetta; ehdotus tulee uuden liikkeen omasta historiasta, jos sellainen on. Aiempien treenien historia ei muutu.",
+    "Kun kirjoitat sarjalle kilot ja toistot (esim. 80 × 12), ne näkyvät heti seuraavien sarjojen ehdotuksena. Säädä − / + -napeilla tai kuittaa sellaisenaan."
+  ]},
   {v:"2.18.103", d:"lokakuu 2026", items:[
     "Vanhan treenihistorian voi tuoda Strongista: Treeni → Asetukset → Tuo treenihistoria (Strongin vientitiedosto, Settings → Export Data). Ennen tuontia jokaisen Strongin liikkeen voi yhdistää Järkäleen liikkeeseen, jolloin historia jatkaa saman liikkeen käyrää ja ennätyksiä. RPE ja liikkeiden huomiot tulevat mukaan, lämmittelysarjat eivät. Samaa tiedostoa ei tuoda kahdesti, ja tuonnin voi perua."
   ]},
@@ -8892,6 +8896,7 @@ function parseExLine(text){
 const repsTxt=(g,dash="–")=>g.max?"max":(g.repsMax?`${g.repsMin}${dash}${g.repsMax}`:`${g.repsMin}`);
 function goalTxt(g){
   if(!g||!g.sets) return "";
+  if(g.repsMin==null&&!g.max&&!(g.groups&&g.groups.length>1)) return `${g.sets} ${g.sets===1?"sarja":"sarjaa"}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
   const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets} × ${repsTxt(x)}`).join(" + "):`${g.sets} × ${repsTxt(g)}`;
   return `${body}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
 }
@@ -9119,7 +9124,22 @@ async function startSession(progId,dayId){
   gymWakeLock(true);
   gTop();
 }
+// v2.18.104: kun liikkeen aiemmalle sarjalle tässä treenissä on syötetty kilot tai toistot, ne kopioituvat seuraavien
+// sarjojen ehdotukseksi (esim. 1. sarja 80 × 12 → muut 80 × 12, säätö − / +). Muuten ehdotus kuten ennen: viime kerran sama sarja, sitten tavoite.
 function ghostFor(s,ex,i){
+  const base=ghostBase(s,ex,i);
+  for(let j=i-1;j>=0;j--){ const r=ex.sets[j]; if(r&&(r.kg!=null||r.reps!=null)) return {kg:r.kg!=null?r.kg:base.kg, reps:r.reps!=null?r.reps:base.reps}; }
+  return base;
+}
+function gRefreshGhosts(s,ei,from){
+  const ex=s.exercises[ei]; if(!ex) return;
+  for(let i=from+1;i<ex.sets.length;i++){ const r=ex.sets[i]; if(r.done) continue; const gh=ghostFor(s,ex,i);
+    const row=document.querySelector(`[data-set="${ei}-${i}"]`); if(!row) continue;
+    const k=row.querySelector('input[data-f="kg"]'), rp=row.querySelector('input[data-f="reps"]');
+    if(k&&r.kg==null) k.placeholder=gh.kg!=null?fmtKg(gh.kg):"–";
+    if(rp&&r.reps==null) rp.placeholder=gh.reps!=null?String(gh.reps):"–"; }
+}
+function ghostBase(s,ex,i){
   const prev=prevFor(ex.key,s);
   const pr=prev&&prev.sets[Math.min(i,prev.sets.length-1)];
   if(pr) return {kg:pr.kg,reps:pr.reps};
@@ -9133,6 +9153,7 @@ function gAdjKg(sid,ei,ri,d){
   const base=r.kg!=null?r.kg:(ghostFor(s,ex,ri).kg??0);
   r.kg=Math.max(0,Math.round((base+d)*100)/100); s.dirtyAt=Date.now(); gymSave(); haptic(10);
   const inp=document.querySelector(`[data-set="${ei}-${ri}"] input[data-f="kg"]`); if(inp) inp.value=fmtKg(r.kg);
+  gRefreshGhosts(s,ei,ri);
 }
 // v2.18.93: toistoille − / + kuten painolle (seuraavana vuorossa oleva sarja); lähtö harmaasta ehdotuksesta.
 function gAdjReps(sid,ei,ri,d){
@@ -9140,6 +9161,7 @@ function gAdjReps(sid,ei,ri,d){
   const base=r.reps!=null?r.reps:(ghostFor(s,ex,ri).reps??0);
   r.reps=Math.max(0,base+d); s.dirtyAt=Date.now(); gymSave(); haptic(10);
   const inp=document.querySelector(`[data-set="${ei}-${ri}"] input[data-f="reps"]`); if(inp) inp.value=String(r.reps);
+  gRefreshGhosts(s,ei,ri);
 }
 function gSetVal(sid,ei,ri,field,raw){
   const s=gSession(sid); if(!s) return;
@@ -9147,6 +9169,7 @@ function gSetVal(sid,ei,ri,field,raw){
   const v=field==="reps"?(raw===""?null:parseInt(raw,10)):gNum(raw);
   r[field]=Number.isFinite(v)?v:null;
   s.dirtyAt=Date.now(); gymSave();
+  if(!s.endedAt) gRefreshGhosts(s,ei,ri);
   if(s.endedAt) gymLinkEntry(s);
 }
 function gToggleSet(sid,ei,ri){
@@ -9225,11 +9248,25 @@ function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=
 function gRenameEx(sid,ei){
   const inp=document.getElementById("g-rename"); const v=inp&&inp.value.trim(); if(!v) return;
   const s=gSession(sid); const ex=s.exercises[ei];
-  const oldKey=ex.key;
-  ex.name=v; ex.key=exKey(v); ex.renamed=true; GU.rename=null; GU.menu=null;
-  // v2.18.94: kun liike vaihtuu toiseen, vanhan liikkeen painot eivät päde (esim. tanko → käsipainot): ohjelman tavoitepaino ja tekemättömiin sarjoihin kirjoitetut kilot tyhjennetään.
-  // Ehdotus tulee tämän jälkeen uuden liikkeen omasta historiasta, jos sellainen on. Tehdyt sarjat ja toistotavoite säilyvät.
-  if(ex.key!==oldKey){ if(ex.goal) ex.goal.weight=null; ex.sets.forEach(r=>{ if(!r.done) r.kg=null; }); }
+  const oldKey=ex.key, newKey=exResolveKey?exResolveKey(v):exKey(v);
+  GU.rename=null; GU.menu=null;
+  if(newKey===oldKey){ ex.name=v; gymSave(); renderGym(); return; } // pelkkä kirjoitusasun korjaus
+  // v2.18.104: vaihto toiseen liikkeeseen. Vanhan liikkeen arvot eivät päde uudelle (esim. tanko → käsipainot):
+  // tekemättömät sarjat tyhjennetään kokonaan (kilot, toistot, rasittavuus) ja tavoitteesta jää vain sarjamäärä.
+  // Jos vanhalla liikkeellä on jo tehtyjä sarjoja, ne jäävät vanhalle liikkeelle ja uusi liike lisätään sen perään
+  // jäljellä olevilla sarjoilla (ennen: tehdyt sarjat siirtyivät uuden liikkeen nimelle). Aiempien treenien historia ei muutu.
+  const done=ex.sets.filter(r=>r.done), left=Math.max(1,ex.sets.length-done.length);
+  const fresh=()=>[...Array(left)].map(()=>({kg:null,reps:null,done:false}));
+  if(done.length){
+    ex.sets=done;
+    s.exercises.splice(ei+1,0,{id:gid(),key:newKey,name:v,goal:{sets:left,repsMin:null,repsMax:null,max:false,weight:null,groups:null},note:"",
+      skipped:false,added:true,replaces:ex.id,feel:null,userNote:"",sets:fresh()});
+    GU.expanded[s.exercises[ei+1].id]=true;
+  } else {
+    ex.name=v; ex.key=newKey; ex.renamed=true;
+    ex.goal={sets:left,repsMin:null,repsMax:null,max:false,weight:null,groups:null};
+    ex.sets=fresh();
+  }
   gymSave(); renderGym();
 }
 // v2.18.25: onko treenissä jo samankaltainen liike, jota ei ole vielä tehty (esim. "Etunosto" vs. "Etunostot levypainolla")
