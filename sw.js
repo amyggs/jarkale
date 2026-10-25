@@ -1,4 +1,4 @@
-const CACHE='jarkale-v294';const PREFIX='jarkale-v';const FONTS='jarkale-fonts-v1';
+const CACHE='jarkale-v295';const PREFIX='jarkale-v';const FONTS='jarkale-fonts-v1';
 const FILES=['./', './index.html','./manifest.webmanifest','./icon-192.png?v=3','./icon-512.png?v=3','./icon-maskable-512.png?v=3','./apple-touch-icon.png?v=3'];
 const CORE_FONTS=['./fonts/manrope-latin-400-normal.woff2','./fonts/manrope-latin-500-normal.woff2','./fonts/manrope-latin-600-normal.woff2','./fonts/manrope-latin-700-normal.woff2','./fonts/manrope-latin-800-normal.woff2'];
 // v2.18.80: fontit omassa pysyvässä välimuistissaan (ei ladata uudelleen jokaisen version mukana); perusfontti esiladataan
