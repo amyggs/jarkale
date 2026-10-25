@@ -574,6 +574,8 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ds-tbl tr.f td.v{color:var(--orange);}
 .ds-tbl tr.f td:first-child::after{content:" •";color:var(--orange);}
 .ds-note{font-size:11px;color:var(--dim);margin-top:6px;}
+.ds-run{display:flex;flex-direction:column;gap:2px;margin-top:6px;font-size:12px;line-height:1.45;color:var(--dim);}
+.ds-run .lo{color:var(--orange);}
 
 /* ═══ ULKOASU v2.14: TEEMAT + RUUDUKKO ════════════════════════════
    Teema (data-palette) × tila (data-theme). Ruudukko ja valintatyyli yhteisiä kaikille teemoille.
@@ -1081,6 +1083,8 @@ html.g-run #view-treeni{padding-bottom:96px!important;}
 .su-row.on .su-ic{color:var(--text);}
 .su-row .su-t{flex:1;min-width:0;}
 .su-row:active{background:var(--surf2);}
+.su-privacy{margin:16px 2px 0;font:500 13px/1.55 Manrope,system-ui,sans-serif;color:var(--dim);}
+.su-privacy b{color:var(--text);font-weight:700;}
 .su-choice{display:block;width:100%;text-align:left;min-height:76px;padding:14px 16px;margin:0 0 10px;border-radius:16px;border:1.5px solid var(--bord);background:var(--surf);color:var(--text);font:inherit;cursor:pointer;}
 .su-choice b{display:block;font:800 17px/1.25 Manrope,system-ui,sans-serif;margin-bottom:3px;}
 .su-choice span{display:block;font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);}
@@ -2207,7 +2211,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.109</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.110</span>
       </div>
     </div>
   </div>
@@ -2241,6 +2245,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.110", d:"lokakuu 2026", items:[
+    "Vertailu omaan tasoon: Päivän tila kertoo, jos uni, palautuminen tai vire on ollut vähintään kolme päivää peräkkäin selvästi oman tason ali tai yli. Oma taso on edellisten 28 päivän keskiarvo.",
+    "Trendien Havainnot vertaavat viime viikon unta, palautumista ja vireä omaan tasoosi, kun ero on selvä (uni 20 min, muut 0,75).",
+    "Aloitusnäkymä kertoo, missä tiedot ovat: vain puhelimessa ja halutessasi omassa Google Drivessa."
+  ]},
   {v:"2.18.109", d:"lokakuu 2026", items:[
     "Asennetun sovelluksen alapalkki: Chrome on alkanut värittää sen sovelluksen perusvärillä, joka ei voi vaihtua teeman mukaan. Perusväri poistettiin, joten palkki seuraa taas puhelimen omaa tummaa tai vaaleaa tilaa. Muutos näkyy, kun puhelin päivittää asennetun sovelluksen (yleensä vuorokauden tai muutaman kuluessa).",
     "Asetukset → Muut asetukset → Näyttö kertoo, piirtääkö sovellus näytön alareunaan asti tällä laitteella."
@@ -3523,7 +3532,8 @@ function renderSetupScreen(){
       <div class="su-sub">Mitä haluat tehdä ensin? Valinnan voi muuttaa milloin tahansa Asetuksista.</div></div>
       <button class="su-choice" onclick="setupPick('gym')"><b>Kirjata treenejä</b><span>Oma ohjelma tekstinä, sarjat ja kilot salilla. Mitään muuta ei tarvitse täyttää.</span></button>
       <button class="su-choice" onclick="setupPick('body')"><b>Seurata kehoa ja vointia</b><span>Paino, uni, palautuminen, kivut ja muut valitsemasi asiat.</span></button>
-      <button class="su-choice" onclick="setupPick('both')"><b>Molempia</b><span>Treenit ja päiväseuranta samassa sovelluksessa.</span></button>`;
+      <button class="su-choice" onclick="setupPick('both')"><b>Molempia</b><span>Treenit ja päiväseuranta samassa sovelluksessa.</span></button>
+      <div class="su-privacy"><b>Tietosi pysyvät sinulla.</b> Järkäleellä ei ole omaa palvelinta: kirjaukset tallentuvat tähän puhelimeen ja halutessasi omaan Google Driveesi. Ne eivät mene sovelluksen tekijälle eivätkä muille. (Valinnainen tekoälyanalyysi lähettää tietoja vain, jos otat sen itse käyttöön omalla avaimella.)</div>`;
     el.style.display="block"; return;
   }
   // v2.18.20: aloitusnäkymä samaan ilmeeseen muun sovelluksen kanssa (ryhmäkortit, kytkimet kuten Asetuksissa)
@@ -5777,6 +5787,13 @@ function buildInsightsHTML(start, effEnd, curr) {
   if(ue.length<3) return "";
   const insights=[];
 
+  // 0. v2.18.110: oma taso – viimeiset 7 pv vs. edeltävät 28 pv, vain kun jakso päättyy tähän päivään
+  if(effEnd===today()){
+    ["sleep","recovery","motivation"].filter(f=>f==="sleep"||trk(f)).forEach(f=>{
+      const c=ownWeekCompare(f,effEnd); if(c&&c.dev) insights.push(ownWeekText(f,c));
+    });
+  }
+
   // 1. Painotrendi
   if(curr.weightRate!=null){
     // v2.16.6: havaintolauseet huoliteltuun suomeen
@@ -8006,6 +8023,46 @@ function ownLevel(field,ds){
   }
   return vals.length>=7?vals.reduce((x,y)=>x+y,0)/vals.length:null;
 }
+// v2.18.110: vertailu omaan tasoon – kynnys, jonka ylittävä ero lasketaan poikkeamaksi (uni 20 min, asteikot 0,75)
+const OWN_THR={sleep:1/3,recovery:0.75,motivation:0.75};
+const OWN_NAME={sleep:"Uni",recovery:"Palautuminen",motivation:"Vire"};
+function ownVal(field,ds){
+  if(ds===S.date&&S[field]!=null) return +S[field];
+  const e=S.entries[ds]; return e&&e[field]!=null?+e[field]:null;
+}
+// Montako peräkkäistä päivää (ds mukaan lukien) arvo on ollut samaan suuntaan yli kynnyksen omasta tasosta
+function ownRun(field,ds){
+  const thr=OWN_THR[field]; let n=0, dir=0; const d=new Date(ds+"T00:00:00");
+  for(let i=0;i<60;i++){
+    const day=iso(d), v=ownVal(field,day), b=ownLevel(field,day);
+    if(v==null||b==null) break;
+    const s=v<=b-thr?-1:v>=b+thr?1:0;
+    if(!s||(dir&&s!==dir)) break;
+    dir=s; n++; d.setDate(d.getDate()-1);
+  }
+  return {n,dir};
+}
+function ownRunText(field,r){
+  const unit=field==="sleep"?(r.n===1?"yö":"yötä"):(r.n===1?"päivä":"päivää");
+  return `${OWN_NAME[field]} ${r.dir<0?"alle":"yli"} oman tason ${r.n} ${unit} peräkkäin`;
+}
+// Viimeisen 7 päivän keskiarvo vs. sitä edeltävät 28 päivää
+function ownWeekCompare(field,endDs){
+  const vals=[]; const d=new Date(endDs+"T00:00:00");
+  for(let i=0;i<7;i++){ const e=S.entries[iso(d)]; if(e&&e[field]!=null&&!(e.day_factors||[]).includes("illness")) vals.push(+e[field]); if(i<6) d.setDate(d.getDate()-1); }
+  if(vals.length<4) return null;
+  const base=ownLevel(field,iso(d)); if(base==null) return null;
+  const avg=vals.reduce((x,y)=>x+y,0)/vals.length;
+  return {avg,base,diff:avg-base,dev:Math.abs(avg-base)>=OWN_THR[field]};
+}
+function ownWeekText(field,c){
+  const n1=v=>(Math.round(v*10)/10).toLocaleString("fi-FI",{minimumFractionDigits:1,maximumFractionDigits:1});
+  if(field==="sleep"){
+    const m=Math.round(Math.abs(c.diff)*60), dt=m>=60?fmtSleepText(m/60):m+" min";
+    return `Viime viikon uni keskimäärin ${fmtSleepText(c.avg)}, ${dt} ${c.diff<0?"alle":"yli"} oman tasosi (${fmtSleepText(c.base)}).`;
+  }
+  return `Viime viikon ${field==="recovery"?"palautuminen":"vire"} keskimäärin ${n1(c.avg)}, ${c.diff<0?"alle":"yli"} oman tasosi (${n1(c.base)}).`;
+}
 let DS_OPEN=(()=>{ try{ return localStorage.getItem("jarkale-ds-open")==="1"; }catch(_){ return false; } })();
 function toggleDayState(){ DS_OPEN=!DS_OPEN; try{ localStorage.setItem("jarkale-ds-open",DS_OPEN?"1":"0"); }catch(_){} haptic(6); renderReadiness(); }
 function renderReadiness(){
@@ -8041,7 +8098,10 @@ function renderReadiness(){
       <span class="ds-ttl">Päivän tila</span>
       <span class="ds-state" style="color:${colFor[body.level]}">${body.label}${!DS_OPEN&&why.length?` <span class="ds-why">· ${why.join(", ")}</span>`:""}</span>
       <span class="ds-chev" aria-hidden="true">›</span></button>`;
-  if(!DS_OPEN){ el.innerHTML=`<div class="ds-card">${head}</div>`; return; }
+  // v2.18.110: vähintään 3 päivää peräkkäin oman tason ali/yli → oma rivi (näkyy myös kiinni)
+  const runs=["sleep","recovery",...(trk("motivation")?["motivation"]:[])].map(f=>({f,r:ownRun(f,S.date)})).filter(x=>x.r.n>=3);
+  const runHTML=runs.length?`<div class="ds-run">${runs.map(x=>`<span class="${x.r.dir<0?"lo":"hi"}">${x.r.dir<0?"↓":"↑"} ${ownRunText(x.f,x.r)}</span>`).join("")}</div>`:"";
+  if(!DS_OPEN){ el.innerHTML=`<div class="ds-card">${head}${runHTML}</div>`; return; }
   el.innerHTML=`<div class="ds-card">
     <div class="ds-head">
       ${head}
@@ -8049,13 +8109,14 @@ function renderReadiness(){
     </div>
     <div id="daystate-hint" style="display:none;margin:4px 0 10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord);font-size:12px;color:var(--dim);line-height:1.6">
       <b style="color:var(--text)">Kehon tila</b> muodostuu unesta, palautumisen tunteesta, aktiivisesta kivusta ja eilisestä treenikuormasta. Kuormittunut = vähintään kaksi kuormitustekijää tai yksi vahva (esim. uni vähintään 2 h alle tavoitteen, palautuminen 1, kipu 4/5 tai enemmän). Palautunut = uni vähintään tavoite, palautuminen vähintään 4 eikä merkittävää kipua.<br><br>
-      <b style="color:var(--text)">Oma taso</b> = edellisten 28 päivän keskiarvo, sairauspäivät pois. Näytetään, kun arvoja on vähintään 7.<br><br>
+      <b style="color:var(--text)">Oma taso</b> = edellisten 28 päivän keskiarvo, sairauspäivät pois. Näytetään, kun arvoja on vähintään 7. Jos arvo on ollut vähintään 3 päivää peräkkäin selvästi oman tason ali tai yli (uni 20 min, palautuminen ja vire 0,75), siitä kerrotaan omalla rivillä.<br><br>
       • = tekijä, joka vaikuttaa luokitukseen. Kortti kuvaa kirjauksia, se ei arvioi treenikykyä eikä anna toimintaohjetta.
     </div>
     <table class="ds-tbl">
       <tr><th style="text-align:left;padding-left:0"></th><th>tänään</th><th>oma taso</th></tr>
       ${rows.map(r=>`<tr class="${r.f?"f":""}"><td>${r.k}</td><td class="v">${r.v}</td><td class="b">${r.b}</td></tr>`).join("")}
     </table>
+    ${runHTML}
     ${codes.has("sleep_below_goal")||S.sleep<sleepGoal?`<div class="ds-note">Unitavoite ${fmtSleepText(sleepGoal)}</div>`:""}
   </div>`;
 }
