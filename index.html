@@ -2211,7 +2211,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.110</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.111</span>
       </div>
     </div>
   </div>
@@ -2245,6 +2245,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.111", d:"lokakuu 2026", items:[
+    "Pilotin Mitä uutta näyttää vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä. Oma versio näyttää edelleen kaikki versiot."
+  ]},
   {v:"2.18.110", d:"lokakuu 2026", items:[
     "Vertailu omaan tasoon: Päivän tila kertoo, jos uni, palautuminen tai vire on ollut vähintään kolme päivää peräkkäin selvästi oman tason ali tai yli. Oma taso on edellisten 28 päivän keskiarvo.",
     "Trendien Havainnot vertaavat viime viikon unta, palautumista ja vireä omaan tasoosi, kun ero on selvä (uni 20 min, muut 0,75).",
@@ -7119,20 +7122,69 @@ function renderGenderSection(){
   </div>`;
 }
 
+// v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
+// Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
+const PILOT_CHANGELOG=[
+  {d:"25.10.2026", items:[
+    "Päivän tila kertoo, kun uni, palautuminen tai vire on ollut vähintään kolme päivää peräkkäin selvästi tavallista tasoasi alempana tai ylempänä. Trendien havainnot vertaavat viime viikkoa omaan tasoosi.",
+    "Androidilla asennetun sovelluksen alareunan palkki ei ole enää keltainen. Muutos näkyy, kun puhelin päivittää sovelluksen, yleensä muutaman päivän kuluessa."
+  ]},
+  {d:"24.10.2026", items:[
+    "Treenin yhteenveto on selkeämpi: sarjat näkyvät liikkeen nimen alla, ennätykset omalla rivillään, ja treenin paras ennätys nostetaan yläosaan.",
+    "Jaettu treenikuva näyttää ohjelman nimen ja kertoo, mitä ennätys tarkoittaa. Liikkeiden huomiot lähtevät jakoon vain, jos valitset niin.",
+    "Kun kirjoitat sarjaan kilot ja toistot, ne tulevat ehdotukseksi saman liikkeen seuraaville sarjoille.",
+    "Vaihda liike kesken treenin: jo tehdyt sarjat jäävät alkuperäiselle liikkeelle, eikä vanhan liikkeen paino siirry uudelle.",
+    "Jos treenaat kahdesti samana päivänä, rasitusarvio koskee molempia treenejä. Viikkotavoite on nyt treenipäiviä viikossa."
+  ]},
+  {d:"23.10.2026", items:[
+    "Vanhan treenihistorian voi tuoda Strongista: Treeni → Asetukset → Tuo treenihistoria.",
+    "Treenin aikana alapalkki piiloutuu ja taukoajastin on näytön alareunassa."
+  ]},
+  {d:"22.10.2026", items:[
+    "Asetukset on järjestetty uudelleen: varmuuskopio ja Drive heti alussa, teemat omana Ulkoasu-osionaan.",
+    "Mitat kertoo, jos rasvaprosentin laskennasta puuttuu pituus tai sukupuoli, ja ne voi täyttää suoraan siinä."
+  ]},
+  {d:"20.–21.10.2026", items:[
+    "Treeniin voi halutessaan kirjata koetun rasittavuuden (toistovara tai RPE): Treeni → Asetukset.",
+    "Treenin asetukset löytyvät nyt Treeni-välilehdeltä.",
+    "Sovellus avautuu nopeasti myös heikolla verkolla."
+  ]},
+  {d:"19.10.2026", items:[
+    "Uusi logo ja kelluva alapalkki.",
+    "Treenissä painoa voi säätää − / + -napeilla suoraan kentässä.",
+    "Treenin voi jakaa kuvana.",
+    "Tallennettu treeni avautuu luettavaksi yhteenvedoksi, joten sitä ei muuta vahingossa.",
+    "Liikkeeseen voi kiinnittää pysyvän huomion, esimerkiksi laitteen säädön."
+  ]},
+  {d:"15.–17.10.2026", items:[
+    "Kuusi uutta teemaa: Fosfori, Kuusnelonen, Teksti-TV, Manageri, Soitin ja Lasi. Keltamusta Järkäle on oletusteema.",
+    "Ennätyssarjasta tulee värinä ja ilmoitus.",
+    "Päivän kirjauksen voi poistaa Kirjaa-näkymän lopusta."
+  ]},
+  {d:"13.10.2026", items:[
+    "Kosketusvärinän voimakkuuden voi valita, tai sen voi kytkeä pois.",
+    "Käynnissä olevan treenin yläosassa on edistymispalkki."
+  ]},
+  {d:"12.10.2026", items:[
+    "Varmuuskopio omaan Google Driveen: kirjaukset, mitat ja treenit säilyvät, vaikka puhelin vaihtuisi.",
+    "Saliohjelmat ja treenien kirjaus (vapaaehtoinen): oma ohjelma tekstinä, sarjat ja kilot salilla, edellisen kerran tulokset valmiina."
+  ]}
+];
 function renderChangelog(){
   const el=document.getElementById("changelog-content"); if(!el) return;
   // v2.18.102: 179 versiota / 51 000 merkkiä oli kehittäjän loki. Oletuksena 5 uusinta, loput napista.
-  const all=!!window._clAll, list=all?CHANGELOG:CHANGELOG.slice(0,5);
+  const pilot=document.documentElement.classList.contains("pilot"), SRC=pilot?PILOT_CHANGELOG:CHANGELOG;
+  const all=!!window._clAll, list=all?SRC:SRC.slice(0,5);
   el.innerHTML=list.map((rel,idx)=>`
     <div style="${idx>0?"margin-top:16px;padding-top:14px;border-top:1px solid var(--bord)":""}">
       <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
-        <span style="color:var(--orange);font-size:13px;font-weight:700">v${rel.v}</span>
-        <span style="color:var(--dim);font-size:11px">${rel.d}</span>
+        ${pilot?`<span style="color:var(--orange);font-size:13px;font-weight:700">${rel.d}</span>`:`<span style="color:var(--orange);font-size:13px;font-weight:700">v${rel.v}</span>
+        <span style="color:var(--dim);font-size:11px">${rel.d}</span>`}
       </div>
       ${rel.items.map(it=>`<div style="display:flex;gap:8px;padding:4px 0;font-size:13px;color:var(--dim);line-height:1.5">
         <span style="color:var(--orange);flex-shrink:0">✓</span><span>${esc(it)}</span>
       </div>`).join("")}
-    </div>`).join("")+(CHANGELOG.length>5?`<button class="cl-more" onclick="window._clAll=!window._clAll;renderChangelog()">${all?"Näytä vain uusimmat":"Näytä kaikki versiot ("+CHANGELOG.length+")"}</button>`:"");
+    </div>`).join("")+(SRC.length>5?`<button class="cl-more" onclick="window._clAll=!window._clAll;renderChangelog()">${all?"Näytä vain uusimmat":pilot?"Näytä kaikki ("+SRC.length+")":"Näytä kaikki versiot ("+SRC.length+")"}</button>`:"");
 }
 
 // v2.17.14: pysyvä tallennustila. Pyytää selainta olemaan poistamatta sovelluksen dataa tilan loppuessa.

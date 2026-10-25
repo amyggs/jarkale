@@ -26,7 +26,13 @@ ok(/Uusi ilme/.test(t3)&&/Treeni sujuvammaksi/.test(t3)&&/Ennätykset|ennätykse
 ok((await p.locator('#news-card .ni').first().locator('button').count())===0,'uutinen ilman toimintoa: ei nappia');
 await p.locator('#news-card button',{hasText:'Kokeile'}).click();await p.waitForTimeout(500);
 ok(await p.evaluate(()=>S.tab==='asetukset'&&!!document.getElementById('theme-section')),'Kokeile vie teema-asetuksiin');
+await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); });await p.waitForTimeout(200);
+const cl=await p.locator('#changelog-content').innerText();
+ok(/25\.10\.2026/.test(cl)&&!/v2\.18\./.test(cl)&&(await p.locator('#changelog-content > div').count())===5,'pilotin Mitä uutta: päivämäärät, ei versionumeroita, 5 uusinta');
+ok(/Näytä kaikki \(\d+\)/.test(cl)&&!/Pilotin Mitä uutta/.test(cl),'pilotin listassa ei kehittäjän merkintöjä');
 const q=await ctx.newPage();await q.goto('http://localhost:8765/index.html');await q.evaluate(()=>{localStorage.removeItem('jarkale-news-seen');});await q.reload();await q.waitForTimeout(400);
 ok(!(await q.locator('#news-card').isVisible()),'oma versio: ei uutiskorttia');
+await q.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); });await q.waitForTimeout(200);
+ok(/v2\.18\.111/.test(await q.locator('#changelog-content').innerText()),'oma versio: täysi versiolista');
 ok(errs.length===0,'ei JS-virheitä '+errs.join('|'));
 console.log(`${pass} / ${pass+fail} läpi`);await b.close();})();
