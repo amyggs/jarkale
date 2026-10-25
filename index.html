@@ -2192,6 +2192,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
           <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z"/><path d="M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>Claude API</div>
           <div id="api-key-section"></div>
         </div>
+        <div class="card">
+          <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:8px">Näyttö</div>
+          <div id="edge-diag" style="font-size:12px;color:var(--dim);line-height:1.5"></div>
+        </div>
       </div>
 
       <!-- Mitä uutta -->
@@ -2203,7 +2207,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.108</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.109</span>
       </div>
     </div>
   </div>
@@ -2237,6 +2241,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.109", d:"lokakuu 2026", items:[
+    "Asennetun sovelluksen alapalkki: Chrome on alkanut värittää sen sovelluksen perusvärillä, joka ei voi vaihtua teeman mukaan. Perusväri poistettiin, joten palkki seuraa taas puhelimen omaa tummaa tai vaaleaa tilaa. Muutos näkyy, kun puhelin päivittää asennetun sovelluksen (yleensä vuorokauden tai muutaman kuluessa).",
+    "Asetukset → Muut asetukset → Näyttö kertoo, piirtääkö sovellus näytön alareunaan asti tällä laitteella."
+  ]},
   {v:"2.18.108", d:"lokakuu 2026", items:[
     "Asennetun sovelluksen alareunan järjestelmäpalkki ei ole enää keltainen: sovelluksen perusväri on nyt tumma. Muutos näkyy, kun puhelin päivittää asennetun sovelluksen tiedot (voi kestää muutaman päivän)."
   ]},
@@ -7000,6 +7008,17 @@ function saveApiKey(val){
 }
 let API_KEY_EDITING = false;
 
+// v2.18.109: Androidin alapalkki. Chrome värittää asennetun sovelluksen alapalkin manifestin theme_colorilla (WebAppNavigationBarThemeColor),
+// joten manifestista poistettiin theme_color: palkki seuraa puhelimen tilaa. Teeman mukainen palkki vaatii, että sivu piirretään palkin alle
+// (viewport-fit=cover, edge-to-edge). Tämä tieto kertoo, tapahtuuko se tällä laitteella.
+function renderEdgeDiag(){
+  const el=document.getElementById("edge-diag"); if(!el) return;
+  const t=document.createElement("div"); t.style.cssText="position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)"; document.body.appendChild(t);
+  const inset=Math.round(parseFloat(getComputedStyle(t).paddingBottom)||0); t.remove();
+  let mode="selain"; try{ if(matchMedia("(display-mode: standalone)").matches) mode="asennettu sovellus"; }catch(_){}
+  el.textContent=inset>0?`Sovellus piirtää näytön alareunaan asti (${mode}, alareunan varaus ${inset} px). Alapalkin kohdalla näkyy teeman tausta.`
+    :`Sovellus ei piirrä Androidin alapalkin alle (${mode}). Alapalkin värin määrää puhelin.`;
+}
 function renderApiKeySection(){
   const el=document.getElementById("api-key-section"); if(!el) return;
   const key=getApiKey();
@@ -7142,7 +7161,7 @@ function renderAsetukset(){
     renderMedSettings();
   }
   if(SETTINGS_TOGGLES.appearance) renderTheme();
-  if(SETTINGS_TOGGLES.technical) renderApiKeySection();
+  if(SETTINGS_TOGGLES.technical){ renderApiKeySection(); renderEdgeDiag(); }
 }
 
 // ═══ CSV EXPORT ══════════════════════════════════════════════════
