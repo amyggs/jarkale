@@ -13,7 +13,7 @@ Henkilökohtainen treeni- ja hyvinvointiseuranta. Yksi HTML-tiedosto (`index.htm
 3. Jos muutos on pilotille merkittävä (hän huomaa sen tai hyötyy siitä), lisää kohta myös `PILOT_CHANGELOG`iin: päivämäärä otsikkona, käyttäjän näkökulmasta, ei versionumeroita. Korjaukset, joita käyttäjä ei huomaa, teemakohtaiset hienosäädöt ja kehittäjämerkinnät vain `CHANGELOG`iin.
 4. Uusi testi → lisää se `tests/run.sh`:n listaan ja `tests/README.md`:n taulukkoon.
 5. `scripts/release.sh` tarkistaa version, nostaa välimuistin (`sw.js`) molemmissa repoissa, ajaa `node --check`, rakentaa pilotin ja ajaa testit. `--commit "vX.Y.Z: …"` tekee lisäksi commitin ja pushin molempiin.
-6. GitHub Actions ajaa testit jokaisesta pushista (`.github/workflows/tests.yml`).
+6. GitHub Actions ajaa testit jokaisesta pushista (`.github/workflows/tests.yml`). Tulokset kirjoitetaan ajon huomautuksiksi, joten ne näkyvät ilman lokia: `gh run view <id> --repo amyggs/jarkale` (ANNOTATIONS: yhteenveto kaikista tiedostoista, epäonnistuneista oma virherivi).
 
 Älä julkaise, jos yksikin testi epäonnistuu.
 
