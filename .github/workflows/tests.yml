@@ -1,0 +1,33 @@
+# Järkäle – regressiotestit jokaisesta pushista ja pull requestista.
+# Punainen ruksi GitHubissa = jokin testi epäonnistui; lokista näkee, mikä (rivit, joissa ✗).
+name: Testit
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  testit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Järkäle
+        uses: actions/checkout@v4
+        with:
+          path: jarkale
+          fetch-depth: 0   # test-r1 hakee vertailuversion gitin historiasta
+      - name: Pilotti (test-news)
+        uses: actions/checkout@v4
+        with:
+          repository: amyggs/jarkale-pilotti
+          path: jarkale-pilotti
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright ja Chromium
+        working-directory: jarkale
+        run: |
+          npm i --no-save --no-package-lock playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Testit
+        working-directory: jarkale
+        run: tests/run.sh

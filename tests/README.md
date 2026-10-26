@@ -29,4 +29,4 @@ tests/run.sh test-gym.js
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
 - Testit eivät käytä oikeaa dataa: jokainen testi tyhjentää selaimen muistin aluksi.
-- Julkaisu: kaikkien testien pitää mennä läpi ennen kuin versio puskataan.
+- Julkaisu: kaikkien testien pitää mennä läpi ennen kuin versio puskataan. `scripts/release.sh` ajaa ne osana julkaisua, ja GitHub Actions ajaa ne jokaisesta pushista (`.github/workflows/tests.yml`).
