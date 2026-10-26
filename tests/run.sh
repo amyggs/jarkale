@@ -16,11 +16,20 @@ git show 46c3ab1:index.html > "$TMP/old/index.html"
 (cd "$TMP/old" && exec python3 -m http.server 8766 >/dev/null 2>&1) & P2=$!
 sleep 1
 TESTS=("$@"); [ ${#TESTS[@]} -eq 0 ] && TESTS=(test-gym.js test-sync.js test-r1.js test-delete.js test-haptics.js test-news.js test-exmeta.js test-safety.js test-fonts.js test-restore.js test-onboarding.js test-gymonly.js test-effort.js test-gymsettings.js test-backup.js test-setrow.js test-swap.js test-sumwrap.js test-swipereset.js test-settings.js test-polish.js test-import.js test-ownlevel.js)
-FAIL=0
+FAIL=0; SUMMARY=""
 for t in "${TESTS[@]}"; do
   if [ "$t" = test-news.js ] && [ ! -f "$TMP/new/jarkale-pilotti/index.html" ]; then echo "$t: ohitettu (ei ../jarkale-pilotti)"; continue; fi
   OUT=$(node "tests/$t" 2>&1); [ -n "${DEBUG:-}" ] && echo "$OUT" | tail -15; RES=$(echo "$OUT" | grep -E "läpi$" | tail -1)
   echo "$t: ${RES:-KAATUI}"; echo "$OUT" | grep "✗"
-  echo "$OUT" | grep -q "✗" || [ -z "$RES" ] && FAIL=1
+  if echo "$OUT" | grep -q "✗" || [ -z "$RES" ]; then
+    FAIL=1
+    # GitHub Actions: epäonnistunut testi huomautukseksi (näkyy myös rajapinnasta, toisin kuin loki)
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+      MSG=$( { echo "$OUT" | grep "✗" || echo "$OUT" | tail -5; } | head -8 | tr '\n' ' ' | sed 's/%/%25/g')
+      echo "::error title=$t ${RES:-KAATUI}::$MSG"
+    fi
+  fi
+  SUMMARY="$SUMMARY$t ${RES:-KAATUI}; "
 done
+[ -n "${GITHUB_ACTIONS:-}" ] && echo "::notice title=Testit $([ $FAIL = 0 ] && echo läpi || echo EPÄONNISTUI)::$SUMMARY"
 exit $FAIL
