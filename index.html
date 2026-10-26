@@ -2214,7 +2214,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.112</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.113</span>
       </div>
     </div>
   </div>
@@ -2248,6 +2248,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.113", d:"lokakuu 2026", items:[
+    "Ohjelman tuonti tunnistaa Strongin Jaa treeni -tekstin: liikkeet, sarjamäärä, toistoväli ja raskain paino tulevat tavoitteeksi. Lämmittelysarjat ohitetaan, paunat muunnetaan kiloiksi, ja liikkeen nimi säilyy kokonaan, esimerkiksi Triceps Pushdown (Cable - Straight Bar). @strongapp, linkki ja päiväys eivät enää tule liikkeiksi."
+  ]},
   {v:"2.18.112", d:"lokakuu 2026", items:[
     "Asennetun sovelluksen alapalkki: ilman sovelluksen perusväriä Chrome teki palkista valkoisen. Perusväri on nyt lähes musta, joten palkki on tumma kaikissa teemoissa. Muutos näkyy, kun puhelin päivittää asennetun sovelluksen.",
     "Lasi- ja Kaurapuuro-teemat vaaleana: viikon tulevien päivien pallot näkyvät taas (katkoviiva katosi taustaan)."
@@ -7132,6 +7135,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"26.10.2026", items:[
+    "Strongista voi tuoda treenin ohjelmaksi: jaa treeni Strongissa tekstinä ja liitä se kohdassa Treeni → Uusi ohjelma → Tuo tekstistä. Liikkeet, sarjat, toistot ja painot tulevat tavoitteeksi."
+  ]},
   {d:"25.10.2026", items:[
     "Päivän tila kertoo, kun uni, palautuminen tai vire on ollut vähintään kolme päivää peräkkäin selvästi tavallista tasoasi alempana tai ylempänä. Trendien havainnot vertaavat viime viikkoa omaan tasoosi.",
     "Androidilla asennetun sovelluksen alareunan palkki on tumma kaikissa teemoissa (ei enää keltainen tai valkoinen). Muutos näkyy, kun puhelin päivittää sovelluksen, yleensä muutaman päivän kuluessa."
@@ -9088,7 +9094,59 @@ function newEx(p){ return {id:gid(),key:exKey(p.name),name:p.name,...goalFields(
 // Tekstituonti (Keep, Docs, .md): otsikkorivit = treenipäivät, liikerivit niiden alle. Ohjeproosa ohitetaan
 // (näytetään esikatselussa), lepopäivät ja tyhjät otsikot pudotetaan, "Supersarja:" merkitään liikkeiden ohjeeseen.
 // Pitkät otsikot (esim. "Vatsalihakset kaksi kertaa viikossa…") tuodaan oletuksena pois valittuina.
+// ── v2.18.113 Strongin "Jaa treeni" -teksti: otsikko, päiväys, liikkeen nimi omalla rivillään ja sarjat riveinä
+// ("Set 1: 60 kg × 10", "W: 40 kg × 10", "Set 2: 135 lb × 8 @ 8"). Liikkeen nimessä voi olla " - " ja sulkeita
+// ("Triceps Pushdown (Cable - Straight Bar)"). Tavoitteeksi työsarjojen määrä, toistoväli ja raskain paino.
+// Lämmittelysarjat ohitetaan. Rivit, joiden alla ei ole sarjoja (@strongapp, linkit, päiväys), jäävät pois.
+const STRONG_SET_RE=/^(?:set\s*(\d+)|([wdf])\s*(\d*))\s*(\((?:w|d|f|warm[- ]?up)\))?\s*[:.]\s*(.*)$/i;
+const STRONG_DATE_RE=/\b(?:mon|tues|wednes|thurs|fri|satur|sun)day\b|\b(?:maanantai|tiistai|keskiviikko|torstai|perjantai|lauantai|sunnuntai)\b|\b20\d\d\b/i;
+function strongSetParse(l){
+  const m=l.match(STRONG_SET_RE); if(!m) return null;
+  const body=m[5]||"";
+  const warm=/^w$/i.test(m[2]||"")||/\(w|warm/i.test(m[4]||"")||/\bwarm[- ]?up\b|\[w\]/i.test(body);
+  let kg=null, reps=null;
+  const w=body.match(/(-?\d+(?:[.,]\d+)?)\s*(kg|lbs?)\b/i);
+  if(w){ kg=gNum(w[1]); if(/lb/i.test(w[2])&&kg!=null) kg=Math.round(kg*0.45359237*2)/2; }
+  const r=body.match(/[×x*]\s*(\d{1,3})\b/i)||body.match(/^\s*(\d{1,3})\s*(?:reps?|toistoa)\b/i);
+  if(r) reps=parseInt(r[1],10);
+  if(kg==null&&reps==null&&!/\d/.test(body)) return null;
+  return {warm,kg,reps};
+}
+function strongShareParse(text){
+  const raw=String(text||"").split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim());
+  const nSet=raw.filter(l=>strongSetParse(l)).length;
+  if(nSet<2&&!(nSet>=1&&/@strongapp|strong\.app/i.test(text))) return null;
+  const isSet=l=>!!strongSetParse(l);
+  const tt=S.settings.trainingTypes||[];
+  const days=[], skipped=[]; let cur=null;
+  const newDay=name=>{ const nm=name.replace(/:$/,"").trim()||"Strong"; const typ=tt.find(t=>t.toLowerCase()===nm.toLowerCase())||"";
+    cur={id:gid(),raw:nm,name:nm.charAt(0).toUpperCase()+nm.slice(1),trainingType:typ,exercises:[],rest:false,include:true}; days.push(cur); };
+  for(let i=0;i<raw.length;i++){
+    const l=raw[i]; if(!l) continue;
+    if(isSet(l)) continue;                                        // orvot sarjarivit (käsitelty liikkeen kohdalla)
+    const next=raw.slice(i+1).find(x=>x)||"";
+    if(STRONG_DATE_RE.test(next)&&!isSet(next)&&!STRONG_DATE_RE.test(l)){ newDay(l); continue; }   // otsikko + päiväys
+    if(STRONG_DATE_RE.test(l)&&!isSet(next)){ skipped.push(l); continue; }
+    // liike = rivi, jota seuraa vähintään yksi sarjarivi
+    const sets=[]; let j=i+1;
+    while(j<raw.length&&(raw[j]===""||isSet(raw[j]))){ if(raw[j]) sets.push(strongSetParse(raw[j])); j++; }
+    if(!sets.length){ if(!days.length&&!/^@|^#/.test(l)) newDay(l); else skipped.push(l); continue; }   // ensimmäinen rivi ilman päiväystä = otsikko
+    if(!cur) newDay(days.length?"Strong":"Strong-treeni");
+    const work=sets.filter(s=>!s.warm), use=work.length?work:sets;
+    const reps=use.map(s=>s.reps).filter(v=>v!=null), kgs=use.map(s=>s.kg).filter(v=>v!=null&&v>0);
+    const rMin=reps.length?Math.min(...reps):null, rMax=reps.length?Math.max(...reps):null;
+    const name=l.replace(/^[•\-–·*]\s*/,"");
+    cur.exercises.push({...newEx({name,sets:use.length,repsMin:rMin,repsMax:rMax!==rMin?rMax:null,max:false,weight:kgs.length?Math.max(...kgs):null,note:""}),unparsed:false});
+    i=j-1;
+  }
+  const out=days.filter(d=>d.exercises.length);
+  days.filter(d=>!d.exercises.length).forEach(d=>skipped.push(d.raw));
+  if(!out.length) return null;
+  out.skipped=skipped; out.source="strong";
+  return out;
+}
 function parseProgramText(text){
+  const sp=strongShareParse(text); if(sp) return sp;
   const lines=String(text||"").split(/\r?\n/).map(cleanLine);
   const days=[], skipped=[]; let cur=null, superset=null;
   const isEx=l=>{ const p=parseExLine(l); return !!(p&&p.parsed); };
@@ -10449,10 +10507,11 @@ function gymImportHTML(){
       const inc=pv.filter(d=>d.include);
       const unp=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.unparsed).length,0);
       h+=`<div class="tr-sec">Esikatselu · ${inc.length} treenipäivää</div>`;
+      if(pv.source==="strong") h+=`<div class="g-hint">Tunnistettu Strongin jakoteksti. Tavoitteeksi tuli työsarjojen määrä, toistoväli ja raskain paino. Lämmittelysarjat ohitettiin. Tavoitteita voi muokata tallennuksen jälkeen.</div>`;
       if(unp) h+=`<div class="g-hint warn">${ico("alert",15)} ${unp} riviltä ei löytynyt sarjoja ja toistoja. Ne tallentuvat pelkkinä nimiä, ja tavoitteen voi lisätä myöhemmin.</div>`;
       pv.forEach((d,di)=>{ h+=`<div class="ed-day${d.include?"":" off"}"><label class="ed-dn"><span style="display:flex;gap:10px;align-items:center;min-width:0"><input type="checkbox" class="g-inc" ${d.include?"checked":""} onchange="GU.importPreview[${di}].include=this.checked;renderGym()"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text);min-width:0;overflow-wrap:anywhere">${esc(d.name)}</span></span><span>${d.exercises.length} liikettä</span></label>
         ${d.include?d.exercises.map((e,ei)=>`<div class="ed-l static${e.unparsed?" unp":""}${e.match?" has-m":""}"><span class="x">${esc(e.name)}${e.note?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>${gMatchRow(e,di,ei)}`).join(""):""}</div>`; });
-      if(pv.skipped&&pv.skipped.length) h+=`<details class="g-src" style="margin:0 0 12px"><summary>Ohitetut rivit (${pv.skipped.length}): ohjetekstiä, ei tuoda</summary><pre data-raw>${esc(pv.skipped.join("\n"))}</pre></details>`;
+      if(pv.skipped&&pv.skipped.length) h+=`<details class="g-src" style="margin:0 0 12px"><summary>Ohitetut rivit (${pv.skipped.length}): ${pv.source==="strong"?"päiväys, linkit ja muut rivit ilman sarjoja":"ohjetekstiä"}, ei tuoda</summary><pre data-raw>${esc(pv.skipped.join("\n"))}</pre></details>`;
       const nm=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.match&&!e.match.auto).length,0);
       if(nm) h=h.replace(`<div class="tr-sec">Esikatselu`,`<div class="g-hint warn">${ico("alert",15)} ${nm} liikkeen nimi muistuttaa aiempaa liikettä. Tarkista alta, onko kyse samasta liikkeestä. Silloin liikkeen historia jatkuu.</div><div class="tr-sec">Esikatselu`);
       const cur=G.programs.find(x=>x.id===G.curProgramId&&!x.archived);
@@ -10477,8 +10536,9 @@ function gImportSave(append){
   else{ const sk=(GU.importPreview&&GU.importPreview.skipped)||[];
     const first=String(GU.importText||"").split(/\r?\n/).map(cleanLine).filter(Boolean).slice(0,2).find(x=>sk.includes(x)&&x.split(" ").length<=6);
     // v2.18.85: oletusnimi "Oma ohjelma", tai numeroitu jos sellainen on jo
-    let nm=first||"Oma ohjelma"; const used=G.programs.map(x=>x.name);
-    if(!first&&used.includes(nm)){ let n=2; while(used.includes(`${nm} ${n}`)) n++; nm=`${nm} ${n}`; }
+    const strong=GU.importPreview&&GU.importPreview.source==="strong";
+    let nm=strong?(days.length===1?days[0].name:"Strong-ohjelma"):(first||"Oma ohjelma"); const used=G.programs.map(x=>x.name);
+    if((strong||!first)&&used.includes(nm)){ let n=2; while(used.includes(`${nm} ${n}`)) n++; nm=`${nm} ${n}`; }
     p=newProgram(nm); p.days=days; p.sourceText=GU.importText; touchProg(p); }
   GU.importPreview=null; GU.importText=null;
   // v2.18.85: tuonnin jälkeen päädytään suoraan Treeni-kotiin, ei muokkaustilaan. Muokkaus on kotinäkymän Muokkaa-napin takana.
