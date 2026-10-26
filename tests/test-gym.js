@@ -79,6 +79,8 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   // keskeneräinen säilyy uudelleenlatauksessa
   await p.reload(); await p.waitForTimeout(600);
   ok(await p.evaluate(sid=>G.activeId===sid&&gSession(sid).exercises[0].sets.filter(r=>r.done).length===2,sid),'uudelleenlatauksen jälkeen treeni ja sarjat tallessa');
+  ok(await p.evaluate(()=>S.tab==='treeni'&&GU.mode==='session'),'v2.18.114: kesken oleva treeni avautuu suoraan käynnistyksessä');
+  await p.evaluate(()=>setTab('log')); await p.waitForTimeout(200);
   ok(await p.locator('#gym-card').isVisible()&&(await p.locator('#gym-card').innerText()).includes('Kesken'),'Kirjaa-kortti: kesken + Jatka');
   await p.locator('#gym-card').getByRole('button',{name:'Jatka'}).click();
   ok(await p.evaluate(()=>S.tab==='treeni'&&GU.mode==='session'),'Jatka palaa treeniin');

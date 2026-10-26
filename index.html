@@ -11,7 +11,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=3">
-<title>Järkäle tracking</title>
+<title>Järkäle</title>
 <script>
 // v2.18.12: iPhonen kotivalikkosovelluksessa (standalone) sivun korkeus raportoidaan ilman tilarivia ja kotipalkkia,
 // jolloin alapalkki jää irti alareunasta. Käytetään näytön todellista korkeutta. Vain iOS standalone.
@@ -2214,7 +2214,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.113</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.114</span>
       </div>
     </div>
   </div>
@@ -2248,6 +2248,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.114", d:"lokakuu 2026", items:[
+    "Treeni ensin: kesken oleva treeni avautuu suoraan, kun sovellus käynnistetään, ja pelkkiä treenejä kirjaava aloittaa Treeni-välilehdeltä.",
+    "Kirjaa-näkymä näyttää suunniteltuna treenipäivänä seuraavan treenin kierrossa ja Aloita-napin. Treenipäivät valitaan kohdassa Asetukset → Tavoitteet. Lepopäivinä ja ilman viikkorytmiä riviä ei näytetä.",
+    "Sovelluksen kuvaus ja jaetun treenin alatunniste puhuvat nyt treenipäiväkirjasta."
+  ]},
   {v:"2.18.113", d:"lokakuu 2026", items:[
     "Ohjelman tuonti tunnistaa Strongin Jaa treeni -tekstin: liikkeet, sarjamäärä, toistoväli ja raskain paino tulevat tavoitteeksi. Lämmittelysarjat ohitetaan, paunat muunnetaan kiloiksi, ja liikkeen nimi säilyy kokonaan, esimerkiksi Triceps Pushdown (Cable - Straight Bar). @strongapp, linkki ja päiväys eivät enää tule liikkeiksi."
   ]},
@@ -7136,6 +7141,8 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.10.2026", items:[
+    "Kesken oleva treeni avautuu suoraan, kun avaat sovelluksen. Jos kirjaat pelkkiä treenejä, sovellus aukeaa Treeni-välilehdelle.",
+    "Kirjaa-näkymässä näkyy suunniteltuna treenipäivänä seuraava treeni ja Aloita-nappi. Treenipäivät valitaan kohdassa Asetukset → Tavoitteet.",
     "Strongista voi tuoda treenin ohjelmaksi: jaa treeni Strongissa tekstinä ja liitä se kohdassa Treeni → Uusi ohjelma → Tuo tekstistä. Liikkeet, sarjat, toistot ja painot tulevat tavoitteeksi."
   ]},
   {d:"25.10.2026", items:[
@@ -9913,6 +9920,12 @@ function renderGymSettings(){
 }
 
 // ── Kirjaa-näkymän tiivis kortti (vain kun ominaisuus on päällä)
+// Seuraava treenipäivä kierrossa: pisimpään tekemättä ollut (kertaakaan tekemätön ensin, ohjelman järjestyksessä).
+function gNextDay(p){
+  const cand=(p&&p.days||[]).filter(d=>d.exercises.length).map(d=>({d,l:lastDoneOfDay(d.id)}));
+  if(!cand.length) return null;
+  return cand.slice().sort((a,b)=>(a.l?a.l.startedAt:0)-(b.l?b.l.startedAt:0))[0].d;
+}
 function renderLogGymCard(){
   const el=document.getElementById("gym-card"); if(!el) return;
   if(!gymOn()){ el.innerHTML=""; el.style.display="none"; return; }
@@ -9925,7 +9938,13 @@ function renderLogGymCard(){
   } else if(doneToday.length){
     h=doneToday.map(s=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
   }
-  // v2.18.17: ei Aloita-tilaa (näkyi myös lepopäivinä, käytännössä kehote). Treeni aloitetaan Treeni-välilehdeltä.
+  // v2.18.17: ei Aloita-tilaa lepopäivinä (oli käytännössä kehote). v2.18.114: suunniteltuna treenipäivänä (Tavoitteet → treenipäivät)
+  // näytetään seuraava treeni kierrossa. Ilman viikkorytmiä ei mitään, kuten ennenkin.
+  else if(S.date===today()&&!act){
+    const plan=plannedTrainingDays(S.date), p=curProgram();
+    if(plan&&plan.includes(new Date(S.date+"T00:00:00").getDay())&&p){ const d=gNextDay(p);
+      if(d) h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">${esc(d.name)}</div><div class="s">Seuraavana kierrossa · ${d.exercises.length}\u00a0${d.exercises.length===1?"liike":"liikettä"}</div></div><button class="tr-go" onclick="startSession('${p.id}','${d.id}')">Aloita</button></div>`; }
+  }
   el.innerHTML=h; el.style.display=h?"":"none";
 }
 function openSession(id){ GU.editPast=null; GU.justFinished=null; GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
@@ -10158,7 +10177,7 @@ const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.96: ennätys näkyy liikkeen omalla rivillä (ei erillistä ennätyslistaa): ennätyssarja, aiempi paras ja arvioitu 1RM
 // v2.18.106: ennätysrivi yhteenvetoon ja jakoon: sarja vain, jos liikkeessä oli eri painoja/toistoja (muuten se on jo sarjarivillä), ja vertailu
 // v2.18.107: jaon apufunktiot
-const SHARE_FOOT="Järkäle · treeni- ja hyvinvointiseuranta";
+const SHARE_FOOT="Järkäle · treenipäiväkirja";
 const PR_EXPLAIN="★ Ennätys: näin raskasta painoa ei ole ennen nostettu näin monta kertaa.";
 // Tekstin väri korostusvärin päälle: tumma vaalealle, valkoinen tummalle (kontrasti ≥ 4,5 kaikissa teemoissa)
 function accentInk(){
@@ -11145,6 +11164,8 @@ try{ gymHealLinks(); }catch(_){}
 navInit();
 updateThemeBtn();
 if(localStorage.getItem("seuranta-setup-done")==="1"&&isBodyOnly()) setTab("historia"); // v2.11: vain mittoja seuraava aloittaa Mitoista
+// v2.18.114: treeni ensin. Kesken oleva treeni avautuu suoraan, ja pelkkää treeniä kirjaava aloittaa Treeni-välilehdeltä.
+try{ if(localStorage.getItem("seuranta-setup-done")==="1"&&gymOn()){ const a=activeSession(); if(a) openSession(a.id); else if(isGymOnly()) setTab("treeni"); } }catch(_){}
 
 // Päivämääräpilleri — näyttää mihin päivään siirryttiin, kun date-nav on scrollattu näkyvistä.
 function showDatePill(ds, note){

@@ -68,7 +68,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(!/Polvikipu|Kevyt päivä/.test(sh.off),'huomiot eivät lähde jakoon oletuksena');
   ok(/Polvikipu/.test(sh.on)&&/Kevyt päivä/.test(sh.on),'valinnalla huomiot mukaan');
   ok(/^Jalat · .+\nOhjelma X\n/.test(sh.off)&&/Paras: RDL 160\u00a0×\u00a04 · raskain tähän asti/.test(sh.off),'ohjelman nimi ja paras ennätys jakotekstissä');
-  ok(/näin raskasta painoa ei ole ennen nostettu näin monta kertaa/.test(sh.off)&&/Järkäle · treeni- ja hyvinvointiseuranta$/.test(sh.off),'selitys ja alatunniste');
+  ok(/näin raskasta painoa ei ole ennen nostettu näin monta kertaa/.test(sh.off)&&/Järkäle · treenipäiväkirja$/.test(sh.off),'selitys ja alatunniste');
   ok(/aiemmin 150\u00a0×\u00a012/.test(sh.off),'vertailuluku ei katkea (sitovat välit)');
   await p.evaluate(sid=>{ setTab('treeni'); openSession(sid); },sh.sid); await p.waitForTimeout(200);
   ok(/1\s*ennätys/.test(await p.locator('.g-sum-hero').innerText()),'yhteenvedossa ennätyskaista');

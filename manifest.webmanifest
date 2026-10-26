@@ -1,7 +1,7 @@
 {
   "name": "Järkäle Tracking",
   "short_name": "Järkäle",
-  "description": "Henkilökohtainen hyvinvointi- ja treeniseurantasovellus",
+  "description": "Treenipäiväkirja: oma ohjelma, sarjat ja kilot salilla, halutessa myös uni, paino ja palautuminen",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
