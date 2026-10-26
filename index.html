@@ -1802,6 +1802,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="lasi"] .ws-day .ws-dot{background:var(--l-bub)!important;border:1px solid var(--l-bub-edge)!important;box-shadow:var(--l-bub-sh)!important;}
 [data-palette="lasi"] .ws-day.logged .ws-dot{background:var(--l-on)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;color:var(--on-accent)!important;}
 [data-palette="lasi"] .ws-day.future .ws-dot{background:transparent!important;border:1px dashed var(--l-bub-edge)!important;box-shadow:none!important;}
+/* v2.18.112: vaaleassa valkoinen katkoviiva katosi taustaan → tumma läpikuultava katkoviiva */
+[data-palette="kaurapuuro"][data-theme="light"] #week-status .ws-day.future .ws-dot{border-color:rgba(60,45,25,.3)!important;}
+[data-palette="lasi"][data-theme="light"] .ws-day.future .ws-dot{border:1.5px dashed rgba(40,50,90,.32)!important;}
 [data-palette="lasi"] .ws-day.sel .ws-dot{box-shadow:var(--l-bub-sh),0 0 0 2px var(--orange)!important;}
 [data-palette="lasi"] .ws-day.sel.logged .ws-dot{box-shadow:var(--l-on-sh),0 0 0 3px rgba(255,255,255,.0),0 0 0 2px var(--orange)!important;outline:2px solid var(--orange);outline-offset:3px;}
 /* kelluva lasinen alapalkki, sisältö rullaa sen alta */
@@ -2211,7 +2214,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.111</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.112</span>
       </div>
     </div>
   </div>
@@ -2245,6 +2248,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.112", d:"lokakuu 2026", items:[
+    "Asennetun sovelluksen alapalkki: ilman sovelluksen perusväriä Chrome teki palkista valkoisen. Perusväri on nyt lähes musta, joten palkki on tumma kaikissa teemoissa. Muutos näkyy, kun puhelin päivittää asennetun sovelluksen.",
+    "Lasi- ja Kaurapuuro-teemat vaaleana: viikon tulevien päivien pallot näkyvät taas (katkoviiva katosi taustaan)."
+  ]},
   {v:"2.18.111", d:"lokakuu 2026", items:[
     "Pilotin Mitä uutta näyttää vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä. Oma versio näyttää edelleen kaikki versiot."
   ]},
@@ -7029,7 +7036,7 @@ function saveApiKey(val){
 let API_KEY_EDITING = false;
 
 // v2.18.109: Androidin alapalkki. Chrome värittää asennetun sovelluksen alapalkin manifestin theme_colorilla (WebAppNavigationBarThemeColor),
-// joten manifestista poistettiin theme_color: palkki seuraa puhelimen tilaa. Teeman mukainen palkki vaatii, että sivu piirretään palkin alle
+// v2.18.112: ilman theme_coloria palkki oli valkoinen (ei seurannut puhelimen tilaa) → theme_color #111312 (tumma kehys). Teeman mukainen palkki vaatii, että sivu piirretään palkin alle
 // (viewport-fit=cover, edge-to-edge). Tämä tieto kertoo, tapahtuuko se tällä laitteella.
 function renderEdgeDiag(){
   const el=document.getElementById("edge-diag"); if(!el) return;
@@ -7127,7 +7134,7 @@ function renderGenderSection(){
 const PILOT_CHANGELOG=[
   {d:"25.10.2026", items:[
     "Päivän tila kertoo, kun uni, palautuminen tai vire on ollut vähintään kolme päivää peräkkäin selvästi tavallista tasoasi alempana tai ylempänä. Trendien havainnot vertaavat viime viikkoa omaan tasoosi.",
-    "Androidilla asennetun sovelluksen alareunan palkki ei ole enää keltainen. Muutos näkyy, kun puhelin päivittää sovelluksen, yleensä muutaman päivän kuluessa."
+    "Androidilla asennetun sovelluksen alareunan palkki on tumma kaikissa teemoissa (ei enää keltainen tai valkoinen). Muutos näkyy, kun puhelin päivittää sovelluksen, yleensä muutaman päivän kuluessa."
   ]},
   {d:"24.10.2026", items:[
     "Treenin yhteenveto on selkeämpi: sarjat näkyvät liikkeen nimen alla, ennätykset omalla rivillään, ja treenin paras ennätys nostetaan yläosaan.",
