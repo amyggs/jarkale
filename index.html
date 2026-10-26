@@ -2214,7 +2214,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.114</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.115</span>
       </div>
     </div>
   </div>
@@ -2248,6 +2248,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.115", d:"lokakuu 2026", items:[
+    "Treenihistorian voi tuoda myös Hevystä: Treeni → Asetukset → Tuo treenihistoria ja Hevyn vientitiedosto (Settings → Export & Import Data → Export Workouts). Lämmittelysarjat sekä aika- ja matkasarjat ohitetaan, paunat muunnetaan kiloiksi, ja liikkeet voi yhdistää Järkäleen liikkeisiin ennen tuontia."
+  ]},
   {v:"2.18.114", d:"lokakuu 2026", items:[
     "Treeni ensin: kesken oleva treeni avautuu suoraan, kun sovellus käynnistetään, ja pelkkiä treenejä kirjaava aloittaa Treeni-välilehdeltä.",
     "Kirjaa-näkymä näyttää suunniteltuna treenipäivänä seuraavan treenin kierrossa ja Aloita-napin. Treenipäivät valitaan kohdassa Asetukset → Tavoitteet. Lepopäivinä ja ilman viikkorytmiä riviä ei näytetä.",
@@ -7141,6 +7144,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.10.2026", items:[
+    "Vanhan treenihistorian voi tuoda myös Hevystä: Treeni → Asetukset → Tuo treenihistoria.",
     "Kesken oleva treeni avautuu suoraan, kun avaat sovelluksen. Jos kirjaat pelkkiä treenejä, sovellus aukeaa Treeni-välilehdelle.",
     "Kirjaa-näkymässä näkyy suunniteltuna treenipäivänä seuraava treeni ja Aloita-nappi. Treenipäivät valitaan kohdassa Asetukset → Tavoitteet.",
     "Strongista voi tuoda treenin ohjelmaksi: jaa treeni Strongissa tekstinä ja liitä se kohdassa Treeni → Uusi ohjelma → Tuo tekstistä. Liikkeet, sarjat, toistot ja painot tulevat tavoitteeksi."
@@ -9832,6 +9836,51 @@ function strongParse(text){
   if(!workouts.length) return {error:"Tiedostosta ei löytynyt yhtään tehtyä sarjaa."};
   return {workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,lbs,unitKnown};
 }
+// ── v2.18.115: Hevyn vientitiedosto (CSV, pilkku, lainausmerkit). Otsikot: title, start_time ("26 Oct 2026, 18:45"), end_time,
+// description, exercise_title, superset_id, exercise_notes, set_index, set_type (normal/warmup/failure/dropset), weight_kg tai
+// weight_lbs, reps, distance_km, duration_seconds, rpe. Lämmittely ja aika-/matkasarjat ohitetaan kuten Strongissa.
+const HIST_APP={strong:{name:"Strong",ela:"Strongista",gen:"Strongin"},hevy:{name:"Hevy",ela:"Hevystä",gen:"Hevyn"}};
+function hevyTime(v){
+  const t=String(v||"").trim(); const M={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  let m=/^(\d{1,2})\s+([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{4}),?\s+(\d{1,2}):(\d{2})/.exec(t);
+  if(m&&M[m[2].toLowerCase()]!=null) return new Date(+m[3],M[m[2].toLowerCase()],+m[1],+m[4],+m[5]).getTime();
+  m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/.exec(t);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]).getTime();
+  return null;
+}
+function hevyParse(text){
+  const rows=csvParse(text); if(rows.length<2) return {error:"Tiedostossa ei ole rivejä."};
+  const H=rows[0].map(h=>h.trim().toLowerCase()), col=n=>H.indexOf(n);
+  const C={t:col("title"),st:col("start_time"),et:col("end_time"),desc:col("description"),ex:col("exercise_title"),notes:col("exercise_notes"),type:col("set_type"),kg:col("weight_kg"),lb:col("weight_lbs"),reps:col("reps"),rpe:col("rpe")};
+  if(C.st<0||C.ex<0||C.reps<0) return {error:"Tiedosto ei näytä Hevyn viennille (sarakkeet start_time, exercise_title ja reps puuttuvat)."};
+  const lbs=C.kg<0&&C.lb>=0;
+  const num=v=>{ const n=parseFloat(String(v||"").replace(",",".")); return Number.isFinite(n)?n:null; };
+  const W=new Map(), exCount=new Map(); let warm=0, timed=0, sets=0, rpeN=0;
+  rows.slice(1).forEach(r=>{
+    const stRaw=(r[C.st]||"").trim(), st=hevyTime(stRaw); if(st==null) return;
+    const title=(C.t>=0?(r[C.t]||""):"").trim(), id=stRaw+"|"+title;
+    if(!W.has(id)){ const d=new Date(st), et=C.et>=0?hevyTime(r[C.et]):null;
+      W.set(id,{ext:"hevy:"+id,date:iso(d),start:st,dur:et&&et>st?Math.round((et-st)/1000):null,name:title||"Treeni",notes:C.desc>=0?(r[C.desc]||"").trim():"",ex:[]}); }
+    const w=W.get(id); const exName=(r[C.ex]||"").trim().replace(/\s+/g," "); if(!exName) return;
+    let ex=w.ex.find(e=>e.name===exName); if(!ex){ ex={name:exName,sets:[],notes:[]}; w.ex.push(ex); }
+    const note=C.notes>=0?(r[C.notes]||"").trim():""; if(note&&!ex.notes.includes(note)) ex.notes.push(note);
+    if(/warm/i.test(C.type>=0?r[C.type]||"":"")){ warm++; return; }
+    const reps=num(r[C.reps]); if(!reps||reps<=0){ timed++; return; }
+    let kg=lbs?num(r[C.lb]):(C.kg>=0?num(r[C.kg]):null); if(kg!=null&&lbs) kg=Math.round(kg*0.45359237*100)/100; if(kg===0) kg=null;
+    let rpe=C.rpe>=0?num(r[C.rpe]):null; if(rpe!=null){ rpe=Math.min(10,Math.max(6,Math.round(rpe*2)/2)); rpeN++; }
+    ex.sets.push(rpe!=null?{kg,reps,done:true,rpe}:{kg,reps,done:true}); sets++;
+  });
+  const workouts=[...W.values()].map(w=>({...w,ex:w.ex.filter(e=>e.sets.length)})).filter(w=>w.ex.length).sort((a,b)=>a.start-b.start);
+  workouts.forEach(w=>w.ex.forEach(e=>exCount.set(e.name,(exCount.get(e.name)||0)+1)));
+  if(!workouts.length) return {error:"Tiedostosta ei löytynyt yhtään tehtyä sarjaa."};
+  return {app:"hevy",workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,lbs,unitKnown:C.kg>=0||C.lb>=0};
+}
+// Kumpi sovellus: Hevyn otsikoissa exercise_title ja set_type, Strongin "Exercise Name" ja "Set Order"
+function histParse(text){
+  const first=String(text||"").split(/\r?\n/,1)[0].toLowerCase();
+  if(/exercise_title/.test(first)&&/set_type|start_time/.test(first)) return hevyParse(text);
+  const r=strongParse(text); if(!r.error) r.app="strong"; return r;
+}
 // Järkäleen tunnetut liikkeet (ohjelmat + tehdyt treenit, ei tuotuja), yhdistämisvalintaa varten
 function knownExercises(){
   const m=new Map();
@@ -9842,7 +9891,7 @@ function knownExercises(){
 function gHistFile(input){
   const f=input.files&&input.files[0]; if(!f) return;
   const rd=new FileReader();
-  rd.onload=()=>{ const r=strongParse(rd.result); input.value="";
+  rd.onload=()=>{ const r=histParse(rd.result); input.value="";
     if(r.error){ jAlert(r.error); return; }
     const known=knownExercises(), map={};
     r.exNames.forEach(x=>{ const k=known.find(e=>e.key===exKey(x.name)); map[x.name]=k?k.key:""; });
@@ -9856,13 +9905,14 @@ function gHistImportHTML(){
   const fresh=r.workouts.filter(w=>!have.has(w.ext)), dup=r.workouts.length-fresh.length;
   const known=knownExercises();
   const fd=ds=>{ const [y,m,d]=ds.split("-"); return `${+d}.${+m}.${y}`; };
-  let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0"><div class="tr-h1">Tuo historia Strongista</div><div class="tr-h2">${esc(H.file)}</div></div></div></div>`;
+  const A=HIST_APP[r.app]||HIST_APP.strong;
+  let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0"><div class="tr-h1">Tuo historia ${A.ela}</div><div class="tr-h2">${esc(H.file)}</div></div></div></div>`;
   h+=`<div class="card hi-sum"><div class="hi-n"><b>${r.workouts.length}</b> treeniä · ${fd(r.workouts[0].date)} – ${fd(r.workouts[r.workouts.length-1].date)}</div>
     <div class="hi-s">${r.sets} sarjaa · ${r.exNames.length} liikettä${r.rpeN?` · RPE ${r.rpeN} sarjassa`:""}</div>
     ${dup?`<div class="hi-w">${dup} treeniä on jo tuotu aiemmin, ne ohitetaan.</div>`:""}
     ${r.warm?`<div class="hi-s">Lämmittelysarjoja (${r.warm}) ei tuoda.</div>`:""}${r.timed?`<div class="hi-s">Aika- ja matkasarjoja (${r.timed}) ei tuoda.</div>`:""}
     ${r.lbs?`<div class="hi-s">Painot muunnetaan paunoista kiloiksi.</div>`:(!r.unitKnown?`<div class="hi-w">Tiedostossa ei kerrota yksikköä: painot tulkitaan kiloiksi.</div>`:"")}</div>`;
-  h+=`<div class="tr-sec">Yhdistä liikkeet</div><div class="hi-help">Valitse Järkäleen liike, jos sama liike on sinulla jo eri nimellä. Silloin Strongin historia jatkaa sen liikkeen käyrää ja ennätyksiä. Muuten liike tuodaan Strongin nimellä.</div>`;
+  h+=`<div class="tr-sec">Yhdistä liikkeet</div><div class="hi-help">Valitse Järkäleen liike, jos sama liike on sinulla jo eri nimellä. Silloin ${A.gen} historia jatkaa sen liikkeen käyrää ja ennätyksiä. Muuten liike tuodaan ${A.gen} nimellä.</div>`;
   h+=`<div class="card hi-map">`+r.exNames.map((x,i)=>`<label class="hi-row"><span class="hi-nm">${esc(x.name)}<small>${x.n} ${x.n===1?"treeni":"treeniä"}</small></span>
     <select onchange="GU.hist.map[GU.hist.r.exNames[${i}].name]=this.value">
       <option value=""${H.map[x.name]?"":" selected"}>Uusi liike: ${esc(x.name)}</option>
@@ -9876,17 +9926,17 @@ function gHistDo(){
   const H=GU.hist; if(!H) return;
   const have=new Set(G.sessions.map(s=>s.importId).filter(Boolean));
   const known=new Map(knownExercises().map(k=>[k.key,k.name]));
-  const batch="imp-"+gid(), now=Date.now(); let n=0;
+  const batch="imp-"+gid(), now=Date.now(); let n=0; const app=H.r.app||"strong", A=HIST_APP[app]||HIST_APP.strong;
   H.r.workouts.filter(w=>!have.has(w.ext)).forEach(w=>{
     const dur=(w.dur&&w.dur>0?w.dur:3600)*1000;
-    G.sessions.push({id:gid(),source:"strong",importId:w.ext,importBatch:batch,programId:null,dayId:null,date:w.date,startedAt:w.start,endedAt:w.start+dur,
-      programName:"Strong",dayName:w.name,trainingType:"",updatedAt:now,
+    G.sessions.push({id:gid(),source:app,importId:w.ext,importBatch:batch,programId:null,dayId:null,date:w.date,startedAt:w.start,endedAt:w.start+dur,
+      programName:A.name,dayName:w.name,trainingType:"",updatedAt:now,
       exercises:w.ex.map(e=>{ const tk=H.map[e.name]; const key=tk||exKey(e.name), name=tk?(known.get(tk)||e.name):e.name;
         return {id:gid(),key,name,srcName:e.name,goal:{},note:"",skipped:false,added:false,feel:null,userNote:e.notes.join(" · "),sets:e.sets.map(x=>({...x}))}; })});
     n++;
   });
   gymSave(); GU.hist=null; GU.mode="home"; renderGym(); gTop();
-  showSavedToast(`Tuotu ${n} treeniä Strongista`);
+  showSavedToast(`Tuotu ${n} treeniä ${A.ela}`);
 }
 function importedBatches(){ const m=new Map(); G.sessions.forEach(s=>{ if(s.importBatch) m.set(s.importBatch,(m.get(s.importBatch)||0)+1); }); return m; }
 async function gHistUndo(){
@@ -9898,7 +9948,7 @@ async function gHistUndo(){
 function gHistSectionHTML(){
   const n=G.sessions.filter(s=>s.importBatch).length;
   return `<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Tuo treenihistoria</span>
-    <span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Strongin vientitiedosto (CSV): Strongissa Settings → Export Data. Liikkeet voi yhdistää Järkäleen liikkeisiin ennen tuontia.</span>
+    <span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Strongin tai Hevyn vientitiedosto (CSV): Strongissa Settings → Export Data, Hevyssä Settings → Export &amp; Import Data → Export Workouts. Liikkeet voi yhdistää Järkäleen liikkeisiin ennen tuontia.</span>
     <label class="tr-go ghost hi-file" style="display:flex;align-items:center;justify-content:center;width:100%;height:44px;cursor:pointer">Valitse tiedosto<input type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gHistFile(this)"></label>
     ${n?`<button class="hi-undo" onclick="gHistUndo()">Poista tuotu historia (${n} treeniä)</button>`:""}</div>`;
 }
@@ -9997,7 +10047,7 @@ function gymHomeHTML(){
     h+=`<div class="g-empty"><div class="n">Tee oma ohjelma</div><div class="s">Kirjoita liikkeet riveinä, esim. <b>Penkkipunnerrus 3x8-10 80</b>. Voit myös liittää valmiin ohjelman tekstinä.</div>
       <button class="tr-go" style="width:100%;height:46px;margin-top:14px" onclick="const c=G.curProgramId;const p=newProgram();gOpenEdit(p.id,true);GU.editSnap.cur=c">+ Uusi ohjelma</button>
       <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä ohjelma tekstinä</button>
-      <label class="hi-emptylink">Tuo vanha historia Strongista (CSV)<input type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gHistFile(this)"></label></div>`;
+      <label class="hi-emptylink">Tuo vanha historia Strongista tai Hevystä (CSV)<input type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gHistFile(this)"></label></div>`;
   } else {
     // v2.18.27 Seuraavana: päivä, joka on tehty pisimpään sitten; kertaakaan tekemätön on vanhin (ohjelman järjestyksessä).
     // Vain vihje: kaikki rivit aloittavat treenin. Ei merkkiä ennen ohjelman ensimmäistä tehtyä treeniä.

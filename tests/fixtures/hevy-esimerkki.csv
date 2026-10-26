@@ -1,0 +1,10 @@
+"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_kg","reps","distance_km","duration_seconds","rpe"
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Bench Press (Barbell)",,"Leveä ote",0,"warmup",40,10,,,
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Bench Press (Barbell)",,"Leveä ote",1,"normal",80,8,,,8
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Bench Press (Barbell)",,"Leveä ote",2,"failure",80,6,,,10
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Triceps Pushdown (Cable - Straight Bar)",0,"",0,"normal",25,12,,,
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Triceps Pushdown (Cable - Straight Bar)",0,"",1,"dropset",15,10,,,
+"Push","12 Oct 2026, 17:30","12 Oct 2026, 18:35","Hyvä päivä","Treadmill",,"",0,"normal",,,1.5,600,
+"Pull","14 Oct 2026, 07:05","14 Oct 2026, 08:00","","Lat Pulldown (Cable)",,"",0,"normal",60,10,,,7.5
+"Pull","14 Oct 2026, 07:05","14 Oct 2026, 08:00","","Lat Pulldown (Cable)",,"",1,"normal",65,8,,,
+"Pull","14 Oct 2026, 07:05","14 Oct 2026, 08:00","","Pull Up",,"",0,"normal",,8,,,

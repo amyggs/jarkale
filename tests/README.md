@@ -27,6 +27,7 @@ tests/run.sh test-gym.js
 | `test-swipereset.js` | Päivän vaihto pyyhkäisyllä: kesken vedon piiloutuva kortti (Kehon mittaus) ei jää sivuun siirretyksi, kun palataan tähän päivään |
 | `test-strongtext.js` | Strongin Jaa treeni -tekstin tuonti ohjelmaksi: lämmittely pois, paunat kiloiksi, " - " nimessä, @strongapp/linkki/päiväys ohitetaan, tavallinen tuonti ennallaan |
 | `test-trainfirst.js` | Treeni ensin: kesken oleva treeni avautuu käynnistyksessä, pelkkä treeni aloittaa Treeni-välilehdeltä, seuraava treeni Kirjaa-näkymässä vain suunniteltuna treenipäivänä |
+| `test-hevy.js` | Treenihistorian tuonti Hevyn CSV:stä: tunnistus, päiväysmuoto, lämmittely ja aikasarjat pois, failure/dropset mukaan, paunat, kaksoistuonnin esto, lähde hevy |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
