@@ -2216,7 +2216,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.118</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.119</span>
       </div>
     </div>
   </div>
@@ -2250,6 +2250,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.119", d:"lokakuu 2026", items:[
+    "Erikoistekniikoiden tunnistus kattaa myös muodot \"drop set\", \"rest pause\", \"rest-pause\", \"(DS)\", \"+ 2 DS\" ja \"DS × 2\". Myo-repsit ja sanallinen ohje jäävät liikkeen ohjeeksi.",
+    "Strongista ja Hevystä tuodut pudotussarjat tulevat DS-lisäriveinä, eivät työsarjoina, joten ne eivät kasvata sarjamäärää eivätkä vääristä vertailua."
+  ]},
   {v:"2.18.118", d:"lokakuu 2026", items:[
     "Kun tuot uuden ohjelman, sovellus kysyy, arkistoidaanko edellinen ohjelma. Treenihistoria säilyy, ja ohjelman voi palauttaa Treeni-välilehden lopusta.",
     "Arkistoi-nappi on nyt ohjelman muokkausnäkymän yläreunassa, ei sivun pohjalla."
@@ -7158,6 +7162,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.10.2026", items:[
+    "Pudotus- ja rest-pause-sarjat tunnistetaan useammasta kirjoitustavasta, ja Strongista tai Hevystä tuodut pudotussarjat tulevat DS-riveinä.",
     "Kun tuot uuden ohjelman, sovellus kysyy, arkistoidaanko edellinen. Arkistoi-nappi on myös ohjelman muokkausnäkymän yläreunassa.",
     "Rest-pause- ja pudotussarjat: ohjelman merkintä \"+ R/P + DS\" luo treeniin merkityt lisärivit, ja pudotussarjan paino ehdotetaan valmiiksi. Lisärivin voi lisätä myös liikkeen valikosta (⋯)."
   ]},
@@ -9095,9 +9100,12 @@ function parseExLine(text){
   const w=rest.match(/^\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?(?=\s|$|[,;)])/i);
   if(w){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
   // v2.18.117: "+ R/P + DS + R/P" → lisärivit viimeisen työsarjan perään (rest-pause, pudotussarja)
+  // v2.18.119: myös "drop set", "rest pause", "rest-pause", "(DS)", "+ 2 DS", "DS × 2". Myo-repsit ja proosa jäävät ohjeeksi.
   let extras=null;
-  const xm=rest.match(/^\s*((?:[+&]\s*(?:r\s*\/\s*p|rp|ds|drop(?:set)?|pudotus(?:sarja)?)\b\s*)+)/i);
-  if(xm){ extras=xm[1].split(/[+&]/).map(t=>t.trim()).filter(Boolean).map(t=>/^(r\s*\/\s*p|rp)$/i.test(t)?"rp":"ds"); rest=rest.slice(xm[0].length); }
+  const XT=/^\s*(?:[+&,]\s*)?\(?\s*(?:(\d)\s*[x×*]?\s*)?(r\s*\/\s*p|rp|rest[\s-]?pause|ds|drop[\s-]?(?:set|sarja)?|pudotus(?:sarja)?)\b(?:\s*[x×*]\s*(\d)\b)?\s*\)?/i;
+  for(let g=0;g<8;g++){ const xm=rest.match(XT); if(!xm) break;
+    const n=Math.min(6,+(xm[1]||xm[3]||1)), k=/^(r\s*\/\s*p|rp|rest)/i.test(xm[2])?"rp":"ds";
+    (extras=extras||[]).push(...Array(n).fill(k)); rest=rest.slice(xm[0].length); }
   let note=rest.replace(/^\s*(?:toistot|toistoa|reps|krt)\b/i,"").replace(/^[\s,;:)–—/-]+/,"").replace(/[\s(]+$/,"").trim();
   const grp=groups.length>1?groups.map(g=>({sets:g.sets,repsMin:g.isMax?null:g.min,repsMax:g.isMax?null:g.max,max:g.isMax})):null;
   // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje.
@@ -9145,13 +9153,14 @@ function strongSetParse(l){
   const m=l.match(STRONG_SET_RE); if(!m) return null;
   const body=m[5]||"";
   const warm=/^w$/i.test(m[2]||"")||/\(w|warm/i.test(m[4]||"")||/\bwarm[- ]?up\b|\[w\]/i.test(body);
+  const drop=/^d$/i.test(m[2]||"")||/\(d\)/i.test(m[4]||"")||/\bdrop/i.test(body);
   let kg=null, reps=null;
   const w=body.match(/(-?\d+(?:[.,]\d+)?)\s*(kg|lbs?)\b/i);
   if(w){ kg=gNum(w[1]); if(/lb/i.test(w[2])&&kg!=null) kg=Math.round(kg*0.45359237*2)/2; }
   const r=body.match(/[×x*]\s*(\d{1,3})\b/i)||body.match(/^\s*(\d{1,3})\s*(?:reps?|toistoa)\b/i);
   if(r) reps=parseInt(r[1],10);
   if(kg==null&&reps==null&&!/\d/.test(body)) return null;
-  return {warm,kg,reps};
+  return {warm,drop,kg,reps};
 }
 function strongShareParse(text){
   const raw=String(text||"").split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim());
@@ -9173,11 +9182,12 @@ function strongShareParse(text){
     while(j<raw.length&&(raw[j]===""||isSet(raw[j]))){ if(raw[j]) sets.push(strongSetParse(raw[j])); j++; }
     if(!sets.length){ if(!days.length&&!/^@|^#/.test(l)) newDay(l); else skipped.push(l); continue; }   // ensimmäinen rivi ilman päiväystä = otsikko
     if(!cur) newDay(days.length?"Strong":"Strong-treeni");
-    const work=sets.filter(s=>!s.warm), use=work.length?work:sets;
+    const work=sets.filter(s=>!s.warm&&!s.drop), use=work.length?work:sets.filter(s=>!s.drop).length?sets.filter(s=>!s.drop):sets;
+    const xds=work.length?sets.filter(s=>s.drop).map(()=>"ds"):[];
     const reps=use.map(s=>s.reps).filter(v=>v!=null), kgs=use.map(s=>s.kg).filter(v=>v!=null&&v>0);
     const rMin=reps.length?Math.min(...reps):null, rMax=reps.length?Math.max(...reps):null;
     const name=l.replace(/^[•\-–·*]\s*/,"");
-    cur.exercises.push({...newEx({name,sets:use.length,repsMin:rMin,repsMax:rMax!==rMin?rMax:null,max:false,weight:kgs.length?Math.max(...kgs):null,note:""}),unparsed:false});
+    cur.exercises.push({...newEx({name,sets:use.length,repsMin:rMin,repsMax:rMax!==rMin?rMax:null,max:false,weight:kgs.length?Math.max(...kgs):null,note:"",extras:xds.length?xds:null}),unparsed:false});
     i=j-1;
   }
   const out=days.filter(d=>d.exercises.length);
@@ -9866,7 +9876,7 @@ function strongParse(text){
   const kgH=C.kg>=0?H[C.kg]:"", lbs=/lb/.test(kgH), unitKnown=/\((kg|lbs?)\)/.test(kgH);
   const num=v=>{ const n=parseFloat(String(v||"").replace(",",".")); return Number.isFinite(n)?n:null; };
   const durSec=v=>{ const t=String(v||"").trim(); if(!t) return null; if(/^\d+(\.\d+)?$/.test(t)) return +t; const h=/(\d+)\s*h/.exec(t), m=/(\d+)\s*m(?!s)/.exec(t), sx=/(\d+)\s*s/.exec(t); const r=(h?+h[1]*3600:0)+(m?+m[1]*60:0)+(sx?+sx[1]:0); return r||null; };
-  const W=new Map(), exCount=new Map(); let warm=0, timed=0, sets=0, rpeN=0;
+  const W=new Map(), exCount=new Map(); let warm=0, timed=0, sets=0, rpeN=0, drops=0;
   rows.slice(1).forEach(r=>{
     const date=(r[C.date]||"").trim(); const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(date); if(!m) return;
     const id=(C.no>=0&&r[C.no]?r[C.no]:"")+"|"+date+"|"+(r[C.wn]||"");
@@ -9878,15 +9888,16 @@ function strongParse(text){
     if(note&&!ex.notes.includes(note)) ex.notes.push(note);
     if(/^rest/i.test(ord)||/^note$/i.test(ord)) return;
     if(/^w/i.test(ord)){ warm++; return; }
+    const kind=/^d/i.test(ord)?"ds":null;
     const reps=num(r[C.reps]); if(!reps||reps<=0){ timed++; return; }
     let kg=C.kg>=0?num(r[C.kg]):null; if(kg!=null&&lbs) kg=Math.round(kg*0.45359237*100)/100; if(kg===0) kg=null;
     let rpe=C.rpe>=0?num(r[C.rpe]):null; if(rpe!=null){ rpe=Math.min(10,Math.max(6,Math.round(rpe*2)/2)); rpeN++; }
-    ex.sets.push(rpe!=null?{kg,reps,done:true,rpe}:{kg,reps,done:true}); sets++;
+    const o=rpe!=null?{kg,reps,done:true,rpe}:{kg,reps,done:true}; if(kind){ o.kind=kind; drops++; } else sets++; ex.sets.push(o);
   });
   const workouts=[...W.values()].map(w=>({...w,ex:w.ex.filter(e=>e.sets.length)})).filter(w=>w.ex.length).sort((a,b)=>a.start-b.start);
   workouts.forEach(w=>w.ex.forEach(e=>exCount.set(e.name,(exCount.get(e.name)||0)+1)));
   if(!workouts.length) return {error:"Tiedostosta ei löytynyt yhtään tehtyä sarjaa."};
-  return {workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,lbs,unitKnown};
+  return {workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,drops,lbs,unitKnown};
 }
 // ── v2.18.115: Hevyn vientitiedosto (CSV, pilkku, lainausmerkit). Otsikot: title, start_time ("26 Oct 2026, 18:45"), end_time,
 // description, exercise_title, superset_id, exercise_notes, set_index, set_type (normal/warmup/failure/dropset), weight_kg tai
@@ -9907,7 +9918,7 @@ function hevyParse(text){
   if(C.st<0||C.ex<0||C.reps<0) return {error:"Tiedosto ei näytä Hevyn viennille (sarakkeet start_time, exercise_title ja reps puuttuvat)."};
   const lbs=C.kg<0&&C.lb>=0;
   const num=v=>{ const n=parseFloat(String(v||"").replace(",",".")); return Number.isFinite(n)?n:null; };
-  const W=new Map(), exCount=new Map(); let warm=0, timed=0, sets=0, rpeN=0;
+  const W=new Map(), exCount=new Map(); let warm=0, timed=0, sets=0, rpeN=0, drops=0;
   rows.slice(1).forEach(r=>{
     const stRaw=(r[C.st]||"").trim(), st=hevyTime(stRaw); if(st==null) return;
     const title=(C.t>=0?(r[C.t]||""):"").trim(), id=stRaw+"|"+title;
@@ -9916,16 +9927,17 @@ function hevyParse(text){
     const w=W.get(id); const exName=(r[C.ex]||"").trim().replace(/\s+/g," "); if(!exName) return;
     let ex=w.ex.find(e=>e.name===exName); if(!ex){ ex={name:exName,sets:[],notes:[]}; w.ex.push(ex); }
     const note=C.notes>=0?(r[C.notes]||"").trim():""; if(note&&!ex.notes.includes(note)) ex.notes.push(note);
-    if(/warm/i.test(C.type>=0?r[C.type]||"":"")){ warm++; return; }
+    const typ=C.type>=0?r[C.type]||"":""; if(/warm/i.test(typ)){ warm++; return; }
+    const kind=/drop/i.test(typ)?"ds":null;
     const reps=num(r[C.reps]); if(!reps||reps<=0){ timed++; return; }
     let kg=lbs?num(r[C.lb]):(C.kg>=0?num(r[C.kg]):null); if(kg!=null&&lbs) kg=Math.round(kg*0.45359237*100)/100; if(kg===0) kg=null;
     let rpe=C.rpe>=0?num(r[C.rpe]):null; if(rpe!=null){ rpe=Math.min(10,Math.max(6,Math.round(rpe*2)/2)); rpeN++; }
-    ex.sets.push(rpe!=null?{kg,reps,done:true,rpe}:{kg,reps,done:true}); sets++;
+    const o=rpe!=null?{kg,reps,done:true,rpe}:{kg,reps,done:true}; if(kind){ o.kind=kind; drops++; } else sets++; ex.sets.push(o);
   });
   const workouts=[...W.values()].map(w=>({...w,ex:w.ex.filter(e=>e.sets.length)})).filter(w=>w.ex.length).sort((a,b)=>a.start-b.start);
   workouts.forEach(w=>w.ex.forEach(e=>exCount.set(e.name,(exCount.get(e.name)||0)+1)));
   if(!workouts.length) return {error:"Tiedostosta ei löytynyt yhtään tehtyä sarjaa."};
-  return {app:"hevy",workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,lbs,unitKnown:C.kg>=0||C.lb>=0};
+  return {app:"hevy",workouts,exNames:[...exCount.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n})),warm,timed,sets,rpeN,drops,lbs,unitKnown:C.kg>=0||C.lb>=0};
 }
 // Kumpi sovellus: Hevyn otsikoissa exercise_title ja set_type, Strongin "Exercise Name" ja "Set Order"
 function histParse(text){
@@ -9962,7 +9974,7 @@ function gHistImportHTML(){
   h+=`<div class="card hi-sum"><div class="hi-n"><b>${r.workouts.length}</b> treeniä · ${fd(r.workouts[0].date)} – ${fd(r.workouts[r.workouts.length-1].date)}</div>
     <div class="hi-s">${r.sets} sarjaa · ${r.exNames.length} liikettä${r.rpeN?` · RPE ${r.rpeN} sarjassa`:""}</div>
     ${dup?`<div class="hi-w">${dup} treeniä on jo tuotu aiemmin, ne ohitetaan.</div>`:""}
-    ${r.warm?`<div class="hi-s">Lämmittelysarjoja (${r.warm}) ei tuoda.</div>`:""}${r.timed?`<div class="hi-s">Aika- ja matkasarjoja (${r.timed}) ei tuoda.</div>`:""}
+    ${r.drops?`<div class="hi-s">Pudotussarjat (${r.drops}) tuodaan lisäriveinä (DS): ne eivät kasvata sarjamäärää eivätkä ole ennätyksiä.</div>`:""}${r.warm?`<div class="hi-s">Lämmittelysarjoja (${r.warm}) ei tuoda.</div>`:""}${r.timed?`<div class="hi-s">Aika- ja matkasarjoja (${r.timed}) ei tuoda.</div>`:""}
     ${r.lbs?`<div class="hi-s">Painot muunnetaan paunoista kiloiksi.</div>`:(!r.unitKnown?`<div class="hi-w">Tiedostossa ei kerrota yksikköä: painot tulkitaan kiloiksi.</div>`:"")}</div>`;
   h+=`<div class="tr-sec">Yhdistä liikkeet</div><div class="hi-help">Valitse Järkäleen liike, jos sama liike on sinulla jo eri nimellä. Silloin ${A.gen} historia jatkaa sen liikkeen käyrää ja ennätyksiä. Muuten liike tuodaan ${A.gen} nimellä.</div>`;
   h+=`<div class="card hi-map">`+r.exNames.map((x,i)=>`<label class="hi-row"><span class="hi-nm">${esc(x.name)}<small>${x.n} ${x.n===1?"treeni":"treeniä"}</small></span>

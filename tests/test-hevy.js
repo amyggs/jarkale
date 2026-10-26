@@ -23,6 +23,8 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(bench&&bench.s==='80x8@8,80x6@10','lämmittely pois, failure-sarja mukaan, RPE: '+(bench&&bench.s));
   ok(bench&&bench.notes==='Leveä ote','liikkeen huomio');
   ok(r.w[0].ex.some(e=>e.n==='Triceps Pushdown (Cable - Straight Bar)'&&e.s==='25x12,15x10'),'pudotussarja mukaan, nimi kokonaan');
+  const ds=await p.evaluate(t=>{ const r=histParse(t); const e=r.workouts[0].ex.find(x=>/Triceps/.test(x.name)); return {k:e.sets.map(x=>x.kind||'-').join(','),drops:r.drops,sets:r.sets}; },CSV);
+  ok(ds.k==='-,ds'&&ds.drops===1&&ds.sets===6,'Hevyn dropset tuodaan DS-lisärivinä, ei työsarjana: '+JSON.stringify(ds));
   ok(!r.w[0].ex.some(e=>/Treadmill/.test(e.n))&&r.timed===1&&r.warm===1,'matka-/aikasarja ja lämmittely lasketaan ohitetuiksi');
   ok(r.w[1].ex.some(e=>e.n==='Pull Up'&&e.s==='nullx8'),'kehonpainosarja ilman kiloja');
   const lb=await p.evaluate(t=>{ const r=histParse(t.replace('"weight_kg"','"weight_lbs"').replace(',"warmup",40,10',',"warmup",88,10').replace(',"normal",80,8,,,8',',"normal",176,8,,,8')); return {lbs:r.lbs,kg:r.workouts[0].ex[0].sets[0].kg}; },CSV);
@@ -33,7 +35,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(t=>{ const r=histParse(t); const known=knownExercises(), map={}; r.exNames.forEach(x=>map[x.name]=""); GU.hist={r,map,file:'workout_data.csv'}; GU.mode='histimport'; setTab('treeni'); renderGym(); },CSV); await p.waitForTimeout(200);
   const ui=await p.locator('#view-treeni').innerText();
   ok(/Tuo historia Hevystä/.test(ui)&&/Hevyn historia jatkaa/.test(ui),'näkymä puhuu Hevystä');
-  ok(/Lämmittelysarjoja \(1\) ei tuoda/.test(ui)&&/Aika- ja matkasarjoja \(1\) ei tuoda/.test(ui),'ohitetut sarjat kerrotaan');
+  ok(/Pudotussarjat \(1\) tuodaan lisäriveinä/.test(ui)&&/Lämmittelysarjoja \(1\) ei tuoda/.test(ui)&&/Aika- ja matkasarjoja \(1\) ei tuoda/.test(ui),'ohitetut sarjat kerrotaan');
   await p.locator('button',{hasText:'Tuo 2 treeniä'}).click(); await p.waitForTimeout(300);
   const s=await p.evaluate(()=>G.sessions.filter(x=>x.importBatch).map(x=>({src:x.source,prog:x.programName,day:x.dayName,id:x.importId})));
   ok(s.length===2&&s.every(x=>x.src==='hevy'&&x.prog==='Hevy'),'treenit tallentuvat lähteellä hevy');

@@ -20,6 +20,13 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   ok(!pv[1].x&&JSON.stringify(pv[2].x)==='["ds","ds"]','ilman merkintää ei lisärivejä; "+ DS + DS" kaksi pudotusta');
   ok(await p.evaluate(()=>{ const e=parseExLine('Penkki 3x8-10 80 + R/P'); return e.weight===80&&JSON.stringify(e.extras)==='["rp"]'&&goalInputTxt(e)==='3x8-10 80 + R/P'; }),'paino ja merkintä samalla rivillä, muokkausteksti säilyttää merkinnän');
 
+  const V=await p.evaluate(()=>[
+    'Penkki 3x8 + drop set','Penkki 3x8 + rest pause','Penkki 3x8 + rest-pause + DS','Penkki 3x8 (DS)','Penkki 3x8 + 2 DS','Penkki 3x8 + DS × 2','Penkki 3x8 80 (R/P + DS)','Penkki 3x8 + myo-reps','Penkki 3x8, viimeinen sarja pudotuksena'
+  ].map(t=>{ const e=parseExLine(t); return (e.extras||[]).join(',')+'|'+e.note; }));
+  ok(V[0]==='ds|'&&V[1]==='rp|'&&V[2]==='rp,ds|','"drop set", "rest pause", "rest-pause + DS": '+V.slice(0,3).join(' / '));
+  ok(V[3]==='ds|'&&V[4]==='ds,ds|'&&V[5]==='ds,ds|'&&V[6]==='rp,ds|','"(DS)", "+ 2 DS", "DS × 2", "(R/P + DS)": '+V.slice(3,7).join(' / '));
+  ok(V[7]==='|+ myo-reps'&&V[8].startsWith('|'),'myo-repsit ja proosa jäävät ohjeeksi: '+V.slice(7).join(' / '));
+
   console.log('\nTreeni');
   await p.evaluate(t=>{ const pr=newProgram('P'); pr.days=gMatchImport(parseProgramText(t)).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,match,...e})=>e)})); touchProg(pr); G.curProgramId=pr.id; gymSave(); },TXT);
   // edellinen kerta: tavallinen treeni samasta päivästä

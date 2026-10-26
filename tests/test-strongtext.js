@@ -28,6 +28,11 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(!Object.keys(ex).some(n=>/strongapp|http|2026/.test(n)),'@strongapp, linkki ja päiväys eivät tule liikkeiksi');
   ok(r.skipped.some(l=>/@strongapp/.test(l))&&r.skipped.some(l=>/2026/.test(l)),'ohitetut rivit näytetään esikatselussa');
 
+  const d=await p.evaluate(()=>{ const pv=parseProgramText("Selkä\nMonday, October 19, 2026 at 5:00 PM\n\nLat Pulldown (Cable)\nSet 1: 60 kg × 10\nSet 2: 60 kg × 8\nD1: 40 kg × 8\n\n@strongapp"); const e=pv[0].exercises[0]; return goalTxt(e); });
+  ok(d==='2 × 8–10 + DS · 60 kg','jakotekstin D-rivi pudotussarjaksi, ei työsarjaksi: '+d);
+  const c=await p.evaluate(()=>{ const r=histParse('Date;Workout Name;Exercise Name;Set Order;Weight (kg);Reps\n2026-10-01 17:00:00;Selkä;Row;1;60;10\n2026-10-01 17:00:00;Selkä;Row;D;40;8'); return {k:r.workouts[0].ex[0].sets.map(x=>x.kind||'-').join(','),drops:r.drops,app:r.app}; });
+  ok(c.app==='strong'&&c.k==='-,ds'&&c.drops===1,'Strongin CSV:n D-sarja DS-lisäriviksi: '+JSON.stringify(c));
+
   console.log('\nTavallinen ohjelmateksti ennallaan');
   const n=await p.evaluate(()=>{ const pv=parseProgramText("1 Rinta\nPenkkipunnerrus 3 * 8 - 12\nVipunosto 4x10\n\n2 Selkä\nYlätalja 3 * 6 - 8"); return {src:pv.source||null,days:pv.length,g:goalTxt(pv[0].exercises[0])}; });
   ok(n.src===null&&n.days===2&&n.g==='3 × 8–12','tavallinen tuonti ei mene Strong-polulle');
