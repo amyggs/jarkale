@@ -33,6 +33,6 @@ ok(/Näytä kaikki \(\d+\)/.test(cl)&&!/Pilotin Mitä uutta/.test(cl),'pilotin l
 const q=await ctx.newPage();await q.goto('http://localhost:8765/index.html');await q.evaluate(()=>{localStorage.removeItem('jarkale-news-seen');});await q.reload();await q.waitForTimeout(400);
 ok(!(await q.locator('#news-card').isVisible()),'oma versio: ei uutiskorttia');
 await q.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); });await q.waitForTimeout(200);
-ok(/v2\.18\.111/.test(await q.locator('#changelog-content').innerText()),'oma versio: täysi versiolista');
+ok(await q.evaluate(()=>document.getElementById('changelog-content').innerText.includes('v'+CHANGELOG[0].v)),'oma versio: täysi versiolista (uusin versio näkyy)');
 ok(errs.length===0,'ei JS-virheitä '+errs.join('|'));
 console.log(`${pass} / ${pass+fail} läpi`);await b.close();})();

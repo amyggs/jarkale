@@ -28,6 +28,7 @@ tests/run.sh test-gym.js
 | `test-strongtext.js` | Strongin Jaa treeni -tekstin tuonti ohjelmaksi: lämmittely pois, paunat kiloiksi, " - " nimessä, @strongapp/linkki/päiväys ohitetaan, tavallinen tuonti ennallaan |
 | `test-trainfirst.js` | Treeni ensin: kesken oleva treeni avautuu käynnistyksessä, pelkkä treeni aloittaa Treeni-välilehdeltä, seuraava treeni Kirjaa-näkymässä vain suunniteltuna treenipäivänä |
 | `test-hevy.js` | Treenihistorian tuonti Hevyn CSV:stä: tunnistus, päiväysmuoto, lämmittely ja aikasarjat pois, failure/dropset mukaan, paunat, kaksoistuonnin esto, lähde hevy |
+| `test-progtext.js` | Ohjelmateksti Word-kopiona (tyhjä rivi joka välissä): supersarja ja kolmoissarja säilyvät, pitkä sulkeissa oleva ohje ohjeeksi, lyhyt tarkenne nimeen, loppupiste ei ohjeeksi |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

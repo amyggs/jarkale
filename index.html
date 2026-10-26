@@ -2214,7 +2214,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.115</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.116</span>
       </div>
     </div>
   </div>
@@ -2248,6 +2248,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.116", d:"lokakuu 2026", items:[
+    "Ohjelman tuonti Word-tiedostosta kopioituna: supersarjat ja kolmoissarjat säilyvät, vaikka rivien välissä on tyhjiä rivejä.",
+    "Liikkeen nimen perässä sulkeissa oleva pitkä ohje siirtyy liikkeen ohjeeksi, ja sulkeiden sisällä oleva pilkku ei enää katkaise nimeä. Lyhyt tarkenne kuten (Barbell) jää nimeen. Rivin loppupiste ei tule ohjeeksi."
+  ]},
   {v:"2.18.115", d:"lokakuu 2026", items:[
     "Treenihistorian voi tuoda myös Hevystä: Treeni → Asetukset → Tuo treenihistoria ja Hevyn vientitiedosto (Settings → Export & Import Data → Export Workouts). Lämmittelysarjat sekä aika- ja matkasarjat ohitetaan, paunat muunnetaan kiloiksi, ja liikkeet voi yhdistää Järkäleen liikkeisiin ennen tuontia."
   ]},
@@ -7144,6 +7148,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.10.2026", items:[
+    "Word-tiedostosta kopioitu ohjelma tuodaan tarkemmin: supersarjat säilyvät, ja liikkeen perässä sulkeissa oleva ohje siirtyy liikkeen ohjeeksi.",
     "Vanhan treenihistorian voi tuoda myös Hevystä: Treeni → Asetukset → Tuo treenihistoria.",
     "Kesken oleva treeni avautuu suoraan, kun avaat sovelluksen. Jos kirjaat pelkkiä treenejä, sovellus aukeaa Treeni-välilehdelle.",
     "Kirjaa-näkymässä näkyy suunniteltuna treenipäivänä seuraava treeni ja Aloita-nappi. Treenipäivät valitaan kohdassa Asetukset → Tavoitteet.",
@@ -9077,9 +9082,15 @@ function parseExLine(text){
   if(w){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
   let note=rest.replace(/^\s*(?:toistot|toistoa|reps|krt)\b/i,"").replace(/^[\s,;:)–—/-]+/,"").replace(/[\s(]+$/,"").trim();
   const grp=groups.length>1?groups.map(g=>({sets:g.sets,repsMin:g.isMax?null:g.min,repsMax:g.isMax?null:g.max,max:g.isMax})):null;
-  // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje
-  const ci=name.indexOf(", ");
+  // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje.
+  // v2.18.116: vain sulkeiden ulkopuolinen pilkku. Pitkä sulkeissa oleva ohje (≥ 3 sanaa) siirtyy ohjeeksi;
+  // lyhyt tarkenne kuten "(Barbell)" tai "(KP)" jää nimeen.
+  let depth=0, ci=-1;
+  for(let i=0;i<name.length-1;i++){ const ch=name[i]; if(ch==="(") depth++; else if(ch===")") depth=Math.max(0,depth-1); else if(ch===","&&name[i+1]===" "&&!depth){ ci=i; break; } }
   if(ci>0&&name.slice(ci+2).split(" ").length>=2){ note=[name.slice(ci+2).trim(),note].filter(Boolean).join(" · "); name=name.slice(0,ci).trim(); }
+  const pm=name.match(/\s*\(([^()]*)\)\s*$/);
+  if(pm&&pm[1].trim().split(/\s+/).length>=3){ note=[pm[1].trim(),note].filter(Boolean).join(" · "); name=name.slice(0,pm.index).trim(); }
+  if(/^[\s.,;:!?]*$/.test(note)) note="";
   const isMax=groups.every(g=>g.isMax);
   const mins=groups.filter(g=>!g.isMax).map(g=>g.min), maxs=groups.filter(g=>!g.isMax).map(g=>g.max??g.min);
   const rMin=mins.length?Math.min(...mins):null, rMaxV=maxs.length?Math.max(...maxs):null;
@@ -9173,8 +9184,10 @@ function parseProgramText(text){
   };
   const tt=S.settings.trainingTypes||[];
   lines.forEach((l,i)=>{
-    if(!l){ superset=null; return; }
-    if(isSuper(l)){ superset={label:l.replace(/:$/,""),items:[]}; return; }
+    // v2.18.116: Word-tiedostosta kopioitaessa jokaisen rivin välissä on tyhjä rivi. Tyhjä rivi päättää supersarjan
+    // vasta, kun sarja on täynnä: supersarja/vuorosarja kaksi liikettä, kolmoissarja kolme (jättisarja: tyhjä rivi kahden jälkeen).
+    if(!l){ if(superset&&superset.items.length>=Math.min(superset.cap,superset.cap>3?2:superset.cap)) superset=null; return; }
+    if(isSuper(l)){ const lab=l.replace(/:$/,""); superset={label:lab,items:[],cap:/kolmois/i.test(lab)?3:/jätti|circuit/i.test(lab)?99:2}; return; }
     if(isHeader(l,i)){
       const name=l.replace(/:$/,"").trim();
       const bare=name.replace(/^\d{1,2}\s*[.)]?\s+/,"");
@@ -9193,8 +9206,9 @@ function parseProgramText(text){
     if(!cur||cur.rest){ skipped.push(l); return; }
     const ex={...newEx(p),unparsed:false};
     if(superset){ superset.items.push(ex); const lab=superset.label.charAt(0).toUpperCase()+superset.label.slice(1).toLowerCase();
-      superset.items.forEach(x=>{ const others=superset.items.filter(y=>y!==x).map(y=>y.name).join(" + "); x.note=[`${lab}${others?": "+others:""}`, (x.note||"").replace(/^(Supersarja|Vuorosarja)[^·]*(· )?/,"")].filter(Boolean).join(" · "); }); }
+      superset.items.forEach(x=>{ const others=superset.items.filter(y=>y!==x).map(y=>y.name).join(" + "); x.note=[`${lab}${others?": "+others:""}`, (x.note||"").replace(/^(Supersarja|Vuorosarja|Kolmoissarja|Jättisarja|Superset|Circuit)[^·]*(· )?/i,"")].filter(Boolean).join(" · "); }); }
     cur.exercises.push(ex);
+    if(superset&&superset.items.length>=superset.cap) superset=null;
   });
   days.filter(d=>!d.rest&&!d.exercises.length).forEach(d=>skipped.push(d.raw));
   const out=days.filter(d=>!d.rest&&d.exercises.length);
