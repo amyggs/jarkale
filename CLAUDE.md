@@ -35,7 +35,8 @@ Henkilökohtainen treeni- ja hyvinvointiseuranta. Yksi HTML-tiedosto (`index.htm
 
 ## Data
 - `S.entries` = päiväkirjaukset (päivämäärä avaimena), `G` = sali (ohjelmat, `G.sessions`).
-- Tuodut treenit (`source:"strong"`) eivät luo päiväkirjauksia (`gymHealLinks` ohittaa ne).
+- Tuodut treenit (`source:"strong"` tai `"hevy"`) eivät luo päiväkirjauksia (`gymHealLinks` ohittaa ne).
+- Sarjan `kind:"rp"|"ds"` = rest-pause- tai pudotussarja työsarjan perään (ohjelmassa `extras`). `doneSets` ei sisällä niitä (sarjamäärä, ennätykset, käyrät); `doneRows` sisältää (näyttö, yhteenveto, jako).
 - Datamallin muutos vaikuttaa Drive-synkronointiin (poistomerkinnät), CSV-vientiin (`CSV_SCHEMA_VERSION`) ja PT-vientiin: tarkista kaikki kolme.
 
 ## Kirjoitustyyli

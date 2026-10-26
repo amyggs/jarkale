@@ -29,6 +29,7 @@ tests/run.sh test-gym.js
 | `test-trainfirst.js` | Treeni ensin: kesken oleva treeni avautuu käynnistyksessä, pelkkä treeni aloittaa Treeni-välilehdeltä, seuraava treeni Kirjaa-näkymässä vain suunniteltuna treenipäivänä |
 | `test-hevy.js` | Treenihistorian tuonti Hevyn CSV:stä: tunnistus, päiväysmuoto, lämmittely ja aikasarjat pois, failure/dropset mukaan, paunat, kaksoistuonnin esto, lähde hevy |
 | `test-progtext.js` | Ohjelmateksti Word-kopiona (tyhjä rivi joka välissä): supersarja ja kolmoissarja säilyvät, pitkä sulkeissa oleva ohje ohjeeksi, lyhyt tarkenne nimeen, loppupiste ei ohjeeksi |
+| `test-extras.js` | Erikoistekniikat: "+ R/P + DS" tuonnissa lisäriveiksi, rivien tunnisteet, painoehdotukset (R/P sama, DS −30 %), ei sarjamäärään eikä ennätyksiin, yhteenveto, jako, seuraava kerta, valikosta lisäys |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
