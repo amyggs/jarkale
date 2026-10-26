@@ -2216,7 +2216,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.117</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.118</span>
       </div>
     </div>
   </div>
@@ -2250,6 +2250,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.118", d:"lokakuu 2026", items:[
+    "Kun tuot uuden ohjelman, sovellus kysyy, arkistoidaanko edellinen ohjelma. Treenihistoria säilyy, ja ohjelman voi palauttaa Treeni-välilehden lopusta.",
+    "Arkistoi-nappi on nyt ohjelman muokkausnäkymän yläreunassa, ei sivun pohjalla."
+  ]},
   {v:"2.18.117", d:"lokakuu 2026", items:[
     "Erikoistekniikat: ohjelman merkintä kuten \"1 × 8–12 + R/P + DS\" luo treeniin viimeisen sarjan perään merkityt lisärivit (R/P = rest-pause, DS = pudotussarja). R/P-rivin painoehdotus on sama kuin edellisen rivin, DS-rivin 30 % kevyempi.",
     "Lisärivin voi lisätä mihin tahansa liikkeeseen liikkeen valikosta (⋯ → + R/P-sarja tai + Pudotussarja). Lisärivit eivät kasvata sarjamäärää eivätkä ole ennätyksiä, mutta ne näkyvät yhteenvedossa, jaossa ja seuraavalla kerralla edellisen kerran tuloksena."
@@ -7154,6 +7158,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.10.2026", items:[
+    "Kun tuot uuden ohjelman, sovellus kysyy, arkistoidaanko edellinen. Arkistoi-nappi on myös ohjelman muokkausnäkymän yläreunassa.",
     "Rest-pause- ja pudotussarjat: ohjelman merkintä \"+ R/P + DS\" luo treeniin merkityt lisärivit, ja pudotussarjan paino ehdotetaan valmiiksi. Lisärivin voi lisätä myös liikkeen valikosta (⋯)."
   ]},
   {d:"26.10.2026", items:[
@@ -10556,7 +10561,7 @@ function gEditRender(){ renderGym(); }
 function gymEditHTML(p){
   const types=S.settings.trainingTypes||TRAINING_TYPES;
   let h=`<div class="view-hero"><div class="tr-hero-row"><input class="g-title-in" value="${esc(p.name)}" aria-label="Ohjelman nimi" oninput="gEdit(p=>p.name=this.value.trim()||'Ohjelma')"></div>
-    <div class="g-edit-bar"><button class="tr-pill" onclick="gCancelEdit()">${GU.editSnap&&GU.editSnap.isNew?"Peruuta":"Peru muutokset"}</button><button class="tr-pill dark" onclick="gDoneEdit()">Valmis</button></div>
+    <div class="g-edit-bar"><button class="tr-pill" onclick="gCancelEdit()">${GU.editSnap&&GU.editSnap.isNew?"Peruuta":"Peru muutokset"}</button>${GU.editSnap&&GU.editSnap.isNew?"":`<button class="tr-pill" onclick="gArchiveProg()">Arkistoi</button>`}<button class="tr-pill dark" onclick="gDoneEdit()">Valmis</button></div>
     <div class="tr-h2" style="padding-bottom:8px">Muutokset tallentuvat heti. ${GU.editSnap&&GU.editSnap.isNew?"Peruuta poistaa uuden ohjelman.":"Peru muutokset palauttaa ohjelman ennalleen."} Aiemmat treenit eivät muutu.</div></div>`;
   p.days.forEach((d,di)=>{
     h+=`<div class="ed-day"><div class="ed-dn"><input class="g-day-in" value="${esc(d.name)}" aria-label="Treenipäivän nimi" oninput="gEdit(p=>p.days[${di}].name=this.value.trim()||'Treenipäivä')"><span>${d.exercises.length} liikettä</span></div>`;
@@ -10578,7 +10583,7 @@ function gymEditHTML(p){
         <span><button onclick="gMoveDay(${di},-1)" ${di?"":"disabled"} aria-label="Siirrä ylös">↑</button><button onclick="gMoveDay(${di},1)" ${di<p.days.length-1?"":"disabled"} aria-label="Siirrä alas">↓</button><button class="danger" onclick="gDelDay(${di})">Poista päivä</button></span></div></div>`;
   });
   h+=`<button class="tr-go ghost" style="width:100%;height:46px" onclick="gEdit(p=>p.days.push({id:gid(),name:'Päivä '+String.fromCharCode(65+p.days.length),trainingType:'',exercises:[]}));renderGym()">+ Treenipäivä</button>
-    <div style="display:flex;gap:8px;margin-top:10px"><button class="tr-go ghost" style="flex:1" onclick="gCopyProg()">Kopioi ohjelma</button><button class="tr-go ghost" style="flex:1" onclick="gArchiveProg()">Arkistoi</button></div>`;
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="tr-go ghost" style="flex:1" onclick="gCopyProg()">Kopioi ohjelma</button></div>`;
   if(p.sourceText) h+=`<details class="g-src"><summary>Alkuperäinen teksti</summary><pre data-raw>${esc(p.sourceText)}</pre></details>`;
   return h+`<div style="height:30px"></div>`;
 }
@@ -10649,7 +10654,8 @@ function gMatchRow(e,di,ei){
   if(m.auto) return `<div class="ed-match auto">Historia jatkuu: ${esc(m.name)}${meta}</div>`;
   return `<label class="ed-match"><input type="checkbox" ${m.use?"checked":""} onchange="GU.importPreview[${di}].exercises[${ei}].match.use=this.checked"> <span>Sama liike kuin <b>${esc(m.name)}</b>${meta}</span></label>`;
 }
-function gImportSave(append){
+async function gImportSave(append){
+  const prevProg=append?null:curProgram();
   const days=(GU.importPreview||[]).filter(d=>d.include).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,match,...e})=>match&&match.use?{...e,key:match.key}:e)}));
   if(!days.length) return;
   let p;
@@ -10665,6 +10671,10 @@ function gImportSave(append){
   // v2.18.85: tuonnin jälkeen päädytään suoraan Treeni-kotiin, ei muokkaustilaan. Muokkaus on kotinäkymän Muokkaa-napin takana.
   GU.editSnap=null; GU.mode="home"; GU.menu=null; GU.progOpen=false; GU.newOpen=false; renderGym(); gTop();
   showSavedToast(append?`${days.length} ${days.length===1?"päivä":"päivää"} lisätty ohjelmaan ${esc(p.name)}`:`Ohjelma tallennettu: ${esc(p.name)}`);
+  // v2.18.118: uusi ohjelma korvaa yleensä edellisen → tarjotaan arkistointia heti (ennen se oli muokkausnäkymän pohjalla)
+  if(prevProg&&prevProg.id!==p.id&&!prevProg.archived&&await jConfirm(`Arkistoidaanko edellinen ohjelma ${prevProg.name}? Treenihistoria säilyy, ja ohjelman voi palauttaa Treeni-välilehden lopusta.`,{ok:"Arkistoi",cancel:"Pidä käytössä"})){
+    prevProg.archived=true; touchProg(prevProg); G.curProgramId=p.id; gymSave(); renderGym(); showSavedToast(`${esc(prevProg.name)} arkistoitu`);
+  }
 }
 
 // ── Liikkeen kehitys: paras sarja kerralta, ei volyymia eikä tonnagea
