@@ -2220,7 +2220,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.121</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.122</span>
       </div>
     </div>
   </div>
@@ -2254,6 +2254,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.122", d:"lokakuu 2026", items:[
+    "Aloituksen ja tyhjän Treeni-näkymän tekstit kertovat, että ohjelmaksi riittävät liikkeet, joita teet nyt. Kirjoitettua ohjelmaa ei tarvita valmiina."
+  ]},
   {v:"2.18.121", d:"lokakuu 2026", items:[
     "Soitin: edellisen kerran kilot ja toistot sekä − / + -napit näkyvät myös vaaleassa teemassa (mustissa kentissä oli tumma teksti). Trendien punainen ja vihreä muutos tummemmiksi vaaleassa.",
     "Fosfori: edellisen kerran arvot erottuvat sarjariveillä (olivat lähes näkymättömiä).",
@@ -3583,7 +3586,7 @@ function renderSetupScreen(){
   if(SU_STEP!=="list"){
     el.innerHTML=`<div class="su-head"><div class="su-h1">Tervetuloa Järkäleeseen</div>
       <div class="su-sub">Mitä haluat tehdä ensin? Valinnan voi muuttaa milloin tahansa Asetuksista.</div></div>
-      <button class="su-choice" onclick="setupPick('gym')"><b>Kirjata treenejä</b><span>Oma ohjelma tekstinä, sarjat ja kilot salilla. Vanhan historian voi tuoda Strongista tai Hevystä.</span></button>
+      <button class="su-choice" onclick="setupPick('gym')"><b>Kirjata treenejä</b><span>Oma tai valmentajan ohjelma, sarjat ja kilot salilla. Ohjelmaksi riittävät liikkeet, joita teet nyt. Vanhan historian voi tuoda Strongista tai Hevystä.</span></button>
       <button class="su-choice" onclick="setupPick('body')"><b>Seurata kehoa ja vointia</b><span>Paino, uni, palautuminen, kivut ja muut valitsemasi asiat.</span></button>
       <button class="su-choice" onclick="setupPick('both')"><b>Molempia</b><span>Treenit ja päiväseuranta samassa sovelluksessa.</span></button>
       <div class="su-privacy"><b>Tietosi pysyvät sinulla.</b> Järkäleellä ei ole omaa palvelinta: kirjaukset tallentuvat tähän puhelimeen ja halutessasi omaan Google Driveesi. Ne eivät mene sovelluksen tekijälle eivätkä muille. (Valinnainen tekoälyanalyysi lähettää tietoja vain, jos otat sen itse käyttöön omalla avaimella.)</div>`;
@@ -10122,7 +10125,7 @@ function gymHomeHTML(){
   }
   if(!act) h+=newsCardHTML()+(firstBackupHTML()||gBackupNudgeHTML());
   if(!p){
-    h+=`<div class="g-empty"><div class="n">Tee oma ohjelma</div><div class="s">Kirjoita liikkeet riveinä, esim. <b>Penkkipunnerrus 3x8-10 80</b>. Voit myös liittää valmiin ohjelman tekstinä.</div>
+    h+=`<div class="g-empty"><div class="n">Tee oma ohjelma</div><div class="s">Kirjoita liikkeet riveinä, esim. <b>Penkkipunnerrus 3x8-10 80</b>, tai liitä valmis ohjelma tekstinä.<br>Ei kirjoitettua ohjelmaa? Kirjoita liikkeet, joita teet nyt salilla. Niistä tulee ohjelma, jota voit muokata myöhemmin.</div>
       <button class="tr-go" style="width:100%;height:46px;margin-top:14px" onclick="const c=G.curProgramId;const p=newProgram();gOpenEdit(p.id,true);GU.editSnap.cur=c">+ Uusi ohjelma</button>
       <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä ohjelma tekstinä</button>
       <label class="hi-emptylink">Tuo vanha historia Strongista tai Hevystä (CSV)<input type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gHistFile(this)"></label></div>`;
