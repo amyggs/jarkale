@@ -1147,7 +1147,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="fosfori"] :is(.tr-go:not(.ghost),.seg-btn.on,.stars button.active,.chip.on,.ck[aria-pressed="true"]){background:var(--ph)!important;color:var(--on-accent)!important;text-shadow:none!important;box-shadow:0 0 12px var(--ph-glow)!important;}
 [data-palette="fosfori"] :is(.tr-go.ghost,.tr-pill,.tr-pick){background:transparent!important;border:1px solid var(--ph)!important;color:var(--ph)!important;}
 [data-palette="fosfori"] :is(input,textarea){background:var(--ph-well)!important;border:1px solid var(--ph-lo)!important;color:var(--ph)!important;caret-color:var(--ph);}
-[data-palette="fosfori"] ::placeholder{color:var(--ph-lo)!important;}
+[data-palette="fosfori"] ::placeholder{color:var(--ph-lo)!important;opacity:1!important;} /* v2.18.121: perussäännön opacity .3 teki ehdotusarvoista lähes näkymättömiä */
 [data-palette="fosfori"] :is(#header,.view-hero){background:transparent!important;border-bottom:1px dashed var(--ph-lo)!important;}
 [data-palette="fosfori"] :is(#nav,nav){border-top:1px solid var(--ph-lo)!important;background:var(--nav-bg)!important;}
 [data-palette="fosfori"] .ws-day.logged .ws-dot{background:var(--ph)!important;color:var(--on-accent)!important;box-shadow:0 0 8px var(--ph-glow);}
@@ -1454,7 +1454,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 @font-face{font-family:"J Rajdhani";font-weight:700;src:url(fonts/rajdhani-latin-700-normal.woff2) format("woff2");font-display:swap;}
 :root[data-palette="soitin"]{--s-pa:#30304A;--s-pb:#22222F;--s-hi:#5A5A7A;--s-lo:#14141C;--s-ba:#5A5A78;--s-bb:#33334A;--s-bhi:#8A8AAA;--s-ta:#3A3A55;--s-tb:#24243A;--s-rib:#6C6C90;--s-tt:#E8E8F0;--s-bt:#E8E8F0;
 --bg:#16161F;--surf:#262635;--surf2:#33334A;--bord:#4A4A66;--text:#D6D6E6;--dim:#A8A8C4;--orange:#00E000;--yellow:#E8D23A;--blue:#5AA0FF;--green:#00E000;--red:#E8402C;--purple:#A08CFF;--card-bg:#262635;--header-bg:#16161F;--nav-bg:#101018;--shadow:none;--seg-on:#00E000;--on-accent:#000;--hi:#00E000;--hi-ink:#000;--ol:#4A4A66;--olbg:transparent;color-scheme:dark;}
-:root[data-palette="soitin"][data-theme="light"]{--s-pa:#E4E4EA;--s-pb:#C9C9D2;--s-hi:#FFFFFF;--s-lo:#8E8E9C;--s-ba:#F2F2F6;--s-bb:#CFCFD8;--s-bhi:#FFFFFF;--s-ta:#D8D8E2;--s-tb:#B8B8C6;--s-rib:#8E8EA2;--s-tt:#22222F;--s-bt:#22222F;
+:root[data-palette="soitin"][data-theme="light"]{--red:#B81414;--green:#0E7A0E;--s-pa:#E4E4EA;--s-pb:#C9C9D2;--s-hi:#FFFFFF;--s-lo:#8E8E9C;--s-ba:#F2F2F6;--s-bb:#CFCFD8;--s-bhi:#FFFFFF;--s-ta:#D8D8E2;--s-tb:#B8B8C6;--s-rib:#8E8EA2;--s-tt:#22222F;--s-bt:#22222F;
 --bg:#B9B9C4;--surf:#DCDCE4;--surf2:#CFCFD8;--bord:#8E8E9C;--text:#1C1C26;--dim:#34344A;--nav-bg:#C9C9D2;--orange:#0A7A0A;--green:#0A7A0A;color-scheme:light;}
 [data-palette="soitin"] body{background:var(--bg);}
 [data-palette="soitin"] *{font-family:"J Rajdhani","Arial Narrow",sans-serif!important;font-weight:600;}
@@ -1475,6 +1475,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 [data-palette="soitin"] .lbl-small{color:var(--dim)!important;text-transform:uppercase;letter-spacing:.12em;font-size:11px!important;}
 /* LCD-näytöt: musta pohja, vihreät numerot */
 [data-palette="soitin"] :is(input,textarea){background:#000!important;border:1px solid #0B0B12!important;box-shadow:inset 1px 1px 0 #000,inset -1px -1px 0 #3A3A55!important;color:#00E000!important;}
+/* v2.18.121: kentät ovat mustia myös vaaleassa, joten ehdotusarvot (edellinen kerta) ja −/+ eivät voi käyttää teeman tekstiväriä: sammunut LCD-vihreä ja vaalea harmaa */
+[data-palette="soitin"] :is(input,textarea)::placeholder{color:#2A662A!important;opacity:1!important;}
+[data-palette="soitin"] .kgb{color:#9A9AB8!important;}
+[data-palette="soitin"] #view-log .stepper input.empty::placeholder{color:#2F7F2F!important;}
 [data-palette="soitin"] :is(.big-val,.val,.stepper-val,#view-log .stepper input,.sleep-hm b,.g-sum-kpi b,.gt .gt-tm){font-family:"J VT323",monospace!important;color:#00E000!important;font-weight:400!important;text-shadow:0 0 6px rgba(0,224,0,.5);}
 [data-palette="soitin"] #view-log .stepper input,[data-palette="soitin"] .sleep-hm b{font-size:44px!important;}
 [data-palette="soitin"] .tr-h1{font-family:"J VT323",monospace!important;color:#00E000;font-size:28px;font-weight:400;background:#000;padding:2px 8px;display:inline-block;letter-spacing:.04em;}
@@ -2216,7 +2220,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.120</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.121</span>
       </div>
     </div>
   </div>
@@ -2250,6 +2254,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.121", d:"lokakuu 2026", items:[
+    "Soitin: edellisen kerran kilot ja toistot sekä − / + -napit näkyvät myös vaaleassa teemassa (mustissa kentissä oli tumma teksti). Trendien punainen ja vihreä muutos tummemmiksi vaaleassa.",
+    "Fosfori: edellisen kerran arvot erottuvat sarjariveillä (olivat lähes näkymättömiä).",
+    "Kehittäjä: automaattinen teematesti kaikille 9 × 2 yhdistelmälle 360 px leveydellä (luettavuus pikseleistä, ylivuoto, viikkonauhan pallot)."
+  ]},
   {v:"2.18.120", d:"lokakuu 2026", items:[
     "Pilotti: uutiskortti treenihistorian tuonnista Strongista tai Hevystä, ja Tuo historia -nappi vie suoraan tuontiin. Korttia ei näytetä, jos historia on jo tuotu.",
     "Uutiskortti näkyy myös Treeni-välilehden etusivulla, joten pelkkiä treenejä kirjaava näkee sen.",

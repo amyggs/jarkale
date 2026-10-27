@@ -31,6 +31,7 @@ tests/run.sh test-gym.js
 | `test-progtext.js` | Ohjelmateksti Word-kopiona (tyhjä rivi joka välissä): supersarja ja kolmoissarja säilyvät, pitkä sulkeissa oleva ohje ohjeeksi, lyhyt tarkenne nimeen, loppupiste ei ohjeeksi |
 | `test-extras.js` | Erikoistekniikat: "+ R/P + DS" tuonnissa lisäriveiksi, rivien tunnisteet, painoehdotukset (R/P sama, DS −30 %), ei sarjamäärään eikä ennätyksiin, yhteenveto, jako, seuraava kerta, valikosta lisäys |
 | `test-archive.js` | Ohjelman arkistointi: kysymys uuden ohjelman tuonnin jälkeen (edellinen valittu ohjelma), Arkistoi muokkausnäkymän yläreunassa, ei uudella ohjelmalla |
+| `test-themes.js` | Kaikki 9 teemaa vaaleana ja tummana, 360 px: tekstin luettavuus mitattuna pikseleistä (kuva tekstin kanssa ja ilman, raja 3,0; himmeät ehdotusarvot 1,6), ei vaakaylivuotoa, tulevien päivien pallot erottuvat, tilarivin väri. Noin 2 min. Yhden teeman ajo: `PAL=soitin tests/run.sh test-themes.js` |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
