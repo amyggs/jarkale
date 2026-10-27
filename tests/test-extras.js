@@ -40,13 +40,23 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   ok(gg.a==='4 × 6–10 + R/P + DS'&&!gg.ad&&/&/.test(gg.ai),'sama toistoväli kahdessa ryhmässä näytetään yhtenä, muokkausteksti säilyy: '+gg.a+' / '+gg.ai);
   ok(gg.b==='1 × 6–8 + 2 × 10–12'&&gg.bd,'eri toistovälit pysyvät erillään: '+gg.b);
   await p.locator('[data-ex] .set .no.kind').first().click(); await p.waitForTimeout(150);
-  ok(/Rest-pause: lyhyt tauko/.test(await p.evaluate(()=>document.getElementById('saved-toast')?.textContent||'')),'R/P-tunnisteen napautus näyttää selityksen');
+  const pop=await p.evaluate(()=>{ const d=document.getElementById('kind-pop'), l=document.querySelector('[data-ex] .set .no.kind'); if(!d) return null; const a=d.getBoundingClientRect(), b=l.getBoundingClientRect(); return {t:d.textContent,near:Math.abs(a.top-b.bottom)<20||Math.abs(a.bottom-b.top)<20,inside:a.left>=0&&a.right<=innerWidth}; });
+  ok(pop&&/Tauko 10–20 s/.test(pop.t)&&pop.near&&pop.inside,'R/P-tunnisteen napautus: selitys tunnisteen vieressä, tauon pituus, mahtuu ruutuun: '+JSON.stringify(pop));
+  ok(await p.evaluate(()=>activeSession().exercises[0].sets[2].done!==true),'napautus ei kuittaa sarjaa');
+  await p.mouse.click(5,5); await p.waitForTimeout(100);
+  ok(!(await p.locator('#kind-pop').count()),'selitys sulkeutuu napautuksesta muualle');
   // kirjoita työsarjat, katso ehdotukset
   await p.evaluate(()=>{ const s=activeSession(); gSetVal(s.id,0,0,'kg','60'); gSetVal(s.id,0,0,'reps','10'); gSetVal(s.id,0,1,'kg','50'); gSetVal(s.id,0,1,'reps','12'); });
   const gh=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; return [2,3,4].map(i=>ghostFor(s,ex,i)); });
   ok(gh[0].kg===50&&gh[0].reps==null,'R/P: sama paino kuin edellinen rivi, toistot itse');
   ok(gh[1].kg===35,'DS: 30 % kevyempi, pyöristettynä painon askeleeseen (50 → 35)');
   ok(gh[2].kg===35,'R/P pudotuksen jälkeen: pudotettu paino');
+  // automaattinen tauko: ennen R/P-riviä 15 s, ennen DS-riviä ei taukoa, valittu pituus säilyy
+  const tm=await p.evaluate(()=>{ S.settings.gym={...(S.settings.gym||{}),autoRest:true}; G.timer.dur=120; timerReset(); const s=activeSession(); gToggleSet(s.id,0,0); const a={on:!!G.timer.endsAt,left:Math.round((G.timer.endsAt-Date.now())/1000)}; timerReset(); gToggleSet(s.id,0,1);
+    const b={left:Math.round((G.timer.endsAt-Date.now())/1000),dur:G.timer.dur,lbl:document.getElementById('gym-timer')?.innerText||''}; timerReset(); gSetVal(s.id,0,2,'reps','3'); gToggleSet(s.id,0,2); const c=!!G.timer.endsAt; timerReset(); [0,1,2].forEach(i=>gToggleSet(s.id,0,i)); S.settings.gym.autoRest=false; return {a,b,c}; });
+  ok(tm.a.on&&tm.a.left>=118,'tavallisen sarjan jälkeen valittu tauko (2:00)');
+  ok(tm.b.left<=15&&tm.b.left>=14&&tm.b.dur===120,'ennen R/P-riviä 15 s tauko, valittu pituus säilyy 2:00: '+JSON.stringify(tm.b));
+  ok(!tm.c,'ennen pudotussarjaa ei taukoa');
   await p.evaluate(()=>{ const s=activeSession(); [0,1].forEach(i=>gToggleSet(s.id,0,i)); gSetVal(s.id,0,2,'reps','3'); gToggleSet(s.id,0,2); gSetVal(s.id,0,3,'reps','8'); gToggleSet(s.id,0,3); gSetVal(s.id,0,4,'reps','2'); gToggleSet(s.id,0,4); });
   const st=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; return {done:doneSets(ex).length,rows:doneRows(ex).length,stats:sessionStats(s).sets,txt:setsTxt(doneRows(ex)),pr:ex.sets.filter(r=>isPR(r,[{kg:1,reps:1}])).length}; });
   ok(st.done===2&&st.rows===5&&st.stats===2,'työsarjoja 2 (lisärivit eivät kasvata sarjamäärää)');
