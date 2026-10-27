@@ -21,6 +21,18 @@ ok(/Driveen/.test(t2)&&!/Saliohjelma/.test(t2),'käytössä oleva ominaisuus ohi
 await p.locator('#news-card button',{hasText:'Yhdistä Driveen'}).click();await p.waitForTimeout(400);
 ok(await p.evaluate(()=>S.tab==='asetukset'&&getComputedStyle(document.getElementById('stgl-content-data')).display!=='none'),'Yhdistä Driveen vie asetusten varmuuskopio-osioon');
 await p.evaluate(()=>{localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali']));});await p.reload();await p.waitForTimeout(400);
+const th=await p.locator('#news-card .ni').first().innerText().catch(()=>'');
+ok(/Tuo treenihistoriasi Strongista tai Hevystä/.test(th)&&/Tuo historia/.test(th),'uutinen: historian tuonti Strongista/Hevystä (sali päällä)');
+await p.locator('#news-card button',{hasText:'Tuo historia'}).click();await p.waitForTimeout(400);
+ok(await p.evaluate(()=>S.tab==='treeni'&&GU.mode==='settings'&&!!document.querySelector('.hi-file')),'Tuo historia avaa treenin asetusten tuonnin');
+await p.evaluate(()=>{ localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali'])); S.settings.tracking={}; saveAll(); GU.mode='home'; setTab('treeni'); renderGym(); });await p.waitForTimeout(200);
+ok(/Tuo treenihistoriasi/.test(await p.locator('#view-treeni').innerText()),'uutiskortti näkyy myös Treeni-kodissa (pelkkää treeniä kirjaava aloittaa sieltä)');
+await p.locator('#view-treeni .news-card button',{hasText:'Selvä'}).click();await p.waitForTimeout(200);
+ok(!(await p.locator('#view-treeni .news-card').count()),'Selvä piilottaa kortin Treeni-kodista');
+await p.evaluate(()=>{localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali','2026-10-hist']));});
+await p.evaluate(()=>{G.sessions.push({id:'x',source:'hevy',importBatch:'b',exercises:[]});});
+ok(await p.evaluate(()=>{ localStorage.removeItem('jarkale-news-seen'); const r=!newsPending().some(n=>n.id==='2026-10-hist'); G.sessions=G.sessions.filter(s=>s.id!=='x'); localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali','2026-10-hist'])); return r; }),'historiauutinen ohitetaan, kun historia on jo tuotu');await p.reload();await p.waitForTimeout(400);
+await p.evaluate(()=>{ localStorage.setItem('jarkale-news-seen',JSON.stringify(['2026-10-drive','2026-10-sali','2026-10-hist'])); S.settings.tracking={weight:true}; saveAll(); setTab('log'); renderNewsCard(); });await p.waitForTimeout(200);
 const t3=await p.locator('#news-card').innerText().catch(()=>'');
 ok(/Uusi ilme/.test(t3)&&/Treeni sujuvammaksi/.test(t3)&&/Ennätykset|ennätykset/i.test(t3)&&/Kuusi uutta teemaa/.test(t3)&&(await p.locator('#news-card .ni').count())===4,'uudet uutiset: uusi ilme, kaksi treeniuutista (sali päällä) ja teemat');
 ok((await p.locator('#news-card .ni').first().locator('button').count())===0,'uutinen ilman toimintoa: ei nappia');
