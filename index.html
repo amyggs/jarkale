@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#0a0a0a">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=3">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=3">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=4">
 <title>Järkäle</title>
 <script>
 // v2.18.12: iPhonen kotivalikkosovelluksessa (standalone) sivun korkeus raportoidaan ilman tilarivia ja kotipalkkia,
@@ -1864,7 +1864,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   <div id="header">
     <div>
       <div style="display:flex;align-items:center;gap:9px;cursor:pointer" onclick="goToday()">
-        <img src="./icon-192.png?v=3" width="28" height="28" alt="" style="flex-shrink:0;border-radius:8px;display:block" onerror="this.style.display='none'">
+        <img src="./icon-192.png?v=4" width="28" height="28" alt="" style="flex-shrink:0;border-radius:8px;display:block" onerror="this.style.display='none'">
         <span class="brand" style="color:var(--text)">Järkäle</span>
         <span id="header-title" style="display:none"></span>
       </div>
@@ -2223,7 +2223,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.124</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.125</span>
       </div>
     </div>
   </div>
@@ -2257,6 +2257,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.125", d:"lokakuu 2026", items:[
+    "Kuvake julkaistu uudelleen (?v=4, tiedosto muuttunut), jotta Chrome kysyy kuvakkeen vaihtoa niiltäkin, joiden asennettuun sovellukseen jäi lokakuun alun sinappinen kuvake. Ulkoasu ennallaan. Julkaisuskripti kopioi nyt myös kuvakkeet pilottiin."
+  ]},
   {v:"2.18.124", d:"lokakuu 2026", items:[
     "R/P- ja DS-tunnisteen selitys aukeaa napautetun tunnisteen viereen ja kertoo tarkemmin: rest-pausessa tauko 10–20 s ja vain lisätoistot riville, pudotussarjassa paino noin 20–30 % kevyempi heti perään.",
     "Automaattinen tauko: ennen rest-pause-riviä 15 s (valittu tauon pituus ei muutu), ennen pudotussarjaa ei taukoa."
@@ -3906,7 +3909,7 @@ function themeBoot(pal){
     // v2.18.68 Lasi: kuplat nousevat, yksi kupla laajenee lasiruuduksi, heijastus pyyhkäisee
     const B=[[8,22,0,1.9],[18,44,260,2.2],[27,16,520,1.6],[36,30,120,2.0],[48,58,380,2.4],[58,20,60,1.7],[66,36,460,2.1],[75,26,200,1.8],[84,50,620,2.3],[92,18,340,1.6],[14,28,760,1.9],[70,14,820,1.5],[42,22,900,1.7],[88,32,980,2.0]];
     o.innerHTML=`<div class="ls-bg"></div>${B.map(([x,sz,d,du],i)=>`<div class="ls2-b" style="left:${x}%;width:${sz}px;height:${sz}px;animation-delay:${d}ms;animation-duration:${du}s"><i style="animation-duration:${(1.1+(i%4)*.25).toFixed(2)}s"></i></div>`).join("")}
-      <div class="tb-scr"><div class="ls-pane ls2-pane"><img class="ls-logo" src="./icon-192.png?v=3" alt=""><div class="ls-name">Järkäle</div><div class="ls-sub">${st>0?`${st} päivän putki`:`${n} ${n===1?"kirjaus":"kirjausta"}`}</div></div>
+      <div class="tb-scr"><div class="ls-pane ls2-pane"><img class="ls-logo" src="./icon-192.png?v=4" alt=""><div class="ls-name">Järkäle</div><div class="ls-sub">${st>0?`${st} päivän putki`:`${n} ${n===1?"kirjaus":"kirjausta"}`}</div></div>
       ${[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b],i)=>`<span class="ls2-pop" style="--dx:${a*120}px;--dy:${b*90}px;animation-delay:${1500+i*90}ms"></span>`).join("")}</div>`;
     at(2800,()=>bootEnd());
   } else if(pal==="ampiainen"){
@@ -7190,6 +7193,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.10.2026", items:[
+    "Jos aloitusnäytön kuvake on vielä vanha sinappinen, puhelin voi kysyä kuvakkeen päivitystä. Hyväksy se, niin kuvake vaihtuu nykyiseen keltaiseen.",
     "Napauta sarjarivin R/P- tai DS-tunnistetta, niin näet, mitä lisärivi tarkoittaa: rest-pausen tauon pituuden ja pudotussarjan painon pudotuksen.",
     "Jos automaattinen tauko on päällä, ennen rest-pause-riviä käynnistyy 15 sekunnin tauko. Valitsemasi tauon pituus ei muutu.",
     "Pudotus- ja rest-pause-sarjat tunnistetaan useammasta kirjoitustavasta, ja Strongista tai Hevystä tuodut pudotussarjat tulevat DS-riveinä.",
@@ -7719,7 +7723,7 @@ function jConfirm(msg,o={}){
     const old=document.getElementById("jdlg"); if(old) old.remove();
     const w=document.createElement("div"); w.id="jdlg"; w.className="jdlg"+(o.alert?" alert":""); w.setAttribute("role","dialog"); w.setAttribute("aria-modal","true");
     const lines=String(msg).split("\n"); const first=lines.shift(); const rest=lines.join("\n").trim();
-    w.innerHTML=`<div class="jdlg-c"><div class="jdlg-h"><img src="./icon-192.png?v=3" alt=""><span>Järkäle</span></div>
+    w.innerHTML=`<div class="jdlg-c"><div class="jdlg-h"><img src="./icon-192.png?v=4" alt=""><span>Järkäle</span></div>
       <div class="jdlg-t">${esc(first)}</div>${rest?`<div class="jdlg-m">${esc(rest)}</div>`:""}
       ${o.check?`<label class="jdlg-chk"><input type="checkbox"${o.check.value?" checked":""}> ${esc(o.check.label)}</label>`:""}
       <div class="jdlg-a">${o.alert?"":`<button class="jdlg-no">${esc(o.cancel||"Peruuta")}</button>`}<button class="jdlg-ok${o.danger?" danger":""}">${esc(o.ok||"OK")}</button></div></div>`;
@@ -10435,7 +10439,7 @@ async function gSessionImage(s,opt){
   const probe=(sel,fb)=>{ const el=document.querySelector(sel); return el?getComputedStyle(el).fontFamily:fb; };
   const FB=probe(".g-sum-list .nm",'Manrope, system-ui, sans-serif'), FN=probe(".g-sum-kpi b",FB), FH=probe(".tr-h1",FB);
   const K=2.6, W=412, P=20, IW=W-2*P;
-  const logo=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src="./icon-192.png?v=3"; });
+  const logo=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src="./icon-192.png?v=4"; });
   const stampSvg=gStampHTML(s,false).replace(/^[\s\S]*?(<svg)/,"$1").replace(/<\/div>\s*$/,"").replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" ').replace(/currentColor/g,C.acc).replace(/font-weight="800"/g,'font-weight="800" font-family="sans-serif"');
   const stamp=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(stampSvg); });
   const cv=document.createElement("canvas"), x=cv.getContext("2d");

@@ -64,7 +64,7 @@ grep -q "Pilotti v$FOOT</span>" "$PILOT/index.html" || die "pilotin alatunnistee
 NDIFF=$(diff index.html "$PILOT/index.html" | grep -c '^<' || true)
 [ "$NDIFF" = 1 ] || die "pilotti eroaa päähaarasta $NDIFF rivillä (pitäisi olla 1: alatunniste)"
 ok "index.html = pääversio + alatunniste \"Pilotti v$FOOT\""
-for f in tietosuoja.html manifest.webmanifest; do cmp -s "$f" "$PILOT/$f" || { cp "$f" "$PILOT/$f"; ok "$f kopioitu pilottiin"; }; done
+for f in tietosuoja.html manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png; do cmp -s "$f" "$PILOT/$f" || { cp "$f" "$PILOT/$f"; ok "$f kopioitu pilottiin"; }; done
 bump_cache "$PILOT"
 
 if [ $RUN_TESTS = 1 ]; then
