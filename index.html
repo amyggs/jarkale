@@ -2220,7 +2220,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.122</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.123</span>
       </div>
     </div>
   </div>
@@ -2254,6 +2254,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.123", d:"lokakuu 2026", items:[
+    "Jos ohjelman sarjaryhmillä on sama toistotavoite (esim. 3 × 6–10 + 1 × 6–10), tavoite näytetään yhtenä (4 × 6–10) eikä sarjarivien alle toisteta samaa toistoväliä. Ohjelman teksti säilyy ennallaan.",
+    "R/P- ja DS-tunnisteen napautus kertoo, mitä lisärivi tarkoittaa (selitys näkyi aiemmin vain hiirellä)."
+  ]},
   {v:"2.18.122", d:"lokakuu 2026", items:[
     "Aloituksen ja tyhjän Treeni-näkymän tekstit kertovat, että ohjelmaksi riittävät liikkeet, joita teet nyt. Kirjoitettua ohjelmaa ei tarvita valmiina."
   ]},
@@ -7179,6 +7183,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.10.2026", items:[
+    "Napauta sarjarivin R/P- tai DS-tunnistetta, niin näet, mitä lisärivi tarkoittaa.",
     "Pudotus- ja rest-pause-sarjat tunnistetaan useammasta kirjoitustavasta, ja Strongista tai Hevystä tuodut pudotussarjat tulevat DS-riveinä.",
     "Kun tuot uuden ohjelman, sovellus kysyy, arkistoidaanko edellinen. Arkistoi-nappi on myös ohjelman muokkausnäkymän yläreunassa.",
     "Rest-pause- ja pudotussarjat: ohjelman merkintä \"+ R/P + DS\" luo treeniin merkityt lisärivit, ja pudotussarjan paino ehdotetaan valmiiksi. Lisärivin voi lisätä myös liikkeen valikosta (⋯)."
@@ -9140,8 +9145,14 @@ function parseExLine(text){
   return {name:name.charAt(0).toUpperCase()+name.slice(1),sets:groups.reduce((n,g)=>n+g.sets,0),repsMin:isMax?null:rMin,repsMax:isMax||rMaxV===rMin?null:rMaxV,max:isMax,weight,note,groups:grp,extras,parsed:true};
 }
 const repsTxt=(g,dash="–")=>g.max?"max":(g.repsMax?`${g.repsMin}${dash}${g.repsMax}`:`${g.repsMin}`);
+// v2.18.123: sarjakohtaiset ryhmät näytetään vain, jos toistotavoitteet eroavat ("3 × 6–10 + 1 × 6–10" → "4 × 6–10").
+// Tallennettu tavoite ja muokkausteksti säilyvät ennallaan.
+// v2.18.123: lisärivin selitys myös puhelimessa (title näkyy vain hiirellä): napautus näyttää sen ilmoituksena
+const SET_KIND_HELP={rp:"Rest-pause: lyhyt tauko ja lisää toistoja samalla painolla",ds:"Pudotussarja: kevyempi paino heti perään"};
+function goalGroupsDiffer(g){ if(!g||!g.groups||g.groups.length<2) return false; const k=x=>[x.repsMin??"",x.repsMax??"",!!x.max].join("|"), a=k(g.groups[0]); return g.groups.some(x=>k(x)!==a); }
 function goalTxt(g){
   if(!g||!g.sets) return "";
+  if(g.groups&&g.groups.length>1&&!goalGroupsDiffer(g)) g={...g,...g.groups[0],sets:g.groups.reduce((n,x)=>n+x.sets,0),groups:null};
   if(g.repsMin==null&&!g.max&&!(g.groups&&g.groups.length>1)) return `${g.sets} ${g.sets===1?"sarja":"sarjaa"}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
   const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets} × ${repsTxt(x)}`).join(" + "):`${g.sets} × ${repsTxt(g)}`;
   return `${body}${extrasTxt(g)}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
@@ -10539,8 +10550,8 @@ function gymSessionHTML(s){
       // v2.18.76: merkki vain sarjalle, joka on parempi kuin aiemmat treenit JA tämän treenin aiemmat sarjat (3 × sama ennätys = yksi merkki)
       const pr=isPR(r,prevSets)&&isPR(r,ex.sets.slice(0,ri).filter(x=>x.done).concat(prevSets));
       const mi=mainIdx(ex,ri), lab=r.kind?(SET_KIND[r.kind]||r.kind):String(mi+1);
-      const sgx=!r.kind&&ex.goal&&ex.goal.groups&&ex.goal.groups.length>1?setGoalAt(ex.goal,mi):null;
-      h+=`<div class="set${r.done?" done":""}${r.kind?" kind":""}${G_FLASH.has("set-"+ex.id+"-"+ri)?" pop":""}" data-set="${ei}-${ri}"><span class="no${r.kind?" kind":""}"${r.kind?` title="${r.kind==="rp"?"Rest-pause: lyhyt tauko ja lisää toistoja samalla painolla":"Pudotussarja: kevyempi paino heti perään"}"`:""}>${lab}${sgx?`<small>${repsTxt(sgx)}</small>`:""}</span>
+      const sgx=!r.kind&&goalGroupsDiffer(ex.goal)?setGoalAt(ex.goal,mi):null;
+      h+=`<div class="set${r.done?" done":""}${r.kind?" kind":""}${G_FLASH.has("set-"+ex.id+"-"+ri)?" pop":""}" data-set="${ei}-${ri}"><span class="no${r.kind?" kind":""}"${r.kind?` title="${SET_KIND_HELP[r.kind]}" role="button" onclick="event.stopPropagation();showSavedToast(SET_KIND_HELP.${r.kind})"`:""}>${lab}${sgx?`<small>${repsTxt(sgx)}</small>`:""}</span>
         ${adj?`<div class="kgw"><button class="kgb" aria-label="Paino −${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},-kgStep())">−</button><input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${lab} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)"><button class="kgb" aria-label="Paino +${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},kgStep())">+</button></div>`:`<input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${lab} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)">`}
         ${adj?`<div class="rpw"><button class="kgb" aria-label="Toistot −1" onclick="gAdjReps('${sid}',${ei},${ri},-1)">−</button>`:""}<input class="f" data-f="reps" inputmode="numeric" enterkeyhint="done" aria-label="Sarja ${lab} toistot" value="${r.reps!=null?r.reps:""}" placeholder="${gh.reps!=null?gh.reps:"–"}" oninput="gSetVal('${sid}',${ei},${ri},'reps',this.value)" onkeydown="if(event.key==='Enter'){this.blur();gToggleSet('${sid}',${ei},${ri})}">${adj?`<button class="kgb" aria-label="Toistot +1" onclick="gAdjReps('${sid}',${ei},${ri},1)">+</button></div>`:""}
         <button class="ck" aria-label="Sarja ${lab} ${r.done?"tehty, peru":"tehty"}" aria-pressed="${r.done}" onclick="gToggleSet('${sid}',${ei},${ri})">${ico("check",20)}</button>

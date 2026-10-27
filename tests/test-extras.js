@@ -1,4 +1,4 @@
-// Järkäle Tracking v2.18.117 – erikoistekniikat: rest-pause (R/P) ja pudotussarjat (DS) lisäriveinä
+// Järkäle Tracking v2.18.117 (+v2.18.123) – erikoistekniikat: rest-pause (R/P) ja pudotussarjat (DS) lisäriveinä
 const { chromium, devices } = require('playwright');
 const fs = require('fs');
 const URL='http://localhost:8765/index.html';
@@ -35,6 +35,12 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   ok(rows==='-,-,rp,ds,rp','treeni luo työsarjat ja merkityt lisärivit: '+rows);
   const labels=await p.evaluate(()=>[...document.querySelectorAll('[data-ex] .sets')][0]?[...document.querySelectorAll('[data-ex]')][0].querySelectorAll('.set .no')?[...[...document.querySelectorAll('[data-ex]')][0].querySelectorAll('.set .no')].map(e=>e.childNodes[0].textContent).join(','):'':'');
   ok(labels==='1,2,R/P,DS,R/P','rivien tunnisteet 1, 2, R/P, DS, R/P: '+labels);
+  ok(await p.evaluate(()=>[...document.querySelector('[data-ex]').querySelectorAll('.set .no small')].length===2),'eri toistotavoitteet (6–10 & 8–12): sarjan oma toistoväli näkyy');
+  const gg=await p.evaluate(()=>{ const a=parseExLine('Vipunosto 3x6-10 & 1x6-10 + R/P + DS'), b=parseExLine('Penkki 1x6-8 & 2x10-12'); return {a:goalTxt(a),ad:goalGroupsDiffer(a),ai:goalInputTxt(a),b:goalTxt(b),bd:goalGroupsDiffer(b)}; });
+  ok(gg.a==='4 × 6–10 + R/P + DS'&&!gg.ad&&/&/.test(gg.ai),'sama toistoväli kahdessa ryhmässä näytetään yhtenä, muokkausteksti säilyy: '+gg.a+' / '+gg.ai);
+  ok(gg.b==='1 × 6–8 + 2 × 10–12'&&gg.bd,'eri toistovälit pysyvät erillään: '+gg.b);
+  await p.locator('[data-ex] .set .no.kind').first().click(); await p.waitForTimeout(150);
+  ok(/Rest-pause: lyhyt tauko/.test(await p.evaluate(()=>document.getElementById('saved-toast')?.textContent||'')),'R/P-tunnisteen napautus näyttää selityksen');
   // kirjoita työsarjat, katso ehdotukset
   await p.evaluate(()=>{ const s=activeSession(); gSetVal(s.id,0,0,'kg','60'); gSetVal(s.id,0,0,'reps','10'); gSetVal(s.id,0,1,'kg','50'); gSetVal(s.id,0,1,'reps','12'); });
   const gh=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; return [2,3,4].map(i=>ghostFor(s,ex,i)); });
