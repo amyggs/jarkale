@@ -146,6 +146,13 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
   ok(!!(await stored(p,D41))||!!(await entry(p,D41)),'tyhjien päivien siivous ei poista tagipäivää');
   await p.reload(); await p.waitForTimeout(500);
   ok(JSON.stringify((await entry(p,D41)).day_factors)==='["illness","high_stress"]','tagit säilyvät reloadissa');
+  // v2.18.127: valinnan jälkeen osion saa suljettua; suljettuna tiivis rivi valinnoista
+  await p.evaluate(D=>{ if(S.date!==D){ S.date=D; loadDayIntoForm(D); } S.showDayFactors=false; renderDayFactors(); },D41);
+  ok(await p.evaluate(()=>{ const b=document.querySelector('#day-factors .df-set'); return !!b&&/Sairas/.test(b.textContent)&&!document.querySelector('#day-factors .chips'); }),'valitut poikkeamat tiiviinä rivinä, kun osio on suljettu');
+  await p.locator('#day-factors .df-set').click();
+  ok(await p.locator('#day-factors .df-close').isVisible(),'avattuna sulkemisrasti näkyy myös valintojen kanssa');
+  await p.locator('#day-factors .df-close').click();
+  ok(await p.locator('#day-factors .df-set').isVisible(),'rasti sulkee osion tiiviiksi riviksi');
   const streakOk=await p.evaluate(ds=>hasMeaningfulEntry(S.entries[ds]),D41);
   ok(streakOk,'tagipäivä lasketaan kirjatuksi (hasMeaningfulEntry)');
 
