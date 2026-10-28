@@ -30,6 +30,18 @@ const TXT=["Ohjelma testi 1/2026","","Jokainen sarja failureen saakka.","","1 Ri
   ok(E(d2,'Maastaveto (Barbell)').g==='3 × 5','lyhyt tarkenne sulkeissa jää nimeen');
   ok(E(d2,'RDL tai SJMV levytangolla').note===''&&E(d2,'RDL tai SJMV levytangolla').g==='2 × 8–12','loppupiste ei tule ohjeeksi');
   ok(E(d2,'Yhden käden ylätalja D kahvalla').note==='nojaa vinopenkkiin (kyynärpää kohti lonkkaa)','pilkun jälkeinen tarkenne ohjeeksi sulkeineen');
+
+  console.log('\nTaulukko (v2.18.129, esim. ChatGPT:n tekemä ohjelma)');
+  const tb=await p.evaluate(()=>{ const f=t=>parseProgramText(t).map(d=>d.name+': '+d.exercises.map(e=>e.name+' '+goalTxt(e)+(e.note?' ['+e.note+']':'')).join(' | ')).join(' // ');
+    return {
+      a:f("### Treeni A – Ylävartalo\n\n| Liike | Sarjat x toistot | Teho | Palautus |\n|---|---|---|---|\n| Penkkipunnerrus tangolla | 3 x 6–8 | RIR 2 | 2–3 min |\n| Tuettu rintasoutu laitteessa | 3 x 8–12 | RIR 2 | 2 min |\n\n### Treeni B – Alavartalo\n\n| Liike | Sarjat x toistot | Teho | Palautus |\n|---|---|---|---|\n| Takakyykky | 3 x 5–8 | RIR 2–3 | 3 min |"),
+      b:f("**Päivä 1**\n\n| Liike | Sarjat | Toistot | Paino |\n|:---|:---:|:---:|---|\n| Penkkipunnerrus | 3 | 8-10 | 60 kg |\n| Ylätalja | 3 | 10–12 | |"),
+      c:f("| Päivä | Liike | Sarjat x toistot |\n|---|---|---|\n| Maanantai | Kyykky | 3 x 5 |\n| Maanantai | Penkki | 3 x 8 |\n| Torstai | Maastaveto | 2 x 5 |"),
+      d:f("## Day A\n\n| Exercise | Sets x Reps | RPE |\n| --- | --- | --- |\n| Bench Press | 4 x 6-8 | 8 |") }; });
+  ok(tb.a==='Treeni A – Ylävartalo: Penkkipunnerrus tangolla 3 × 6–8 [teho RIR 2, palautus 2–3 min] | Tuettu rintasoutu laitteessa 3 × 8–12 [teho RIR 2, palautus 2 min] // Treeni B – Alavartalo: Takakyykky 3 × 5–8 [teho RIR 2–3, palautus 3 min]','taulukko: otsikot päiviksi, sarjat ja toistot, teho ja palautus ohjeeksi: '+tb.a);
+  ok(tb.b==='Päivä 1: Penkkipunnerrus 3 × 8–10 · 60 kg | Ylätalja 3 × 10–12','erilliset Sarjat- ja Toistot-sarakkeet, paino: '+tb.b);
+  ok(tb.c==='Maanantai: Kyykky 3 × 5 | Penkki 3 × 8 // Torstai: Maastaveto 2 × 5','Päivä-sarake treenipäiviksi: '+tb.c);
+  ok(tb.d==='Day A: Bench Press 4 × 6–8 [RPE 8]','englanninkielinen taulukko: '+tb.d);
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

@@ -2236,7 +2236,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.128</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.129</span>
       </div>
     </div>
   </div>
@@ -2270,6 +2270,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.129", d:"lokakuu 2026", items:[
+    "Ohjelman tuonti lukee myös taulukon (esim. ChatGPT:n tekemä ohjelma): liike, sarjat ja toistot (yhdessä tai erillisissä sarakkeissa), paino, Päivä-sarake treenipäiviksi ja muut sarakkeet, kuten teho ja palautus, liikkeen ohjeeksi. Markdown-otsikot (### Treeni A) tunnistetaan treenipäiviksi. Sulkeissa oleva ohje tallentuu ilman sulkeita."
+  ]},
   {v:"2.18.128", d:"lokakuu 2026", items:[
     "Treenipäivän napautus ei enää aloita treeniä suoraan, vaan näyttää sen sisällön: liikkeet, tavoitteet ja viime kerran sarjat. Treeni alkaa Aloita treeni -napista. Seuraavana kierrossa -rivin Aloita aloittaa yhä suoraan."
   ]},
@@ -7217,6 +7220,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"28.10.2026", items:[
+    "Ohjelman tuonti lukee myös taulukon, esimerkiksi ChatGPT:n tekemän ohjelman. Liitä se sellaisenaan kohtaan Treeni → Uusi ohjelma → Tuo tekstistä.",
     "Treenipäivän napautus näyttää ensin, mitä treeni sisältää: liikkeet, tavoitteet ja viime kerran sarjat. Treeni alkaa Aloita treeni -napista.",
     "Päivässä jotain poikkeavaa -osion saa suljettua myös valinnan jälkeen. Valinnat näkyvät silloin yhdellä rivillä.",
     "Pitkät ohjelmien, treenipäivien ja liikkeiden nimet rivittyvät siististi eivätkä katkea keskeltä sanaa."
@@ -9136,6 +9140,7 @@ function cleanLine(l){
     .replace(/\\([^\w\s])/g,"$1")          // markdown-escapet
     .replace(/\[([^\]]*)\]\((?:[^)]*)\)/g,"$1")               // [teksti](linkki) → teksti
     .replace(/https?:\/\/\S+/g,"")                            // irralliset linkit pois
+    .replace(/^#{1,6}\s+/,"")                                 // markdown-otsikko (### Treeni A)
     .replace(/\*\*|__/g,"")                                   // lihavointi
     .replace(/^[\s•\-–·*]+(?=\S)/,"")                          // luettelomerkit
     .replace(/\s+/g," ").trim();
@@ -9175,6 +9180,7 @@ function parseExLine(text){
     const n=Math.min(6,+(xm[1]||xm[3]||1)), k=/^(r\s*\/\s*p|rp|rest)/i.test(xm[2])?"rp":"ds";
     (extras=extras||[]).push(...Array(n).fill(k)); rest=rest.slice(xm[0].length); }
   let note=rest.replace(/^\s*(?:toistot|toistoa|reps|krt)\b/i,"").replace(/^[\s,;:)–—/-]+/,"").replace(/[\s(]+$/,"").trim();
+  if(/^\([^()]*\)$/.test(note)) note=note.slice(1,-1).trim();   // v2.18.129: "(RIR 2, tauko 2 min)" → ilman sulkeita
   const grp=groups.length>1?groups.map(g=>({sets:g.sets,repsMin:g.isMax?null:g.min,repsMax:g.isMax?null:g.max,max:g.isMax})):null;
   // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje.
   // v2.18.116: vain sulkeiden ulkopuolinen pilkku. Pitkä sulkeissa oleva ohje (≥ 3 sanaa) siirtyy ohjeeksi;
@@ -9285,8 +9291,39 @@ function strongShareParse(text){
   out.skipped=skipped; out.source="strong";
   return out;
 }
+// v2.18.129: markdown-taulukot (ChatGPT:n ja muiden tekoälyjen tyypillinen ohjelmamuoto) riveiksi ennen jäsennystä:
+// | Liike | Sarjat x toistot | Teho | Palautus | → "Liike 3 x 6–8 (teho RIR 2, palautus 2 min)". Sarakkeet tunnistetaan otsikosta;
+// erilliset Sarjat- ja Toistot-sarakkeet yhdistetään, Paino-sarakkeen luku tulee painoksi, Päivä-sarake treenipäivän otsikoksi.
+function mdTablesToLines(text){
+  const L=String(text||"").split(/\r?\n/), out=[];
+  const isRow=l=>/^\s*\|.*\|\s*$/.test(l);
+  const isSep=l=>/^\s*\|?(\s*:?-{2,}:?\s*\|)+\s*(:?-{2,}:?\s*)?\|?\s*$/.test(l);
+  const cells=l=>l.trim().replace(/^\|/,"").replace(/\|$/,"").split("|").map(c=>cleanLine(c));
+  const classify=h=>{ const f=re=>h.findIndex(x=>re.test(x));
+    const both=f(/(sarj|sets?).*(toist|reps?)|^\s*(sets?\s*[x×]\s*reps?)\s*$/i);
+    const c={day:f(/^(päivä|paiva|treeni|day|workout)$/i),name:f(/liike|harjoitus|exercise|movement|nimi|lift/i),both,
+      sets:both>=0?-1:f(/^(sarjat?|sets?)$/i),reps:both>=0?-1:f(/^(toistot?|reps?|toistomäärä)$/i),kg:f(/^(paino|kg|kuorma|load|weight)/i)};
+    if(c.name<0) c.name=c.day===0?1:0; return c; };
+  let hdr=null, lastDay=null;
+  L.forEach((l,i)=>{
+    if(!isRow(l)){ hdr=null; out.push(l); return; }
+    if(isSep(l)) return;
+    const c=cells(l);
+    if(!hdr&&isSep(L[i+1]||"")){ hdr={...classify(c),labels:c}; return; }   // otsikkorivi
+    const H=hdr||{name:0,both:c.length>1?1:-1,sets:-1,reps:-1,kg:-1,day:-1,labels:[]};
+    const name=c[H.name]||""; if(!name) return;
+    if(H.day>=0&&c[H.day]&&c[H.day]!==lastDay){ lastDay=c[H.day]; out.push("",lastDay+":"); }
+    let goal=H.both>=0?c[H.both]:(H.sets>=0&&H.reps>=0&&c[H.sets]&&c[H.reps]?`${c[H.sets]}x${c[H.reps]}`:(H.sets>=0?c[H.sets]:""));
+    const kg=H.kg>=0?(c[H.kg]||"").match(/^(\d+(?:[.,]\d+)?)\s*(kg)?$/i):null;
+    const used=new Set([H.name,H.both,H.sets,H.reps,H.day,kg?H.kg:-2]);
+    const rest=c.map((v,j)=>used.has(j)||!v||/^[-–—]$/.test(v)?null:((H.labels[j]?(/^[A-ZÅÄÖ]{2,4}$/.test(H.labels[j])?H.labels[j]:H.labels[j].toLowerCase())+" ":"")+v)).filter(Boolean);
+    out.push([name,goal,kg?kg[1]:"",rest.length?`(${rest.join(", ")})`:""].filter(Boolean).join(" "));
+  });
+  return out.join("\n");
+}
 function parseProgramText(text){
   const sp=strongShareParse(text); if(sp) return sp;
+  if(/^\s*\|.*\|\s*$/m.test(String(text||""))) text=mdTablesToLines(text);
   const lines=String(text||"").split(/\r?\n/).map(cleanLine);
   const days=[], skipped=[]; let cur=null, superset=null;
   const isEx=l=>{ const p=parseExLine(l); return !!(p&&p.parsed); };
@@ -10735,7 +10772,7 @@ async function gArchiveProg(){
 function gymImportHTML(){
   const pv=GU.importPreview;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Muistiinpanosta tai tekstitiedostosta</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
-    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti käy sellaisenaan. Puuttuvia arvoja ei keksitä.</div>
+    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.</div>
     <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
     <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=gMatchImport(parseProgramText(GU.importText));renderGym()">Esikatsele</button>`;
   if(pv){
