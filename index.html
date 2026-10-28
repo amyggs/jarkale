@@ -752,8 +752,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 [data-palette="ampiainen"] #day-factors .df-open .df-ico{color:var(--text);}
 /* ═══ v2.17.0: SALIOHJELMAT JA TREENISEURANTA ═══ */
 #view-treeni .view-hero{padding-top:4px;}
-.tr-hero-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 8px;}
-.tr-h1{font:800 20px/1.15 Manrope,system-ui,sans-serif;color:var(--text);letter-spacing:-.01em;overflow-wrap:anywhere;}
+.tr-hero-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 8px;}
+/* v2.18.126: otsikko saa vähintään pisimmän sanansa levyisen tilan; jos napit eivät mahdu viereen, ne siirtyvät otsikon alle (ei sanan katkeamista keskeltä) */
+.tr-hero-row>div:first-child{flex:1 1 min-content!important;}
+.tr-h1{font:800 20px/1.15 Manrope,system-ui,sans-serif;color:var(--text);letter-spacing:-.01em;overflow-wrap:break-word;}
 .tr-h2{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:3px;}
 .tr-pill{border:none;border-radius:999px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 16px;min-height:40px;white-space:nowrap;flex-shrink:0;}
 .tr-pill.dark{background:var(--seg-on);color:var(--on-accent);}
@@ -901,7 +903,7 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ex.skipped{opacity:.6;}
 .ex.skipped .ex-n{text-decoration:line-through;}
 .ex-top{display:flex;align-items:center;gap:8px;}
-.ex-n{font:800 16px Manrope,system-ui,sans-serif;color:var(--text);flex:1;min-width:0;overflow-wrap:anywhere;}
+.ex-n{font:800 16px Manrope,system-ui,sans-serif;color:var(--text);flex:1;min-width:0;overflow-wrap:break-word;}
 .ex-more{border:none;background:transparent;color:var(--dim);font:800 20px Manrope,system-ui,sans-serif;min-width:40px;min-height:36px;line-height:1;padding:0;flex-shrink:0;}
 .ex-menu{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px;}
 .ex-menu button{border:none;border-radius:10px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;min-height:38px;padding:0 12px;}
@@ -997,9 +999,9 @@ html.g-run #view-treeni{padding-bottom:96px!important;}
 .ed-dn span{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);white-space:nowrap;}
 .g-day-in{flex:1;min-width:0;border:none;background:transparent;font:800 16px Manrope,system-ui,sans-serif;color:var(--text);padding:6px 0;outline:none;border-bottom:1.5px dashed transparent;}
 .g-day-in:focus{border-bottom-color:var(--bord);}
-.ed-l{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--surf2);padding:12px 0;font:600 15px Manrope,system-ui,sans-serif;color:var(--text);}
-.ed-l .x{flex:1;min-width:0;overflow-wrap:anywhere;}
-.ed-l .g{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
+.ed-l{display:flex;flex-wrap:wrap;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--surf2);padding:12px 0;font:600 15px Manrope,system-ui,sans-serif;color:var(--text);}
+.ed-l .x{flex:1 1 11em;min-width:0;overflow-wrap:break-word;} /* v2.18.126: pitkä tavoite siirtyy nimen alle */
+.ed-l .g{margin-left:auto;font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
 .ed-l.open{border-bottom-color:transparent;font-weight:800;}
 .ed-l.unp .g{color:var(--orange);}
 .ed-l.has-m{border-bottom:none;padding-bottom:4px;}
@@ -2223,7 +2225,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.125</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.126</span>
       </div>
     </div>
   </div>
@@ -2257,6 +2259,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.126", d:"lokakuu 2026", items:[
+    "Rivitys: pitkä ohjelman nimi ei katkea keskeltä sanaa, vaan napit siirtyvät otsikon alle, jos ne eivät mahdu viereen (Treeni, treeni käynnissä, liikehistoria).",
+    "Ohjelman muokkauksessa ja tuonnin esikatselussa pitkä tavoite (esim. 1 × 6–10 + 1 × 8–12 + R/P + DS) siirtyy liikkeen nimen alle, eikä nimi katkea kesken sanan. Tuonnin esikatselun pitkä treenipäivän nimi rivittyy eikä mene reunan yli.",
+    "Kehittäjä: rivitystesti (test-wrap.js) etsii keskeltä katkenneet sanat 11 näkymästä kolmella teemalla."
+  ]},
   {v:"2.18.125", d:"lokakuu 2026", items:[
     "Kuvake julkaistu uudelleen (?v=4, tiedosto muuttunut), jotta Chrome kysyy kuvakkeen vaihtoa niiltäkin, joiden asennettuun sovellukseen jäi lokakuun alun sinappinen kuvake. Ulkoasu ennallaan. Julkaisuskripti kopioi nyt myös kuvakkeet pilottiin."
   ]},
@@ -7192,6 +7199,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"28.10.2026", items:[
+    "Pitkät ohjelmien, treenipäivien ja liikkeiden nimet rivittyvät siististi eivätkä katkea keskeltä sanaa."
+  ]},
   {d:"27.10.2026", items:[
     "Jos aloitusnäytön kuvake on vielä vanha sinappinen, puhelin voi kysyä kuvakkeen päivitystä. Hyväksy se, niin kuvake vaihtuu nykyiseen keltaiseen.",
     "Napauta sarjarivin R/P- tai DS-tunnistetta, niin näet, mitä lisärivi tarkoittaa: rest-pausen tauon pituuden ja pudotussarjan painon pudotuksen.",
@@ -10708,7 +10718,7 @@ function gymImportHTML(){
       h+=`<div class="tr-sec">Esikatselu · ${inc.length} treenipäivää</div>`;
       if(pv.source==="strong") h+=`<div class="g-hint">Tunnistettu Strongin jakoteksti. Tavoitteeksi tuli työsarjojen määrä, toistoväli ja raskain paino. Lämmittelysarjat ohitettiin. Tavoitteita voi muokata tallennuksen jälkeen.</div>`;
       if(unp) h+=`<div class="g-hint warn">${ico("alert",15)} ${unp} riviltä ei löytynyt sarjoja ja toistoja. Ne tallentuvat pelkkinä nimiä, ja tavoitteen voi lisätä myöhemmin.</div>`;
-      pv.forEach((d,di)=>{ h+=`<div class="ed-day${d.include?"":" off"}"><label class="ed-dn"><span style="display:flex;gap:10px;align-items:center;min-width:0"><input type="checkbox" class="g-inc" ${d.include?"checked":""} onchange="GU.importPreview[${di}].include=this.checked;renderGym()"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text);min-width:0;overflow-wrap:anywhere">${esc(d.name)}</span></span><span>${d.exercises.length} liikettä</span></label>
+      pv.forEach((d,di)=>{ h+=`<div class="ed-day${d.include?"":" off"}"><label class="ed-dn"><span style="display:flex;gap:10px;align-items:center;min-width:0;flex:1"><input type="checkbox" class="g-inc" ${d.include?"checked":""} onchange="GU.importPreview[${di}].include=this.checked;renderGym()"><span style="font:800 16px Manrope,system-ui,sans-serif;color:var(--text);min-width:0;white-space:normal;overflow-wrap:break-word">${esc(d.name)}</span></span><span>${d.exercises.length} liikettä</span></label>
         ${d.include?d.exercises.map((e,ei)=>`<div class="ed-l static${e.unparsed?" unp":""}${e.match?" has-m":""}"><span class="x">${esc(e.name)}${e.note?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></div>${gMatchRow(e,di,ei)}`).join(""):""}</div>`; });
       if(pv.skipped&&pv.skipped.length) h+=`<details class="g-src" style="margin:0 0 12px"><summary>Ohitetut rivit (${pv.skipped.length}): ${pv.source==="strong"?"päiväys, linkit ja muut rivit ilman sarjoja":"ohjetekstiä"}, ei tuoda</summary><pre data-raw>${esc(pv.skipped.join("\n"))}</pre></details>`;
       const nm=inc.reduce((n,d)=>n+d.exercises.filter(e=>e.match&&!e.match.auto).length,0);
