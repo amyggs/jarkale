@@ -253,8 +253,8 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
 
   console.log('\nEnnätys ja 1RM-vertailu (v2.17.5)');
   const prr=await p.evaluate(()=>{ const prev=[{kg:80,reps:10,done:true},{kg:82.5,reps:8,done:true}];
-    return [isPR({kg:82.5,reps:9,done:true},prev),isPR({kg:80,reps:9,done:true},prev),isPR({kg:85,reps:5,done:true},prev),isPR({kg:null,reps:12,done:true},[{kg:null,reps:11,done:true}]),isPR({kg:80,reps:10,done:true},[])]; });
-  ok(JSON.stringify(prr)==='[true,false,true,true,false]','ennätys todellisista sarjoista: '+JSON.stringify(prr));
+    return [isPR({kg:82.5,reps:9,done:true},prev),isPR({kg:80,reps:9,done:true},prev),isPR({kg:85,reps:5,done:true},prev),isPR({kg:null,reps:12,done:true},[{kg:null,reps:11,done:true}]),isPR({kg:80,reps:10,done:true},[]),isPR({kg:8,reps:15,done:true},[{kg:10,reps:12,done:true}])]; });
+  ok(JSON.stringify(prr)==='[true,false,true,true,false,false]','ennätys todellisista sarjoista: '+JSON.stringify(prr));
   ok(await p.evaluate(()=>e1rm(100,20)>e1rm(100,18)),'yli 15 toistoa: 18 → 20 näkyy nousuna');
 
   console.log('\nPaluu ja peruutus, suuret toistomäärät (v2.17.6)');
@@ -286,7 +286,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
   await p.getByRole('button',{name:'Tallenna treeni'}).click();
   const sum=(await p.locator('.g-sum').innerText()).replace(/\u00a0/g,' ');
-  ok((await p.locator('.g-sum .g-stamp').count())===1&&/1\s*ennätys/i.test(sum),'yhteenveto ja tallennusleima lopetuksen jälkeen, ennätysten määrä kaistassa');
+  ok((await p.locator('.g-sum .g-stamp').count())===1&&(await p.locator('.g-sum-hero').count())===0&&/ENNÄTYS|ennätys/i.test(sum),'yhteenveto ja tallennusleima lopetuksen jälkeen, ei ennätyslaatikkoa, ennätys liikkeen rivillä');
   ok(sum.includes('90 × 8')&&/raskain tähän asti · aiemmin 85 × 8/.test(sum),'ennätys ja vertailukohta: '+sum.split('\n').filter(x=>/90|aiemmin|uusi/.test(x)).join(' | '));
   const shared=await p.evaluate(async()=>{ let got=null; navigator.share=async d=>{got=d;}; window.__jdlgAuto=false; await gShareSession(GU.sessionId); window.__jdlgAuto=true; return got; });
   const img=await p.evaluate(async()=>{ let got=null; navigator.canShare=()=>true; navigator.share=async d=>{got=d;}; await gShareSession(GU.sessionId); const f=got&&got.files&&got.files[0]; if(!f) return null; const bm=await createImageBitmap(f); return {name:f.name,type:f.type,w:bm.width,h:bm.height}; });

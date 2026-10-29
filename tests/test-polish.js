@@ -71,7 +71,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(/näin raskasta painoa ei ole ennen nostettu näin monta kertaa/.test(sh.off)&&/Järkäle · treenipäiväkirja$/.test(sh.off),'selitys ja alatunniste');
   ok(/aiemmin 150\u00a0×\u00a012/.test(sh.off),'vertailuluku ei katkea (sitovat välit)');
   await p.evaluate(sid=>{ setTab('treeni'); openSession(sid); },sh.sid); await p.waitForTimeout(200);
-  ok(/1\s*ennätys/.test(await p.locator('.g-sum-hero').innerText()),'yhteenvedossa ennätyskaista');
+  ok((await p.locator('.g-sum-hero').count())===0&&(await p.locator('.g-sum-list .pr-tag').count())>=1,'yhteenvedossa ei ennätyslaatikkoa, ennätys liikkeen rivillä (v2.18.130)');
 
   console.log('\nMitä uutta');
   await p.evaluate(()=>{ setTab('asetukset'); SETTINGS_TOGGLES.changelog=true; renderAsetukset(); }); await p.waitForTimeout(200);

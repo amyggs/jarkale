@@ -58,7 +58,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
   await p.getByRole('button',{name:'Tallenna treeni'}).click(); await p.waitForTimeout(200);
   sum=await p.locator('.g-sum').innerText();
-  ok(!/Ensimmäinen treeni tallennettu/.test(sum)&&/Ei ennätyksiä|Ennätykset/.test(sum)&&/Nuoli:/.test(sum),'toisen treenin yhteenveto on tavallinen');
+  ok(!/Ensimmäinen treeni tallennettu/.test(sum)&&/Liikkeet/.test(sum)&&/Nuoli:/.test(sum),'toisen treenin yhteenveto on tavallinen');
 
   console.log('\nViikkorivin selite');
   await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1'); localStorage.setItem('seuranta-settings',JSON.stringify({theme:'dark',tracking:{weight:true}})); });

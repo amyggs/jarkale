@@ -2236,7 +2236,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.129</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.130</span>
       </div>
     </div>
   </div>
@@ -2270,6 +2270,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.130", d:"lokakuu 2026", items:[
+    "Ennätys tarkoittaa nyt raskainta painoa koskaan tai parasta arvioitua maksimia. Kevyempi paino isommilla toistoilla ei ole ennätys, ellei se ole laskennallisesti kovempi suoritus (esim. 8 × 15 aiemman 10 × 12 jälkeen ei ole). Koskee myös treenin aikaista ennätysmerkkiä ja värinää.",
+    "Yhteenvedon ennätyslaatikko poistettu: ennätykset näkyvät liikkeiden riveillä. Jakoteksti ja jakokuva kertovat ennätyksistä kuten ennenkin."
+  ]},
   {v:"2.18.129", d:"lokakuu 2026", items:[
     "Ohjelman tuonti lukee myös taulukon (esim. ChatGPT:n tekemä ohjelma): liike, sarjat ja toistot (yhdessä tai erillisissä sarakkeissa), paino, Päivä-sarake treenipäiviksi ja muut sarakkeet, kuten teho ja palautus, liikkeen ohjeeksi. Markdown-otsikot (### Treeni A) tunnistetaan treenipäiviksi. Sulkeissa oleva ohje tallentuu ilman sulkeita."
   ]},
@@ -7219,6 +7223,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"29.10.2026", items:[
+    "Ennätyksiä tulee harvemmin ja ne ovat oikeita: raskain paino koskaan tai laskennallisesti kovin suoritus. Kevyempi paino isommilla toistoilla ei enää ole ennätys. Yhteenvedon ennätyslaatikko on poistettu, ennätykset näkyvät liikkeiden riveillä."
+  ]},
   {d:"28.10.2026", items:[
     "Ohjelman tuonti lukee myös taulukon, esimerkiksi ChatGPT:n tekemän ohjelman. Liitä se sellaisenaan kohtaan Treeni → Uusi ohjelma → Tuo tekstistä.",
     "Treenipäivän napautus näyttää ensin, mitä treeni sisältää: liikkeet, tavoitteet ja viime kerran sarjat. Treeni alkaa Aloita treeni -napista.",
@@ -9501,7 +9508,11 @@ function setsBefore(key,sess){
 function isPR(r,prev){
   if(!r.done||!r.reps||!prev.length||r.kind) return false;
   if(r.kg==null) return !prev.some(p=>p.kg==null&&p.reps>=r.reps);
-  return !prev.some(p=>p.kg!=null&&p.kg>=r.kg&&p.reps>=r.reps);
+  // v2.18.130: ennätys = raskain paino koskaan tai paras arvioitu maksimi (Epley). Kevyempi paino isommilla toistoilla
+  // (8 × 15 aiemman 10 × 12 jälkeen) ei ole ennätys, ellei se ole laskennallisesti kovempi. Uuden ohjelman uudet toistoalueet
+  // tekivät aiemmin lähes jokaisesta liikkeestä ennätyksen.
+  const w=prev.filter(p=>p.kg!=null&&p.reps); if(!w.length) return true;
+  return r.kg>Math.max(...w.map(p=>p.kg))||e1rm(r.kg,r.reps)>Math.max(...w.map(p=>e1rm(p.kg,p.reps)))+1e-9;
 }
 // v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (sama tai kevyempi paino, enemmän toistoja) → toistot
 function prOnKg(r,prev){ if(r.kg==null) return false; const w=prev.filter(p=>p.kg!=null); return !w.length||r.kg>Math.max(...w.map(p=>p.kg)); }
@@ -10470,8 +10481,8 @@ function gymSummaryHTML(s,fresh){
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
   // v2.18.107: ennätykset näkyviksi heti tunnuslukujen alle (paras uutinen ylimmäksi)
   const bp=bestPR(S2);
-  if(bp) h+=`<div class="g-sum-hero" style="color:${accentInk()}"><b>${S2.prs.length}</b><span>${S2.prs.length===1?"ennätys":"ennätystä"}<small>Paras: ${esc(bestPRTxt(bp))}</small></span></div>`;
-  h+=`<div class="lbl-small g-sum-prh">${S2.prs.length?"Liikkeet":S2.first?"Ensimmäinen treeni tallennettu":"Ei ennätyksiä tällä kertaa"}</div>`;
+  // v2.18.130: ei erillistä ennätyslaatikkoa yhteenvedossa – ennätykset näkyvät liikkeiden omilla riveillä (jaossa yhä mukana)
+  h+=`<div class="lbl-small g-sum-prh">${S2.first?"Ensimmäinen treeni tallennettu":"Liikkeet"}</div>`;
   // v2.18.106: jokaisella liikkeellä sama muoto: nimi (+ nuoli), sarjat heti alla, ennätys yhdellä rivillä, huomio omalla rivillään.
   // Ennätysriveillä ei nuolta (kaksi eri mittaria hämäsi), ei arvioitua 1RM:ää (se on liikkeen sivulla ja ennätyshetken ilmoituksessa).
   const noteH=r=>r.ex.userNote?`<div class="gs-note">${ico("note",13)}<span>${esc(r.ex.userNote)}</span></div>`:"";
