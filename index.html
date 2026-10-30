@@ -762,7 +762,10 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .tr-pill{border:none;border-radius:999px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 16px;min-height:40px;white-space:nowrap;flex-shrink:0;}
 /* v2.18.128 treenipäivän esikatselu listassa */
 .tr-row .chev{transition:transform .15s;} .tr-row .chev.open{transform:rotate(90deg);}
-.tr-pv{padding:2px 16px 14px;border-bottom:1px solid var(--surf2);}
+.tr-pv{margin:0 10px 12px;padding:2px 14px 14px;border-radius:14px;background:color-mix(in srgb,var(--text) 5%,transparent);border-left:3px solid var(--orange);}
+.tr-row.tr-open .n{font-weight:800;}
+.tr-pv-act{display:flex;gap:8px;margin-top:12px;} .tr-pv-act .tr-pv-go{flex:1;margin-top:0;} .tr-pv-x{flex:none;border:none;border-radius:999px;background:transparent;color:var(--dim);font:700 13px Manrope,system-ui,sans-serif;padding:0 14px;min-height:46px;}
+.tr-pe:has(+ .tr-pv-act){border-bottom:none;}
 .tr-pe{padding:8px 0;border-bottom:1px solid var(--surf2);}
 .tr-pe-h{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;justify-content:space-between;}
 .tr-pe-h b{flex:1 1 11em;min-width:0;font:700 14px/1.35 Manrope,system-ui,sans-serif;color:var(--text);overflow-wrap:break-word;}
@@ -2236,7 +2239,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.130</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.131</span>
       </div>
     </div>
   </div>
@@ -2270,6 +2273,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.131", d:"lokakuu 2026", items:[
+    "Treenipäivän esikatselu erottuu listasta: sisennetty laatikko, jonka reunassa on korostusviiva, avattu päivä lihavoituna ja lopussa Sulje-nappi Aloita treeni -napin vieressä. Seuraavan treenipäivän alkukohta näkyy selvästi."
+  ]},
   {v:"2.18.130", d:"lokakuu 2026", items:[
     "Ennätys tarkoittaa nyt raskainta painoa koskaan tai parasta arvioitua maksimia. Kevyempi paino isommilla toistoilla ei ole ennätys, ellei se ole laskennallisesti kovempi suoritus (esim. 8 × 15 aiemman 10 × 12 jälkeen ei ole). Koskee myös treenin aikaista ennätysmerkkiä ja värinää.",
     "Yhteenvedon ennätyslaatikko poistettu: ennätykset näkyvät liikkeiden riveillä. Jakoteksti ja jakokuva kertovat ennätyksistä kuten ennenkin."
@@ -10266,7 +10272,7 @@ function gymHomeHTML(){
       // v2.18.128: rivin napautus näyttää treenin sisällön (liikkeet, tavoitteet, viimeksi) ja Aloita-napin; Seuraavana-rivin Aloita aloittaa suoraan
       const op=GU.dayOpen===d.id;
       let r=`<button class="tr-row tr-btn${on?" tr-next":""}${op?" tr-open":""}" ${d.exercises.length?"":"disabled"} aria-expanded="${op}" onclick="GU.dayOpen=GU.dayOpen==='${d.id}'?null:'${d.id}';renderGym()"><div class="t">${d.id===next?`<div class="tr-nx">Seuraavana kierrossa</div>`:""}<div class="n">${esc(d.name)}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:" · ei vielä tehty"}</div></div>${on&&!op?`<span class="tr-go" role="button" onclick="event.stopPropagation();startSession('${p.id}','${d.id}')">Aloita</span>`:`<span class="chev${op?" open":""}">›</span>`}</button>`;
-      if(op) r+=`<div class="tr-pv">${d.exercises.map(e=>{ const pv=prevFor(e.key,null); return `<div class="tr-pe"><div class="tr-pe-h"><b>${esc(e.name)}</b><span>${goalTxt(e)||""}</span></div>${pv?`<div class="tr-pe-l">Viimeksi ${gDay(pv.date)}: ${setsTxt(pv.rows||pv.sets)}</div>`:""}</div>`; }).join("")}<button class="tr-go tr-pv-go" onclick="startSession('${p.id}','${d.id}')">Aloita treeni</button></div>`;
+      if(op) r+=`<div class="tr-pv">${d.exercises.map(e=>{ const pv=prevFor(e.key,null); return `<div class="tr-pe"><div class="tr-pe-h"><b>${esc(e.name)}</b><span>${goalTxt(e)||""}</span></div>${pv?`<div class="tr-pe-l">Viimeksi ${gDay(pv.date)}: ${setsTxt(pv.rows||pv.sets)}</div>`:""}</div>`; }).join("")}<div class="tr-pv-act"><button class="tr-pv-x" onclick="GU.dayOpen=null;renderGym()">Sulje</button><button class="tr-go tr-pv-go" onclick="startSession('${p.id}','${d.id}')">Aloita treeni</button></div></div>`;
       return r; }).join("");
     h+=`</div>`;
     // v2.18.29: Ohjelmat-osio päivälistan alla: käytössä oleva + muut aktiiviset riveinä (vaihto napautuksella),
