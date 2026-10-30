@@ -34,6 +34,22 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ gDoneEdit(); const c=G.curProgramId; const np=newProgram('Tyhjä'); gOpenEdit(np.id,true); GU.editSnap.cur=c; renderGym(); }); await p.waitForTimeout(150);
   ok(!/Arkistoi/.test(await p.evaluate(()=>document.querySelector('.g-edit-bar').innerText)),'uudella ohjelmalla ei Arkistoi-nappia (Peruuta poistaa)');
 
+
+  console.log('\nLiikkeen historia toisesta liikkeestä (v2.18.132)');
+  await p.evaluate(()=>{ window.__jdlgAuto=true; const pr=newProgram('Selkä'); pr.days[0].name='Selkä';
+    pr.days[0].exercises.push({...newEx({name:'Leuanveto leveä myötäote',sets:3,repsMin:6,repsMax:12}),key:'ylatalja'},newEx({name:'Ylätalja',sets:3,repsMin:8}));
+    touchProg(pr); G.curProgramId=pr.id; const t=Date.now()-3*864e5;
+    G.sessions.push({id:'hx',programId:'x',dayId:'x',date:new Date(t).toISOString().slice(0,10),startedAt:t,endedAt:t+3600000,dayName:'Selkä',exercises:[{id:'e1',key:'ylatalja',name:'Ylätalja',sets:[{kg:80,reps:10,done:true}]}]});
+    pr.days[0].exercises[1].key='ylatalja'; gymSave(); setTab('treeni'); gOpenEdit(pr.id,false); });
+  await p.waitForTimeout(200);
+  const hl=await p.locator('.ed-l',{hasText:'Leuanveto'}).innerText();
+  ok(/Historia: Ylätalja/.test(hl)&&!/Historia/.test(await p.locator('.ed-l',{hasText:/^Ylätalja/}).innerText()),'väärin kytketyllä liikkeellä merkintä "Historia: Ylätalja", oikealla ei');
+  await p.locator('.ed-l',{hasText:'Leuanveto'}).click(); await p.waitForTimeout(150);
+  ok(/tulevat liikkeestä Ylätalja \(1 kerta\)/.test(await p.locator('.ed-hist').innerText()),'avattuna selitys ja kertojen määrä');
+  await p.locator('.ed-hist button',{hasText:'Erota omaksi liikkeeksi'}).click(); await p.waitForTimeout(150);
+  const ux=await p.evaluate(()=>{ const e=curProgram().days[0].exercises; return {k:e[0].key,k2:e[1].key,prev:prevFor(e[0].key,null),hist:G.sessions.find(s=>s.id==='hx').exercises[0].key}; });
+  ok(ux.k!=='ylatalja'&&ux.k2==='ylatalja'&&!ux.prev&&ux.hist==='ylatalja','erotus: oma avain, ei viime kertaa, ylätaljan historia ennallaan: '+JSON.stringify(ux));
+  ok(!(await p.locator('.ed-hl').count()),'merkintä poistuu erotuksen jälkeen');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

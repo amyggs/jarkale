@@ -762,6 +762,8 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .tr-pill{border:none;border-radius:999px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;padding:0 16px;min-height:40px;white-space:nowrap;flex-shrink:0;}
 /* v2.18.128 treenipäivän esikatselu listassa */
 .tr-row .chev{transition:transform .15s;} .tr-row .chev.open{transform:rotate(90deg);}
+.ed-hist{font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);margin:2px 0 4px;} .ed-hist b{color:var(--text);} .ed-hist .tr-pill{display:block;margin-top:8px;}
+.ed-note.ed-hl{color:var(--orange);}
 .tr-pv{margin:0 10px 12px;padding:2px 14px 14px;border-radius:14px;background:color-mix(in srgb,var(--text) 5%,transparent);border-left:3px solid var(--orange);}
 .tr-row.tr-open .n{font-weight:800;}
 .tr-pv-act{display:flex;gap:8px;margin-top:12px;} .tr-pv-act .tr-pv-go{flex:1;margin-top:0;} .tr-pv-x{flex:none;border:none;border-radius:999px;background:transparent;color:var(--dim);font:700 13px Manrope,system-ui,sans-serif;padding:0 14px;min-height:46px;}
@@ -2239,7 +2241,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.131</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.132</span>
       </div>
     </div>
   </div>
@@ -2273,6 +2275,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.132", d:"lokakuu 2026", items:[
+    "Ohjelman muokkaus näyttää, jos liikkeen historia ja ennätykset tulevat eri nimisestä liikkeestä (esim. tuonnissa hyväksytty väärä yhdistäminen): rivillä \"Historia: …\" ja avattuna nappi Erota omaksi liikkeeksi. Aiemmat treenit eivät muutu."
+  ]},
   {v:"2.18.131", d:"lokakuu 2026", items:[
     "Treenipäivän esikatselu erottuu listasta: sisennetty laatikko, jonka reunassa on korostusviiva, avattu päivä lihavoituna ja lopussa Sulje-nappi Aloita treeni -napin vieressä. Seuraavan treenipäivän alkukohta näkyy selvästi."
   ]},
@@ -7229,6 +7234,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"30.10.2026", items:[
+    "Ohjelman muokkaus näyttää, jos liike käyttää toisen liikkeen historiaa (esim. tuonnissa yhdistetty väärin). Avaa liike ja valitse Erota omaksi liikkeeksi."
+  ]},
   {d:"29.10.2026", items:[
     "Ennätyksiä tulee harvemmin ja ne ovat oikeita: raskain paino koskaan tai laskennallisesti kovin suoritus. Kevyempi paino isommilla toistoilla ei enää ole ennätys. Yhteenvedon ennätyslaatikko on poistettu, ennätykset näkyvät liikkeiden riveillä."
   ]},
@@ -9393,6 +9401,10 @@ function gLev(a,b){
   for(let i=1;i<=a.length;i++){ const cur=[i]; for(let j=1;j<=b.length;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); prev=cur; }
   return prev[b.length];
 }
+function gUnlinkEx(di,xi){
+  gEdit(p=>{ const x=p.days[di].exercises[xi]; x.key=exKey(x.name); });
+  showSavedToast("Liikkeellä on nyt oma historia. Aiemmat treenit eivät muutu."); renderGym();
+}
 function gKnownEx(){
   const m={};
   const add=(key,name,date)=>{ if(!key) return; const o=m[key]||(m[key]={key,name,n:0,last:""}); if(date){ o.n++; if(date>=o.last){ o.last=date; o.name=name; } } };
@@ -10728,16 +10740,19 @@ function gymEditHTML(p){
   let h=`<div class="view-hero"><div class="tr-hero-row"><input class="g-title-in" value="${esc(p.name)}" aria-label="Ohjelman nimi" oninput="gEdit(p=>p.name=this.value.trim()||'Ohjelma')"></div>
     <div class="g-edit-bar"><button class="tr-pill" onclick="gCancelEdit()">${GU.editSnap&&GU.editSnap.isNew?"Peruuta":"Peru muutokset"}</button>${GU.editSnap&&GU.editSnap.isNew?"":`<button class="tr-pill" onclick="gArchiveProg()">Arkistoi</button>`}<button class="tr-pill dark" onclick="gDoneEdit()">Valmis</button></div>
     <div class="tr-h2" style="padding-bottom:8px">Muutokset tallentuvat heti. ${GU.editSnap&&GU.editSnap.isNew?"Peruuta poistaa uuden ohjelman.":"Peru muutokset palauttaa ohjelman ennalleen."} Aiemmat treenit eivät muutu.</div></div>`;
+  // v2.18.132: näytä, jos liikkeen historia kuuluu eri nimiselle liikkeelle (esim. tuonnissa hyväksytty väärä yhdistäminen), ja tarjoa erotus
+  const KN=gKnownEx(), histOf=e=>{ const o=KN[e.key]; return o&&o.n&&exNorm(o.name)!==exNorm(e.name)?o:null; };
   p.days.forEach((d,di)=>{
     h+=`<div class="ed-day"><div class="ed-dn"><input class="g-day-in" value="${esc(d.name)}" aria-label="Treenipäivän nimi" oninput="gEdit(p=>p.days[${di}].name=this.value.trim()||'Treenipäivä')"><span>${d.exercises.length} liikettä</span></div>`;
     d.exercises.forEach((e,xi)=>{
       const open=GU.openEx===e.id;
-      h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}${e.note&&!open?`<span class="ed-note">${esc(e.note)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
-      if(open){
+      h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}${e.note&&!open?`<span class="ed-note">${esc(e.note)}</span>`:""}${histOf(e)&&!open?`<span class="ed-note ed-hl">Historia: ${esc(histOf(e).name)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
+      if(open){ const ho=histOf(e);
         h+=`<div class="ed-form">
           <input class="g-in" value="${esc(e.name)}" aria-label="Liikkeen nimi" placeholder="Liikkeen nimi" onchange="gEdit(p=>{const x=p.days[${di}].exercises[${xi}];x.name=this.value.trim()||x.name;});renderGym()">
           <input class="g-in" value="${esc(goalInputTxt(e))}" aria-label="Tavoite" placeholder="Tavoite, esim. 3x8-10 80" onchange="gSetGoal(${di},${xi},this.value)">
           <input class="g-in" value="${esc(e.note||"")}" aria-label="Ohje" placeholder="Ohje (valinnainen)" onchange="gEdit(p=>p.days[${di}].exercises[${xi}].note=this.value.trim())">
+          ${ho?`<div class="ed-hist">Historia ja ennätykset tulevat liikkeestä <b>${esc(ho.name)}</b> (${ho.n} ${ho.n===1?"kerta":"kertaa"}). Jos se on eri liike, erota tämä omaksi liikkeekseen.<button class="tr-pill" onclick="gUnlinkEx(${di},${xi})">Erota omaksi liikkeeksi</button></div>`:""}
           <div class="ex-menu"><button onclick="gMoveTplEx(${di},${xi},-1)" ${xi?"":"disabled"}>↑ Ylös</button><button onclick="gMoveTplEx(${di},${xi},1)" ${xi<d.exercises.length-1?"":"disabled"}>↓ Alas</button><button class="danger" onclick="gEdit(p=>p.days[${di}].exercises.splice(${xi},1));GU.openEx=null;renderGym()">Poista</button></div>
         </div>`;
       }
