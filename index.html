@@ -1556,7 +1556,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ex-grp-c{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);min-width:22px;text-align:right;}
 .ex-grp-h[aria-expanded="true"]{background:var(--surf2);}
 .g-editpast{width:100%;height:46px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.g-editbar{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
+.g-editbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;margin:12px 0;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
 .g-editbar span{flex:1;}
 .g-editbar .tr-go{height:38px;padding:0 16px;}
 /* v2.18.57 oma vahvistusikkuna */
@@ -2243,7 +2243,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.134</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.135</span>
       </div>
     </div>
   </div>
@@ -2277,6 +2277,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.135", d:"marraskuu 2026", items:[
+    "Ennätyksen vertailu erotuksena: \"+8 toistoa\", \"+5 kg\" tai \"arv. maksimi +3 kg\" (ennen \"aiemmin 105 × 12\").",
+    "Tallennetun treenin muokkaus: yhteenveto piiloon muokkauksen ajaksi, jolloin sarjat näkyvät heti. Tallenna-palkki pysyy ylhäällä vierittäessä, ja listan lopussa on Tallenna muutokset -nappi (ennen Valmis-nappi oli yhteenvedon ja sarjojen välissä)."
+  ]},
   {v:"2.18.134", d:"marraskuu 2026", items:[
     "Ennätyksen korjaus: kevyempi paino suurella toistomäärällä ei ole ennätys (esim. jalkaprässi 157,5 × 30 aiemman 165 × 12 jälkeen). Ennätys = raskain paino koskaan, samalla painolla enemmän toistoja tai paras arvioitu maksimi enintään 12 toistolla, jolla arvio on luotettava. Sama raja kuukausikuvan Kehittyi-osioon."
   ]},
@@ -7244,6 +7248,8 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"1.11.2026", items:[
+    "Ennätys kertoo, paljonko parani: esim. \"+8 toistoa\" tai \"+5 kg\".",
+    "Tallennetun treenin muokkauksessa Tallenna-nappi pysyy ylhäällä vierittäessä ja löytyy myös listan lopusta.",
     "Ennätyksiä korjattu: kevyempi paino suurella toistomäärällä (esim. 30 toistoa) ei enää ole ennätys. Samalla painolla enemmän toistoja on edelleen."
   ]},
   {d:"31.10.2026", items:[
@@ -10241,6 +10247,7 @@ function renderLogGymCard(){
   }
   el.innerHTML=h; el.style.display=h?"":"none";
 }
+function gEditPastDone(){ gymSave(); GU.editPast=null; renderGym(); gTop(); showSavedToast("Muutokset tallennettu"); }
 function openSession(id){ GU.editPast=null; GU.justFinished=null; GU.mode="session"; GU.sessionId=id; GU.finishing=false; GU.menu=null; if(S.tab!=="treeni") setTab("treeni"); else renderGym(); gTop(); if(G.activeId===id) gymWakeLock(true); }
 
 // ── Treeni-välilehti
@@ -10455,18 +10462,14 @@ function sessionSummary(s){
     const prSets=done.filter(r=>isPR(r,before));
     if(prSets.length){
       const best=prSets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,prSets[0]);
+      // v2.18.135: vertailu erotuksena ("+8 toistoa", "+5 kg") eikä "aiemmin 105 × 12" – lyhyempi ja kertoo suoraan, paljonko parani
       let was="";
       if(best.kg!=null){
-        const same=before.filter(p=>p.kg===best.kg);
-        if(same.length) was=`aiemmin ${fmtKg(best.kg)}\u00a0×\u00a0${Math.max(...same.map(p=>p.reps))}`;
-        else {
-          // v2.18.106: "uusi paino, aiemmin raskain 165 × 12" oli harhaanjohtava, kun ennätyspaino (150) oli kevyempi kuin aiempi raskain.
-          const hv=before.filter(p=>p.kg!=null).sort((x,y)=>y.kg-x.kg||y.reps-x.reps)[0];
-          if(!hv) was="";
-          else if(best.kg>hv.kg) was=`raskain tähän asti · aiemmin ${fmtKg(hv.kg)}\u00a0×\u00a0${hv.reps}`;
-          else { const ref=before.filter(p=>p.kg!=null&&p.kg>=best.kg).sort((x,y)=>y.reps-x.reps||x.kg-y.kg)[0]||hv; was=`aiemmin ${fmtKg(ref.kg)}\u00a0×\u00a0${ref.reps}`; }
-        }
-      } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`aiemmin ${mx}\u00a0toistoa`; }
+        const same=before.filter(p=>p.kg===best.kg), w=before.filter(p=>p.kg!=null), top=w.length?Math.max(...w.map(p=>p.kg)):null;
+        if(top!=null&&best.kg>top) was=`+${fmtKg(Math.round((best.kg-top)*100)/100)}\u00a0kg`;
+        else if(same.length) was=`+${best.reps-Math.max(...same.map(p=>p.reps))}\u00a0toistoa`;
+        else if(w.length){ const em=r=>e1rm(r.kg,Math.min(r.reps,12)), d=Math.round((em(best)-Math.max(...w.map(em)))*2)/2; if(d>0) was=`arv.\u00a0maksimi +${fmtKg(d)}\u00a0kg`; }
+      } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`+${best.reps-mx}\u00a0toistoa`; }
       prs.push({ex,set:best,was});
     }
     rows.push({ex,done,all:doneRows(ex),dir,prev,pr:prSets.length?prs[prs.length-1]:null});
@@ -10490,7 +10493,7 @@ function bestPR(S2){
   const rows=S2.rows.filter(r=>r.pr); if(!rows.length) return null;
   return rows.slice().sort((a,b)=>(/^raskain/.test(b.pr.was)-/^raskain/.test(a.pr.was))||(e1rm(b.pr.set.kg,b.pr.set.reps)-e1rm(a.pr.set.kg,a.pr.set.reps)))[0];
 }
-function bestPRTxt(r){ return `${r.ex.name} ${setOneTxt(r.pr.set)}${/^raskain/.test(r.pr.was)?" · raskain tähän asti":""}`; }
+function bestPRTxt(r){ return `${r.ex.name} ${setOneTxt(r.pr.set)}${/^\+[\d,.]+\u00a0kg$/.test(r.pr.was)?" · raskain tähän asti":""}`; }
 function sessionProgLine(s){ return s.programName&&s.programName!==s.dayName?s.programName:""; }
 function prLine(r){
   const multi=new Set((r.done||[]).map(x=>(x.kg??"")+"|"+x.reps)).size>1;
@@ -10764,10 +10767,10 @@ function gymSessionHTML(s){
   let h=`<div class="view-hero">${gBackLink(live?"Treeni (jatkuu taustalla)":"Treeni")}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(s.dayName)}</div>
     <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div></div>
     ${live?`<button class="tr-pill dark" onclick="gOpenFinish()">Lopeta</button>`:""}</div>${live?gProgHTML(s):""}</div>`;
-  if(!live) h+=gymSummaryHTML(s,GU.justFinished===s.id);
+  if(!live&&GU.editPast!==s.id) h+=gymSummaryHTML(s,GU.justFinished===s.id);   // v2.18.135: muokatessa yhteenveto piiloon, sarjat heti näkyviin
   // v2.18.56: tallennettu treeni avautuu vain luettavaksi; muokkaus erikseen, ettei vanhaa treeniä muuteta vahingossa
   if(!live&&GU.editPast!==s.id) return h+`<button class="tr-go ghost g-editpast" onclick="GU.editPast='${s.id}';renderGym()">${ico("edit",16)} Muokkaa treeniä</button><div style="height:24px"></div>`;
-  if(!live) h+=`<div class="g-editbar"><span>Muokkaat tallennettua treeniä. Muutokset tallentuvat heti.</span><button class="tr-go" onclick="GU.editPast=null;renderGym();gTop()">Valmis</button></div>`;
+  if(!live) h+=`<div class="g-editbar"><span>Muokkaat tallennettua treeniä. Muutokset tallentuvat heti.</span><button class="tr-go" onclick="gEditPastDone()">Tallenna</button></div>`;
   if(live&&GU.finishing){
     const diff=sessionDiffersFromTemplate(s);
     // v2.18.105: rasitus ja kulku ovat päiväkohtaisia. Jos samalle päivälle on jo tallennettu treeni, otsikko kertoo, että arvio koskee molempia.
@@ -10835,7 +10838,8 @@ function gymSessionHTML(s){
   });
   h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div>`;
   if(live) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gOpenFinish()">Lopeta treeni</button>`;
-  else h+=`<button class="g-link danger" style="margin-top:18px" onclick="discardSession('${s.id}')">Poista treeni</button>`;
+  else{ if(GU.editPast===s.id) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gEditPastDone()">Tallenna muutokset</button>`;
+  h+=`<button class="g-link danger" style="margin-top:18px" onclick="discardSession('${s.id}')">Poista treeni</button>`; }
   return h+`<div style="height:${live?130:30}px"></div>`;
 }
 

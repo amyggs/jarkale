@@ -127,6 +127,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   console.log('\nMuokkaus jälkikäteen ja linkitys');
   await p.evaluate(sid=>openSession(sid),sid);
   await p.locator('.g-editpast').click(); // v2.18.56: tallennettu treeni avautuu lukutilaan
+  ok(await p.evaluate(()=>!document.querySelector('#view-treeni .g-sum')&&getComputedStyle(document.querySelector('.g-editbar')).position==='sticky'&&/Tallenna/.test(document.querySelector('.g-editbar').textContent)&&[...document.querySelectorAll('#view-treeni button')].some(b=>b.textContent==='Tallenna muutokset')),'muokkaus: yhteenveto piilossa, Tallenna-palkki ylhäällä ja Tallenna muutokset lopussa (v2.18.135)');
   await p.locator('[data-set="1-0"] .ck').click();
   const e2=await p.evaluate(T=>JSON.parse(localStorage.getItem('seuranta-entries'))[T],T);
   ok(e2.workout_ids.length===1,'saman treenin muokkaus ei tuplaa merkintää');
@@ -287,7 +288,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   await p.getByRole('button',{name:'Tallenna treeni'}).click();
   const sum=(await p.locator('.g-sum').innerText()).replace(/\u00a0/g,' ');
   ok((await p.locator('.g-sum .g-stamp').count())===1&&(await p.locator('.g-sum-hero').count())===0&&/ENNÄTYS|ennätys/i.test(sum),'yhteenveto ja tallennusleima lopetuksen jälkeen, ei ennätyslaatikkoa, ennätys liikkeen rivillä');
-  ok(sum.includes('90 × 8')&&/raskain tähän asti · aiemmin 85 × 8/.test(sum),'ennätys ja vertailukohta: '+sum.split('\n').filter(x=>/90|aiemmin|uusi/.test(x)).join(' | '));
+  ok(sum.includes('90 × 8')&&/\+5 kg/.test(sum),'ennätys ja erotus (+5 kg): '+sum.split('\n').filter(x=>/90|aiemmin|uusi/.test(x)).join(' | '));
   const shared=await p.evaluate(async()=>{ let got=null; navigator.share=async d=>{got=d;}; window.__jdlgAuto=false; await gShareSession(GU.sessionId); window.__jdlgAuto=true; return got; });
   const img=await p.evaluate(async()=>{ let got=null; navigator.canShare=()=>true; navigator.share=async d=>{got=d;}; await gShareSession(GU.sessionId); const f=got&&got.files&&got.files[0]; if(!f) return null; const bm=await createImageBitmap(f); return {name:f.name,type:f.type,w:bm.width,h:bm.height}; });
   ok(img&&img.type==='image/png'&&/^jarkale-treeni-\d{4}-\d{2}-\d{2}\.png$/.test(img.name)&&img.w>1000&&img.h>600,'jako kuvana: PNG-tiedosto ('+(img?img.name+' '+img.w+'×'+img.h:'-')+')');

@@ -56,7 +56,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(pr.sep===0,'erillistä ennätyslistaa ei ole');
   ok(pr.cnt===1,'liike näkyy liikelistassa vain kerran');
   ok(pr.tags>=2&&!pr.lbl,'ennätysmerkit riveillä, ei erillistä ennätyslaatikkoa (v2.18.130): '+pr.tags);
-  ok(/110 × 3/.test(pr.tasa)&&/aiemmin/.test(pr.tasa),'rivillä ennätyssarja ja vertailu: '+pr.tasa);
+  ok(/110 × 3/.test(pr.tasa)&&/\+/.test(pr.tasa),'rivillä ennätyssarja ja vertailu: '+pr.tasa);
   ok(!pr.tasaDir,'ennätysrivillä ei nuolta');
   ok(!pr.rm,'yhteenvedossa ei arvioitua 1RM:ää');
   const sh=await p.evaluate(()=>sessionShareText(G.sessions.filter(x=>x.endedAt).sort((a,b)=>b.startedAt-a.startedAt)[0]));
