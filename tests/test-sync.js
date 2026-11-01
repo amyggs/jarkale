@@ -51,6 +51,8 @@ const drive=()=>JSON.parse((byName('jarkale-data.json')||{}).content||'{}');
   ok(DRIVE.meta&&DRIVE.meta.parents&&DRIVE.meta.parents[0]==='appDataFolder','tiedosto appDataFolderiin');
   ok(/^Bearer tok-/.test(DRIVE.lastAuth||''),'pyynnöissä tokeni');
   ok(await A.evaluate(()=>syncState().enabled&&syncState().dirtyAt===0),'A: synkronointi päällä, ei odottavia muutoksia');
+  const cn=await A.evaluate(()=>{ renderSyncUI(); const c=syncState().counts; return {c,txt:(document.getElementById('sync-section')||{}).innerText||''}; });
+  ok(cn.c&&cn.c.w===1&&cn.c.e>=5&&/Drivessa tallessa: 1 treeni, \d+ päiväkirjausta/.test(cn.txt)&&/piilotetussa sovelluskansiossa/.test(cn.txt),'Drive-osiossa näkyy mitä tallessa (v2.18.139): '+JSON.stringify(cn.c));
 
   console.log('\nUusi puhelin B');
   await syncBtn(B);

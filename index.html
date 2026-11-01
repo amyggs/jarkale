@@ -2245,7 +2245,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.138</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.139</span>
       </div>
     </div>
   </div>
@@ -2279,6 +2279,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.139", d:"marraskuu 2026", items:[
+    "Drive-osio näyttää, mitä Driveen on tallennettu: \"Drivessa tallessa: 23 treeniä, 41 päiväkirjausta\" ja synkronoinnin ajan. Lisäksi kerrotaan, että tiedosto on piilotetussa sovelluskansiossa eikä siksi näy Driven tiedostolistassa."
+  ]},
   {v:"2.18.138", d:"marraskuu 2026", items:[
     "iPhone selaimessa: aloitus neuvoo lisäämään Järkäleen ensin Koti-valikkoon (Safari → jakonappi → Lisää Koti-valikkoon), koska selaimessa iPhone tai selain voi poistaa tiedot (viikon käyttötauko, selaimen tyhjennys, esim. DuckDuckGon liekkinappi). Jos dataa on jo, Kirjaa- ja Treeni-näkymässä kortti, joka neuvoo siirtämään tiedot Google Driven kautta, koska Koti-valikon Järkäle aloittaa tyhjänä. Myöhemmin piilottaa kortin viikoksi."
   ]},
@@ -7260,6 +7263,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"1.11.2026", items:[
+    "Asetusten Drive-kohdassa näet, mitä Driveen on tallennettu (esim. 23 treeniä, 41 päiväkirjausta). Tiedosto on Driven piilotetussa sovelluskansiossa, joten se ei näy Driven tiedostolistassa.",
     "iPhonella: lisää Järkäle Koti-valikkoon (Safari → jakonappi → Lisää Koti-valikkoon). Selaimessa iPhone tai selain voi poistaa tiedot. Sovellus neuvoo, miten tiedot siirretään Google Driven kautta.",
     "Jos Google Drive -yhteyttä ei ole, treenin tallennuksen jälkeen muistutetaan, että treenit ovat vain tässä puhelimessa ja katoavat, jos selaimen historia tai evästeet tyhjennetään. Drive-yhteys pitää kopion tallessa.",
     "Korjattu: treeni ei enää hyppää seuraavaan liikkeeseen, kun liike on vielä kesken.",
@@ -11152,6 +11156,7 @@ const SYNC_KEY="jarkale-sync", SYNC_TOMB_KEY="jarkale-sync-tomb", SYNC_TOKEN_KEY
 const SYNC_AVAILABLE=true;
 let SYNC_APPLYING=false, SYNC_TIMER=null, SYNC_BUSY=false, SYNC_TOKEN_CLIENT=null, SYNC_ERR=null;
 
+function syncCountsTxt(c){ const p=(n,a,b)=>`${n} ${n===1?a:b}`; return [c.w?p(c.w,"treeni","treeniä"):"",c.e?p(c.e,"päiväkirjaus","päiväkirjausta"):"",c.m?p(c.m,"mittaus","mittausta"):""].filter(Boolean).join(", ")||"asetukset (ei vielä kirjauksia)"; }
 function syncState(){ try{ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0,email:null,...JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")}; }catch(_){ return {enabled:false,fileId:null,lastSyncAt:0,dirtyAt:0}; } }
 function setSyncState(p){ const s={...syncState(),...p}; try{ localStorage.setItem(SYNC_KEY,JSON.stringify(s)); }catch(_){} return s; }
 function syncTombs(){ try{ return {e:{},s:{},p:{},m:{},...JSON.parse(localStorage.getItem(SYNC_TOMB_KEY)||"{}")}; }catch(_){ return {e:{},s:{},p:{},m:{}}; } }
@@ -11339,7 +11344,9 @@ async function syncNow(opts={}){
     const up=await driveUpload(fileId,out);
     // v2.18.19: lähetyksen aikana tehty muutos jää odottamaan; synkronoinnin lopetus kesken siirron pysyy voimassa
     const now=syncState(), changed=(now.dirtyAt||0)!==seq0;
-    setSyncState({enabled:st.enabled?now.enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:changed?now.dirtyAt:0});
+    // v2.18.139: mitä Driveen tallennettiin (näytetään Asetuksissa, koska piilotettu sovelluskansio ei näy Drivessa)
+    const cnt={w:(out.gym&&out.gym.sessions||[]).filter(x=>x&&x.endedAt&&!x.deleted).length,e:Object.values(out.entries||{}).filter(x=>x&&!x.deleted&&hasMeaningfulEntry(x)).length,m:(out.measurements||[]).filter(x=>x&&!x.deleted).length};
+    setSyncState({enabled:st.enabled?now.enabled:true,fileId:up.id||fileId,lastSyncAt:Date.now(),dirtyAt:changed?now.dirtyAt:0,counts:cnt});
     if(changed) rerun=true;
     if(!syncState().email){ try{ const ar=await driveFetch("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)"); const aj=await ar.json(); if(aj&&aj.user&&aj.user.emailAddress) setSyncState({email:aj.user.emailAddress}); }catch(e){ if(e&&e.auth) throw e; } }
     if(syncState().ptCopy){
@@ -11407,7 +11414,7 @@ function renderSyncUI(){
     else{
       el.style.display="";
       el.innerHTML=st.enabled?`<div style="font-size:14px;font-weight:700;color:var(--text)">Google Drive -synkronointi päällä</div>
-        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">Viimeksi synkronoitu ${syncAgo(st.lastSyncAt)}${st.dirtyAt>st.lastSyncAt?" · muutoksia odottaa":""}.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
+        <div style="font-size:12px;color:var(--dim);margin:4px 0 10px;line-height:1.5">${st.counts?`<b style="color:var(--text)">Drivessa tallessa: ${syncCountsTxt(st.counts)}</b><br>`:""}Viimeksi synkronoitu ${syncAgo(st.lastSyncAt)}${st.dirtyAt>st.lastSyncAt?" · muutoksia odottaa":""}. Tiedosto on Driven piilotetussa sovelluskansiossa, joten se ei näy Driven tiedostolistassa.${SYNC_ERR?`<br><span style="color:var(--red)">${esc(SYNC_ERR)}</span>`:""}</div>
         <div class="g-set-row pt-only" style="border-top:1px solid var(--surf2);margin-bottom:10px"><span><span style="font-size:14px;color:var(--text);font-weight:600">Kopio Järkäle PT:lle</span><span style="display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.45">${st.ptCopy?(st.ptErr?`<span style="color:var(--red)">${esc(st.ptErr)}</span>`:st.ptLastAt?`Drive → ${PT_FOLDER}/${PT_FILE} · päivitetty ${syncAgo(st.ptLastAt)}`:"Luodaan seuraavassa synkronoinnissa"):"Näkyvä tiedosto Driveen, jonka ChatGPT voi lukea. Sisältää kaiken datan."}</span></span>
           <button onclick="setPtCopy(${!st.ptCopy})" role="switch" aria-checked="${!!st.ptCopy}" class="g-sw${st.ptCopy?" on":""}"><span></span></button></div>
         <button class="btn-primary" style="width:100%;margin-bottom:8px" ${SYNC_BUSY?"disabled":""} onclick="syncNow()">${SYNC_BUSY?"Synkronoidaan…":"Synkronoi nyt"}</button>
