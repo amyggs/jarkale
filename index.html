@@ -1556,6 +1556,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ex-grp-c{font:700 13px Manrope,system-ui,sans-serif;color:var(--dim);min-width:22px;text-align:right;}
 .ex-grp-h[aria-expanded="true"]{background:var(--surf2);}
 .g-editpast{width:100%;height:46px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.g-safe{display:flex;gap:10px;align-items:flex-start;margin:12px 0 4px;padding:12px;border-radius:12px;border:1.5px solid var(--orange);font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--text);} .g-safe>svg{flex:none;color:var(--orange);margin-top:2px;} .g-safe b{font-weight:700;} .g-safe .tr-go{display:block;margin-top:10px;height:40px;padding:0 16px;}
 .g-editbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;margin:12px 0;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
 .g-editbar span{flex:1;}
 .g-editbar .tr-go{height:38px;padding:0 16px;}
@@ -2243,7 +2244,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.136</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.137</span>
       </div>
     </div>
   </div>
@@ -2277,6 +2278,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.137", d:"marraskuu 2026", items:[
+    "Juuri tallennetun treenin yhteenvedossa muistutus, jos Google Drive -yhteyttä ei ole: treenit ovat vain tässä puhelimessa ja katoavat, jos selaimen historia tai evästeet tyhjennetään. Nappi Yhdistä Google Driveen. Ensimmäisen varmuuskopion kortin teksti mainitsee nyt historian ja evästeet suoraan."
+  ]},
   {v:"2.18.136", d:"marraskuu 2026", items:[
     "Korjattu: liike pienentyi välillä kesken treenin ja näkymä hyppäsi seuraavaan liikkeeseen, jos myöhemmässä liikkeessä oli jo tehty sarja (supersarja, liikkeet eri järjestyksessä). Nyt liike pienenee vasta, kun kaikki rivit, myös R/P- ja DS-lisärivit, on tehty ja seuraava sarja on kirjattu toiseen liikkeeseen sen jälkeen.",
     "Treenin aikana jokaisessa liikkeessä näkyy ennätyssarja \"Viimeksi\"-rivin alla, esim. \"Ennätys: 90 × 10 · raskain 95 × 4\"."
@@ -7252,6 +7256,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"1.11.2026", items:[
+    "Jos Google Drive -yhteyttä ei ole, treenin tallennuksen jälkeen muistutetaan, että treenit ovat vain tässä puhelimessa ja katoavat, jos selaimen historia tai evästeet tyhjennetään. Drive-yhteys pitää kopion tallessa.",
     "Korjattu: treeni ei enää hyppää seuraavaan liikkeeseen, kun liike on vielä kesken.",
     "Treenin aikana näet jokaisen liikkeen ennätyssarjan Viimeksi-rivin alla.",
     "Ennätys kertoo, paljonko parani: esim. \"+8 toistoa\" tai \"+5 kg\".",
@@ -10528,7 +10533,7 @@ function gymSummaryHTML(s,fresh){
   const hit=G_FLASH.has("stamp-"+s.id);
   // v2.18.59: yksi tallennus = yksi merkki. Leima vain juuri tallennetussa treenissä; ei ilmoitusta, otsikkotekstiä eikä reunusta päällekkäin.
   let h=`<div class="g-sum${hit?" stamped":""}">
-    <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>
+    <div class="g-sum-h">${s.endedAt&&fresh?gStampHTML(s,hit):""}<span class="lbl-small" style="margin:0;flex:1">Yhteenveto</span><button class="tr-go ghost g-share" onclick="gShareSession('${s.id}')">Jaa</button></div>${fresh&&s.endedAt?gSafetyHTML():""}
     <div class="g-sum-kpi"><div><b>${S2.st.done}/${S2.st.exN}</b><span>liikettä</span></div><div><b>${S2.st.sets}</b><span>sarjaa</span></div>${durOk?`<div><b>${durShort(S2.dur)}</b><span>kesto</span></div>`:""}</div>`;
   // v2.18.107: ennätykset näkyviksi heti tunnuslukujen alle (paras uutinen ylimmäksi)
   const bp=bestPR(S2);
@@ -11488,7 +11493,7 @@ function firstBackupHTML(){
   if(!firstBackupDue()) return "";
   const act=SYNC_AVAILABLE?`<button class="btn-primary" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="btn-primary" onclick="goBackup()">Tee varmuuskopio</button>`;
   return `<div class="card fb-card"><div class="fb-h">${ico("save",17)} Varmuuskopioi tietosi</div>
-    <div class="fb-t">Tiedot tallentuvat vain tämän puhelimen selaimeen. Jos puhelin vaihtuu tai selaimen tiedot tyhjennetään, ne katoavat.${SYNC_AVAILABLE?" Google Drive -yhteys pitää kopion omassa Drivessasi, ja se päivittyy itsestään.":""}</div>
+    <div class="fb-t">Tiedot tallentuvat vain tämän puhelimen selaimeen. Jos puhelin vaihtuu tai tyhjennät selaimen historian tai evästeet, ne katoavat.${SYNC_AVAILABLE?" Google Drive -yhteys pitää kopion omassa Drivessasi, ja se päivittyy itsestään.":""}</div>
     <div class="fb-b">${act}<button class="fb-later" onclick="firstBackupLater()">Myöhemmin</button></div></div>`;
 }
 function renderFirstBackup(){
@@ -11510,6 +11515,14 @@ function openSettingsSection(key){
   setTab("asetukset");
   SETTINGS_TOGGLES[key]=true; renderAsetukset();
   const c=document.getElementById("stgl-content-"+key); if(c){ c.style.display=""; setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),250); }
+}
+// v2.18.137: juuri tallennetun treenin yhteenvedossa muistutus, jos Drive-yhteyttä ei ole. Pilotti menetti treeninsä
+// tyhjentäessään selaimen historian ja evästeet; ensimmäisen varmuuskopion kortti oli siirretty Myöhemmin-napilla.
+function gSafetyHTML(){
+  try{ if(syncState().enabled) return ""; }catch(_){ return ""; }
+  const n=G.sessions.filter(x=>x.endedAt).length;
+  const act=SYNC_AVAILABLE?`<button class="tr-go" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="tr-go" onclick="goBackup()">Tee varmuuskopio</button>`;
+  return `<div class="g-safe">${ico("save",16)}<div><b>${n>1?`${n} treeniä on tallessa`:"Treeni on tallessa"} vain tässä puhelimessa.</b> Jos tyhjennät selaimen historian tai evästeet, ne katoavat.${SYNC_AVAILABLE?" Driveen yhdistetty kopio päivittyy itsestään.":""}${act}</div></div>`;
 }
 function goBackup(){ openSettingsSection("data"); }
 function gBackupNudgeHTML(){

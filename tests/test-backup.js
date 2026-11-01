@@ -83,6 +83,14 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ localStorage.setItem('lastExport',String(Date.now())); renderLog(); }); await p.waitForTimeout(150);
   ok(await p.evaluate(()=>getComputedStyle(document.getElementById('first-backup')).display)==='none','varmuuskopion jälkeen ei korttia');
 
+
+  console.log('\nMuistutus treenin yhteenvedossa (v2.18.137)');
+  const sf=await p.evaluate(async()=>{ const pr=newProgram('P'); pr.days[0].name='A'; pr.days[0].exercises.push(newEx({name:'Penkki',sets:1,repsMin:8})); touchProg(pr); G.curProgramId=pr.id; gymSave();
+    await startSession(pr.id,pr.days[0].id); const s=activeSession(); s.exercises[0].sets[0].kg=50; s.exercises[0].sets[0].reps=8; s.exercises[0].sets[0].done=true; const id=s.id; finishSession(true);
+    const a=gymSummaryHTML(G.sessions.find(x=>x.id===id),true), b=gymSummaryHTML(G.sessions.find(x=>x.id===id),false);
+    localStorage.setItem('jarkale-sync',JSON.stringify({enabled:true,lastSyncAt:Date.now()})); const c=gymSummaryHTML(G.sessions.find(x=>x.id===id),true); localStorage.removeItem('jarkale-sync');
+    return {a:/g-safe/.test(a)&&/historian tai evästeet/.test(a),b:/g-safe/.test(b),c:/g-safe/.test(c)}; });
+  ok(sf.a&&!sf.b&&!sf.c,'juuri tallennetun treenin yhteenvedossa muistutus; ei vanhan treenin avauksessa eikä Drive-yhteyden kanssa');
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));
   await b.close();
   console.log(`\n${pass} / ${pass+fail} läpi`); process.exit(fail?1:0);
