@@ -2243,7 +2243,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.133</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.134</span>
       </div>
     </div>
   </div>
@@ -2277,6 +2277,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.134", d:"marraskuu 2026", items:[
+    "Ennätyksen korjaus: kevyempi paino suurella toistomäärällä ei ole ennätys (esim. jalkaprässi 157,5 × 30 aiemman 165 × 12 jälkeen). Ennätys = raskain paino koskaan, samalla painolla enemmän toistoja tai paras arvioitu maksimi enintään 12 toistolla, jolla arvio on luotettava. Sama raja kuukausikuvan Kehittyi-osioon."
+  ]},
   {v:"2.18.133", d:"lokakuu 2026", items:[
     "Kuukausi kuvana: treenimäärä, kalenteri, jossa jokainen treenipäivä (esim. Rinta, Jalat) on omalla värillään ja selite määrineen, toteutuneet / suunnitellut treenipäivät (jos treenipäivät on valittu) ja enintään kolme eniten kehittynyttä liikettä (paras arvioitu maksimi ennen kuuta → kuussa). Teeman värit ja fontti. Ei ohjelman nimeä, huomioita, volyymia eikä tonneja.",
     "Jakopaikat: Treeni → Tehdyt treenit → Jaa kuukausi (kuun alussa valinta edellisen ja kuluvan välillä) ja kuukauden 1.–3. päivänä kerran ehdotus Treeni-etusivulla."
@@ -7240,6 +7243,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"1.11.2026", items:[
+    "Ennätyksiä korjattu: kevyempi paino suurella toistomäärällä (esim. 30 toistoa) ei enää ole ennätys. Samalla painolla enemmän toistoja on edelleen."
+  ]},
   {d:"31.10.2026", items:[
     "Jaa kuukausi kuvana: treenipäivät kalenterissa, ohjelman päivät omilla väreillään ja kuukauden aikana eniten kehittyneet liikkeet. Treeni → Tehdyt treenit → Jaa kuukausi. Kuukauden alussa sovellus ehdottaa sitä kerran."
   ]},
@@ -9539,7 +9545,11 @@ function isPR(r,prev){
   // (8 × 15 aiemman 10 × 12 jälkeen) ei ole ennätys, ellei se ole laskennallisesti kovempi. Uuden ohjelman uudet toistoalueet
   // tekivät aiemmin lähes jokaisesta liikkeestä ennätyksen.
   const w=prev.filter(p=>p.kg!=null&&p.reps); if(!w.length) return true;
-  return r.kg>Math.max(...w.map(p=>p.kg))||e1rm(r.kg,r.reps)>Math.max(...w.map(p=>e1rm(p.kg,p.reps)))+1e-9;
+  if(r.kg>Math.max(...w.map(p=>p.kg))) return true;                                   // raskain paino koskaan
+  const same=w.filter(p=>p.kg===r.kg); if(same.length&&r.reps>Math.max(...same.map(p=>p.reps))) return true;   // samalla painolla enemmän toistoja
+  // v2.18.134: kevyempi paino vain arvioidun maksimin kautta ja vain kaavan luotettavalla alueella (≤ 12 toistoa):
+  // 157,5 × 30 ei ole ennätys aiemman 165 × 12 jälkeen, vaikka kaava antaisi 30 toistolle yli 300 kg
+  return r.reps<=12&&e1rm(r.kg,r.reps)>Math.max(...w.map(p=>e1rm(p.kg,Math.min(p.reps,12))))+1e-9;
 }
 // v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (sama tai kevyempi paino, enemmän toistoja) → toistot
 function prOnKg(r,prev){ if(r.kg==null) return false; const w=prev.filter(p=>p.kg!=null); return !w.length||r.kg>Math.max(...w.map(p=>p.kg)); }
@@ -10629,12 +10639,12 @@ function monthSummary(ym){
   const td=(S.settings.goals&&S.settings.goals.trainingDays)||null; let planned=null;
   if(td&&td.length){ const last=ym===today().slice(0,7)?+today().slice(8,10):dim; planned=0; for(let d=1;d<=last;d++){ if(td.includes(new Date(Y,M-1,d).getDay())) planned++; } }
   // kehitys: kuukauden paras arvioitu maksimi vs. paras ennen kuuta (sama periaate kuin ennätyksissä)
-  const start=new Date(Y,M-1,1).getTime(), best=(sets)=>sets.filter(r=>r.kg!=null&&r.reps).reduce((a,r)=>!a||e1rm(r.kg,r.reps)>e1rm(a.kg,a.reps)?r:a,null);
+  const start=new Date(Y,M-1,1).getTime(), em=r=>e1rm(r.kg,Math.min(r.reps,12)), best=(sets)=>sets.filter(r=>r.kg!=null&&r.reps).reduce((a,r)=>!a||em(r)>em(a)?r:a,null);   // v2.18.134: arvio enintään 12 toistolla
   const keys=[...new Set(ss.flatMap(s=>s.exercises.filter(e=>doneSets(e).length).map(e=>e.key)))];
   const prog=keys.map(k=>{ const inM=[], before=[]; let name=k;
     G.sessions.forEach(s=>{ if(!s.endedAt) return; s.exercises.forEach(e=>{ if(e.key!==k) return; const d=doneSets(e); if(!d.length) return;
       if(s.date.slice(0,7)===ym){ inM.push(...d); name=e.name; } else if(s.startedAt<start) before.push(...d); }); });
-    const a=best(before), b=best(inM); if(!a||!b) return null; const g=e1rm(b.kg,b.reps)/e1rm(a.kg,a.reps)-1;
+    const a=best(before), b=best(inM); if(!a||!b) return null; const g=em(b)/em(a)-1;
     return g>0.005?{name,a,b,g}:null; }).filter(Boolean).sort((x,y)=>y.g-x.g).slice(0,3);
   return {ym,Y,M,dim,ss,byDay,types,order,days,count:ss.length,planned,prog};
 }

@@ -253,8 +253,8 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
 
   console.log('\nEnnätys ja 1RM-vertailu (v2.17.5)');
   const prr=await p.evaluate(()=>{ const prev=[{kg:80,reps:10,done:true},{kg:82.5,reps:8,done:true}];
-    return [isPR({kg:82.5,reps:9,done:true},prev),isPR({kg:80,reps:9,done:true},prev),isPR({kg:85,reps:5,done:true},prev),isPR({kg:null,reps:12,done:true},[{kg:null,reps:11,done:true}]),isPR({kg:80,reps:10,done:true},[]),isPR({kg:8,reps:15,done:true},[{kg:10,reps:12,done:true}])]; });
-  ok(JSON.stringify(prr)==='[true,false,true,true,false,false]','ennätys todellisista sarjoista: '+JSON.stringify(prr));
+    return [isPR({kg:82.5,reps:9,done:true},prev),isPR({kg:80,reps:9,done:true},prev),isPR({kg:85,reps:5,done:true},prev),isPR({kg:null,reps:12,done:true},[{kg:null,reps:11,done:true}]),isPR({kg:80,reps:10,done:true},[]),isPR({kg:8,reps:15,done:true},[{kg:10,reps:12,done:true}]),isPR({kg:157.5,reps:30,done:true},[{kg:165,reps:12,done:true}]),isPR({kg:105,reps:20,done:true},[{kg:105,reps:12,done:true}]),isPR({kg:80,reps:12,done:true},[{kg:85,reps:8,done:true}])]; });
+  ok(JSON.stringify(prr)==='[true,false,true,true,false,false,false,true,true]','ennätys todellisista sarjoista: '+JSON.stringify(prr));
   ok(await p.evaluate(()=>e1rm(100,20)>e1rm(100,18)),'yli 15 toistoa: 18 → 20 näkyy nousuna');
 
   console.log('\nPaluu ja peruutus, suuret toistomäärät (v2.17.6)');
