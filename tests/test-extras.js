@@ -69,6 +69,14 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   ok(await p.evaluate(()=>activeSession().exercises[0].sets.map(r=>r.kind||'-').join(','))==='-,-,rp,ds,rp,-','+ Sarja tehtyjen lisärivien jälkeen menee loppuun');
   await p.evaluate(()=>{ const s=activeSession(); gRemoveSet(s.id,0); });
 
+  console.log('\nPienennys (v2.18.136)');
+  const mc=await p.evaluate(()=>{ const s=activeSession(); const e0=s.exercises[0], e1=s.exercises[1];
+    const t0=Date.now(); e1.sets[0].at=t0-60000; e0.sets.forEach((r,i)=>{ if(r.done) r.at=t0-30000+i; });
+    const a=exClosed(s,e0,0);
+    e1.sets.push({kg:20,reps:10,done:true,at:t0}); const b=exClosed(s,e0,0); e1.sets.pop();
+    e0.sets.push({kg:null,reps:null,done:false,kind:'ds'}); e1.sets.push({kg:20,reps:10,done:true,at:t0+1}); const c=exClosed(s,e0,0); e0.sets.pop(); e1.sets.pop();
+    return {a,b,c}; });
+  ok(mc.a===false&&mc.b===true&&mc.c===false,'liike pienenee vasta, kun kaikki rivit tehty ja sen jälkeen kirjattu toiseen liikkeeseen: '+JSON.stringify(mc));
   console.log('\nYhteenveto ja seuraava kerta');
   await p.evaluate(()=>{ const id=G.activeId; finishSession(true); GU.mode='session'; GU.sessionId=id; renderGym(); }); await p.waitForTimeout(200);
   const sum=await p.locator('#view-treeni').innerText();
@@ -79,6 +87,8 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   const nx=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; return {g:[0,1,2,3].map(i=>ghostFor(s,ex,i)), prev:document.querySelector('[data-ex] .ex-prev')?.innerText||''}; });
   ok(nx.g[0].kg===60&&nx.g[1].kg===50&&nx.g[2].reps===3&&nx.g[3].reps===8,'seuraavalla kerralla työsarjat ja lisärivien toistot edelliseltä kerralta');
   ok(/R\/P/.test(nx.prev),'"Viimeksi"-rivillä lisärivit: '+nx.prev.replace(/ /g,' '));
+  const best=await p.evaluate(()=>document.querySelector('[data-ex] .ex-best')?.textContent||'');
+  ok(/^Ennätys: 60\u00a0×\u00a010$/.test(best),'treenin aikana ennätysrivi (paras arvioitu maksimi, ei lisärivejä): '+best);
   ok(await p.evaluate(()=>{ const e=document.querySelector('[data-ex]'); return e.scrollWidth<=e.clientWidth+1; }),'mahtuu 360 px leveyteen');
 
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));

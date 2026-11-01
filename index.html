@@ -2243,7 +2243,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.135</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.136</span>
       </div>
     </div>
   </div>
@@ -2277,6 +2277,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.136", d:"marraskuu 2026", items:[
+    "Korjattu: liike pienentyi välillä kesken treenin ja näkymä hyppäsi seuraavaan liikkeeseen, jos myöhemmässä liikkeessä oli jo tehty sarja (supersarja, liikkeet eri järjestyksessä). Nyt liike pienenee vasta, kun kaikki rivit, myös R/P- ja DS-lisärivit, on tehty ja seuraava sarja on kirjattu toiseen liikkeeseen sen jälkeen.",
+    "Treenin aikana jokaisessa liikkeessä näkyy ennätyssarja \"Viimeksi\"-rivin alla, esim. \"Ennätys: 90 × 10 · raskain 95 × 4\"."
+  ]},
   {v:"2.18.135", d:"marraskuu 2026", items:[
     "Ennätyksen vertailu erotuksena: \"+8 toistoa\", \"+5 kg\" tai \"arv. maksimi +3 kg\" (ennen \"aiemmin 105 × 12\").",
     "Tallennetun treenin muokkaus: yhteenveto piiloon muokkauksen ajaksi, jolloin sarjat näkyvät heti. Tallenna-palkki pysyy ylhäällä vierittäessä, ja listan lopussa on Tallenna muutokset -nappi (ennen Valmis-nappi oli yhteenvedon ja sarjojen välissä)."
@@ -7248,6 +7252,8 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"1.11.2026", items:[
+    "Korjattu: treeni ei enää hyppää seuraavaan liikkeeseen, kun liike on vielä kesken.",
+    "Treenin aikana näet jokaisen liikkeen ennätyssarjan Viimeksi-rivin alla.",
     "Ennätys kertoo, paljonko parani: esim. \"+8 toistoa\" tai \"+5 kg\".",
     "Tallennetun treenin muokkauksessa Tallenna-nappi pysyy ylhäällä vierittäessä ja löytyy myös listan lopusta.",
     "Ennätyksiä korjattu: kevyempi paino suurella toistomäärällä (esim. 30 toistoa) ei enää ole ennätys. Samalla painolla enemmän toistoja on edelleen."
@@ -9699,7 +9705,12 @@ function exMini(s,ex,ei){
 function exClosed(s,ex,ei){
   const d=doneSets(ex).length; if(!d) return false;
   if(ex.feel) return true;
-  return ex.sets.every(r=>r.done||r.kind)&&s.exercises.slice(ei+1).some(e=>doneSets(e).length);
+  // v2.18.136: liike pienenee itsestään vasta, kun kaikki rivit (myös R/P- ja DS-lisärivit) on tehty JA käyttäjä on
+  // kirjannut sarjan johonkin myöhempään liikkeeseen tämän liikkeen viimeisen sarjan jälkeen. Aiemmin riitti, että
+  // myöhemmässä liikkeessä oli joskus tehty sarja, jolloin liike sulkeutui kesken (esim. lisärivit tai lisäsarja tekemättä).
+  if(!ex.sets.every(r=>r.done)) return false;
+  const last=Math.max(0,...ex.sets.map(r=>r.at||0));
+  return s.exercises.slice(ei+1).some(e=>e.sets.some(r=>r.done&&(r.at||0)>last));
 }
 // v2.18.5: Lopeta-kysely kysyy myös Kirjaa-näkymän rasituksen ja kulun (valinnaiset)
 function gOpenFinish(){
@@ -10810,6 +10821,11 @@ function gymSessionHTML(s){
       h+=`<div class="ex-prev">Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.rows||prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${effTxt(prev.sets)?` · ${effTxt(prev.sets)}`:""}${prev.note?` <button class="nt" onclick="GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}</div>`;
       if(prev.note&&GU.prevNote[ex.id]) h+=`<div class="ex-pnote">${esc(prev.note)}</div>`;
     }
+    // v2.18.136: ennätyssarja näkyviin treenin aikana (sama sääntö kuin ennätyksissä: paras arvioitu maksimi ≤ 12 toistolla, lisäksi raskain jos eri)
+    if(prevSets.length){ const w=prevSets.filter(r=>r.kg!=null&&r.reps);
+      if(w.length){ const em=r=>e1rm(r.kg,Math.min(r.reps,12)), b=w.reduce((a,r)=>em(r)>em(a)?r:a), hv=w.reduce((a,r)=>r.kg>a.kg||(r.kg===a.kg&&r.reps>a.reps)?r:a);
+        h+=`<div class="ex-prev ex-best">Ennätys: ${setOneTxt(b)}${hv.kg>b.kg?` · raskain ${setOneTxt(hv)}`:""}</div>`; }
+      else { const mx=Math.max(0,...prevSets.filter(r=>r.kg==null).map(r=>r.reps||0)); if(mx) h+=`<div class="ex-prev ex-best">Ennätys: ${mx}\u00a0toistoa</div>`; } }
     // v2.18.63: arvioitu 1RM ei enää treenikortissa; näkyy ennätyksen yhteydessä ja liikkeen sivulla
     h+=`<div class="sets${gymCfg().effort?" eff":""}"><div class="set-h"><span>#</span><span>kg</span><span>toistot</span><span></span></div>`;
     const adjRi=live?ex.sets.findIndex(x=>!x.done):-1;
