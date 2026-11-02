@@ -90,6 +90,10 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   const best=await p.evaluate(()=>document.querySelector('[data-ex] .ex-best')?.textContent||'');
   ok(/^Ennätys: 60\u00a0×\u00a010$/.test(best),'treenin aikana ennätysrivi (paras arvioitu maksimi, ei lisärivejä): '+best);
   ok(await p.evaluate(()=>{ const e=document.querySelector('[data-ex]'); return e.scrollWidth<=e.clientWidth+1; }),'mahtuu 360 px leveyteen');
+  const dsg=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; gSetVal(s.id,0,1,'kg','55'); return ghostFor(s,ex,3).kg; });
+  ok(dsg===35,'v2.18.143: DS-rivillä viime kerran pudotuspaino (35), ei laskettua: '+dsg);
+  const hist=await p.evaluate(()=>{ GU.mode='exercise'; GU.exKey=activeSession().exercises[0].key; renderGym(); const t=document.querySelector('#view-treeni .tr-list')?.innerText||''; GU.mode='session'; GU.sessionId=G.activeId; renderGym(); return t; });
+  ok(/R\/P/.test(hist)&&/DS/.test(hist),'v2.18.143: liikkeen Kaikki kerrat -listassa lisärivit: '+hist.replace(/\s+/g,' ').slice(0,80));
 
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();

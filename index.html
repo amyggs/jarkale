@@ -2244,7 +2244,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.142</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.143</span>
       </div>
     </div>
   </div>
@@ -2278,6 +2278,13 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.143", d:"marraskuu 2026", items:[
+    "Pudotussarjan valmis paino on viime kerran pudotuspaino. Laskettu 30 % kevyempi paino tulee vain, jos aiempaa pudotussarjaa ei ole.",
+    "Liikkeen sivun Kaikki kerrat -lista näyttää myös rest-pause- ja pudotussarjat, kuten Viimeksi-rivi.",
+    "Ennätyksen selitys vastaa nykyistä sääntöä: raskain paino, eniten toistoja samalla painolla tai paras laskennallinen maksimi (enintään 12 toistoa).",
+    "Tavoitteissa ja verensokerissa desimaalipilkku (7,5 eikä 7.5). Unitavoite näytetään Trendeissä muodossa 7 h 30 min kuten muualla.",
+    "Pienet korjaukset: liikkeen sivulta poistettu toinen Takaisin-nappi, ohjelman muokkauksen liikekentän esimerkki mahtuu kapealle näytölle, ennätys- ja kehitysrivit eivät katkea luvun ja kertomerkin välistä."
+  ]},
   {v:"2.18.142", d:"marraskuu 2026", items:[
     "Kehittäjä: napautusmittari (test-taps.js) käy läpi tavallisen treenin oikeilla napautuksilla ja lukitsee perustilanteiden määrät: aloitus 1, sama sarja kuin viimeksi 1, painon tai toiston muutos 2, korjaus 3, lopetus 2. Ydin ja periaatteet kirjattu CLAUDE.md:hen."
   ]},
@@ -4322,7 +4329,7 @@ function buildSummaryHTML(curr,prev,rangeLabel,asOfDate){
     ${curr.avgWeight!=null?`<div class="ws-stat"><div class="k">Paino ka</div><div class="v">${curr.avgWeight.toFixed(1)}<small> kg</small></div>
       <div class="s wrap">${curr.weightRate!=null?(trendReliable?`${curr.weightRate>0.005?"↑ +":curr.weightRate<-0.005?"↓ ":"→ "}${Math.abs(curr.weightRate).toFixed(2)} kg/vko`:(curr.weightRate>0.05?"nouseva":curr.weightRate<-0.05?"laskeva":"tasainen")+" · vähän dataa"):"&nbsp;"}</div></div>`:""}
     ${curr.avgSleep!=null?`<div class="ws-stat"><div class="k">Uni ka</div><div class="v">${(()=>{const [hh,mm]=fmtSleepHM(curr.avgSleep).split(":").map(Number);return `${hh}<small> h</small>${mm?` ${mm}<small> min</small>`:""}`;})()}</div>
-      <div class="s">${curr.avgSleep>=sleepGoalS?"tavoitteessa":`tavoite ${sleepGoalS} h`}</div></div>`:""}
+      <div class="s">${curr.avgSleep>=sleepGoalS?"tavoitteessa":`tavoite ${fmtSleepText(sleepGoalS)}`}</div></div>`:""}
   </div>`:"";
   return `<div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -5165,7 +5172,7 @@ function renderWeekStatus(ds){
   const s1=win(0,7).map(e=>e.sleep).filter(v=>v!=null);
   const sGoal=getActiveGoals(ds).sleepHours||null;
   const sAvg=s1.length?+avg(s1).toFixed(1):null;
-  const sSub=sAvg==null?"Ei unikirjauksia":(sGoal?`tavoite ${sGoal} h · ${s1.filter(v=>v>=sGoal).length}/${s1.length} yli`:`${s1.length} yötä`);
+  const sSub=sAvg==null?"Ei unikirjauksia":(sGoal?`tavoite ${fmtSleepText(sGoal)} · ${s1.filter(v=>v>=sGoal).length}/${s1.length} yli`:`${s1.length} yötä`);
 
   const stats=[];
   if(false&&trk("weight")) stats.push(`<div class="ws-stat"><div class="k">Paino · 7 pv ka</div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;min-width:0"><div class="v" style="white-space:nowrap;flex:none">${wAvg!=null?wAvg.toFixed(1):"—"}${wAvg!=null?"<small> kg</small>":""}</div>${spark}</div><div class="s">${wSub}</div></div>`);
@@ -6137,7 +6144,7 @@ function renderTrendit() {
     if(slPts.length){
       html+=`<div class="section-head" style="margin-top:4px">Uni</div>`;
       html+=buildChart(slPts,"sleep","var(--text)",155,getActiveGoals(end).sleepHours||7,null,{aria:"Uni"});
-      html+=`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln"></i>7 pv liukuva ka</span><span><i class="dot"></i>Yö</span><span><i class="ln ref"></i>${getActiveGoals(end).sleepHours||7} h tavoite</span></div>`;
+      html+=`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln"></i>7 pv liukuva ka</span><span><i class="dot"></i>Yö</span><span><i class="ln ref"></i>tavoite ${fmtSleepText(getActiveGoals(end).sleepHours||7)}</span></div>`;
     }
     if(bpPts.length>=2){
       html+=`<div class="section-head" style="margin-top:4px">Verenpaine</div>`;
@@ -7079,7 +7086,7 @@ function renderGoals() {
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bord)">
       <span style="color:var(--dim);font-size:13px">${label}</span>
       <div style="display:flex;align-items:center;gap:6px">
-        <input type="text" inputmode="decimal" value="${g[key]??''}" placeholder="${placeholder}"
+        <input type="text" inputmode="decimal" value="${g[key]==null?'':String(g[key]).replace('.',',')}" placeholder="${placeholder}"
           onchange="setAnyGoal('${key}',this.value,'${season?.id||''}')"
           style="width:52px;height:34px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:8px;color:var(--orange);font-size:13px;font-weight:700;text-align:center;outline:none">
         <span style="color:var(--dim);font-size:11px;width:28px">${unit}</span>
@@ -7097,7 +7104,7 @@ function renderGoals() {
   const targetRow=`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bord)">
     <span style="color:var(--dim);font-size:13px">Tavoitepaino</span>
     <div style="display:flex;align-items:center;gap:6px">
-      <input type="text" inputmode="decimal" value="${activeTargetW2??''}" placeholder="—"
+      <input type="text" inputmode="decimal" value="${activeTargetW2==null?'':String(activeTargetW2).replace('.',',')}" placeholder="—"
         onchange="setAnyGoal('targetWeight',this.value,'${season?.id||""}')"
         style="width:52px;height:34px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:8px;color:var(--orange);font-size:13px;font-weight:700;text-align:center;outline:none">
       <span style="color:var(--dim);font-size:11px;width:28px">kg</span>
@@ -7277,6 +7284,8 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"2.11.2026", items:[
+    "Pudotussarjaan on valmiina viime kerran pudotuspaino.",
+    "Liikkeen historiassa näkyvät myös rest-pause- ja pudotussarjat.",
     "Jos avaat Järkäleen Instagramin tai Facebookin linkistä, sovellus neuvoo avaamaan sen oikeassa selaimessa, jotta tiedot pysyvät tallessa ja Google Drive toimii."
   ]},
   {d:"1.11.2026", items:[
@@ -8381,7 +8390,7 @@ function renderBloodSugarSection(){
     <div style="display:flex;gap:8px;align-items:center">
       <button class="stepper-btn" onclick="adjBS(-0.1)">−</button>
       <div style="flex:1;position:relative">
-        <input type="text" inputmode="decimal" value="${val??''}" placeholder="—"
+        <input type="text" inputmode="decimal" value="${val==null?'':String(val).replace('.',',')}" placeholder="—"
           oninput="S.blood_sugar=parseNum(this.value);saveDraft();updateSaveBtn(S.date,new Date(S.date+'T00:00:00').getDay())"
           onblur="renderBloodSugarSection()"
           style="width:100%;height:48px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:8px;
@@ -9283,7 +9292,7 @@ const SET_KIND_HELP={rp:"Rest-pause: lyhyt tauko ja lisää toistoja samalla pai
 // v2.18.124: selitys napautetun tunnisteen viereen, tarkemmin (tauko ja pudotuksen suuruus)
 const SET_KIND_POP={
   rp:()=>"<b>Rest-pause</b>Tauko 10–20 s, sitten lisää toistoja samalla painolla. Kirjaa riville vain lisätoistot."+(gymCfg().autoRest?" Automaattinen tauko on 15 s.":""),
-  ds:()=>"<b>Pudotussarja</b>Heti perään ilman taukoa, paino noin 20–30 % kevyempi. Järkäle ehdottaa 30 % kevyempää."};
+  ds:()=>"<b>Pudotussarja</b>Heti perään ilman taukoa, paino noin 20–30 % kevyempi. Valmiina on viime kerran pudotuspaino, ensimmäisellä kerralla 30 % kevyempi."};
 function kindPop(el,k){
   kindPopClose(); const r=el.getBoundingClientRect(), d=document.createElement("div");
   d.id="kind-pop"; d.className="kind-pop"; d.setAttribute("role","status"); d.innerHTML=SET_KIND_POP[k]?SET_KIND_POP[k]():esc(SET_KIND_HELP[k]||"");
@@ -9597,7 +9606,7 @@ function isPR(r,prev){
 // v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (sama tai kevyempi paino, enemmän toistoja) → toistot
 function prOnKg(r,prev){ if(r.kg==null) return false; const w=prev.filter(p=>p.kg!=null); return !w.length||r.kg>Math.max(...w.map(p=>p.kg)); }
 function prText(r,prev){
-  const st=(kg,reps)=>kg!=null?`${fmtKg(kg)} × ${reps}`:`${reps} toistoa`;
+  const st=(kg,reps)=>kg!=null?`${fmtKg(kg)}\u00a0×\u00a0${reps}`:`${reps}\u00a0toistoa`;
   if(r.kg==null){ const b=Math.max(...prev.filter(p=>p.kg==null).map(p=>p.reps)); return `Uusi ennätys ${st(null,r.reps)}`+(Number.isFinite(b)?` · aiempi paras ${b} toistoa`:""); }
   const same=prev.filter(p=>p.kg===r.kg);
   if(same.length){ const b=Math.max(...same.map(p=>p.reps)); return `Uusi ennätys ${st(r.kg,r.reps)} · aiempi paras ${st(r.kg,b)}`; }
@@ -9643,14 +9652,14 @@ function ghostFor(s,ex,i){
   for(let j=i-1;j>=0;j--){ const r=ex.sets[j]; if(!r||r.kind) continue; if(r.kg!=null||r.reps!=null) return {kg:r.kg!=null?r.kg:base.kg, reps:r.reps!=null?r.reps:base.reps}; }
   return base;
 }
-// Lisärivin ehdotus: R/P samalla painolla kuin edellinen rivi, DS 30 % kevyempi (painon askeleeseen pyöristettynä).
+// Lisärivin ehdotus: R/P samalla painolla kuin edellinen rivi. DS viime kerran pudotuspainolla; jos sitä ei ole, 30 % kevyempi (painon askeleeseen pyöristettynä).
 // Toistot edellisen kerran vastaavalta lisäriviltä, jos sellainen on.
 function kindGhost(s,ex,i){
   const cur=ex.sets[i], k=ex.sets.slice(0,i).filter(x=>x.kind).length;
   const prev=prevFor(ex.key,s), pe=prev&&prev.extra?prev.extra[k]:null;
   let pk=null; if(i>0){ const r=ex.sets[i-1]; pk=r.kg!=null?r.kg:ghostFor(s,ex,i-1).kg; }
   const reps=pe&&pe.kind===cur.kind?pe.reps:null;
-  if(cur.kind==="ds") return {kg:pk!=null&&pk>0?kgRound(pk*0.7):(pe?pe.kg:null),reps};
+  if(cur.kind==="ds") return {kg:pe&&pe.kind==="ds"&&pe.kg!=null?pe.kg:pk!=null&&pk>0?kgRound(pk*0.7):(pe?pe.kg:null),reps};
   return {kg:pk!=null?pk:(pe?pe.kg:null),reps};
 }
 function gRefreshGhosts(s,ei,from){
@@ -10068,7 +10077,7 @@ function gymSettingsHTML(){
     h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Painon − / + -askel</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Kuinka paljon − ja + muuttavat seuraavan sarjan painoa treenin aikana. Muut painot voi aina kirjoittaa itse.</span>
       <div class="g-seg" role="radiogroup" aria-label="Painon askel">${KG_STEPS.map(v=>`<button role="radio" aria-checked="${st===v}" class="${st===v?"on":""}" onclick="setGymOpt('kgStep',${v})">${fmtKg(v)} kg</button>`).join("")}</div></div>`; }
   { const ef=c.effort||"";
-    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Koettu rasittavuus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo on ehdotus). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = toistovara, eli montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
+    h+=`<div class="g-set-row" style="display:block"><span style="font-size:14px;color:var(--text);font-weight:600">Koettu rasittavuus (valinnainen)</span><span style="display:block;font-size:12px;color:var(--dim);margin:2px 0 8px">Sarjan alle tulee − / + -säädin (harmaa arvo tulee edellisestä sarjasta). Säädin vie tilaa, joten sarjarivi tiivistyy. RIR = toistovara, eli montako toistoa olisi vielä jaksanut. RPE = kuinka raskas sarja oli (10 − RIR). Valitse toinen, ne kertovat saman asian.</span>
       <div class="g-seg" role="radiogroup" aria-label="Koettu rasittavuus">${[["","Pois"],["rir","RIR"],["rpe","RPE"]].map(([k,t])=>`<button role="radio" aria-checked="${ef===k}" class="${ef===k?"on":""}" onclick="setGymOpt('effort','${k}')">${t}</button>`).join("")}</div></div>`; }
   h+=gHistSectionHTML();
   return h;
@@ -10524,7 +10533,7 @@ const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.106: ennätysrivi yhteenvetoon ja jakoon: sarja vain, jos liikkeessä oli eri painoja/toistoja (muuten se on jo sarjarivillä), ja vertailu
 // v2.18.107: jaon apufunktiot
 const SHARE_FOOT="Järkäle · treenipäiväkirja";
-const PR_EXPLAIN="★ Ennätys: näin raskasta painoa ei ole ennen nostettu näin monta kertaa.";
+const PR_EXPLAIN="★ Ennätys: liikkeen raskain paino, eniten toistoja samalla painolla tai paras laskennallinen maksimi (enintään 12 toistoa).";
 // Tekstin väri korostusvärin päälle: tumma vaalealle, valkoinen tummalle (kontrasti ≥ 4,5 kaikissa teemoissa)
 function accentInk(){
   try{ const el=document.createElement("i"); el.style.color="var(--orange)"; document.body.appendChild(el); const c=getComputedStyle(el).color; el.remove();
@@ -10938,7 +10947,7 @@ function gymEditHTML(p){
         </div>`;
       }
     });
-    h+=`<div class="ed-addrow"><input class="g-in dashed" id="g-add-${d.id}" placeholder="+ Liike, esim. Penkki 3x8-10 80" enterkeyhint="done" oninput="gParsePreview('${d.id}',this.value)" onkeydown="if(event.key==='Enter')gAddTplEx(${di},'${d.id}')"><button class="tr-go" onclick="gAddTplEx(${di},'${d.id}')">Lisää</button></div>
+    h+=`<div class="ed-addrow"><input class="g-in dashed" id="g-add-${d.id}" placeholder="+ Liike, esim. Penkki 3x10" enterkeyhint="done" oninput="gParsePreview('${d.id}',this.value)" onkeydown="if(event.key==='Enter')gAddTplEx(${di},'${d.id}')"><button class="tr-go" onclick="gAddTplEx(${di},'${d.id}')">Lisää</button></div>
       <div class="ed-parse" id="g-prev-${d.id}"></div>
       <div class="ed-dayfoot"><label>Kirjaa-merkintä <select onchange="gEdit(p=>p.days[${di}].trainingType=this.value)"><option value="">ei treenityyppiä</option>${types.map(t=>`<option value="${esc(t)}" ${d.trainingType===t?"selected":""}>${esc(t)}</option>`).join("")}</select></label>
         <span><button onclick="gMoveDay(${di},-1)" ${di?"":"disabled"} aria-label="Siirrä ylös">↑</button><button onclick="gMoveDay(${di},1)" ${di<p.days.length-1?"":"disabled"} aria-label="Siirrä alas">↓</button><button class="danger" onclick="gDelDay(${di})">Poista päivä</button></span></div></div>`;
@@ -11106,7 +11115,7 @@ function gymChartHTML(H){
 function gymExerciseHTML(key){
   const H=exerciseHistory(key);
   const name=H.length?H[H.length-1].ex.name:key;
-  let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(name)}</div><div class="tr-h2">${H.length} kertaa</div></div><button class="tr-pill" onclick="gBack()">Takaisin</button></div></div>`;
+  let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(name)}</div><div class="tr-h2">${H.length} kertaa</div></div></div></div>`;
   if(!H.length) return h+`<div class="g-hint">Ei kirjattuja sarjoja.</div>`;
   { const g=exGroup(key,name), k=esc(JSON.stringify(key));
     h+=`<div class="ex-grp-row"><span>Lihasryhmä</span><select class="g-in" onchange="gSetGroup(${k},this.value)" aria-label="Lihasryhmä">${EX_GROUPS.map(x=>`<option${x===g?" selected":""}>${x}</option>`).join("")}</select></div>`;
@@ -11124,7 +11133,7 @@ function gymExerciseHTML(key){
     <div class="g-stats-note">Sarjat muodossa ${unit}.${best.top.kg!=null?" Arvioitu 1RM on laskennallinen ja järkevä noin 1–12 toiston sarjoista.":""}</div>`;
   h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
-  h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(x.sets)}${effTxt(x.sets)?` · ${effTxt(x.sets)}`:""}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
+  h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(doneRows(x.ex))}${effTxt(x.sets)?` · ${effTxt(x.sets)}`:""}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
   return h+`</div><div style="height:30px"></div>`;
 }
 
@@ -11142,7 +11151,7 @@ function gymTrendHTML(start,end){
     const top=x=>doneSets(x.e).reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b);
     const a=top(list[0]), b=top(list[list.length-1]);
     const ea=e1rm(a.kg,a.reps), eb=e1rm(b.kg,b.reps);
-    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?fmtKg(a.kg)+" × ":""}${a.reps} → ${b.kg!=null?fmtKg(b.kg)+" × ":""}${b.reps}`;
+    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?fmtKg(a.kg)+"\u00a0×\u00a0":""}${a.reps} → ${b.kg!=null?fmtKg(b.kg)+"\u00a0×\u00a0":""}${b.reps}`;
     if(!ea||!eb){ return; }
     if(eb>ea*1.01) up.push(lab); else if(eb<ea*0.99) down.push(lab); else same.push(lab);
   });
