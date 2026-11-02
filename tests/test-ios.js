@@ -35,6 +35,17 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await and.goto(URL); await and.evaluate(()=>localStorage.clear()); await and.reload(); await and.waitForTimeout(300);
   ok(!/Koti-valikkoon/.test(await and.locator('#setup-screen').innerText())&&await and.evaluate(()=>!isIOS()),'Androidissa ei iPhone-ohjetta');
 
+
+  console.log('\nSovelluksen sisäinen selain (Instagram) ja iPad (v2.18.140)');
+  const {defaultBrowserType:_d,...iph2}=devices['iPhone 13'];
+  const ig=await (await b.newContext({...iph2,userAgent:iph2.userAgent+' Instagram 300.0.0.0.0 (iPhone14,5; iOS 18_0)',serviceWorkers:'block'})).newPage();
+  await ig.goto(URL); await ig.evaluate(()=>localStorage.clear()); await ig.reload(); await ig.waitForTimeout(300);
+  const igt=await ig.locator('#setup-screen').innerText();
+  ok(/Avaa Järkäle selaimessa/.test(igt)&&/Avaa selaimessa/.test(igt)&&!/ensin Koti-valikkoon/.test(igt),'Instagramin selaimessa ohje avata oikeassa selaimessa (ei Koti-valikko-ohjetta päällekkäin)');
+  const {defaultBrowserType:_e,...ipad}=devices['iPad Mini'];
+  const ip=await (await b.newContext({...ipad,serviceWorkers:'block'})).newPage();
+  await ip.goto(URL); await ip.evaluate(()=>localStorage.clear()); await ip.reload(); await ip.waitForTimeout(300);
+  ok(/iPadilla: lisää Järkäle ensin Koti-valikkoon/.test(await ip.locator('#setup-screen').innerText()),'iPadilla ohjeessa iPad');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

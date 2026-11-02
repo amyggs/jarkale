@@ -2245,7 +2245,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         Data tallennetaan tämän selaimen localStorage:iin.<br>
         Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.139</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.140</span>
       </div>
     </div>
   </div>
@@ -2279,6 +2279,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.140", d:"marraskuu 2026", items:[
+    "Sovellusten sisäinen selain (Instagram, Facebook, Messenger ym.): aloituksessa ja Kirjaa-näkymässä ohje avata Järkäle oikeassa selaimessa, koska upotetussa selaimessa tiedot voivat kadota eikä Googlen kirjautuminen (Drive) toimi.",
+    "iPhone-ohje tunnistaa myös iPadin.",
+    "Kuukausikuvasta poistettu \"toteutuneet / suunnitellut treenipäivät\": vajaa luku näytti epäonnistumiselta. Treenipäivien määrä näkyy, jos samana päivänä on ollut useampi treeni."
+  ]},
   {v:"2.18.139", d:"marraskuu 2026", items:[
     "Drive-osio näyttää, mitä Driveen on tallennettu: \"Drivessa tallessa: 23 treeniä, 41 päiväkirjausta\" ja synkronoinnin ajan. Lisäksi kerrotaan, että tiedosto on piilotetussa sovelluskansiossa eikä siksi näy Driven tiedostolistassa."
   ]},
@@ -3669,7 +3674,7 @@ function renderSetupScreen(){
   const t=S.settings.tracking;
   if(SU_STEP!=="list"){
     el.innerHTML=`<div class="su-head"><div class="su-h1">Tervetuloa Järkäleeseen</div>
-      <div class="su-sub">Mitä haluat tehdä ensin? Valinnan voi muuttaa milloin tahansa Asetuksista.</div></div>${iosNeedsInstall()?IOS_SETUP_HTML:""}
+      <div class="su-sub">Mitä haluat tehdä ensin? Valinnan voi muuttaa milloin tahansa Asetuksista.</div></div>${inAppBrowser()?IN_APP_HTML():iosNeedsInstall()?IOS_SETUP_HTML():""}
       <button class="su-choice" onclick="setupPick('gym')"><b>Kirjata treenejä</b><span>Oma tai valmentajan ohjelma, sarjat ja kilot salilla. Ohjelmaksi riittävät liikkeet, joita teet nyt. Vanhan historian voi tuoda Strongista tai Hevystä.</span></button>
       <button class="su-choice" onclick="setupPick('body')"><b>Seurata kehoa ja vointia</b><span>Paino, uni, palautuminen, kivut ja muut valitsemasi asiat.</span></button>
       <button class="su-choice" onclick="setupPick('both')"><b>Molempia</b><span>Treenit ja päiväseuranta samassa sovelluksessa.</span></button>
@@ -7262,6 +7267,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"2.11.2026", items:[
+    "Jos avaat Järkäleen Instagramin tai Facebookin linkistä, sovellus neuvoo avaamaan sen oikeassa selaimessa, jotta tiedot pysyvät tallessa ja Google Drive toimii."
+  ]},
   {d:"1.11.2026", items:[
     "Asetusten Drive-kohdassa näet, mitä Driveen on tallennettu (esim. 23 treeniä, 41 päiväkirjausta). Tiedosto on Driven piilotetussa sovelluskansiossa, joten se ei näy Driven tiedostolistassa.",
     "iPhonella: lisää Järkäle Koti-valikkoon (Safari → jakonappi → Lisää Koti-valikkoon). Selaimessa iPhone tai selain voi poistaa tiedot. Sovellus neuvoo, miten tiedot siirretään Google Driven kautta.",
@@ -10710,7 +10718,8 @@ async function gMonthImage(ym){
     font(800,20,FH); if(draw){ x.fillStyle=C.text; x.fillText(MS.count===1?"treeni":"treeniä",P+cw+10,y+4); }
     font(600,15,FB); if(draw){ x.fillStyle=C.dim; x.fillText(`${MTHS_INE[MS.M-1]} ${MS.Y}`,P+cw+10,y+28); }
     y+=54;
-    if(MS.planned){ font(600,14,FB); const t=`${MS.days} / ${MS.planned} suunniteltua treenipäivää`; if(draw){ x.fillStyle=C.text; x.fillText(t,P,y); } y+=24; }
+    // v2.18.140: ei "15 / 18 suunniteltua" – vajaa luku näytti epäonnistumiselta, toteutuminen näkyy kalenterista
+    if(MS.days!==MS.count){ font(600,14,FB); const t=`${MS.days} treenipäivää`; if(draw){ x.fillStyle=C.text; x.fillText(t,P,y); } y+=24; }
     const cardY=y; y+=18;
     // kalenteri, maanantai ensin
     const cx=P+16, cwid=IW-32, cell=cwid/7, r0=Math.min(15,cell/2-3);
@@ -11513,22 +11522,27 @@ function firstBackupHTML(){
 // joka on erillinen Safarin tilasta: ohje aloitukseen ennen kirjauksia, ja jos dataa on jo, ensin siirto Driven kautta.
 function isIOS(){ const u=navigator.userAgent||""; return /iPhone|iPad|iPod/.test(u)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1); }
 function isStandalone(){ try{ return navigator.standalone===true||matchMedia("(display-mode: standalone)").matches; }catch(_){ return false; } }
-function iosNeedsInstall(){ return isIOS()&&!isStandalone(); }
+function iosNeedsInstall(){ return isIOS()&&!isStandalone()&&!inAppBrowser(); }
+function iosDev(){ const u=navigator.userAgent||""; return /iPad/.test(u)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)?"iPad":"iPhone"; }
+// v2.18.140: Instagramin, Facebookin ym. sovellusten sisäinen selain: Google estää kirjautumisen upotetuissa selaimissa
+// (Drive ei onnistu) ja tallennustila voi tyhjentyä. Storyn linkistä tuleva avaa Järkäleen yleensä juuri tässä.
+function inAppBrowser(){ return /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|LinkedInApp|Snapchat|TikTok|musical_ly|Line\//i.test(navigator.userAgent||""); }
+const IN_APP_HTML=()=>`<div class="ios-card"><div class="ios-h">Avaa Järkäle selaimessa</div><div class="ios-t">Olet sovelluksen sisäisessä selaimessa (esim. Instagram). Siinä tiedot voivat kadota, eikä Google Drive -varmuuskopio toimi.</div><ol class="ios-steps"><li>Paina oikean yläkulman <b>⋯</b>-valikkoa.</li><li>Valitse <b>Avaa selaimessa</b> (${isIOS()?"Safari":"Chrome"}).</li>${isIOS()?`<li>Lisää Järkäle sen jälkeen Koti-valikkoon: jakonappi <span class="ios-share" aria-hidden="true">⎙</span> → <b>Lisää Koti-valikkoon</b>.</li>`:`<li>Asenna Järkäle sen jälkeen Chromen valikosta: <b>Lisää aloitusnäyttöön</b>.</li>`}</ol></div>`;
 const IOS_STEPS=`<ol class="ios-steps"><li>Avaa tämä sivu <b>Safarissa</b>, jos käytät muuta selainta.</li><li>Paina jakonappia <span class="ios-share" aria-hidden="true">⎙</span> ja valitse <b>Lisää Koti-valikkoon</b>.</li><li>Avaa Järkäle Koti-valikosta ja käytä sitä jatkossa sieltä.</li></ol>`;
-const IOS_SETUP_HTML=`<div class="ios-card"><div class="ios-h">iPhonella: lisää Järkäle ensin Koti-valikkoon</div><div class="ios-t">Selaimessa käytettynä iPhone tai selain voi poistaa tietosi, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikon Järkäle pitää ne tallessa, mutta aloittaa tyhjänä, joten tee tämä ennen kirjaamista.</div>${IOS_STEPS}</div>`;
+const IOS_SETUP_HTML=()=>`<div class="ios-card"><div class="ios-h">${iosDev()==="iPad"?"iPadilla":"iPhonella"}: lisää Järkäle ensin Koti-valikkoon</div><div class="ios-t">Selaimessa käytettynä ${iosDev()} tai selain voi poistaa tietosi, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikon Järkäle pitää ne tallessa, mutta aloittaa tyhjänä, joten tee tämä ennen kirjaamista.</div>${IOS_STEPS}</div>`;
 const IOS_LATER="jarkale-ios-later";
 function iosDataCardHTML(){
   if(!iosNeedsInstall()||localStorage.getItem("seuranta-setup-done")!=="1") return "";
   const has=Object.keys(S.entries||{}).length||G.sessions.length||G.programs.length; if(!has) return "";
   try{ const l=parseInt(localStorage.getItem(IOS_LATER)||"0"); if(l&&Date.now()-l<7*864e5) return ""; }catch(_){ }
   const drive=syncState().enabled;
-  return `<div class="card ios-card"><div class="ios-h">${ico("save",17)} iPhone voi poistaa tietosi</div><div class="ios-t">Selaimessa käytettynä iPhone tai selain voi poistaa Järkäleen tiedot, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikkoon lisätty Järkäle pitää ne tallessa, mutta aloittaa tyhjänä. Siirrä tiedot näin:</div>
+  return `<div class="card ios-card"><div class="ios-h">${ico("save",17)} ${iosDev()} voi poistaa tietosi</div><div class="ios-t">Selaimessa käytettynä ${iosDev()} tai selain voi poistaa Järkäleen tiedot, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikkoon lisätty Järkäle pitää ne tallessa, mutta aloittaa tyhjänä. Siirrä tiedot näin:</div>
     <ol class="ios-steps"><li>${drive?"Google Drive on yhdistetty ✓":`<b>Yhdistä Google Drive</b> tai tee varmuuskopio.`}</li><li>Avaa tämä sivu <b>Safarissa</b> → jakonappi <span class="ios-share" aria-hidden="true">⎙</span> → <b>Lisää Koti-valikkoon</b>.</li><li>Avaa Järkäle Koti-valikosta ja yhdistä sama Google Drive (tai palauta varmuuskopio), niin tiedot palaavat.</li></ol>
     <div class="ios-b">${drive?"":SYNC_AVAILABLE?`<button class="tr-go" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="tr-go" onclick="goBackup()">Tee varmuuskopio</button>`}<button class="tr-pill ios-later" onclick="try{localStorage.setItem(IOS_LATER,String(Date.now()))}catch(_){};renderFirstBackup();if(S.tab==='treeni')renderGym()">Myöhemmin</button></div></div>`;
 }
 function renderFirstBackup(){
   const el=document.getElementById("first-backup"); if(!el) return;
-  const h=S.date===today()?(iosDataCardHTML()||firstBackupHTML()):"";
+  const h=S.date===today()?((inAppBrowser()&&localStorage.getItem("seuranta-setup-done")==="1"?IN_APP_HTML():"")||iosDataCardHTML()||firstBackupHTML()):"";
   el.innerHTML=h; el.style.display=h?"block":"none";
 }
 function backupNudge(){
