@@ -2243,9 +2243,8 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       </div>
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
-        Data tallennetaan tämän selaimen localStorage:iin.<br>
-        Varmuuskopioi säännöllisesti → tallenna Google Driveen.<br><br>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.140</span>
+        <span id="stg-foot-data"></span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.141</span>
       </div>
     </div>
   </div>
@@ -2279,6 +2278,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.141", d:"marraskuu 2026", items:[
+    "Asetusten osiot isommiksi ja selkeämmiksi: teksti 15 px (ennen 13 px) tekstin värillä, korkeus 52 px, Mitä seuraat -osiolle kuvake kuten muillakin. Alatunniste kertoo tilan ilman teknistä termiä: tiedot puhelimessa ja kopio Drivessa, tai vain puhelimessa."
+  ]},
   {v:"2.18.140", d:"marraskuu 2026", items:[
     "Sovellusten sisäinen selain (Instagram, Facebook, Messenger ym.): aloituksessa ja Kirjaa-näkymässä ohje avata Järkäle oikeassa selaimessa, koska upotetussa selaimessa tiedot voivat kadota eikä Googlen kirjautuminen (Drive) toimi.",
     "iPhone-ohje tunnistaa myös iPadin.",
@@ -6904,15 +6906,19 @@ function renderSettingsToggle(key, lbl, icon){
   const open = SETTINGS_TOGGLES[key];
   const el = document.getElementById("stgl-"+key);
   if(!el) return;
-  el.innerHTML=`<button onclick="SETTINGS_TOGGLES['${key}']=!SETTINGS_TOGGLES['${key}'];renderAsetukset()" style="width:100%;height:44px;border-radius:12px;border:1.5px solid ${open?"var(--orange)":"var(--bord)"};background:${open?"rgba(249,115,22,.06)":"transparent"};color:${open?"var(--orange)":"var(--dim)"};font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;cursor:pointer;margin-bottom:0">
-    <span class="ttl-ico">${ICONS[icon]?ico(icon,18):icon}${lbl}</span><span style="font-size:11px">${open?"▴":"▾"}</span>
+  el.innerHTML=`<button onclick="SETTINGS_TOGGLES['${key}']=!SETTINGS_TOGGLES['${key}'];renderAsetukset()" style="width:100%;min-height:52px;border-radius:12px;border:1.5px solid ${open?"var(--orange)":"var(--bord)"};background:${open?"rgba(249,115,22,.06)":"transparent"};color:${open?"var(--orange)":"var(--text)"};font-size:15px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;cursor:pointer;margin-bottom:0">
+    <span class="ttl-ico" style="flex:1;min-width:0;text-align:left">${ICONS[icon]?ico(icon,18):icon}${lbl}</span><span style="font-size:13px;color:var(--dim);flex:none;margin-left:8px">${open?"▴":"▾"}</span>
   </button>`;
   const contentEl = document.getElementById("stgl-content-"+key);
   if(contentEl) contentEl.style.display = open ? "block" : "none";
 }
 
 // v2.18.98: Drive-tila näkyy osion otsikossa ilman avaamista (päivittyy myös renderSyncUI:sta)
+// v2.18.141: alatunniste tilan mukaan, ilman teknistä termiä (ennen "localStorage:iin" myös Drive-käyttäjälle)
+function renderDataFoot(){ const el=document.getElementById("stg-foot-data"); if(!el) return; let on=false; try{ on=SYNC_AVAILABLE&&syncState().enabled; }catch(_){}
+  el.innerHTML=on?"Tiedot ovat tässä puhelimessa ja kopio omassa Google Drivessasi.<br><br>":"Tiedot ovat vain tässä puhelimessa. Yhdistä Google Drive tai tee varmuuskopio, ettei niitä menetetä.<br><br>"; }
 function renderDataToggle(){
+  try{ renderDataFoot(); }catch(_){}
   let lbl="Varmuuskopio ja Drive";
   try{ if(SYNC_AVAILABLE) lbl+=syncState().enabled?" · Drive käytössä":" · Drive ei käytössä"; }catch(_){}
   renderSettingsToggle("data",lbl,"save");
@@ -6923,7 +6929,7 @@ function renderSettingsToggles(){
   const trackingTotal=getTrackingGroups().flatMap(g=>g.items).length;
   // v2.18.98: pelkkää treeniä kirjaavalle "— ei valintoja" näytti virheeltä
   const trackingLbl=trackingCount>0?`Mitä seuraat (${trackingCount}/${trackingTotal})`:(gymOn()?"Mitä seuraat · vain treenit":"Mitä seuraat · ei valintoja");
-  renderSettingsToggle("tracking",trackingLbl,"✓");
+  renderSettingsToggle("tracking",trackingLbl,"check");
   renderDataToggle();
   const palName=(PALETTES.find(p=>p.id===curPalette())||{}).l;
   renderSettingsToggle("appearance","Ulkoasu"+(palName?" · "+palName:""),"palette");
