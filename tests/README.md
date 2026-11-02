@@ -35,6 +35,7 @@ tests/run.sh test-gym.js
 | `test-wrap.js` | Rivitys 360 px: pitkillä ohjelma-, päivä- ja liikenimillä mikään sana ei katkea keskeltä (yhdysmerkki ja ajatusviiva sallittu) eikä mikään mene reunan yli. 11 näkymää (Kirjaa, Trendit, Mitat, Asetukset, Treeni, treeni käynnissä, yhteenveto, muokkaus, liikehistoria, treenin asetukset, tuonnin esikatselu), teemat Järkäle, Teksti-TV ja Kuusnelonen |
 | `test-month.js` | Kuukausikuva: treenimäärä ja -päivät (tyhjä treeni ei lasketa, kaksi samana päivänä), treenipäivien selite, suunnitellut päivät, kehitys (vain aiemman historian liikkeet, paras arvioitu maksimi), kuva syntyy kahdella teemalla, Jaa kuukausi -nappi ja kuukauden alun ehdotus (Playwrightin kello) |
 | `test-ios.js` | iPhone selaimessa (iPhone 13 -emulointi Chromiumilla, ei WebKit): aloituksessa ohje Koti-valikkoon lisäämisestä, siirtokortti kun dataa on (Drive ensin), Myöhemmin piilottaa, ei ohjetta Koti-valikosta avattuna eikä Androidissa |
+| `test-taps.js` | Napautusmittari: tavallinen treeni oikeilla napautuksilla (aloitus 1, sama sarja kuin viimeksi 1, painon tai toiston muutos 2, väärin kuitatun korjaus 3, lopetus 2; koko esimerkkitreeni 17). Kaatuu, jos perustilanne vaatii enemmän napautuksia |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

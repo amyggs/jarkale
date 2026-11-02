@@ -22,6 +22,15 @@ Henkilökohtainen treeni- ja hyvinvointiseuranta. Yksi HTML-tiedosto (`index.htm
 - Ennen ajoa vapauta portit: `fuser -k 8765/tcp 8766/tcp`.
 - Testit eivät käytä oikeaa dataa. Repo on julkinen: **ei oikeita vientitiedostoja, ohjelmia tai henkilötietoja** repoon, vain keksittyjä esimerkkejä (`tests/fixtures/`).
 
+## Ydin (2.11.2026)
+Järkäle on treenipäiväkirja, joka on yhtä kevyt kuin muistiinpanot. Salilla viime kerran luvut ovat valmiina, ja treenin rinnalla kulkee se, mitä kello ei mittaa: miltä tuntui, mihin sattui, mikä päivässä oli poikkeavaa ja miten mitat muuttuvat. Tiedot säilyvät, ja kehityksen näkee yhdellä silmäyksellä.
+
+Periaatteet, joilla jokainen muutos arvioidaan:
+1. **Nopeampi kuin muistiinpanot, Strong, Hevy ja SmartReps.** Perustilanteissa vähemmän napautuksia ja sekunteja. Jos muutos lisää vaiheita, asetuksia tai päätöksiä, se ei mene läpi. Napautusmäärät on lukittu testiin `tests/test-taps.js` (treeni alkaa 1 napautuksella, sama sarja kuin viimeksi 1, painon tai toiston muutos 2, korjaus 3, lopetus 2).
+2. **Tiedot eivät katoa.** Luotettavuus ja palautettavuus menevät kaiken muun edelle.
+3. **Järkäle näyttää, ei neuvo.** Ei painoehdotuksia, valmennusta eikä pisteitä. Ohjelma on käyttäjän tai valmentajan.
+Uni, askeleet ja paino ovat kelloissa jo valmiina; Järkäleen oma arvo kehon puolella on tuntemuksissa, kivuissa, päivän poikkeamissa ja mitoissa.
+
 ## Tuotteen linja (lukittu)
 - Käyttäjällä on jo ohjelma (oma tai valmentajan). Järkäle kirjaa sen ja näyttää, mitä tapahtuu. Ei ohjelmageneraattoria.
 - Ei omaa palvelinta, ei käyttäjätiliä, ei analytiikkaa. Data puhelimessa ja halutessa käyttäjän omassa Google Drivessa (`drive.appdata`, `drive.file`). Tekoälyanalyysi vain käyttäjän omalla API-avaimella. Jos tietovirtoihin tulee muutos, päivitä `tietosuoja.html`.
