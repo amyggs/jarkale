@@ -2244,7 +2244,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.143</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.144</span>
       </div>
     </div>
   </div>
@@ -2278,6 +2278,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.144", d:"marraskuu 2026", items:[
+    "Liikkeen sivun Paras sarja, Arvioitu 1RM, käyrä ja kehityssuunta käyttävät samaa sääntöä kuin ennätykset: arvio enintään 12 toistolla. Kevyt pitkä sarja (esim. 157,5 × 30) ei enää näy parhaana sarjana raskaamman lyhyen sarjan ohi. Sama korjaus treenin yhteenvedon nuoleen ja Trendien salitreeneihin. Samalla painolla toistojen lisäys näkyy nousuna myös yli 12 toistolla."
+  ]},
   {v:"2.18.143", d:"marraskuu 2026", items:[
     "Pudotussarjan valmis paino on viime kerran pudotuspaino. Laskettu 30 % kevyempi paino tulee vain, jos aiempaa pudotussarjaa ei ole.",
     "Liikkeen sivun Kaikki kerrat -lista näyttää myös rest-pause- ja pudotussarjat, kuten Viimeksi-rivi.",
@@ -7283,6 +7286,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"3.11.2026", items:[
+    "Liikkeen sivun paras sarja ja arvioitu maksimi lasketaan samoin kuin ennätykset, joten pitkä kevyt sarja ei enää näy parhaana."
+  ]},
   {d:"2.11.2026", items:[
     "Pudotussarjaan on valmiina viime kerran pudotuspaino.",
     "Liikkeen historiassa näkyvät myös rest-pause- ja pudotussarjat.",
@@ -9216,6 +9222,12 @@ function gDay(ds){ const a=new Date(ds+"T00:00:00"); return `${WD_SHORT[a.getDay
 // ei sekoitu painoihin). Toistoja ei katkaista (v2.17.5): luku on saman liikkeen kertojen välinen vertailuluku, ei maksimiennuste,
 // ja katkaisu olisi piilottanut esim. 18 → 20 toiston kehityksen. Kirjattu sarja (kg, toistot) näytetään aina sellaisenaan.
 function e1rm(kg,reps){ if(!reps) return 0; return kg?kg*(1+reps/30):reps/1000; }
+// v2.18.144: vertailuihin arvio enintään 12 toistolla (sama sääntö kuin ennätyksissä); yli 12 toistoa ratkaisee vain tasatilanteen
+function e1c(kg,reps){ if(!reps) return 0; return kg?e1rm(kg,Math.min(reps,12))+Math.max(0,reps-12)*1e-6:e1rm(kg,reps); }
+const bestSet=sets=>sets.reduce((b,r)=>e1c(r.kg,r.reps)>e1c(b.kg,b.reps)?r:b,sets[0]);
+// Suunta vanhasta uuteen: samalla painolla toistot, muuten arvio (kynnys th)
+function setDir(a,b,th){ if(a.kg===b.kg) return b.reps>a.reps?"up":b.reps<a.reps?"down":"same";
+  const x=e1c(a.kg,a.reps), y=e1c(b.kg,b.reps); return y>x*(1+th)?"up":y<x*(1-th)?"down":"same"; }
 
 // ── Liikerivin jäsennin (v2.17.1): "Penkkipunnerrus 3x8-10 80" / "Leuanveto 3xmax" / "Hauis 3 x 12 @ 14kg" /
 // "Penkki, pieni stoppi 2 * 6 - 8 & 1 * 8 - 12" / pelkkä nimi. Tavoitteen jälkeinen teksti ja pilkun jälkeinen
@@ -10429,13 +10441,10 @@ function exerciseTrend(key){
   const H=exerciseHistory(key);
   if(!H.length) return {dir:null,last:null,sinceBest:0};
   const last=H[H.length-1];
-  let bi=0; H.forEach((x,i)=>{ if(x.e1>=H[bi].e1-1e-9) bi=i; });
+  const ev=x=>e1c(x.top.kg,x.top.reps); let bi=0; H.forEach((x,i)=>{ if(ev(x)>=ev(H[bi])-1e-9) bi=i; });
   const r={dir:null,dirTxt:"",last,prev:H.length>=2?H[H.length-2]:null,sinceBest:H.length-1-bi};
   if(H.length>=2){
-    const a=H[H.length-2].e1, b=last.e1;
-    if(b>a*1.005){ r.dir="up"; r.dirTxt="nousi"; }
-    else if(b<a*0.995){ r.dir="down"; r.dirTxt="laski"; }
-    else { r.dir="same"; r.dirTxt="ennallaan"; }
+    r.dir=setDir(H[H.length-2].top,last.top,0.005); r.dirTxt={up:"nousi",down:"laski",same:"ennallaan"}[r.dir];
   }
   return r;
 }
@@ -10501,18 +10510,14 @@ function sessionSummary(s){
   s.exercises.forEach(ex=>{
     const done=doneSets(ex);
     if(ex.skipped||!done.length){ rows.push({ex,skipped:true}); return; }
-    const top=done.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,done[0]);
+    const top=bestSet(done);
     const prev=prevFor(ex.key,s);
     let dir=null;
-    if(prev&&prev.sets.length){
-      const pt=prev.sets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,prev.sets[0]);
-      const a=e1rm(pt.kg,pt.reps), b=e1rm(top.kg,top.reps);
-      dir=b>a*1.005?"up":b<a*0.995?"down":"same";
-    }
+    if(prev&&prev.sets.length) dir=setDir(bestSet(prev.sets),top,0.005);
     const before=setsBefore(ex.key,s);
     const prSets=done.filter(r=>isPR(r,before));
     if(prSets.length){
-      const best=prSets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,prSets[0]);
+      const best=bestSet(prSets);
       // v2.18.135: vertailu erotuksena ("+8 toistoa", "+5 kg") eikä "aiemmin 105 × 12" – lyhyempi ja kertoo suoraan, paljonko parani
       let was="";
       if(best.kg!=null){
@@ -10542,7 +10547,7 @@ function accentInk(){
 }
 function bestPR(S2){
   const rows=S2.rows.filter(r=>r.pr); if(!rows.length) return null;
-  return rows.slice().sort((a,b)=>(/^raskain/.test(b.pr.was)-/^raskain/.test(a.pr.was))||(e1rm(b.pr.set.kg,b.pr.set.reps)-e1rm(a.pr.set.kg,a.pr.set.reps)))[0];
+  return rows.slice().sort((a,b)=>(/^raskain/.test(b.pr.was)-/^raskain/.test(a.pr.was))||(e1c(b.pr.set.kg,b.pr.set.reps)-e1c(a.pr.set.kg,a.pr.set.reps)))[0];
 }
 function bestPRTxt(r){ return `${r.ex.name} ${setOneTxt(r.pr.set)}${/^\+[\d,.]+\u00a0kg$/.test(r.pr.was)?" · raskain tähän asti":""}`; }
 function sessionProgLine(s){ return s.programName&&s.programName!==s.dayName?s.programName:""; }
@@ -11050,8 +11055,8 @@ async function gImportSave(append){
 // ── Liikkeen kehitys: paras sarja kerralta, ei volyymia eikä tonnagea
 function exerciseHistory(key){
   return G.sessions.filter(s=>s.endedAt).map(s=>{ const ex=s.exercises.find(e=>e.key===key&&doneSets(e).length); if(!ex) return null;
-    const sets=doneSets(ex); const top=sets.reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b,sets[0]);
-    return {s,ex,sets,top,e1:e1rm(top.kg,top.reps)}; }).filter(Boolean).sort((a,b)=>a.s.startedAt-b.s.startedAt);
+    const sets=doneSets(ex); const top=bestSet(sets);
+    return {s,ex,sets,top,e1:e1rm(top.kg,top.kg?Math.min(top.reps,12):top.reps)}; }).filter(Boolean).sort((a,b)=>a.s.startedAt-b.s.startedAt);
 }
 // Kehityskäyrä (v2.17.4). Oletuksena arvioitu 1RM, joka nousee sekä kuorman että toistojen kasvaessa: tuplaprogressiossa
 // (80 × 8 → 80 × 10 → 82,5 × 8) pelkkä paino jäisi vaakasuoraksi. Jokaisen pisteen kohdalla näkyy todellinen sarja.
@@ -11122,7 +11127,7 @@ function gymExerciseHTML(key){
     const ph=gPinHTML(key);
     h+=ph||`<button class="g-pinbtn" onclick="GU.pinEdit[${k}]=true;renderGym()">${ico("pin",14)} Lisää kiinnitetty huomio</button>`; }
   const withKg=H.filter(x=>x.top.kg!=null);
-  const best=H.reduce((b,x)=>x.e1>b.e1?x:b,H[0]);
+  const best=H.reduce((b,x)=>e1c(x.top.kg,x.top.reps)>e1c(b.top.kg,b.top.reps)?x:b,H[0]);
   // v2.17.12: tunnuslukulaatikot keskitettyinä kuten treenin yhteenvedossa (luku ensin, selite alla)
   const kgx=r=>r.kg!=null?`${fmtKg(r.kg)} × ${r.reps}`:`${r.reps}`;
   const unit=best.top.kg!=null?"kg × toistot":"toistoa";
@@ -11148,12 +11153,12 @@ function gymTrendHTML(start,end){
   Object.values(keys).forEach(list=>{
     if(list.length<2) return;
     list.sort((a,b)=>a.s.startedAt-b.s.startedAt);
-    const top=x=>doneSets(x.e).reduce((b,r)=>e1rm(r.kg,r.reps)>e1rm(b.kg,b.reps)?r:b);
+    const top=x=>bestSet(doneSets(x.e));
     const a=top(list[0]), b=top(list[list.length-1]);
-    const ea=e1rm(a.kg,a.reps), eb=e1rm(b.kg,b.reps);
+    const ea=e1c(a.kg,a.reps), eb=e1c(b.kg,b.reps);
     const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?fmtKg(a.kg)+"\u00a0×\u00a0":""}${a.reps} → ${b.kg!=null?fmtKg(b.kg)+"\u00a0×\u00a0":""}${b.reps}`;
     if(!ea||!eb){ return; }
-    if(eb>ea*1.01) up.push(lab); else if(eb<ea*0.99) down.push(lab); else same.push(lab);
+    const dr=setDir(a,b,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab);
   });
   const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0);
   let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
