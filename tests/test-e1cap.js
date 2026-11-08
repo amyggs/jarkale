@@ -29,6 +29,15 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(/^253,5 Arvioitu 1RM/.test(r.stats[2]),'arvioitu 1RM 12 toiston rajalla (ei 315 kevyemmästä 30 toiston sarjasta): '+r.stats[2]);
   ok(r.tr==='down'&&r.sinceBest===1,'suunta ja "paras" samalla säännöllä: '+r.tr+' / '+r.sinceBest);
   ok(r.dir==='up','yhteenvedon nuoli: 60 × 13 → 60 × 14 on nousu: '+r.dir);
+  // v2.18.146: ennätys yhteisluvulla. Keksitty esimerkki: aiemmin 73 × 3, 54 × 8, 45 × 13 → 54 × 10 ei ole ennätys
+  const pr=await p.evaluate(()=>{ const P=[{kg:73,reps:3},{kg:54,reps:8},{kg:45,reps:8},{kg:45,reps:13}], d=r=>({...r,done:true});
+    return { a:isPR(d({kg:54,reps:10}),P), b:isPR(d({kg:75,reps:2}),P), c:isPR(d({kg:70,reps:6}),P), e:isPR(d({kg:45,reps:15}),P),
+      t:prText(d({kg:70,reps:6}),P), f:isPR(d({kg:80,reps:9}),[{kg:80,reps:8},{kg:60,reps:12}]), ft:prText(d({kg:80,reps:9}),[{kg:80,reps:8},{kg:60,reps:12}]) }; });
+  ok(pr.a===false,'54 × 10 aiempien 73 × 3 ja 54 × 8 jälkeen ei ole ennätys');
+  ok(pr.b===true,'raskain paino koskaan on ennätys (75 × 2)');
+  ok(pr.c===true&&/aiempi paras 73\s×\s3/.test(pr.t),'kevyempi mutta laskennallisesti kovempi on ennätys: '+pr.t);
+  ok(pr.e===false,'kevyt pitkä sarja (45 × 15) ei ole ennätys');
+  ok(pr.f===true&&/aiempi paras 80\s×\s8/.test(pr.ft),'samalla painolla toisto lisää on ennätys, kun se nostaa parasta: '+pr.ft);
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
