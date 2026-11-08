@@ -60,7 +60,7 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   await p.evaluate(()=>{ const s=activeSession(); [0,1].forEach(i=>gToggleSet(s.id,0,i)); gSetVal(s.id,0,2,'reps','3'); gToggleSet(s.id,0,2); gSetVal(s.id,0,3,'reps','8'); gToggleSet(s.id,0,3); gSetVal(s.id,0,4,'reps','2'); gToggleSet(s.id,0,4); });
   const st=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; return {done:doneSets(ex).length,rows:doneRows(ex).length,stats:sessionStats(s).sets,txt:setsTxt(doneRows(ex)),pr:ex.sets.filter(r=>isPR(r,[{kg:1,reps:1}])).length}; });
   ok(st.done===2&&st.rows===5&&st.stats===2,'työsarjoja 2 (lisärivit eivät kasvata sarjamäärää)');
-  ok(st.txt==='60 × 10 · 50 × 12 + R/P 3 + DS 35 × 8 + R/P 2','teksti: '+st.txt.replace(/ /g,' '));
+  ok(st.txt==='60 kg × 10 · 50 kg × 12 + R/P 3 toistoa + DS 35 kg × 8 + R/P 2 toistoa','teksti: '+st.txt.replace(/ /g,' '));
   ok(st.pr===2,'lisärivit eivät ole ennätyksiä');
   // käsin lisätty pudotussarja liikkeelle ilman merkintää
   await p.evaluate(()=>{ const s=activeSession(); gSetVal(s.id,1,0,'kg','20'); gSetVal(s.id,1,0,'reps','10'); gToggleSet(s.id,1,0); gAddKind(s.id,1,'ds'); });
@@ -80,7 +80,7 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   console.log('\nYhteenveto ja seuraava kerta');
   await p.evaluate(()=>{ const id=G.activeId; finishSession(true); GU.mode='session'; GU.sessionId=id; renderGym(); }); await p.waitForTimeout(200);
   const sum=await p.locator('#view-treeni').innerText();
-  ok(/50\s×\s12 \+\sR\/P\s3 \+\sDS\s35\s×\s8 \+\sR\/P\s2/.test(sum.replace(/ /g,' ')),'yhteenvedossa lisärivit pääsarjan perässä');
+  ok(/50\skg\s×\s12 \+\sR\/P\s3\stoistoa \+\sDS\s35\skg\s×\s8 \+\sR\/P\s2\stoistoa/.test(sum.replace(/ /g,' ')),'yhteenvedossa lisärivit pääsarjan perässä');
   const sh=await p.evaluate(()=>sessionShareText(G.sessions[G.sessions.length-1]));
   ok(/\+ DS 35/.test(sh),'jakotekstissä lisärivit');
   await p.evaluate(async()=>{ const pr=G.programs[0]; await startSession(pr.id,pr.days[0].id); }); await p.waitForTimeout(200);
@@ -88,7 +88,7 @@ const TXT="1 Rinta\nVinopenkki laite 1 * 6 - 10 & 1 * 8 - 12 + R/P + DS + R/P\nR
   ok(nx.g[0].kg===60&&nx.g[1].kg===50&&nx.g[2].reps===3&&nx.g[3].reps===8,'seuraavalla kerralla työsarjat ja lisärivien toistot edelliseltä kerralta');
   ok(/R\/P/.test(nx.prev),'"Viimeksi"-rivillä lisärivit: '+nx.prev.replace(/ /g,' '));
   const best=await p.evaluate(()=>document.querySelector('[data-ex] .ex-best')?.textContent||'');
-  ok(/^Ennätys: 60\u00a0×\u00a010$/.test(best),'treenin aikana ennätysrivi (paras arvioitu maksimi, ei lisärivejä): '+best);
+  ok(/^Ennätys: 60\u00a0kg\u00a0×\u00a010$/.test(best),'treenin aikana ennätysrivi (paras arvioitu maksimi, ei lisärivejä): '+best);
   ok(await p.evaluate(()=>{ const e=document.querySelector('[data-ex]'); return e.scrollWidth<=e.clientWidth+1; }),'mahtuu 360 px leveyteen');
   const dsg=await p.evaluate(()=>{ const s=activeSession(), ex=s.exercises[0]; gSetVal(s.id,0,1,'kg','55'); return ghostFor(s,ex,3).kg; });
   ok(dsg===35,'v2.18.143: DS-rivillä viime kerran pudotuspaino (35), ei laskettua: '+dsg);

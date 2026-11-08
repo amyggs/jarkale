@@ -67,7 +67,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     return {off:sessionShareText(s), on:sessionShareText(s,{notes:true}), sid:s.id}; });
   ok(!/Polvikipu|Kevyt päivä/.test(sh.off),'huomiot eivät lähde jakoon oletuksena');
   ok(/Polvikipu/.test(sh.on)&&/Kevyt päivä/.test(sh.on),'valinnalla huomiot mukaan');
-  ok(/^Jalat · .+\nOhjelma X\n/.test(sh.off)&&/Paras: RDL 160\u00a0×\u00a04 · raskain tähän asti/.test(sh.off),'ohjelman nimi ja paras ennätys jakotekstissä');
+  ok(/^Jalat · .+\nOhjelma X\n/.test(sh.off)&&/Paras: RDL 160\u00a0kg\u00a0×\u00a04 · raskain tähän asti/.test(sh.off),'ohjelman nimi ja paras ennätys jakotekstissä');
   ok(/raskain paino tai paras laskettu suoritus/.test(sh.off)&&/Järkäle · treenipäiväkirja$/.test(sh.off),'selitys ja alatunniste');
   ok(/\+10\u00a0kg/.test(sh.off),'ennätyksen erotus jakotekstissä, sitova väli (+10 kg)');
   await p.evaluate(sid=>{ setTab('treeni'); openSession(sid); },sh.sid); await p.waitForTimeout(200);

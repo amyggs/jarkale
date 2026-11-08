@@ -35,9 +35,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
       t:prText(d({kg:70,reps:6}),P), f:isPR(d({kg:80,reps:9}),[{kg:80,reps:8},{kg:60,reps:12}]), ft:prText(d({kg:80,reps:9}),[{kg:80,reps:8},{kg:60,reps:12}]) }; });
   ok(pr.a===false,'54 × 10 aiempien 73 × 3 ja 54 × 8 jälkeen ei ole ennätys');
   ok(pr.b===true,'raskain paino koskaan on ennätys (75 × 2)');
-  ok(pr.c===true&&/aiempi paras 73\s×\s3/.test(pr.t),'kevyempi mutta laskennallisesti kovempi on ennätys: '+pr.t);
+  ok(pr.c===true&&/aiempi paras 73\skg\s×\s3/.test(pr.t),'kevyempi mutta laskennallisesti kovempi on ennätys: '+pr.t);
   ok(pr.e===false,'kevyt pitkä sarja (45 × 15) ei ole ennätys');
-  ok(pr.f===true&&/aiempi paras 80\s×\s8/.test(pr.ft),'samalla painolla toisto lisää on ennätys, kun se nostaa parasta: '+pr.ft);
+  ok(pr.f===true&&/aiempi paras 80\skg\s×\s8/.test(pr.ft),'samalla painolla toisto lisää on ennätys, kun se nostaa parasta: '+pr.ft);
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

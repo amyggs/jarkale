@@ -2247,7 +2247,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.146</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.147</span>
       </div>
     </div>
   </div>
@@ -2281,6 +2281,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.147", d:"marraskuu 2026", items:[
+    "Sarjateksteissä yksikkö: \"54 kg × 8, 10\" (kerran painoa kohden). Koskee Viimeksi- ja Ennätys-rivejä, yhteenvetoa, liikehistoriaa, Trendejä, ennätysilmoitusta, jakotekstiä, jakokuvaa ja kuukausikuvaa. Syöttökentissä yksikkö on jo sarakeotsikossa.",
+    "Rest-pause samalla painolla näkyy muodossa \"R/P 6 toistoa\" (aiemmin pelkkä luku). Pudotussarja: \"DS 32,5 kg × 6\"."
+  ]},
   {v:"2.18.146", d:"marraskuu 2026", items:[
     "Ennätys yhdellä luvulla: raskain paino koskaan tai paras laskettu suoritus (paino ja toistot yhdessä, arvio enintään 12 toistolla). Erillinen sääntö \"samalla painolla enemmän toistoja\" poistettu: esim. 54 × 10 aiempien 73 × 3 ja 54 × 8 jälkeen ei ole ennätys. Samalla painolla toistojen lisäys on ennätys, jos se nostaa parasta suoritusta; muuten se näkyy nousuna viime kertaan. Ennätysrivi vertaa aiempaan parhaaseen sarjaan."
   ]},
@@ -7297,6 +7301,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"8.11.2026", items:[
+    "Sarjoissa näkyy yksikkö: \"54 kg × 8\". Rest-pause näkyy muodossa \"R/P 6 toistoa\" ja pudotussarja \"DS 32,5 kg × 6\".",
     "Ennätys on nyt raskain paino tai paras suoritus, jossa paino ja toistot lasketaan yhteen. Kevyempi paino muutamalla lisätoistolla ei ole ennätys, jos olet tehnyt raskaammalla painolla kovemman sarjan. Toistojen lisäys viime kertaan näkyy edelleen nousuna.",
     "Liikkeen käyrästä voi valita aikavälin: 3 kk, 6 kk, 1 v tai kaikki. Näet nyt pidemmän ajan kehityksen, ei vain viimeisimpiä kertoja."
   ]},
@@ -9228,6 +9233,8 @@ const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const exKey=n=>String(n||"").trim().toLowerCase().replace(/\s+/g," ");
 const gNum=v=>{ if(v==null||v==="") return null; const n=parseFloat(String(v).replace(/[\s ]/g,"").replace(",",".")); return Number.isFinite(n)?n:null; };
 const fmtKg=v=>v==null?"":String(Math.round(v*100)/100).replace(".",",");
+// v2.18.147: sarjateksteissä yksikkö kerran painoa kohden ("54 kg × 8, 10"), jotta paino ja toistot erottuvat ilman sarakeotsikoita
+const kgX=kg=>`${fmtKg(kg)}\u00a0kg\u00a0×\u00a0`;
 const hhmm=ms=>{ const d=new Date(ms); return `${d.getHours()}.${String(d.getMinutes()).padStart(2,"0")}`; };
 function durShort(ms){ return `${Math.max(0,Math.round(ms/60000))} min`; }
 function durTxt(ms){ const m=Math.max(0,Math.round(ms/60000)); if(m<60) return `${m} min`; return m%60?`${Math.floor(m/60)} h ${m%60} min`:`${Math.floor(m/60)} h`; }
@@ -9635,7 +9642,7 @@ function isPR(r,prev){
 // v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (paras laskettu suoritus) → toistot
 function prOnKg(r,prev){ if(r.kg==null) return false; const w=prev.filter(p=>p.kg!=null); return !w.length||r.kg>Math.max(...w.map(p=>p.kg)); }
 function prText(r,prev){
-  const st=(kg,reps)=>kg!=null?`${fmtKg(kg)}\u00a0×\u00a0${reps}`:`${reps}\u00a0toistoa`;
+  const st=(kg,reps)=>kg!=null?`${kgX(kg)}${reps}`:`${reps}\u00a0toistoa`;
   if(r.kg==null){ const b=Math.max(...prev.filter(p=>p.kg==null).map(p=>p.reps)); return `Uusi ennätys ${st(null,r.reps)}`+(Number.isFinite(b)?` · aiempi paras ${b} toistoa`:""); }
   const w=prev.filter(p=>p.kg!=null&&p.reps); if(!w.length) return `Uusi ennätys ${st(r.kg,r.reps)}`;
   const top=w.reduce((a,p)=>p.kg>a.kg||(p.kg===a.kg&&p.reps>a.reps)?p:a);
@@ -10452,7 +10459,7 @@ function gExRowsHTML(shown){
 }
 // Liikkeen suunta: viimeisin kerta vs. edellinen (paras sarja, arvioitu 1RM tai kehonpainossa toistot).
 // sinceBest = montako kertaa on tehty parhaan kerran jälkeen (0 = viimeisin on paras).
-const setOneTxt=r=>r.kg!=null?`${fmtKg(r.kg)}\u00a0×\u00a0${r.reps}`:`${r.reps}\u00a0toistoa`;
+const setOneTxt=r=>r.kg!=null?`${kgX(r.kg)}${r.reps}`:`${r.reps}\u00a0toistoa`;
 function exerciseTrend(key){
   const H=exerciseHistory(key);
   if(!H.length) return {dir:null,last:null,sinceBest:0};
@@ -10512,10 +10519,10 @@ const setsTxt=sets=>{
   if(!sets.length) return "";
   const g=[]; let lastKg=null;
   sets.forEach(r=>{ const k=r.kg??null; const last=g[g.length-1];
-    if(r.kind){ const lab=SET_KIND[r.kind]||r.kind, v=(r.kind==="rp"&&k===lastKg)||k==null?String(r.reps):setOneTxt(r);
+    if(r.kind){ const lab=SET_KIND[r.kind]||r.kind, v=(r.kind==="rp"&&k===lastKg)||k==null?`${r.reps}\u00a0toistoa`:setOneTxt(r);
       if(last) last.x.push(`+\u00a0${lab}\u00a0${v}`); else g.push({kg:null,reps:[],x:[`${lab}\u00a0${v}`]}); lastKg=k; return; }
     if(last&&last.kg===k&&!last.x.length) last.reps.push(r.reps); else g.push({kg:k,reps:[r.reps],x:[]}); lastKg=k; });
-  return g.map(x=>`${x.reps.length?`${x.kg!=null?fmtKg(x.kg)+"\u00a0×\u00a0":""}${x.reps.join(",\u00a0")}`:""}${x.x.length?(x.reps.length?" ":"")+x.x.join(" "):""}`).join(" · ");
+  return g.map(x=>`${x.reps.length?`${x.kg!=null?kgX(x.kg):""}${x.reps.join(",\u00a0")}`:""}${x.x.length?(x.reps.length?" ":"")+x.x.join(" "):""}`).join(" · ");
 };
 
 // ── Treenin yhteenveto (v2.17.8): näkyy lopetuksen jälkeen ja historiassa. Kuvaileva: mitä tehtiin, ennätykset
@@ -10778,7 +10785,7 @@ async function gMonthImage(ym){
       if(draw){ x.fillStyle=C.bord; x.globalAlpha=.6; x.fillRect(cx,y,cwid,1); x.globalAlpha=1; } y+=12;
       font(700,12,FB); if(draw){ x.fillStyle=C.dim; x.fillText("KEHITTYI",cx,y); } y+=22;
       MS.prog.forEach(pg=>{ font(700,15,FB); wrap(pg.name,cwid).forEach(l=>{ if(draw){ x.fillStyle=C.text; x.fillText(l,cx,y); } y+=20; });
-        font(600,14,FB); if(draw){ x.fillStyle=C.dim; x.fillText(`${fmtKg(pg.a.kg)} × ${pg.a.reps}  →  `,cx,y); const w0=x.measureText(`${fmtKg(pg.a.kg)} × ${pg.a.reps}  →  `).width; font(800,14,FB); x.fillStyle=C.acc; x.fillText(`${fmtKg(pg.b.kg)} × ${pg.b.reps}`,cx+w0,y); } y+=26; });
+        font(600,14,FB); if(draw){ x.fillStyle=C.dim; x.fillText(`${kgX(pg.a.kg)}${pg.a.reps}  →  `,cx,y); const w0=x.measureText(`${kgX(pg.a.kg)}${pg.a.reps}  →  `).width; font(800,14,FB); x.fillStyle=C.acc; x.fillText(`${kgX(pg.b.kg)}${pg.b.reps}`,cx+w0,y); } y+=26; });
     }
     y+=8; const cardH=y-cardY; y+=16;
     font(700,12,FB); if(draw){ x.fillStyle=C.dim; x.fillText(SHARE_FOOT,P,y); } y+=18+P;
@@ -11188,7 +11195,7 @@ function gymTrendHTML(start,end){
     const top=x=>bestSet(doneSets(x.e));
     const a=top(list[0]), b=top(list[list.length-1]);
     const ea=e1c(a.kg,a.reps), eb=e1c(b.kg,b.reps);
-    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?fmtKg(a.kg)+"\u00a0×\u00a0":""}${a.reps} → ${b.kg!=null?fmtKg(b.kg)+"\u00a0×\u00a0":""}${b.reps}`;
+    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?kgX(a.kg):""}${a.reps} → ${b.kg!=null?kgX(b.kg):""}${b.reps}`;
     if(!ea||!eb){ return; }
     const dr=setDir(a,b,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab);
   });
