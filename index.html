@@ -1054,6 +1054,9 @@ html.g-run #view-treeni{padding-bottom:96px!important;}
 .g-chart-sum{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:6px;}
 .g-chart-sum b{color:var(--text);}
 .g-seg{display:inline-flex;background:var(--surf2);border-radius:9px;padding:2px;}
+.g-rng{display:flex;gap:6px;margin:8px 0 2px;}
+.g-rng button{flex:1;min-height:34px;border:1.5px solid var(--bord);border-radius:9px;background:transparent;color:var(--text);font:700 12px Manrope,system-ui,sans-serif;padding:0 4px;}
+.g-rng button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
 .g-seg button{border:none;background:transparent;color:var(--dim);font:700 12px Manrope,system-ui,sans-serif;min-height:30px;padding:0 10px;border-radius:7px;}
 .g-seg button.on{background:var(--seg-on);color:var(--on-accent);}
 .g-chart-ax{display:flex;justify-content:space-between;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-top:4px;}
@@ -2244,7 +2247,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.144</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.145</span>
       </div>
     </div>
   </div>
@@ -2278,6 +2281,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.145", d:"marraskuu 2026", items:[
+    "Liikkeen käyrään aikaväli: 3 kk, 6 kk, 1 v tai Kaikki (oletus 6 kk). Aiemmin käyrä näytti vain 16 viimeisintä kertaa. Valinnat näkyvät vain, kun ne tuovat lisää kertoja, ja valinta muistetaan tällä laitteella. Yli 10 kuukauden välillä päivämäärissä on vuosi.",
+    "Käyrän paras-tunniste ei enää osu viimeisen kerran tunnisteen päälle."
+  ]},
   {v:"2.18.144", d:"marraskuu 2026", items:[
     "Liikkeen sivun Paras sarja, Arvioitu 1RM, käyrä ja kehityssuunta käyttävät samaa sääntöä kuin ennätykset: arvio enintään 12 toistolla. Kevyt pitkä sarja (esim. 157,5 × 30) ei enää näy parhaana sarjana raskaamman lyhyen sarjan ohi. Sama korjaus treenin yhteenvedon nuoleen ja Trendien salitreeneihin. Samalla painolla toistojen lisäys näkyy nousuna myös yli 12 toistolla."
   ]},
@@ -7286,6 +7293,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"8.11.2026", items:[
+    "Liikkeen käyrästä voi valita aikavälin: 3 kk, 6 kk, 1 v tai kaikki. Näet nyt pidemmän ajan kehityksen, ei vain viimeisimpiä kertoja."
+  ]},
   {d:"3.11.2026", items:[
     "Liikkeen sivun paras sarja ja arvioitu maksimi lasketaan samoin kuin ennätykset, joten pitkä kevyt sarja ei enää näy parhaana."
   ]},
@@ -9219,8 +9229,8 @@ function durShort(ms){ return `${Math.max(0,Math.round(ms/60000))} min`; }
 function durTxt(ms){ const m=Math.max(0,Math.round(ms/60000)); if(m<60) return `${m} min`; return m%60?`${Math.floor(m/60)} h ${m%60} min`:`${Math.floor(m/60)} h`; }
 function gDay(ds){ const a=new Date(ds+"T00:00:00"); return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`; }
 // Sarjan vertailuluku: painollisille arvioitu 1RM (Epley kg × (1 + toistot/30)), kehonpainoliikkeille toistot (pieni luku,
-// ei sekoitu painoihin). Toistoja ei katkaista (v2.17.5): luku on saman liikkeen kertojen välinen vertailuluku, ei maksimiennuste,
-// ja katkaisu olisi piilottanut esim. 18 → 20 toiston kehityksen. Kirjattu sarja (kg, toistot) näytetään aina sellaisenaan.
+// ei sekoitu painoihin). v2.18.144: vertailuissa (e1c) arvio enintään 12 toistolla kuten ennätyksissä; samalla painolla
+// toistojen kasvu (esim. 18 → 20) näkyy setDir-vertailussa ja käyrän pisteiden tunnisteissa. Kirjattu sarja näytetään sellaisenaan.
 function e1rm(kg,reps){ if(!reps) return 0; return kg?kg*(1+reps/30):reps/1000; }
 // v2.18.144: vertailuihin arvio enintään 12 toistolla (sama sääntö kuin ennätyksissä); yli 12 toistoa ratkaisee vain tasatilanteen
 function e1c(kg,reps){ if(!reps) return 0; return kg?e1rm(kg,Math.min(reps,12))+Math.max(0,reps-12)*1e-6:e1rm(kg,reps); }
@@ -11075,19 +11085,35 @@ function kgDesc(x){
   const g=[]; x.sets.forEach(r=>{ const k=r.kg==null?null:r.kg; const f=g.find(y=>y.k===k); if(f) f.n++; else g.push({k,n:1}); });
   return g.map(y=>`${y.k==null?"kehonpaino":fmtKg(y.k)+" kg"}${g.length>1?` ×${y.n}`:""}`).join(", ");
 }
+// v2.18.145: käyrän aikaväli. Valinnat näytetään vain, jos ne tuovat lisää kertoja; valinta muistetaan tällä laitteella.
+const CHART_RANGES=[["3","3 kk",91],["6","6 kk",183],["12","1 v",365],["all","Kaikki",1e9]];
+function chartRangePref(){ try{ return localStorage.getItem("jarkale-chart-range")||"6"; }catch(_){ return "6"; } }
+function setChartRange(k){ try{ localStorage.setItem("jarkale-chart-range",k); }catch(_){} GU.chartRange=k; renderGym(); }
+function chartRangeOpts(data){ const now=new Date(today()+"T00:00:00").getTime(), out=[]; let prevN=0;
+  CHART_RANGES.forEach(([k,t,d])=>{ const n=data.filter(x=>now-new Date(x.s.date+"T00:00:00").getTime()<=d*864e5).length;
+    if(n>=2&&n>prevN){ out.push({k,t,d,n}); prevN=n; } });
+  return out; }
 function gymChartHTML(H){
   const anyKg=H.some(x=>x.top.kg!=null);
   const mode=GU.chartMode==="tot"?"tot":anyKg?(GU.chartMode||"e1"):"reps";
   const data=mode==="tot"?H:anyKg?H.filter(x=>x.top.kg!=null):H;
   if(data.length<2) return "";
   const val=x=>mode==="tot"?totReps(x):mode==="e1"?x.e1:mode==="kg"?x.top.kg:x.top.reps;
-  const pts=data.slice(-16), W=340, Hh=168, padX=22, padT=26, padB=14;
+  // Aikaväli: valittu tai seuraava pidempi; jos yksikään väli ei kata kahta kertaa (liike tehty kauan sitten), kaksi viimeisintä
+  const opts=chartRangeOpts(data), want=GU.chartRange||chartRangePref(), wi=CHART_RANGES.findIndex(r=>r[0]===want);
+  const rng=opts.find(o=>CHART_RANGES.findIndex(r=>r[0]===o.k)>=wi)||opts[opts.length-1]||null;
+  const pts=rng?data.slice(-rng.n):data.slice(-2), W=340, Hh=168, padX=22, padT=26, padB=14;
+  const longSpan=(new Date(pts[pts.length-1].s.date)-new Date(pts[0].s.date))>300*864e5;
+  const dLab=ds=>{ if(!longSpan) return gDay(ds); const a=new Date(ds+"T00:00:00"); return `${a.getDate()}.${a.getMonth()+1}.${a.getFullYear()}`; };
+  const many=pts.length>30;
   const ys=pts.map(val); let mn=Math.min(...ys), mx=Math.max(...ys);
   if(mx-mn<1e-9){ mn-=1; mx+=1; }
   const X=i=>padX+i*(W-2*padX)/(pts.length-1), Y=v=>padT+(1-(v-mn)/(mx-mn))*(Hh-padT-padB);
   // Tunnisteet: kaikki, jos pisteitä on vähän; muuten ensimmäinen, viimeinen ja paras
   const bi=ys.indexOf(Math.max(...ys));
-  const lab=i=>pts.length<=7||i===0||i===pts.length-1||i===bi;
+  // v2.18.145: paras-tunniste jää pois, jos se osuisi ensimmäisen tai viimeisen päälle (alle 48 px päässä)
+  const near=(i,j)=>Math.abs(X(i)-X(j))<48;
+  const lab=i=>pts.length<=7||i===0||i===pts.length-1||(i===bi&&!near(bi,pts.length-1)&&!near(bi,0));
   const set=x=>mode==="tot"?String(totReps(x)):x.top.kg!=null?`${fmtKg(x.top.kg)}×${x.top.reps}`:`${x.top.reps}`;
   const title=mode==="tot"?"Toistot yhteensä (tehdyt sarjat)":mode==="e1"?"Arvioitu 1RM (kg)":mode==="kg"?"Paras sarja, paino (kg)":"Paras sarja, toistot";
   const unit=mode==="reps"||mode==="tot"?" toistoa":" kg";
@@ -11100,14 +11126,14 @@ function gymChartHTML(H){
   const ncmp=i=>mode==="tot"&&i>0&&!totCompare(pts[i],pts[i-1]).ok;
   let h=`<div class="g-chart"><div class="g-chart-h"><span class="lbl-small" style="margin:0">${title}</span>`;
   h+=`<span class="g-seg">${anyKg?`<button class="${mode==="e1"?"on":""}" aria-pressed="${mode==="e1"}" onclick="GU.chartMode='e1';renderGym()">1RM</button><button class="${mode==="kg"?"on":""}" aria-pressed="${mode==="kg"}" onclick="GU.chartMode='kg';renderGym()">Paino</button>`:`<button class="${mode==="reps"?"on":""}" aria-pressed="${mode==="reps"}" onclick="GU.chartMode='reps';renderGym()">Paras</button>`}<button class="${mode==="tot"?"on":""}" aria-pressed="${mode==="tot"}" onclick="GU.chartMode='tot';renderGym()">Toistot yht.</button></span>`;
-  h+=`</div><div class="g-chart-sum">${sumTxt||`${gDay(pts[0].s.date)} → ${gDay(pts[pts.length-1].s.date)}: <b>${diffTxt}</b>`}</div>
+  h+=`</div>${opts.length>1?`<div class="g-rng" role="radiogroup" aria-label="Aikaväli">${opts.map(o=>`<button role="radio" aria-checked="${o===rng}" class="${o===rng?"on":""}" onclick="setChartRange('${o.k}')">${o.t}</button>`).join("")}</div>`:""}<div class="g-chart-sum">${sumTxt||`${dLab(pts[0].s.date)} → ${dLab(pts[pts.length-1].s.date)}: <b>${diffTxt}</b>`}</div>
     <svg viewBox="0 0 ${W} ${Hh}" width="100%" style="display:block;height:auto" role="img" aria-label="${title}, ${pts.length} kertaa, muutos ${diffTxt}">
       <line x1="${padX}" x2="${W-padX}" y1="${Hh-padB}" y2="${Hh-padB}" stroke="var(--bord)" stroke-width="1"/>
       <polyline fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round" points="${pts.map((x,i)=>`${X(i).toFixed(1)},${Y(val(x)).toFixed(1)}`).join(" ")}"/>
-      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(val(x)).toFixed(1)}" r="${i===bi?5:3.5}" fill="${i===bi?"var(--hi,var(--orange))":"var(--surf)"}" stroke="var(--text)" stroke-width="1.5"${ncmp(i)?` stroke-dasharray="2 2"`:""}/>`).join("")}
+      ${pts.map((x,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(val(x)).toFixed(1)}" r="${i===bi?5:many?2.2:3.5}" fill="${i===bi?"var(--hi,var(--orange))":"var(--surf)"}" stroke="var(--text)" stroke-width="1.5"${ncmp(i)?` stroke-dasharray="2 2"`:""}/>`).join("")}
       ${pts.map((x,i)=>lab(i)?`<text x="${Math.min(W-4,Math.max(4,X(i))).toFixed(1)}" y="${(Y(val(x))-10).toFixed(1)}" text-anchor="${i===0?"start":i===pts.length-1?"end":"middle"}" font-size="11" font-weight="700" fill="var(--text)" stroke="var(--surf)" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="Manrope,system-ui,sans-serif">${set(x)}</text>`:"").join("")}
     </svg>
-    <div class="g-chart-ax"><span>${gDay(pts[0].s.date)}</span><span>${gDay(pts[pts.length-1].s.date)}</span></div>`;
+    <div class="g-chart-ax"><span>${dLab(pts[0].s.date)}</span><span>${dLab(pts[pts.length-1].s.date)}</span></div>`;
   if(mode==="tot"){
     // Viimeiset kerrat: sarjamäärä, painot ja muutos edelliseen vain vertailukelpoisena
     h+=`<div class="g-tot">${pts.map((x,i)=>({x,i})).slice(-5).reverse().map(({x,i})=>{ const c=totCompare(x,pts[i-1]);

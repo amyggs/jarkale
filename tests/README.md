@@ -37,6 +37,7 @@ tests/run.sh test-gym.js
 | `test-ios.js` | iPhone selaimessa (iPhone 13 -emulointi Chromiumilla, ei WebKit): aloituksessa ohje Koti-valikkoon lisäämisestä, siirtokortti kun dataa on (Drive ensin), Myöhemmin piilottaa, ei ohjetta Koti-valikosta avattuna eikä Androidissa |
 | `test-taps.js` | Napautusmittari: tavallinen treeni oikeilla napautuksilla (aloitus 1, sama sarja kuin viimeksi 1, painon tai toiston muutos 2, väärin kuitatun korjaus 3, lopetus 2; koko esimerkkitreeni 17). Kaatuu, jos perustilanne vaatii enemmän napautuksia |
 | `test-e1cap.js` | Arvioitu maksimi vertailuissa enintään 12 toistolla: liikesivun paras sarja ja 1RM, kehityssuunta, yhteenvedon nuoli (samalla painolla toisto lisää on nousu myös yli 12 toistolla) |
+| `test-chartrange.js` | Liikekäyrän aikaväli: valinnat vain kun tuovat lisää kertoja, oletus 6 kk, Kaikki koko historia, valinta muistetaan, vuosi pitkän välin päivämäärissä, vanha liike näkyy silti |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
