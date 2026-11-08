@@ -340,6 +340,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .stepper>.lbl-small{margin:0;}
 .stepper-row{flex:0 0 200px;gap:6px;}
 .stepper-btn{width:44px;height:44px;border:none;border-radius:12px;background:var(--surf2);font-size:20px;font-weight:600;}
+.stepper-btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .stepper-btn:active{background:var(--seg-on);}
 .stepper input{height:44px;border:none;background:transparent;color:var(--text);font-size:22px;font-weight:800;padding:0 0 8px;border-radius:10px;}
 .stepper input:focus{background:var(--surf);}
@@ -1969,9 +1970,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div id="track-steps-wrap"><div class="stepper">
         <span class="lbl-small">Askeleet</span>
         <div class="stepper-row">
-          <button class="stepper-btn" onclick="adj('steps',-500)">−</button>
+          <button class="stepper-btn" data-big="-500" onclick="adj('steps',-100)" aria-label="Vähennä askelia (pidä pohjassa nopeammin)">−</button>
           <input type="text" id="inp-steps" class="empty" inputmode="numeric" placeholder="—" oninput="setField('steps',parseNum(this.value))" onblur="renderSteppers()">
-          <button class="stepper-btn" onclick="adj('steps',500)">+</button>
+          <button class="stepper-btn" data-big="500" onclick="adj('steps',100)" aria-label="Lisää askelia (pidä pohjassa nopeammin)">+</button>
         </div>
       </div></div>
 
@@ -2247,7 +2248,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.147</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.148</span>
       </div>
     </div>
   </div>
@@ -2281,6 +2282,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.148", d:"marraskuu 2026", items:[
+    "Kirjaa-näkymän −/+ (paino, uni, askeleet, verensokeri): pohjassa pidettäessä arvo juoksee ja kiihtyy. Napautus toimii kuten ennen, eikä pidon jälkeen tule ylimääräistä askelta. Vieritys napin päältä ei muuta arvoa.",
+    "Askeleet napautuksella 100 välein (ennen 500), tasattuna sadan ruudukkoon (7 234 → 7 300). Pohjassa pidettäessä 20 askeleen jälkeen 500 välein."
+  ]},
   {v:"2.18.147", d:"marraskuu 2026", items:[
     "Sarjateksteissä yksikkö: \"54 kg × 8, 10\" (kerran painoa kohden). Koskee Viimeksi- ja Ennätys-rivejä, yhteenvetoa, liikehistoriaa, Trendejä, ennätysilmoitusta, jakotekstiä, jakokuvaa ja kuukausikuvaa. Syöttökentissä yksikkö on jo sarakeotsikossa.",
     "Rest-pause samalla painolla näkyy muodossa \"R/P 6 toistoa\" (aiemmin pelkkä luku). Pudotussarja: \"DS 32,5 kg × 6\"."
@@ -7301,6 +7306,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"8.11.2026", items:[
+    "Askeleet muuttuvat napautuksella 100 askelta kerrallaan. Kun pidät −/+ -nappia pohjassa, luku juoksee ja nopeutuu. Sama toimii painossa ja unessa.",
     "Sarjoissa näkyy yksikkö: \"54 kg × 8\". Rest-pause näkyy muodossa \"R/P 6 toistoa\" ja pudotussarja \"DS 32,5 kg × 6\".",
     "Ennätys on nyt raskain paino tai paras suoritus, jossa paino ja toistot lasketaan yhteen. Kevyempi paino muutamalla lisätoistolla ei ole ennätys, jos olet tehnyt raskaammalla painolla kovemman sarjan. Toistojen lisäys viime kertaan näkyy edelleen nousuna.",
     "Liikkeen käyrästä voi valita aikavälin: 3 kk, 6 kk, 1 v tai kaikki. Näet nyt pidemmän ajan kehityksen, ei vain viimeisimpiä kertoja."
@@ -7770,7 +7776,7 @@ function relDay(d,ref){
   return `${WD_SHORT[a.getDay()]} ${a.getDate()}.${a.getMonth()+1}.`;
 }
 function adj(field,delta){
-  haptic(15); // v2.18.24: myös paino, uni ja askeleet
+  if(!HOLD.on||HOLD.n%5===0) haptic(15); // v2.18.24: myös paino, uni ja askeleet; pohjassa pidettäessä harvemmin
   const limits={weight:[30,300],sleep:[0,24],steps:[0,80000]};
   const [mn,mx]=limits[field]||[0,Infinity];
   const cur=S[field]??(field==="weight"?(lastKnownWeight(S.date)??80):field==="sleep"?(lastKnown("sleep",S.date)?.v??7):0);
@@ -7781,6 +7787,8 @@ function adj(field,delta){
     const nm=delta>0?Math.floor(m/5)*5+5:Math.ceil(m/5)*5-5;
     next=Math.round(nm/60*100)/100;
   }
+  // v2.18.148: askeleet tasataan askelen ruudukkoon (7 234 → + → 7 300)
+  if(field==="steps"){ const st=Math.abs(delta); next=delta>0?Math.floor(cur/st)*st+st:Math.ceil(cur/st)*st-st; }
   S[field]=Math.max(mn,Math.min(mx,next));
   renderSteppers();
   updateSaveBtn(S.date,new Date(S.date+"T00:00:00").getDay());
@@ -7788,6 +7796,21 @@ function adj(field,delta){
 }
 
 // adjBP poistettu — verenpaine syötetään suoraan kentistä
+// v2.18.148: −/+ pohjassa → arvo juoksee (0,45 s jälkeen, kiihtyen). Askeleissa 20 askeleen jälkeen isompi askel (data-big).
+// Napautus toimii kuten ennen; pidon jälkeen tuleva click ohitetaan, jottei viimeinen askel tuplaannu.
+const HOLD={on:false,n:0,t:null,btn:null,x:0,y:0,skip:null};
+function holdStop(){ clearTimeout(HOLD.t); HOLD.t=null; if(HOLD.on){ HOLD.skip=HOLD.btn; setTimeout(()=>{ HOLD.skip=null; },400); } HOLD.on=false; HOLD.btn=null; }
+function holdTick(){ const b=HOLD.btn; if(!b||!b.isConnected){ holdStop(); return; }
+  HOLD.on=true; HOLD.n++;
+  const big=b.dataset.big;
+  const fast=big&&HOLD.n>20; if(fast) adj("steps",+big); else b.click();
+  HOLD.t=setTimeout(holdTick,fast?150:Math.max(70,150-HOLD.n*5)); }
+document.addEventListener("pointerdown",e=>{ const b=e.target.closest&&e.target.closest(".stepper-btn"); if(!b||e.button>0) return;
+  holdStop(); HOLD.btn=b; HOLD.n=0; HOLD.x=e.clientX; HOLD.y=e.clientY; HOLD.t=setTimeout(holdTick,450); });
+["pointerup","pointercancel","blur"].forEach(ev=>(ev==="blur"?window:document).addEventListener(ev,()=>{ if(HOLD.btn) holdStop(); }));
+document.addEventListener("pointermove",e=>{ if(HOLD.btn&&!HOLD.on&&Math.hypot(e.clientX-HOLD.x,e.clientY-HOLD.y)>12) holdStop(); });
+document.addEventListener("click",e=>{ if(HOLD.skip&&e.target.closest&&e.target.closest(".stepper-btn")===HOLD.skip){ e.stopImmediatePropagation(); e.preventDefault(); HOLD.skip=null; } },true);
+document.addEventListener("contextmenu",e=>{ if(e.target.closest&&e.target.closest(".stepper-btn")) e.preventDefault(); });
 
 // Kenttäkohtainen muutosaika. Korvaa objektin (ei muokkausta paikallaan, ks. v2.9.4-korjaus) ja tallentaa ajan
 // jokaisesta muutoksesta. Päivän tilan tallenne kopioi ajat lukitushetkellä, joten analyysissä nähdään,
