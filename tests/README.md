@@ -39,6 +39,7 @@ tests/run.sh test-gym.js
 | `test-e1cap.js` | Arvioitu maksimi vertailuissa enintään 12 toistolla: liikesivun paras sarja ja 1RM, kehityssuunta, yhteenvedon nuoli (samalla painolla toisto lisää on nousu myös yli 12 toistolla) |
 | `test-chartrange.js` | Liikekäyrän aikaväli: valinnat vain kun tuovat lisää kertoja, oletus 6 kk, Kaikki koko historia, valinta muistetaan, vuosi pitkän välin päivämäärissä, vanha liike näkyy silti |
 | `test-hold.js` | Kirjaa-näkymän −/+ pohjassa: arvo juoksee ja kiihtyy, ei ylimääräistä askelta irrotuksessa, vieritys ei muuta arvoa; askeleet 100 välein sadan ruudukkoon |
+| `test-trainsec.js` | Kirjaa: salitreenipäivänä Salitreeni-nappi ilman treenityyppiä, rasitus ja kulku kortissa ja tallessa; ilman salitreeniä kuten ennen |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

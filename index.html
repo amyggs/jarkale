@@ -2248,7 +2248,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.148</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.149</span>
       </div>
     </div>
   </div>
@@ -2282,6 +2282,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.149", d:"marraskuu 2026", items:[
+    "Kirjaa: kun päivälle on tallennettu salitreeni, Treeni-osion nappi on \"✓ Salitreeni\" ja treenityyppi piilossa (tulee ohjelmasta). Rasitustaso, treenin kulku, Treeni muuttui ja treenihuomio säilyvät, joten lopetusruudussa tyhjäksi jääneen kulun voi täydentää tässä. Ilman salitreeniä osio toimii kuten ennen.",
+    "Kirjaa-näkymän salitreenikortti näyttää päivän rasituksen ja kulun (esim. \"rasitus 4 · normaalisti\"). Kesto ei enää katkea kesken (\"1 h 56 min\")."
+  ]},
   {v:"2.18.148", d:"marraskuu 2026", items:[
     "Kirjaa-näkymän −/+ (paino, uni, askeleet, verensokeri): pohjassa pidettäessä arvo juoksee ja kiihtyy. Napautus toimii kuten ennen, eikä pidon jälkeen tule ylimääräistä askelta. Vieritys napin päältä ei muuta arvoa.",
     "Askeleet napautuksella 100 välein (ennen 500), tasattuna sadan ruudukkoon (7 234 → 7 300). Pohjassa pidettäessä 20 askeleen jälkeen 500 välein."
@@ -7306,6 +7310,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"8.11.2026", items:[
+    "Kirjaa-näkymässä salitreeni ei enää näy kahteen kertaan. Treeni-osiossa lukee \"Salitreeni\", ja salitreenikortissa näkyvät rasitus ja treenin kulku. Jos jätit kulun lopetuksessa valitsematta, voit valita sen Kirjaa-näkymässä.",
     "Askeleet muuttuvat napautuksella 100 askelta kerrallaan. Kun pidät −/+ -nappia pohjassa, luku juoksee ja nopeutuu. Sama toimii painossa ja unessa.",
     "Sarjoissa näkyy yksikkö: \"54 kg × 8\". Rest-pause näkyy muodossa \"R/P 6 toistoa\" ja pudotussarja \"DS 32,5 kg × 6\".",
     "Ennätys on nyt raskain paino tai paras suoritus, jossa paino ja toistot lasketaan yhteen. Kevyempi paino muutamalla lisätoistolla ei ole ennätys, jos olet tehnyt raskaammalla painolla kovemman sarjan. Toistojen lisäys viime kertaan näkyy edelleen nousuna.",
@@ -8173,7 +8178,7 @@ function setTrainingOutcome(id){
   if(next!=null&&S.training_outcome==null) lockDayStateSnapshot(); // null → ei-null: ainoa lukitushetki
   S.training_outcome=next;
   if(next==="worse") S.showTrainingMods=true;
-  haptic(6); saveDraft(); scheduleAutoSave(); renderTrainingSection();
+  haptic(6); saveDraft(); scheduleAutoSave(); renderTrainingSection(); if(typeof renderLogGymCard==="function") renderLogGymCard();
 }
 function setPlannedLightening(v){
   S.planned_lightening=S.planned_lightening===v?null:v;
@@ -8684,9 +8689,12 @@ function toggleInjuryResolved(idx){
 function renderTrainingSection(){
   const el=document.getElementById("training-section"); if(!el) return;
   const done=S.training_done, cardio=S.cardio_done;
+  // v2.18.149: päivälle tallennettu salitreeni on Treeni-merkinnän lähde: nappi kertoo sen (treeni näkyy kortissa yllä), treenityyppi tulee ohjelmasta.
+  // Rasitus, kulku, muutokset ja huomio pysyvät (samat tiedot kuin lopetusruudussa; tyhjän voi täydentää tässä).
+  const gs=done&&typeof dayGymSessions==="function"?dayGymSessions(S.date):[];
   let h=`<div class="card tr-card">
     <div class="chips" style="flex-wrap:nowrap;margin-bottom:${done||cardio?"12px":"0"}">
-      <button class="chip grow tr-tg${done?" on":""}" aria-pressed="${!!done}" onclick="toggleTraining('done')">${done?"✓ ":""}Treeni</button>
+      <button class="chip grow tr-tg${done?" on":""}" aria-pressed="${!!done}" onclick="toggleTraining('done')">${done?"✓ ":""}${gs.length?"Salitreeni":"Treeni"}</button>
       <button class="chip grow tr-tg${cardio?" on":""}" aria-pressed="${!!cardio}" onclick="toggleTraining('cardio')">${cardio?"✓ ":""}Cardio</button>
     </div>`;
   if(cardio){
@@ -8760,13 +8768,13 @@ function renderTrainingSection(){
             <div class="chips" style="flex-wrap:nowrap">${[[true,"Kyllä, suunniteltu"],[false,"Ei, päätin treenissä"]].map(([v,l])=>`<button class="chip grow${S.planned_lightening===v?" on":""}" aria-pressed="${S.planned_lightening===v}" onclick="setPlannedLightening(${v})">${l}</button>`).join("")}</div></div>`:""}</div>`;
       })()}
     </div>
-    <div style="margin-bottom:10px">
+    ${gs.length?"":`<div style="margin-bottom:10px">
       <span class="lbl-small">Treenityyppi (valinnainen)</span>
       <select onchange="S.training_type=this.value;saveDraft();scheduleAutoSave()" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:${S.training_type?"var(--text)":"var(--dim)"};font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
         <option value="">Valitse tyyppi...</option>
         ${(S.settings.trainingTypes||TRAINING_TYPES).map(t=>`<option value="${esc(t)}" ${S.training_type===t?"selected":""}>${esc(t)}</option>`).join("")}
       </select>
-    </div>
+    </div>`}
     <div>
       <span class="lbl-small">Treenihuomio (valinnainen)</span>
       <textarea oninput="S.training_notes=this.value;saveDraft();scheduleAutoSave()" placeholder="Miten treeni meni..." rows="2" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:10px 13px;resize:none;outline:none">${esc(S.training_notes)}</textarea>
@@ -8788,7 +8796,7 @@ function toggleTraining(field){
   updateSaveBtn(S.date,new Date(S.date+"T00:00:00").getDay());
   scheduleAutoSave();
 }
-function setTrainingLoad(n){S.training_load=S.training_load===n?null:n;haptic(6);saveDraft();scheduleAutoSave();renderTrainingSection();}
+function setTrainingLoad(n){S.training_load=S.training_load===n?null:n;haptic(6);saveDraft();scheduleAutoSave();renderTrainingSection();if(typeof renderLogGymCard==="function") renderLogGymCard();}
 
 // ═══ LÄÄKEINHALLINTA ════════════════════════════════════════════
 
@@ -10345,7 +10353,10 @@ function renderLogGymCard(){
     const st=sessionStats(act);
     h=`<div class="tw"><span class="ic">${ico("dumbbell",20)}</span><div class="t"><div class="n">${esc(act.dayName)}</div><div class="s">Kesken · ${st.done}/${st.exN} liikettä · aloitettu ${act.date===today()?`<span data-raw>${hhmm(act.startedAt)}</span>`:gDay(act.date)}</div></div><button class="tr-go" onclick="openSession('${act.id}')">Jatka</button></div>`;
   } else if(doneToday.length){
-    h=doneToday.map(s=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt)}`:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
+    // v2.18.149: päivän rasitus ja kulku näkyvät kortissa (samat tiedot kuin alla Treeni-osiossa), viimeisen treenin rivillä
+    const oc=TRAINING_OUTCOMES.find(o=>o.id===S.training_outcome);
+    const dayTxt=[S.training_load!=null?`rasitus ${S.training_load}`:"",oc?oc.short.toLowerCase():""].filter(Boolean).map(t=>` · ${t}`).join("");
+    h=doneToday.map((s,i)=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt).replace(/ /g,"\u00a0")}`:""}${i===doneToday.length-1?dayTxt:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
   }
   // v2.18.17: ei Aloita-tilaa lepopäivinä (oli käytännössä kehote). v2.18.114: suunniteltuna treenipäivänä (Tavoitteet → treenipäivät)
   // näytetään seuraava treeni kierrossa. Ilman viikkorytmiä ei mitään, kuten ennenkin.
