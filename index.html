@@ -2110,7 +2110,6 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <!-- v2.18.62: päivän poisto näkymän alimmaksi, selitteen kanssa (harvinainen toiminto) -->
       <div id="log-del-wrap" class="log-del-wrap" style="display:none">
         <button id="log-del" class="log-del" onclick="deleteDay(S.date)">Poista päivän kirjaus</button>
-        <div class="log-del-hint">Esimerkiksi jos kirjasit vahingossa väärälle päivälle. Poisto koskee vain tämän päivän kirjausta, ja sen voi kumota heti poiston jälkeen.</div>
       </div>
 
 
@@ -2248,7 +2247,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.149</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.150</span>
       </div>
     </div>
   </div>
@@ -2282,6 +2281,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.150", d:"marraskuu 2026", items:[
+    "Kirjaa selkeämmäksi: salitreenipäivänä Treeni ja kuormitus on yksi rivi (\"✓ Salitreeni · rasitus 4 · lisää kulku ›\") ja Cardio; napautus avaa rasituksen, kulun, muutokset ja huomion.",
+    "Treenihuomio ja kivun lisätiedot linkin takana (\"+ Treenihuomio\", \"+ Lisätietoja kivusta\"); kenttä on auki, jos siihen on kirjoitettu.",
+    "Aamupainon muutos ja 7 päivän keskiarvo ilman punaista ja vihreää: nousu ei ole huono eikä lasku hyvä.",
+    "Päivän poiston selitys siirretty vahvistusikkunaan; kehon mittauksen muistutuksesta poistettu \"(väli 28 pv)\"."
+  ]},
   {v:"2.18.149", d:"marraskuu 2026", items:[
     "Kirjaa: kun päivälle on tallennettu salitreeni, Treeni-osion nappi on \"✓ Salitreeni\" ja treenityyppi piilossa (tulee ohjelmasta). Rasitustaso, treenin kulku, Treeni muuttui ja treenihuomio säilyvät, joten lopetusruudussa tyhjäksi jääneen kulun voi täydentää tässä. Ilman salitreeniä osio toimii kuten ennen.",
     "Kirjaa-näkymän salitreenikortti näyttää päivän rasituksen ja kulun (esim. \"rasitus 4 · normaalisti\"). Kesto ei enää katkea kesken (\"1 h 56 min\")."
@@ -4629,7 +4634,7 @@ function renderLog() {
     measEl.style.display=measOverdue?"flex":"none";
     if(measOverdue){
       document.getElementById("meas-reminder-text").textContent=
-        daysSinceMeas===null?"Ei yhtään mittausta vielä":`Edellinen ${daysSinceMeas} pv sitten (väli ${intervalDays} pv)`;
+        daysSinceMeas===null?"Ei yhtään mittausta vielä":`Edellinen ${daysSinceMeas} pv sitten`;
     }
   } else {
     document.getElementById("meas-reminder").style.display="none";
@@ -4920,14 +4925,14 @@ function renderSteppers() {
     if(S.weight!=null&&prevW!=null){
       const dayDiff=+(S.weight-prevW).toFixed(1);
       const maStr=""; // 7 pv ka näkyy viikkokortissa — ei toisteta tässä
-      const dayCol=Math.abs(dayDiff)<0.3?"var(--dim)":dayDiff>0?"var(--red)":"var(--green)";
+      const dayCol=Math.abs(dayDiff)<0.3?"var(--dim)":"var(--text)"; // v2.18.150: ei arvottavaa väriä
       maEl.style.display="inline";
       const arrow=Math.abs(dayDiff)<0.1?"→":dayDiff>0?"↑ +":"↓ ";
       maEl.innerHTML=arrow+`<span style="color:${dayCol};font-weight:600">${Math.abs(dayDiff)===0?"sama":Math.abs(dayDiff)+" kg eilisestä"}</span><span style="color:var(--dim)">${maStr}</span>`;
     } else if(ma!==null&&S.weight!=null){ // pelkkä ka ilman päivän arvoa näkyy jo viikkokortissa
       const diff=S.weight!=null?+(S.weight-ma).toFixed(1):null;
       const arrow=diff===null?"":diff>0.3?" ↑":diff<-0.3?" ↓":" →";
-      const col=diff===null?"var(--dim)":diff>0.3?"var(--red)":diff<-0.3?"var(--green)":"var(--dim)";
+      const col=diff===null||Math.abs(diff)<=0.3?"var(--dim)":"var(--text)"; // v2.18.150: ei arvottavaa väriä
       maEl.style.display="inline";
       maEl.innerHTML=`7 pv ka <span style="color:${col};font-weight:600">${ma} kg${arrow}</span>`;
     } else {
@@ -7310,6 +7315,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"8.11.2026", items:[
+    "Kirjaa-näkymä on siistimpi. Salitreenipäivänä treeniosio on yksi rivi, jota napauttamalla voi kirjata rasituksen ja kulun. Treenihuomio ja kivun lisätiedot avautuvat linkistä. Painon muutos ei ole enää punainen tai vihreä.",
     "Kirjaa-näkymässä salitreeni ei enää näy kahteen kertaan. Treeni-osiossa lukee \"Salitreeni\", ja salitreenikortissa näkyvät rasitus ja treenin kulku. Jos jätit kulun lopetuksessa valitsematta, voit valita sen Kirjaa-näkymässä.",
     "Askeleet muuttuvat napautuksella 100 askelta kerrallaan. Kun pidät −/+ -nappia pohjassa, luku juoksee ja nopeutuu. Sama toimii painossa ja unessa.",
     "Sarjoissa näkyy yksikkö: \"54 kg × 8\". Rest-pause näkyy muodossa \"R/P 6 toistoa\" ja pudotussarja \"DS 32,5 kg × 6\".",
@@ -7863,7 +7869,7 @@ async function deleteDay(ds){
   const e=S.entries[ds]; if(!e) return;
   const gs=dayGymSessions(ds);
   const lbl=ds===today()?"tämän päivän":gDay(ds);
-  if(!await jConfirm(`Poistetaanko ${lbl} kirjaus?`+(gs.length?"\n\nPäivän salitreeni säilyy Treeni-historiassa, joten Treeni-merkintä jää päivälle.":""),{ok:"Poista",danger:true})) return;
+  if(!await jConfirm(`Poistetaanko ${lbl} kirjaus?\n\nPoisto koskee vain tätä päivää (esimerkiksi jos kirjasit vahingossa väärälle päivälle), ja sen voi kumota heti poiston jälkeen.`+(gs.length?"\n\nPäivän salitreeni säilyy Treeni-historiassa, joten Treeni-merkintä jää päivälle.":""),{ok:"Poista",danger:true})) return;
   const copy=JSON.parse(JSON.stringify(e)), nowIso=new Date().toISOString();
   if(gs.length){
     const tt=(gs.find(x=>x.trainingType)||{}).trainingType||"";
@@ -8638,9 +8644,11 @@ function renderInjurySelector(){
     </select>
   </div>`;
 
-  el.innerHTML=existingHTML+addHTML+`<textarea id="inp-injury" placeholder="Lisätietoja (valinnainen)…" rows="2"
+  // v2.18.150: lisätiedot linkin takana, ellei niihin ole jo kirjoitettu
+  const notesOpen=(S.injury_notes||"").trim()||S.showInjNotes;
+  el.innerHTML=existingHTML+addHTML+(notesOpen?`<textarea id="inp-injury" placeholder="Lisätietoja (valinnainen)…" rows="2"
     oninput="S.injury_notes=this.value;saveDraft();scheduleAutoSave()"
-    class="inj-notes">${esc(S.injury_notes)}</textarea>`;
+    class="inj-notes">${esc(S.injury_notes)}</textarea>`:`<button class="df-open" onclick="S.showInjNotes=true;renderInjurySelector();setTimeout(()=>document.getElementById('inp-injury')?.focus(),30)">+ Lisätietoja kivusta</button>`);
 }
 
 function injuryChanged(){
@@ -8686,18 +8694,8 @@ function toggleInjuryResolved(idx){
 // v2.18.16: kuormitusvertailu (7 pv / 28 pv) poistettu: laski kirjaamattomat päivät nollaksi ja
 // arvioimattoman treenin kakkoseksi, ja tila ("Kuormitus koholla") oli valmennusarvio. Raakadata riittää PT:lle.
 
-function renderTrainingSection(){
-  const el=document.getElementById("training-section"); if(!el) return;
-  const done=S.training_done, cardio=S.cardio_done;
-  // v2.18.149: päivälle tallennettu salitreeni on Treeni-merkinnän lähde: nappi kertoo sen (treeni näkyy kortissa yllä), treenityyppi tulee ohjelmasta.
-  // Rasitus, kulku, muutokset ja huomio pysyvät (samat tiedot kuin lopetusruudussa; tyhjän voi täydentää tässä).
-  const gs=done&&typeof dayGymSessions==="function"?dayGymSessions(S.date):[];
-  let h=`<div class="card tr-card">
-    <div class="chips" style="flex-wrap:nowrap;margin-bottom:${done||cardio?"12px":"0"}">
-      <button class="chip grow tr-tg${done?" on":""}" aria-pressed="${!!done}" onclick="toggleTraining('done')">${done?"✓ ":""}${gs.length?"Salitreeni":"Treeni"}</button>
-      <button class="chip grow tr-tg${cardio?" on":""}" aria-pressed="${!!cardio}" onclick="toggleTraining('cardio')">${cardio?"✓ ":""}Cardio</button>
-    </div>`;
-  if(cardio){
+function trCardioHTML(){
+  let h="";
     const maxHR=getMaxHR();
     const zone=getHRZone(S.cardio_hr_min,S.cardio_hr_max,maxHR);
     h+=`<div style="margin-bottom:10px;padding-top:10px;border-top:1px solid var(--bord)">
@@ -8745,7 +8743,32 @@ function renderTrainingSection(){
       })()}
 
     </div>`;
+    return h;
+}
+let TR_OPEN=null; // v2.18.150: salitreenipäivän Treeni-osio auki tälle päivälle
+function renderTrainingSection(){
+  const el=document.getElementById("training-section"); if(!el) return;
+  const done=S.training_done, cardio=S.cardio_done;
+  // v2.18.149: päivälle tallennettu salitreeni on Treeni-merkinnän lähde: nappi kertoo sen (treeni näkyy kortissa yllä), treenityyppi tulee ohjelmasta.
+  // Rasitus, kulku, muutokset ja huomio pysyvät (samat tiedot kuin lopetusruudussa; tyhjän voi täydentää tässä).
+  const gs=done&&typeof dayGymSessions==="function"?dayGymSessions(S.date):[];
+  // v2.18.150: salitreenipäivänä osio on yksi rivi (treeni näkyy kortissa yllä); napautus avaa kentät
+  const compact=gs.length&&TR_OPEN!==S.date;
+  if(compact){
+    const oc=TRAINING_OUTCOMES.find(o=>o.id===S.training_outcome);
+    const bits=["✓ Salitreeni",S.training_load!=null?`rasitus ${S.training_load}`:"",oc?oc.short.toLowerCase():"lisää kulku"].filter(Boolean).join(" · ");
+    const shortTxt=bits;
+    el.innerHTML=`<div class="card tr-card"><div class="chips" style="flex-wrap:nowrap;margin-bottom:${cardio?"12px":"0"}">
+      <button class="chip grow tr-tg on tr-sumbtn" aria-expanded="false" onclick="TR_OPEN=S.date;renderTrainingSection()">${shortTxt} ›</button>
+      <button class="chip tr-tg${cardio?" on":""}" aria-pressed="${!!cardio}" onclick="toggleTraining('cardio')">${cardio?"✓ ":""}Cardio</button></div>${cardio?trCardioHTML():""}</div>`;
+    return;
   }
+  let h=`<div class="card tr-card">
+    <div class="chips" style="flex-wrap:nowrap;margin-bottom:${done||cardio?"12px":"0"}">
+      <button class="chip grow tr-tg${done?" on":""}" aria-pressed="${!!done}" onclick="toggleTraining('done')">${done?"✓ ":""}${gs.length?"Salitreeni":"Treeni"}</button>
+      <button class="chip grow tr-tg${cardio?" on":""}" aria-pressed="${!!cardio}" onclick="toggleTraining('cardio')">${cardio?"✓ ":""}Cardio</button>
+    </div>`;
+  if(cardio) h+=trCardioHTML();
   if(done){
     h+=`<div style="margin-bottom:10px">
       <span class="lbl-small">Rasitustaso</span>
@@ -8775,10 +8798,10 @@ function renderTrainingSection(){
         ${(S.settings.trainingTypes||TRAINING_TYPES).map(t=>`<option value="${esc(t)}" ${S.training_type===t?"selected":""}>${esc(t)}</option>`).join("")}
       </select>
     </div>`}
-    <div>
+    ${!(S.training_notes||"").trim()&&!S.showTrNotes?`<button class="df-open" onclick="S.showTrNotes=true;renderTrainingSection();setTimeout(()=>document.querySelector('#training-section textarea')?.focus(),30)">+ Treenihuomio</button>`:`<div>
       <span class="lbl-small">Treenihuomio (valinnainen)</span>
       <textarea oninput="S.training_notes=this.value;saveDraft();scheduleAutoSave()" placeholder="Miten treeni meni..." rows="2" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:10px 13px;resize:none;outline:none">${esc(S.training_notes)}</textarea>
-    </div>`;
+    </div>`}`;
   }
   // v2.13.0: kuormitusvertailu ei kuulu kirjaamiseen (näkyy Trendeissä)
   h+=`</div>`;
