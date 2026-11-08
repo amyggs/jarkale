@@ -2247,7 +2247,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.145</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.146</span>
       </div>
     </div>
   </div>
@@ -2281,6 +2281,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.146", d:"marraskuu 2026", items:[
+    "Ennätys yhdellä luvulla: raskain paino koskaan tai paras laskettu suoritus (paino ja toistot yhdessä, arvio enintään 12 toistolla). Erillinen sääntö \"samalla painolla enemmän toistoja\" poistettu: esim. 54 × 10 aiempien 73 × 3 ja 54 × 8 jälkeen ei ole ennätys. Samalla painolla toistojen lisäys on ennätys, jos se nostaa parasta suoritusta; muuten se näkyy nousuna viime kertaan. Ennätysrivi vertaa aiempaan parhaaseen sarjaan."
+  ]},
   {v:"2.18.145", d:"marraskuu 2026", items:[
     "Liikkeen käyrään aikaväli: 3 kk, 6 kk, 1 v tai Kaikki (oletus 6 kk). Aiemmin käyrä näytti vain 16 viimeisintä kertaa. Valinnat näkyvät vain, kun ne tuovat lisää kertoja, ja valinta muistetaan tällä laitteella. Yli 10 kuukauden välillä päivämäärissä on vuosi.",
     "Käyrän paras-tunniste ei enää osu viimeisen kerran tunnisteen päälle."
@@ -7294,6 +7297,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"8.11.2026", items:[
+    "Ennätys on nyt raskain paino tai paras suoritus, jossa paino ja toistot lasketaan yhteen. Kevyempi paino muutamalla lisätoistolla ei ole ennätys, jos olet tehnyt raskaammalla painolla kovemman sarjan. Toistojen lisäys viime kertaan näkyy edelleen nousuna.",
     "Liikkeen käyrästä voi valita aikavälin: 3 kk, 6 kk, 1 v tai kaikki. Näet nyt pidemmän ajan kehityksen, ei vain viimeisimpiä kertoja."
   ]},
   {d:"3.11.2026", items:[
@@ -9620,21 +9624,23 @@ function isPR(r,prev){
   // tekivät aiemmin lähes jokaisesta liikkeestä ennätyksen.
   const w=prev.filter(p=>p.kg!=null&&p.reps); if(!w.length) return true;
   if(r.kg>Math.max(...w.map(p=>p.kg))) return true;                                   // raskain paino koskaan
-  const same=w.filter(p=>p.kg===r.kg); if(same.length&&r.reps>Math.max(...same.map(p=>p.reps))) return true;   // samalla painolla enemmän toistoja
+  // v2.18.146: "samalla painolla enemmän toistoja" ei ole enää oma sääntönsä: 54 × 10 aiempien 54 × 8 ja 73 × 3 jälkeen ei ole
+  // ennätys, koska raskaampi sarja oli jo laskennallisesti kovempi. Samalla painolla toistojen lisäys on ennätys, jos se nostaa
+  // parasta arviota; muuten se näkyy nousuna viime kertaan (setDir).
   // v2.18.134: kevyempi paino vain arvioidun maksimin kautta ja vain kaavan luotettavalla alueella (≤ 12 toistoa):
   // 157,5 × 30 ei ole ennätys aiemman 165 × 12 jälkeen, vaikka kaava antaisi 30 toistolle yli 300 kg
-  return r.reps<=12&&e1rm(r.kg,r.reps)>Math.max(...w.map(p=>e1rm(p.kg,Math.min(p.reps,12))))+1e-9;
+  // e1c: yli 12 toistoa ratkaisee vain tasatilanteen, joten 105 × 20 aiemman parhaan 105 × 12 jälkeen on ennätys
+  return e1c(r.kg,r.reps)>Math.max(...w.map(p=>e1c(p.kg,p.reps)))+1e-9;
 }
-// v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (sama tai kevyempi paino, enemmän toistoja) → toistot
+// v2.18.75: ennätysmerkki sen kentän kohdalle, joka parani: uusi raskain paino → kg, muuten (paras laskettu suoritus) → toistot
 function prOnKg(r,prev){ if(r.kg==null) return false; const w=prev.filter(p=>p.kg!=null); return !w.length||r.kg>Math.max(...w.map(p=>p.kg)); }
 function prText(r,prev){
   const st=(kg,reps)=>kg!=null?`${fmtKg(kg)}\u00a0×\u00a0${reps}`:`${reps}\u00a0toistoa`;
   if(r.kg==null){ const b=Math.max(...prev.filter(p=>p.kg==null).map(p=>p.reps)); return `Uusi ennätys ${st(null,r.reps)}`+(Number.isFinite(b)?` · aiempi paras ${b} toistoa`:""); }
-  const same=prev.filter(p=>p.kg===r.kg);
-  if(same.length){ const b=Math.max(...same.map(p=>p.reps)); return `Uusi ennätys ${st(r.kg,r.reps)} · aiempi paras ${st(r.kg,b)}`; }
-  const w=prev.filter(p=>p.kg!=null); if(!w.length) return `Uusi ennätys ${st(r.kg,r.reps)}`;
+  const w=prev.filter(p=>p.kg!=null&&p.reps); if(!w.length) return `Uusi ennätys ${st(r.kg,r.reps)}`;
   const top=w.reduce((a,p)=>p.kg>a.kg||(p.kg===a.kg&&p.reps>a.reps)?p:a);
-  return `Uusi ennätys ${st(r.kg,r.reps)} · aiempi raskain ${st(top.kg,top.reps)}`;
+  if(r.kg>top.kg) return `Uusi ennätys ${st(r.kg,r.reps)} · aiempi raskain ${st(top.kg,top.reps)}`;
+  const b=bestSet(w); return `Uusi ennätys ${st(r.kg,r.reps)} · aiempi paras ${st(b.kg,b.reps)}`;
 }
 function hapticPR(){ try{ const l=hapticLevel(); if(!l||!navigator.vibrate) return; const m=HAPTIC_MS[l]+10; navigator.vibrate([m,70,m]); }catch(_){} }
 // v2.18.31 Arvioitu 1RM (Epley) treenin aikana: paras arvio tehdyistä sarjoista. Kaava on järkevä noin 1–12 toistolla,
@@ -10531,9 +10537,9 @@ function sessionSummary(s){
       // v2.18.135: vertailu erotuksena ("+8 toistoa", "+5 kg") eikä "aiemmin 105 × 12" – lyhyempi ja kertoo suoraan, paljonko parani
       let was="";
       if(best.kg!=null){
-        const same=before.filter(p=>p.kg===best.kg), w=before.filter(p=>p.kg!=null), top=w.length?Math.max(...w.map(p=>p.kg)):null;
+        const w=before.filter(p=>p.kg!=null&&p.reps), top=w.length?Math.max(...w.map(p=>p.kg)):null, pb=w.length?bestSet(w):null;
         if(top!=null&&best.kg>top) was=`+${fmtKg(Math.round((best.kg-top)*100)/100)}\u00a0kg`;
-        else if(same.length) was=`+${best.reps-Math.max(...same.map(p=>p.reps))}\u00a0toistoa`;
+        else if(pb&&pb.kg===best.kg&&best.reps>pb.reps) was=`+${best.reps-pb.reps}\u00a0toistoa`;   // aiempi paras samalla painolla
         else if(w.length){ const em=r=>e1rm(r.kg,Math.min(r.reps,12)), d=Math.round((em(best)-Math.max(...w.map(em)))*2)/2; if(d>0) was=`arv.\u00a0maksimi +${fmtKg(d)}\u00a0kg`; }
       } else { const mx=Math.max(...before.filter(p=>p.kg==null).map(p=>p.reps),0); if(mx) was=`+${best.reps-mx}\u00a0toistoa`; }
       prs.push({ex,set:best,was});
@@ -10548,7 +10554,7 @@ const DIR_SYM={up:"↑",down:"↓",same:"→"};
 // v2.18.106: ennätysrivi yhteenvetoon ja jakoon: sarja vain, jos liikkeessä oli eri painoja/toistoja (muuten se on jo sarjarivillä), ja vertailu
 // v2.18.107: jaon apufunktiot
 const SHARE_FOOT="Järkäle · treenipäiväkirja";
-const PR_EXPLAIN="★ Ennätys: liikkeen raskain paino, eniten toistoja samalla painolla tai paras laskennallinen maksimi (enintään 12 toistoa).";
+const PR_EXPLAIN="★ Ennätys: liikkeen raskain paino tai paras laskettu suoritus (paino ja toistot yhdessä, enintään 12 toistoa).";
 // Tekstin väri korostusvärin päälle: tumma vaalealle, valkoinen tummalle (kontrasti ≥ 4,5 kaikissa teemoissa)
 function accentInk(){
   try{ const el=document.createElement("i"); el.style.color="var(--orange)"; document.body.appendChild(el); const c=getComputedStyle(el).color; el.remove();
@@ -10896,7 +10902,7 @@ function gymSessionHTML(s){
         ${adj?`<div class="kgw"><button class="kgb" aria-label="Paino −${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},-kgStep())">−</button><input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${lab} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)"><button class="kgb" aria-label="Paino +${fmtKg(kgStep())} kg" onclick="gAdjKg('${sid}',${ei},${ri},kgStep())">+</button></div>`:`<input class="f" data-f="kg" inputmode="decimal" enterkeyhint="next" aria-label="Sarja ${lab} kg" value="${r.kg!=null?fmtKg(r.kg):""}" placeholder="${gh.kg!=null?fmtKg(gh.kg):"–"}" oninput="gSetVal('${sid}',${ei},${ri},'kg',this.value)">`}
         ${adj?`<div class="rpw"><button class="kgb" aria-label="Toistot −1" onclick="gAdjReps('${sid}',${ei},${ri},-1)">−</button>`:""}<input class="f" data-f="reps" inputmode="numeric" enterkeyhint="done" aria-label="Sarja ${lab} toistot" value="${r.reps!=null?r.reps:""}" placeholder="${gh.reps!=null?gh.reps:"–"}" oninput="gSetVal('${sid}',${ei},${ri},'reps',this.value)" onkeydown="if(event.key==='Enter'){this.blur();gToggleSet('${sid}',${ei},${ri})}">${adj?`<button class="kgb" aria-label="Toistot +1" onclick="gAdjReps('${sid}',${ei},${ri},1)">+</button></div>`:""}
         <button class="ck" aria-label="Sarja ${lab} ${r.done?"tehty, peru":"tehty"}" aria-pressed="${r.done}" onclick="gToggleSet('${sid}',${ei},${ri})">${ico("check",20)}</button>
-        ${pr?`<span class="pr${prOnKg(r,prevSets)?" on-kg":""}${G_FLASH.has("pr-"+ex.id+"-"+ri)?" pop":""}" title="${prOnKg(r,prevSets)?"Raskain paino, jolla olet tehnyt tämän liikkeen":"Et ole aiemmin tehnyt tätä painoa näin monella toistolla"}">Ennätys</span>`:""}</div>`;
+        ${pr?`<span class="pr${prOnKg(r,prevSets)?" on-kg":""}${G_FLASH.has("pr-"+ex.id+"-"+ri)?" pop":""}" title="${prOnKg(r,prevSets)?"Raskain paino, jolla olet tehnyt tämän liikkeen":"Paras laskettu suoritus: paino ja toistot yhdessä"}">Ennätys</span>`:""}</div>`;
       if(effMode&&!r.kind&&(r.done||ri===adjRi)) h+=effRowHTML(s,ex,sid,ei,ri,r,effMode);
     });
     if(GU.prMsg[ex.id]) h+=`<div class="ex-prmsg${G_FLASH.has("prmsg-"+ex.id)?" in":""}" data-prmsg="${ex.id}" role="status">★ ${esc(GU.prMsg[ex.id])}</div>`;
