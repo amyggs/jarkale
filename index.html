@@ -2247,7 +2247,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.150</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.151</span>
       </div>
     </div>
   </div>
@@ -2281,6 +2281,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.151", d:"marraskuu 2026", items:[
+    "Askeleet: tyhjästä kentästä ensimmäinen −/+ tuo viime päivien tason (enintään 7 viimeisimmän kirjatun päivän keskiarvo 30 päivän sisältä, 500:n tarkkuudella), kuten paino ja uni aloittavat edellisestä arvosta. Siitä säädetään 100 kerrallaan. Ilman aiempia askelkirjauksia aloitus on nollasta.",
+    "Kirjaa: salitreenirivi kertoo, mitä puuttuu (\"lisää rasitus ja kulku\", \"lisää kulku\" tai \"lisää rasitus\").",
+    "Esittelysivu: ennätyssääntö ajan tasalle ja uudet kohdat (kg-merkintä, Kirjaa-näkymä, pohjassa pidettävä säätö)."
+  ]},
   {v:"2.18.150", d:"marraskuu 2026", items:[
     "Kirjaa selkeämmäksi: salitreenipäivänä Treeni ja kuormitus on yksi rivi (\"✓ Salitreeni · rasitus 4 · lisää kulku ›\") ja Cardio; napautus avaa rasituksen, kulun, muutokset ja huomion.",
     "Treenihuomio ja kivun lisätiedot linkin takana (\"+ Treenihuomio\", \"+ Lisätietoja kivusta\"); kenttä on auki, jos siihen on kirjoitettu.",
@@ -7314,6 +7319,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"10.11.2026", items:[
+    "Askeleet: kun kenttä on tyhjä, ensimmäinen painallus tuo viime päivien tasosi, eikä sinun tarvitse aloittaa nollasta."
+  ]},
   {d:"8.11.2026", items:[
     "Kirjaa-näkymä on siistimpi. Salitreenipäivänä treeniosio on yksi rivi, jota napauttamalla voi kirjata rasituksen ja kulun. Treenihuomio ja kivun lisätiedot avautuvat linkistä. Painon muutos ei ole enää punainen tai vihreä.",
     "Kirjaa-näkymässä salitreeni ei enää näy kahteen kertaan. Treeni-osiossa lukee \"Salitreeni\", ja salitreenikortissa näkyvät rasitus ja treenin kulku. Jos jätit kulun lopetuksessa valitsematta, voit valita sen Kirjaa-näkymässä.",
@@ -7777,6 +7785,10 @@ function lastKnown(field,ds){
   return after.length?{v:S.entries[after[0]][field],d:after[0]}:null;
 }
 function lastKnownWeight(ds){ const k=lastKnown("weight",ds); return k?k.v:null; }
+// v2.18.151: askelten lähtöarvo tyhjästä kentästä = enintään 7 viimeisimmän kirjatun päivän keskiarvo (30 päivän sisältä), 500:n tarkkuudella
+function stepsBase(ds){ const lim=new Date(new Date(ds+"T00:00:00").getTime()-30*864e5).toISOString().slice(0,10);
+  const v=Object.keys(S.entries).filter(d=>d<ds&&d>=lim&&S.entries[d]&&S.entries[d].steps>0).sort().slice(-7).map(d=>S.entries[d].steps);
+  return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length/500)*500:0; }
 // v2.13.0: lyhyt päiväys suhteessa valittuun päivään ("eilen", "la 3.10.")
 const WD_SHORT=["su","ma","ti","ke","to","pe","la"];
 function relDay(d,ref){
@@ -7799,7 +7811,9 @@ function adj(field,delta){
     next=Math.round(nm/60*100)/100;
   }
   // v2.18.148: askeleet tasataan askelen ruudukkoon (7 234 → + → 7 300)
-  if(field==="steps"){ const st=Math.abs(delta); next=delta>0?Math.floor(cur/st)*st+st:Math.ceil(cur/st)*st-st; }
+  if(field==="steps"){ const st=Math.abs(delta); next=delta>0?Math.floor(cur/st)*st+st:Math.ceil(cur/st)*st-st;
+    // tyhjästä kentästä ensimmäinen painallus tuo viime päivien tason (kuten paino ja uni aloittavat edellisestä arvosta); siitä säädetään 100 kerrallaan
+    if(S.steps==null){ const b=stepsBase(S.date); if(b>0) next=b; } }
   S[field]=Math.max(mn,Math.min(mx,next));
   renderSteppers();
   updateSaveBtn(S.date,new Date(S.date+"T00:00:00").getDay());
@@ -8756,7 +8770,9 @@ function renderTrainingSection(){
   const compact=gs.length&&TR_OPEN!==S.date;
   if(compact){
     const oc=TRAINING_OUTCOMES.find(o=>o.id===S.training_outcome);
-    const bits=["✓ Salitreeni",S.training_load!=null?`rasitus ${S.training_load}`:"",oc?oc.short.toLowerCase():"lisää kulku"].filter(Boolean).join(" · ");
+    // v2.18.151: rivi kertoo myös, mitä puuttuu
+    const ld=S.training_load!=null;
+    const bits=["✓ Salitreeni",ld?`rasitus ${S.training_load}`:(oc?"lisää rasitus":""),oc?oc.short.toLowerCase():(ld?"lisää kulku":"lisää rasitus ja kulku")].filter(Boolean).join(" · ");
     const shortTxt=bits;
     el.innerHTML=`<div class="card tr-card"><div class="chips" style="flex-wrap:nowrap;margin-bottom:${cardio?"12px":"0"}">
       <button class="chip grow tr-tg on tr-sumbtn" aria-expanded="false" onclick="TR_OPEN=S.date;renderTrainingSection()">${shortTxt} ›</button>

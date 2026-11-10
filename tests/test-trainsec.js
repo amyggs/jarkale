@@ -27,13 +27,15 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     setTab('log'); loadDayIntoForm(S.date); renderLog(); });
   await p.waitForTimeout(200);
   v=await sec();
-  ok(/^✓ Salitreeni · lisää kulku ›$/.test(v.btn)&&!/Rasitustaso/.test(v.txt),'v2.18.150: salitreenipäivänä yksi rivi: '+v.btn);
+  ok(/^✓ Salitreeni · lisää rasitus ja kulku ›$/.test(v.btn)&&!/Rasitustaso/.test(v.txt),'v2.18.150: salitreenipäivänä yksi rivi: '+v.btn);
   ok(/Cardio/.test(v.txt)&&!/Treenityyppi/.test(v.txt),'Cardio säilyy, treenityyppi ei näy');
   ok(/Selkä ja hauikset/.test(v.card),'treenin nimi kortissa');
   await p.locator('#training-section .tr-sumbtn').click(); await p.waitForTimeout(100);
   v=await sec();
   ok(v.btn==='✓ Salitreeni'&&/Rasitustaso/.test(v.txt)&&/Treenin kulku/.test(v.txt)&&/\+ Treenihuomio/.test(v.txt)&&!/Treenityyppi/.test(v.txt),'napautus avaa kentät; huomio linkin takana');
-  await p.evaluate(()=>setTrainingLoad(4)); await p.locator('#training-section button',{hasText:'Normaalisti'}).click(); await p.waitForTimeout(150);
+  await p.evaluate(()=>setTrainingLoad(4));
+  ok(await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); const t=document.querySelector('#training-section .tr-sumbtn').textContent; TR_OPEN=S.date; renderTrainingSection(); return t; })==='✓ Salitreeni · rasitus 4 · lisää kulku ›','v2.18.151: rivi kertoo, mitä puuttuu (kulku)');
+  await p.locator('#training-section button',{hasText:'Normaalisti'}).click(); await p.waitForTimeout(150);
   v=await sec();
   ok(/1 liikettä · 2 sarjaa · .*min · rasitus 4 · normaalisti/.test(v.card),'kortissa rasitus ja kulku: '+v.card);
   await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); }); v=await sec();

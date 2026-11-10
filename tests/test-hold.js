@@ -38,6 +38,14 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.mouse.move(sb.x+sb.width/2,sb.y+sb.height/2); await p.mouse.down(); await p.waitForTimeout(1200); await p.mouse.up(); await p.waitForTimeout(100);
   const sl=await p.evaluate(()=>S.sleep); ok(sl>7.2&&Math.abs(Math.round(sl*60)%5)===0,'uni juoksee 5 min askelin: '+sl);
   ok(await p.evaluate(()=>getComputedStyle(document.querySelector('.stepper-btn')).userSelect)==='none','pitkä painallus ei valitse tekstiä');
+  // v2.18.151: tyhjästä kentästä ensimmäinen painallus tuo viime päivien tason (keksitty historia: 7 päivää, keskiarvo 8 143 → 8 000)
+  const base=await p.evaluate(()=>{ const now=new Date().toISOString(); [9000,7000,8000,10000,6000,8500,8500].forEach((v,i)=>{ const d=new Date(Date.now()-(i+1)*864e5).toISOString().slice(0,10); S.entries[d]={date:d,steps:v,created_at:now,updated_at:now}; });
+    const old=new Date(Date.now()-60*864e5).toISOString().slice(0,10); S.entries[old]={date:old,steps:30000,created_at:now,updated_at:now};
+    S.steps=null; renderSteppers(); return stepsBase(S.date); });
+  ok(base===8000,'lähtöarvo = 7 viime päivän keskiarvo 500:n tarkkuudella, vanha päivä ei vaikuta: '+base);
+  await plus.click(); ok(await val()===8000,'tyhjä kenttä + → 8 000 (ei 100): '+await val());
+  await plus.click(); ok(await val()===8100,'siitä eteenpäin 100 kerrallaan: '+await val());
+  await p.evaluate(()=>{ S.steps=null; renderSteppers(); }); await minus.click(); ok(await val()===8000,'tyhjä kenttä − → sama lähtöarvo');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
