@@ -109,6 +109,15 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>startEditMeas(today())); await p.waitForTimeout(150);
   ok(await p.locator('#mfd-ar').inputValue()==='38,5','muokkauksessa desimaalipilkku');
   await p.evaluate(()=>cancelMeasForm());
+  // v2.18.153: Mitoissa ei arvottavia värejä
+  const mc=await p.evaluate(()=>{ S.settings.profile={height:180,age:40}; S.settings.gender='male'; const d=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
+    S.measurements=[{date:d(30),wn:95,neck:40,ar:38,updated_at:1},{date:today(),wn:92,neck:40,ar:39,updated_at:2}]; S.entries[d(30)]={date:d(30),weight:100}; S.entries[today()]={date:today(),weight:96}; saveAll(); renderMeasurements();
+    const el=document.getElementById('historia-content'); const cols=[...el.querySelectorAll('.mo-kd span, .mo-ch span, .mo-tag')].map(e=>getComputedStyle(e).color);
+    const g=getComputedStyle(document.documentElement); const mk=v=>{ const t=document.createElement('i'); t.style.color=`var(${v})`; el.appendChild(t); const c=getComputedStyle(t).color; t.remove(); return c; };
+    return {n:cols.length, bad:cols.filter(c=>c===mk('--green')||c===mk('--red')).length, txt:el.innerText}; });
+  ok(mc.n>=4&&mc.bad===0,'muutosluvuissa ja luokkamerkeissä ei vihreää tai punaista ('+mc.n+' kohtaa)');
+  ok(/−3/.test(mc.txt)&&/\+1/.test(mc.txt),'etumerkki kertoo suunnan');
+  ok(!/Vihreä\/punainen/.test(mc.txt)&&!/\bHyvä\b(?! kunto)/.test(mc.txt),'ei arvottavaa selitystä eikä FFMI-luokkaa "Hyvä"');
 
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();

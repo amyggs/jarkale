@@ -518,7 +518,7 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .mo-kn{font-size:12px;color:var(--dim);font-weight:600;}
 .mo-kv{font-size:22px;font-weight:800;line-height:1.3;display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;}
 .mo-kv small{font-size:13px;color:var(--dim);font-weight:600;}
-.mo-tag{font-size:11px;font-weight:700;background:var(--surf2);border-radius:6px;padding:2px 7px;margin-left:6px;align-self:center;}
+.mo-tag{font-size:11px;font-weight:700;color:var(--text);background:var(--surf2);border-radius:6px;padding:2px 7px;margin-left:6px;align-self:center;}
 .mo-kd{font-size:12px;color:var(--dim);font-weight:600;}
 .mo-spark{flex:none;}
 .mo-info-btn{border:none;background:transparent;color:var(--dim);font:600 12px Manrope,system-ui,sans-serif;text-decoration:underline;padding:10px 0 0;min-height:32px;}
@@ -2249,7 +2249,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.152</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.153</span>
       </div>
     </div>
   </div>
@@ -2283,6 +2283,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.153", d:"marraskuu 2026", items:[
+    "Mitat ilman arvottavia värejä: muutosluvut neutraalilla värillä (etumerkki kertoo suunnan), koska sovellus ei tiedä tavoitetta (massakausi, dieetti). Luokkamerkit ilman värejä. FFMI-luokat kuvaaviksi: Hyvä → Korkea, Erittäin hyvä → Erittäin korkea. Selitys päivitetty."
+  ]},
   {v:"2.18.152", d:"marraskuu 2026", items:[
     "Mitat, ensimmäinen mittaus selkeämmäksi: lomakkeen alussa lyhyt ohje (täytä vain seuraamasi mitat, mittaa samasta kohdasta samaan aikaan, vyötärön kolme kohtaa). Puuttuvien laskentatietojen kortti on mittakenttien jälkeen ja kertoo selkokielellä, mitä jää laskematta.",
     "Ihopoimumittaus on linkin takana (\"+ Ihopoimumittaus (rasvapihdeillä)\"), ellei siinä ole arvoja; ikää kysytään vasta, kun osio avataan. Ohjetekstit isommalla (12 px, ennen 9–10 px).",
@@ -3336,13 +3339,13 @@ function ffmiCategory(norm, gender){
   if(g==='female'){
     if(norm<15) return {lbl:"Matala",col:"var(--blue)"};
     if(norm<18) return {lbl:"Keskitaso",col:"var(--yellow)"};
-    if(norm<21) return {lbl:"Hyvä",col:"var(--green)"};
-    return {lbl:"Erittäin hyvä",col:"var(--green)"};
+    if(norm<21) return {lbl:"Korkea",col:"var(--green)"};
+    return {lbl:"Erittäin korkea",col:"var(--green)"};
   } else {
     if(norm<18) return {lbl:"Matala",col:"var(--blue)"};
     if(norm<20) return {lbl:"Keskitaso",col:"var(--yellow)"};
-    if(norm<23) return {lbl:"Hyvä",col:"var(--green)"};
-    if(norm<25) return {lbl:"Erittäin hyvä",col:"var(--green)"};
+    if(norm<23) return {lbl:"Korkea",col:"var(--green)"};
+    if(norm<25) return {lbl:"Erittäin korkea",col:"var(--green)"};
     return {lbl:"Poikkeuksellinen",col:"var(--green)"};
   }
 }
@@ -6488,7 +6491,8 @@ function measFmtDate(ds,withYear){const d=new Date(ds+"T00:00:00");return `${d.g
 function measDelta(d,dir,unit){
   if(d==null) return "";
   d=+d.toFixed(1);
-  const col=d===0||!dir?"var(--dim)":((d*dir)>0?"var(--green)":"var(--red)");
+  // v2.18.153: ei arvottavaa väriä. Sovellus ei tiedä tavoitetta (massakausi, dieetti), joten etumerkki kertoo suunnan ja tulkinta jää käyttäjälle.
+  const col=d===0?"var(--dim)":"var(--text)";
   return `<span style="color:${col}">${d===0?"±0":(d>0?"+":"−")+Math.abs(d)}${unit||""}</span>`;
 }
 function measSpark(vals){
@@ -6566,7 +6570,7 @@ function renderMeasurementsInner(){
       rows+=`<div class="mo-kpi">
         <div class="mo-kl">
           <div class="mo-kn">${k.l}</div>
-          <div class="mo-kv">${v}<small>${k.u}</small>${c?`<span class="mo-tag" style="color:${c.col}">${c.lbl}</span>`:""}</div>
+          <div class="mo-kv">${v}<small>${k.u}</small>${c?`<span class="mo-tag">${c.lbl}</span>`:""}</div>
           ${idx.length>=2?`<div class="mo-kd">${measDelta(v-prevV,k.dir,k.u)} edellisestä · ${measDelta(v-firstV,k.dir,k.u)} alusta</div>`
             :`<div class="mo-kd">Ensimmäinen arvo ${measFmtDate(all[li].date,multiYear)}</div>`}
         </div>
@@ -6585,7 +6589,7 @@ function renderMeasurementsInner(){
         <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
         <p><b>Ihopoimu (Jackson-Pollock 3-kohta)</b> on erillinen, rinnakkainen arvio. Tulos riippuu eniten siitä, osuuko poimu joka kerta samaan kohtaan.</p>
         <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista. <b>FMI</b> on sama rasvamassasta.</p>
-        <p>Vihreä/punainen kertoo suunnan: vyötärössä ja rasvaprosentissa lasku on hyvä, FFMI:ssä ja raajojen ympäryksissä kasvu.</p>
+        <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Luvun vieressä oleva merkki (esim. Urheilijoilla, Keskitaso) on yleinen viiteluokka, ei arvio sinun tavoitteestasi.</p>
       </div>`:""}
     </div>`;
 
@@ -7332,6 +7336,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"10.11.2026", items:[
+    "Mitoissa muutokset eivät ole enää vihreitä tai punaisia. Plus tai miinus kertoo suunnan, ja sinä päätät, onko muutos tavoitteesi mukainen.",
     "Kehon mittaus on helpompi aloittaa: lomakkeessa on lyhyt mittausohje, ja ihopoimumittaus aukeaa linkistä vain, jos käytät rasvapihtejä.",
     "Askeleet: kun kenttä on tyhjä, ensimmäinen painallus tuo viime päivien tasosi, eikä sinun tarvitse aloittaa nollasta."
   ]},
