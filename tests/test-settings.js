@@ -76,7 +76,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     localStorage.setItem('seuranta-setup-done','1'); saveAll(); applyNavVisibility&&applyNavVisibility(); setTab('historia'); renderMeasurements(); }); await p.waitForTimeout(200);
   let mt=await p.locator('#historia-content').innerText();
   ok(/Laskentaan puuttuu pituus ja sukupuoli/.test(mt),'kortti kertoo, mitä puuttuu');
-  ok(/ei lasketa Navy-rasvaprosenttia ja FFMI:tä/.test(mt)&&!/ihopoimu/i.test(mt.split('Kokonaiskuva')[0]),'kertoo seurauksen, ei mainitse ihopoimua ilman ihopoimuja');
+  ok(/ei lasketa rasvaprosenttiarviota \(Navy-kaava\) ja lihasmassaindeksiä \(FFMI\)/.test(mt)&&!/ihopoimu/i.test(mt.split('Kokonaiskuva')[0]),'kertoo seurauksen, ei mainitse ihopoimua ilman ihopoimuja');
   ok(!/Rasvaprosentti · Navy/.test(mt),'Navy puuttuu ennen täyttöä');
   await p.locator('.mo-needs input').first().fill('190'); await p.locator('.mo-needs input').first().dispatchEvent('change'); await p.waitForTimeout(150);
   mt=await p.locator('#historia-content').innerText();
@@ -92,6 +92,23 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(!(await p.locator('.mo-needs').count()),'kaikki tiedossa: lomakkeessa ei puutekorttia');
   await p.evaluate(()=>{ S.settings.profile.height=null; saveAll(); renderMeasurements(); }); await p.waitForTimeout(150);
   ok(await p.locator('#historia-content .mo-needs').count()===1&&/pituus/.test(await p.locator('.mo-needs').innerText()),'lomakkeessa sama kortti, kun pituus puuttuu');
+  // v2.18.152: ensimmäinen mittaus uuden käyttäjän silmin
+  await p.evaluate(()=>{ S.settings.profile={}; S.settings.gender=null; S.measurements=[]; saveAll(); cancelMeasForm&&cancelMeasForm(); showMeasForm(); }); await p.waitForTimeout(150);
+  let ft=await p.locator('#historia-content').innerText();
+  ok(/Täytä vain ne mitat, joita seuraat/.test(ft)&&/navan kohdalta sekä 5 cm/.test(ft),'lomakkeessa mittausohje');
+  ok(/Vyötärö \+5 cm/.test(ft)&&/Vyötärö −5 cm/.test(ft),'yksiköt välilyönnillä');
+  ok(/Laskentaan puuttuu pituus ja sukupuoli/.test(ft)&&!/ikä/.test(ft.split('Laskentaan puuttuu')[1].split('Ilman')[0]),'ikää ei kysytä ilman ihopoimuja');
+  ok(ft.indexOf('Pohje vasen')<ft.indexOf('Laskentaan puuttuu'),'puutekortti vasta mittakenttien jälkeen');
+  ok(/\+ Ihopoimumittaus \(rasvapihdeillä\)/.test(ft)&&!/Jackson & Pollock 1978/.test(ft),'ihopoimuosio linkin takana');
+  await p.locator('#historia-content button',{hasText:'Ihopoimumittaus'}).click(); await p.waitForTimeout(150);
+  ft=await p.locator('#historia-content').innerText();
+  ok(/Laskentaan puuttuu pituus, sukupuoli ja ikä/.test(ft)&&/tulee näkyviin, kun laskentakaava on valittu/.test(ft),'osion avaus kysyy iän ja kertoo, mitä tarvitaan');
+  await p.locator('#mfd-wn').fill('92'); await p.locator('#mfd-ar').fill('38,5'); await p.locator('#historia-content button',{hasText:'Tallenna'}).click(); await p.waitForTimeout(250);
+  ft=await p.locator('#historia-content').innerText();
+  ok(/Mitattu tänään/.test(ft)&&!/väli \d+ pv/.test(ft)&&!/0 pv/.test(ft),'ensimmäisen mittauksen jälkeen "Mitattu tänään"');
+  await p.evaluate(()=>startEditMeas(today())); await p.waitForTimeout(150);
+  ok(await p.locator('#mfd-ar').inputValue()==='38,5','muokkauksessa desimaalipilkku');
+  await p.evaluate(()=>cancelMeasForm());
 
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();

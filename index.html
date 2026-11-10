@@ -340,6 +340,8 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .stepper>.lbl-small{margin:0;}
 .stepper-row{flex:0 0 200px;gap:6px;}
 .stepper-btn{width:44px;height:44px;border:none;border-radius:12px;background:var(--surf2);font-size:20px;font-weight:600;}
+.mf-guide{font:500 12.5px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:12px;}
+.mf-hint{font:500 12px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px;}
 .stepper-btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .stepper-btn:active{background:var(--seg-on);}
 .stepper input{height:44px;border:none;background:transparent;color:var(--text);font-size:22px;font-weight:800;padding:0 0 8px;border-radius:10px;}
@@ -2247,7 +2249,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.151</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.152</span>
       </div>
     </div>
   </div>
@@ -2281,6 +2283,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.152", d:"marraskuu 2026", items:[
+    "Mitat, ensimmäinen mittaus selkeämmäksi: lomakkeen alussa lyhyt ohje (täytä vain seuraamasi mitat, mittaa samasta kohdasta samaan aikaan, vyötärön kolme kohtaa). Puuttuvien laskentatietojen kortti on mittakenttien jälkeen ja kertoo selkokielellä, mitä jää laskematta.",
+    "Ihopoimumittaus on linkin takana (\"+ Ihopoimumittaus (rasvapihdeillä)\"), ellei siinä ole arvoja; ikää kysytään vasta, kun osio avataan. Ohjetekstit isommalla (12 px, ennen 9–10 px).",
+    "Kokonaiskuva: \"Mitattu tänään\" (ennen \"Edellisestä mittauksesta 0 pv · väli 28 pv\"). Mittauksen muokkauksessa desimaalipilkku. \"Vyötärö +5 cm\" välilyönnillä."
+  ]},
   {v:"2.18.151", d:"marraskuu 2026", items:[
     "Askeleet: tyhjästä kentästä ensimmäinen −/+ tuo viime päivien tason (enintään 7 viimeisimmän kirjatun päivän keskiarvo 30 päivän sisältä, 500:n tarkkuudella), kuten paino ja uni aloittavat edellisestä arvosta. Siitä säädetään 100 kerrallaan. Ilman aiempia askelkirjauksia aloitus on nollasta.",
     "Kirjaa: salitreenirivi kertoo, mitä puuttuu (\"lisää rasitus ja kulku\", \"lisää kulku\" tai \"lisää rasitus\").",
@@ -3214,8 +3221,8 @@ function ico(n,s=18,cls=""){ const p=ICONS[n]; if(!p) return ""; return `<svg cl
 function icoTile(n){ return `<span class="ico-tile">${ico(n,18)}</span>`; }
 const MEAS_FIELDS = [
   {k:"wn",    l:"Vyötärö napa"},
-  {k:"wa",    l:"Vyötärö +5cm"},
-  {k:"wb",    l:"Vyötärö −5cm"},
+  {k:"wa",    l:"Vyötärö +5 cm"},
+  {k:"wb",    l:"Vyötärö −5 cm"},
   {k:"neck",  l:"Kaula"},
   {k:"hips",  l:"Lantio"},
   {k:"chest", l:"Rinta"},
@@ -6502,7 +6509,7 @@ function measNeeds(all,formOpen){
 function measNeedsHTML(n){
   if(!n.height&&!n.gender&&!n.age) return "";
   const miss=[n.height&&"pituus",n.gender&&"sukupuoli",n.age&&"ikä"].filter(Boolean);
-  const what=[(n.height||n.gender)&&"Navy-rasvaprosenttia ja FFMI:tä",(n.age||(n.gender&&n.sf))&&"ihopoimuarviota"].filter(Boolean);
+  const what=[(n.height||n.gender)&&"rasvaprosenttiarviota (Navy-kaava) ja lihasmassaindeksiä (FFMI)",(n.age||(n.gender&&n.sf))&&"ihopoimuarviota"].filter(Boolean);
   const inp=(k,l,u,ph)=>`<label class="mn-f"><span class="lbl-small">${l}</span><span class="mn-in"><input type="text" inputmode="decimal" placeholder="${ph}" onchange="measSetProfile('${k}',this.value)"><small>${u}</small></span></label>`;
   return `<div class="card mo-needs">
     <div class="mn-h">${ico("alert",15)} Laskentaan puuttuu ${miss.join(" ja ").replace(/ ja (?=.* ja )/,", ")}</div>
@@ -6572,7 +6579,7 @@ function renderMeasurementsInner(){
         <span style="font-size:12px;color:var(--dim)">${all.length} ${all.length===1?"mittaus":"mittausta"}${all.length>1?` · ${measFmtDate(first.date,true)} – ${measFmtDate(last.date,true)}`:` · ${measFmtDate(last.date,true)}`}</span>
       </div>
       ${rows}
-      <div style="font-size:12px;color:var(--dim);margin-top:${rows?10:6}px">Edellisestä mittauksesta ${sinceLast} pv${sinceLast>=interval?` · <span style="color:var(--orange);font-weight:700">mittausväli ${interval} pv täynnä</span>`:` · väli ${interval} pv`}</div>
+      <div style="font-size:12px;color:var(--dim);margin-top:${rows?10:6}px">${sinceLast===0?"Mitattu tänään":sinceLast===1?"Edellinen mittaus eilen":`Edellisestä mittauksesta ${sinceLast} pv`}${sinceLast>=interval?` · <span style="color:var(--orange);font-weight:700">mittausväli ${interval} pv täynnä</span>`:""}</div>
       <button class="mo-info-btn" onclick="window._measInfoOpen=!window._measInfoOpen;renderMeasurements()">${window._measInfoOpen?"Piilota selitykset":"Mistä luvut tulevat?"}</button>
       ${window._measInfoOpen?`<div class="mo-info">
         <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
@@ -6626,7 +6633,10 @@ function buildMeasFormHTML(){
   const f=MEAS_FORM;
   const isFemale=(S.settings.gender==="female");
   const genderSet=(S.settings.gender==="male"||S.settings.gender==="female");
-  const needs=measNeedsHTML(measNeeds([...HIST_MEAS,...(S.measurements||[])],true));
+  // v2.18.152: ihopoimuosio on linkin takana, ellei siinä ole arvoja; ikää kysytään vain silloin, kun osio on auki
+  const sfOpen=!!f.sfOpen||SKINFOLD_FIELDS_ALL.some(x=>f.values[x.k]!=null);
+  const needs=measNeedsHTML(measNeeds([...HIST_MEAS,...(S.measurements||[])],sfOpen));
+  const fv=k=>f.values[k]==null?"":String(f.values[k]).replace(".",",");
   const bfHint=!genderSet
     ? `${ico("alert",13)} Rasvaprosentti- ja FFMI-arvio tarvitsevat sukupuolen (laskentakaava) ja pituuden. Mittaukset tallentuvat silti normaalisti.`
     : `${ico("bulb",13)} Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>${ico("dumbbell",13)} FFMI: lasketaan automaattisesti painosta, Navy-rasvaprosentista ja pituudesta. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
@@ -6635,7 +6645,7 @@ function buildMeasFormHTML(){
       <span style="color:var(--text);font-weight:600">${f.editing?"Muokkaa mittausta":"Uusi mittaus"}</span>
       <button onclick="cancelMeasForm()" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer">×</button>
     </div>
-    ${needs||`<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.5">${bfHint}</div>`}
+    <div class="mf-guide">Täytä vain ne mitat, joita seuraat. Mittaa aina samasta kohdasta ja samaan aikaan päivästä, niin luvut ovat vertailukelpoisia. Vyötärö mitataan navan kohdalta sekä 5 cm sen ylä- ja alapuolelta.</div>
     <div style="margin-bottom:12px">
       <div class="lbl-small">Päivämäärä</div>
       <input type="date" id="mfd-date" value="${f.date}" max="${today()}" onchange="MEAS_FORM.date=this.value" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
@@ -6644,18 +6654,20 @@ function buildMeasFormHTML(){
       ${MEAS_FIELDS.map(fld=>`<div>
         <div class="lbl-small">${fld.l}</div>
         <div style="position:relative">
-          <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${f.values[fld.k]??''}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
+          <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
           <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none">cm</span>
         </div>
       </div>`).join("")}
     </div>
+    ${needs||`<div class="mf-hint">${bfHint}</div>`}
     ${(()=>{
+      if(!sfOpen) return `<button class="df-open" style="margin-bottom:14px" onclick="MEAS_FORM.sfOpen=true;renderMeasurements()">+ Ihopoimumittaus (rasvapihdeillä)</button>`;
       const sfFields=skinfoldFields();
-      if(!sfFields) return `<div style="font-size:11px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:8px 10px;margin-bottom:14px">${ico("alert",13)} Ihopoimumittaus (Jackson-Pollock) tulee näkyviin, kun laskentakaava on valittu yllä.</div>`;
+      if(!sfFields) return `<div class="mf-hint">${ico("bulb",13)} Ihopoimumittaus tulee näkyviin, kun laskentakaava on valittu yllä.</div>`;
       const ageOk=!!S.settings.profile?.age;
       return `<div style="margin-bottom:14px">
         <div style="font-size:12px;color:var(--dim);margin-bottom:4px">${ico("ruler",14)} Ihopoimu (Jackson-Pollock 3-kohta) — vaihtoehtoinen rasvaprosenttiarvio, ei korvaa Navya${ageOk?"":". Tulos lasketaan, kun ikä on annettu yllä."}</div>
-        <div style="font-size:10px;color:var(--dim);background:var(--surf2);border-radius:8px;padding:7px 9px;margin-bottom:9px;line-height:1.5">
+        <div class="mf-hint" style="margin-bottom:9px">
           Lähde: Jackson & Pollock 1978 (miehet) / Jackson, Pollock & Ward 1980 (naiset), ACSM-protokolla.
           Mittaa aina kehon oikealta puolelta, mittari 1 cm sormista poimun puolivälistä, kohtisuoraan poimuun nähden.
           2–3 mittausta per kohta, keskiarvo jos ero ≤2mm. Sama kellonaika joka kerta (aamulla, ennen treeniä) —
@@ -6665,10 +6677,10 @@ function buildMeasFormHTML(){
           ${sfFields.map(fld=>`<div>
             <div class="lbl-small">${fld.l}</div>
             <div style="position:relative">
-              <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${f.values[fld.k]??''}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
+              <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
               <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none">mm</span>
             </div>
-            <div style="font-size:9px;color:var(--dim);margin-top:4px;line-height:1.35">${SKINFOLD_SITE_INFO[fld.k]||""}</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:4px;line-height:1.35">${SKINFOLD_SITE_INFO[fld.k]||""}</div>
           </div>`).join("")}
         </div>
       </div>`;
@@ -7320,6 +7332,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"10.11.2026", items:[
+    "Kehon mittaus on helpompi aloittaa: lomakkeessa on lyhyt mittausohje, ja ihopoimumittaus aukeaa linkistä vain, jos käytät rasvapihtejä.",
     "Askeleet: kun kenttä on tyhjä, ensimmäinen painallus tuo viime päivien tasosi, eikä sinun tarvitse aloittaa nollasta."
   ]},
   {d:"8.11.2026", items:[
