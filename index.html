@@ -2249,7 +2249,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.153</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.154</span>
       </div>
     </div>
   </div>
@@ -2283,6 +2283,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.154", d:"marraskuu 2026", items:[
+    "Rasvaprosentin luokat tasosanoiksi (rajat ennallaan): Välttämätön → Hyvin matala, Urheilijoilla → Matala, Hyvä kunto → Melko matala, Normaali → Keskitaso, Korkea ennallaan. Tieto siitä, keillä taso on tyypillinen, on selityksessä \"Mistä luvut tulevat?\"."
+  ]},
   {v:"2.18.153", d:"marraskuu 2026", items:[
     "Mitat ilman arvottavia värejä: muutosluvut neutraalilla värillä (etumerkki kertoo suunnan), koska sovellus ei tiedä tavoitetta (massakausi, dieetti). Luokkamerkit ilman värejä. FFMI-luokat kuvaaviksi: Hyvä → Korkea, Erittäin hyvä → Erittäin korkea. Selitys päivitetty."
   ]},
@@ -3402,16 +3405,16 @@ function calcJPBodyFat(sf, gender, age){
 function bfCategory(bf, gender){
   const g = gender||S.settings.gender||'male';
   if(g==='female'){
-    if(bf<14) return {lbl:"Välttämätön",col:"var(--blue)"};
-    if(bf<21) return {lbl:"Urheilijoilla",col:"var(--green)"};
-    if(bf<25) return {lbl:"Hyvä kunto",col:"var(--green)"};
-    if(bf<32) return {lbl:"Normaali",col:"var(--yellow)"};
+    if(bf<14) return {lbl:"Hyvin matala",col:"var(--blue)"};
+    if(bf<21) return {lbl:"Matala",col:"var(--green)"};
+    if(bf<25) return {lbl:"Melko matala",col:"var(--green)"};
+    if(bf<32) return {lbl:"Keskitaso",col:"var(--yellow)"};
     return {lbl:"Korkea",col:"var(--red)"};
   } else {
-    if(bf<6)  return {lbl:"Välttämätön",col:"var(--blue)"};
-    if(bf<14) return {lbl:"Urheilijoilla",col:"var(--green)"};
-    if(bf<18) return {lbl:"Hyvä kunto",col:"var(--green)"};
-    if(bf<25) return {lbl:"Normaali",col:"var(--yellow)"};
+    if(bf<6)  return {lbl:"Hyvin matala",col:"var(--blue)"};
+    if(bf<14) return {lbl:"Matala",col:"var(--green)"};
+    if(bf<18) return {lbl:"Melko matala",col:"var(--green)"};
+    if(bf<25) return {lbl:"Keskitaso",col:"var(--yellow)"};
     return {lbl:"Korkea",col:"var(--red)"};
   }
 }
@@ -6589,7 +6592,7 @@ function renderMeasurementsInner(){
         <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
         <p><b>Ihopoimu (Jackson-Pollock 3-kohta)</b> on erillinen, rinnakkainen arvio. Tulos riippuu eniten siitä, osuuko poimu joka kerta samaan kohtaan.</p>
         <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista. <b>FMI</b> on sama rasvamassasta.</p>
-        <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Luvun vieressä oleva merkki (esim. Urheilijoilla, Keskitaso) on yleinen viiteluokka, ei arvio sinun tavoitteestasi.</p>
+        <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Luvun vieressä oleva merkki (esim. Matala, Keskitaso) on yleinen viiteluokka, ei arvio sinun tavoitteestasi. Rasvaprosentissa hyvin matala vastaa elimistölle välttämätöntä rasvaa, matala on tyypillinen urheilijoilla ja melko matala kuntoilijoilla.</p>
       </div>`:""}
     </div>`;
 
