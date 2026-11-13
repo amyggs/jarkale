@@ -1890,6 +1890,40 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 @keyframes lsPane{to{opacity:1;transform:none}}
 @keyframes lsSheen{to{left:140%}}
 @media (prefers-reduced-motion:reduce){.tb-lasi *{animation:none!important;opacity:1!important;transform:none!important;}}
+
+/* ═══ v2.18.158: TABLETTI JA TIETOKONE ═══
+   Puhelin (alle 700 px) ei muutu. Tabletilla sisältö levenee 720 px:iin, tietokoneella (1100 px+) alapalkki
+   siirtyy sisällön vasemmalle puolelle pystypalkiksi (sidottu #appiin, koska Magnesiumin filter tekee #appista fixed-elementtien kehyksen). Kelluvat elementit sidotaan sisältöpalstaan. */
+@media (min-width:700px){
+  :root{--appw:720px;}
+  #app{max-width:var(--appw);}
+  :is([data-palette="kaurapuuro"],[data-palette="ampiainen"],[data-palette="lasi"]) #nav{width:min(calc(100% - 24px),560px);}
+  .gt{left:calc((100vw - var(--appw))/2 + 12px);right:calc((100vw - var(--appw))/2 + 12px);}
+  .jdlg-c{max-width:520px;}
+}
+@media (min-width:1100px){
+  :root{--appw:760px;--railw:88px;}
+  #header{border-left:none;}
+  #nav,:is([data-palette="kaurapuuro"],[data-palette="ampiainen"],[data-palette="lasi"]) #nav{
+    position:absolute!important;top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;
+    left:calc(-1 * var(--railw) - 20px)!important;width:var(--railw)!important;
+    flex-direction:column;gap:2px;padding:6px!important;z-index:50;}
+  #nav{border:1px solid var(--bord)!important;border-radius:14px;}
+  #nav button{flex:none;padding:12px 2px!important;border-radius:10px;}
+  #nav button::before{display:none;}
+  #nav button:hover{background:var(--surf2);}
+  .view,:is([data-palette="kaurapuuro"],[data-palette="ampiainen"],[data-palette="lasi"]) .view{padding:20px 24px 48px!important;}
+  .gt,:is([data-palette="kaurapuuro"],[data-palette="ampiainen"]) .gt{bottom:20px;}
+  .undo-toast,:is([data-palette="kaurapuuro"],[data-palette="ampiainen"]) .undo-toast{bottom:28px;}
+  .move-card{bottom:24px;}
+}
+/* Isot näytöt: koko sovellus suurenee, jotta palsta vie näytöstä saman osuuden kuin 1440 px:n näytöllä (kuten esittelysivu) */
+@media (min-width:1700px){body{zoom:1.18}}
+@media (min-width:2000px){body{zoom:1.38}}
+@media (min-width:2300px){body{zoom:1.6}}
+@media (min-width:2700px){body{zoom:1.85}}
+@media (min-width:3200px){body{zoom:2.2}}
+@media (min-width:3700px){body{zoom:2.6}}
 </style>
 </head>
 <body>
@@ -2259,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.157</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.158</span>
       </div>
     </div>
   </div>
@@ -2293,6 +2327,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.158", d:"marraskuu 2026", items:[
+    "Tabletti ja tietokone: yli 700 px leveällä näytöllä sisältö levenee 720 px:iin, ja yli 1100 px:ssä alapalkki siirtyy palstan vasemmalle puolelle pystypalkiksi. Puhelinnäkymä ei muutu.",
+    "Kaaviot piirretään sisältöalueen levyisinä (ennen 340 px:n kuva venyi ja akselien luvut suurenivat). Kaavio piirretään uudelleen, kun ikkunan leveys muuttuu.",
+    "Ajastinpalkki ja vahvistusikkunat pysyvät sisältöpalstan levyisinä. Isoilla näytöillä koko sovellus suurenee esittelysivun tapaan.",
+    "Uusi testi test-layout.js (puhelin ennallaan, tabletin palsta, sivupalkki kaikissa 18 teemassa, kaavioiden leveys)."
+  ]},
   {v:"2.18.157", d:"marraskuu 2026", items:[
     "Pilotti: Palaute kehittäjälle -nappi asetusten lopussa ja Mitä uutta -näkymässä. Avaa sähköpostin osoitteeseen tuki@jarkale.com valmiilla otsikolla; viestin loppuun tulee versio, laite, selain ja teema (käyttäjä näkee ja voi poistaa). Sovellus ei lähetä mitään itse.",
     "Tietosuoja: yhteysosoite tuki@jarkale.com, osoitteet jarkale.com, uusi kohta palautteesta, Googlen kirjautumisikkuna mainittu, esittelysivu ja tietokone mukana."
@@ -4491,12 +4531,21 @@ function movingAvg7(pts,key){
     return win.length>=3?{date:p.date,v:+(win.reduce((a,x)=>a+x[key],0)/win.length).toFixed(2)}:null;
   }).filter(Boolean);
 }
+
+// v2.18.158: kaaviot piirretään sisältöalueen levyisinä (tabletti ja tietokone), ei venytettynä kuvana.
+// Puhelimessa leveys pysyy 340:ssä, joten puhelimen kaaviot eivät muutu.
+let CHART_WK=null;
+function chartW(){ const c=document.getElementById("content"), w=(c&&c.clientWidth)||0; return CHART_WK=(w>=700?Math.min(Math.round(w-64),760):340); }
+window.addEventListener("resize",()=>{ clearTimeout(window._chartRT); window._chartRT=setTimeout(()=>{ const prev=CHART_WK; if(prev===null) return; const c=document.getElementById("content"), w=(c&&c.clientWidth)||0, k=w>=700?Math.min(Math.round(w-64),760):340; if(k===prev) return;
+  try{ if(S.tab==="trendit") renderTrendit(); else if(S.tab==="historia") renderHistoria(); else if(S.tab==="treeni") renderGym(); }catch(_){} },250); });
+function chartH(h,W){ return W<=340?h:Math.round(h*Math.min(1.45,1+(W/340-1)*.4)); }
+
 function buildChart(data, key, color, height=160, refLine=null, seasons=null, opts={}) {
   const raw=(data||[]).filter(d=>d[key]!=null&&d.date).sort((a,b)=>a.date.localeCompare(b.date));
   if(raw.length<2) return `<div style="color:var(--dim);text-align:center;padding:20px 0;font-size:13px">Graafi ilmestyy kun jaksolta löytyy vähintään 2 mittausta.</div>`;
   const ma=movingAvg7(raw,key);
   const vals=[...raw.map(d=>d[key]),...(refLine!=null?[refLine]:[])];
-  const W=340,H=height,pad={t:12,r:8,b:22,l:32};
+  const W=chartW(),H=chartH(height,W),pad={t:12,r:8,b:22,l:32};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
   let minV=opts.min??Math.floor(Math.min(...vals)-0.5), maxV=opts.max??Math.ceil(Math.max(...vals)+0.5);
   if(maxV<=minV){maxV=minV+1;minV=minV-1;}
@@ -4520,7 +4569,7 @@ function buildChart(data, key, color, height=160, refLine=null, seasons=null, op
 function buildWeightChart(maPts, rawPts, height=185, seasons=null) {
   if(!maPts||maPts.length<2) return `<div style="color:var(--dim);text-align:center;padding:30px 0;font-size:13px">Ei tarpeeksi dataa</div>`;
   const allVals=[...maPts.map(d=>d.weight),...rawPts.map(d=>d.weight)].filter(v=>v!=null);
-  const W=340,H=height,pad={t:14,r:8,b:22,l:32};
+  const W=chartW(),H=chartH(height,W),pad={t:14,r:8,b:22,l:32};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
   let minV=Math.floor(Math.min(...allVals)-0.5), maxV=Math.ceil(Math.max(...allVals)+0.5);
   if(maxV<=minV){maxV=minV+1;minV=minV-1;}
@@ -4564,7 +4613,7 @@ function buildWeightChart(maPts, rawPts, height=185, seasons=null) {
 
 function buildBPChart(data, h=150) {
   if(!data||data.length<2) return `<div style="color:var(--dim);text-align:center;padding:20px 0;font-size:13px">Graafi ilmestyy kun jaksolta löytyy vähintään 2 mittausta.</div>`;
-  const W=340,H=h,pad={t:8,r:8,b:22,l:32};
+  const W=chartW(),H=chartH(h,W),pad={t:8,r:8,b:22,l:32};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
   const allV=[...data.map(d=>d.sys),...data.map(d=>d.dia)].filter(v=>v!=null);
   let minV=Math.max(40,Math.floor(Math.min(...allV)-5)), maxV=Math.ceil(Math.max(...allV)+5);
@@ -4592,7 +4641,7 @@ function buildDualChart(data, k1, k2, c1, c2, lbl1, lbl2, h=140) {
   const m1=movingAvg7(data,k1), m2=movingAvg7(data,k2);
   const r1=data.filter(d=>d[k1]!=null&&d.date);
   if(m1.length<2&&m2.length<2) return `<div style="color:var(--dim);text-align:center;padding:16px 0;font-size:13px">Liukuva keskiarvo tarvitsee vähintään viikon kirjauksia.</div>`;
-  const W=340,H=h,pad={t:8,r:8,b:22,l:24};
+  const W=chartW(),H=chartH(h,W),pad={t:8,r:8,b:22,l:24};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
   const dates=[...m1,...m2,...r1].map(p=>p.date).sort();
   const ts=d=>new Date(d+"T00:00:00").getTime();
@@ -7359,6 +7408,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"13.11.2026", items:[
+    "Järkäle toimii nyt myös tabletilla ja tietokoneella: sisältö levenee näytön mukaan, ja tietokoneella valikko on vasemmassa reunassa. Puhelimessa kaikki pysyy ennallaan.",
     "Palautetta tai kysyttävää? Asetusten lopussa on Palaute kehittäjälle -nappi. Se avaa sähköpostin valmiiksi osoitettuna, ja vastaus tulee suoraan sinulle."
   ]},
   {d:"10.11.2026", items:[
@@ -11248,7 +11298,7 @@ function gymChartHTML(H){
   // Aikaväli: valittu tai seuraava pidempi; jos yksikään väli ei kata kahta kertaa (liike tehty kauan sitten), kaksi viimeisintä
   const opts=chartRangeOpts(data), want=GU.chartRange||chartRangePref(), wi=CHART_RANGES.findIndex(r=>r[0]===want);
   const rng=opts.find(o=>CHART_RANGES.findIndex(r=>r[0]===o.k)>=wi)||opts[opts.length-1]||null;
-  const pts=rng?data.slice(-rng.n):data.slice(-2), W=340, Hh=168, padX=22, padT=26, padB=14;
+  const pts=rng?data.slice(-rng.n):data.slice(-2), W=chartW(), Hh=chartH(168,W), padX=22, padT=26, padB=14;
   const longSpan=(new Date(pts[pts.length-1].s.date)-new Date(pts[0].s.date))>300*864e5;
   const dLab=ds=>{ if(!longSpan) return gDay(ds); const a=new Date(ds+"T00:00:00"); return `${a.getDate()}.${a.getMonth()+1}.${a.getFullYear()}`; };
   const many=pts.length>30;
