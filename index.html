@@ -1902,6 +1902,19 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   .gt{left:max(12px,calc(50% - var(--appw)/2 + 12px));right:max(12px,calc(50% - var(--appw)/2 + 12px));}
   .jdlg-c{max-width:520px;}
   /* paino, uni ja askeleet samalle riville, palautuminen ja vire puoliksi (kun kaikki kolme seurataan) */
+  /* treenin sarjarivit: isommat luvut ja kentät, ettei leveä kenttä näytä tyhjältä */
+  :is(.set,.set-h){grid-template-columns:32px 1.4fr 1fr 56px;gap:10px;}
+  .set .f{height:54px;font-size:22px;}
+  .kgw .f,.rpw .f{font-size:22px!important;}
+  [data-palette="kuusnelonen"] .kgw .f{font-size:19px!important;}
+  .set .ck{width:56px;height:54px;}
+  .set .no{font-size:15px;}
+  .set-h{font-size:11px;}
+  :where(.sets.eff) .set .f{height:48px;font-size:19px;}
+  :where(.sets.eff) .set .ck{width:50px;height:48px;}
+  :where(.sets.eff) :is(.set,.set-h){grid-template-columns:28px 1.4fr 1fr 50px;gap:8px;}
+  /* Mittojen kokonaiskuvan minikäyrä leveämmäksi leveässä kortissa */
+  svg[viewBox="0 0 54 22"]{width:120px!important;flex-basis:120px!important;height:30px!important;}
   #view-log.row3.active{grid-template-columns:repeat(6,minmax(0,1fr));}
   #view-log.row3>:is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap){grid-column:span 2;}
   #view-log.row3>:is(#track-recovery-wrap,#track-motivation-wrap){grid-column:span 3;}
@@ -2309,7 +2322,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.164</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.165</span>
       </div>
     </div>
   </div>
@@ -2343,6 +2356,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.165", d:"marraskuu 2026", items:[
+    "Tabletti: treenin sarjarivit isommiksi (kentät 54 px, luvut 22 px, kuittausnappi 56 px; rasittavuustilassa 48 px / 19 px), ettei leveä kenttä näytä tyhjältä. Mittojen kokonaiskuvan minikäyrä leveämmäksi. Muut näkymät (Treeni, yhteenveto, liikesivu, Trendit, Mitat, Asetukset) tarkistettu 744 px:ssä Lasi vaalea ja Järkäle tumma."
+  ]},
   {v:"2.18.164", d:"marraskuu 2026", items:[
     "Tabletilla koko sovellus 120 % (luettavampi, isommat napit), tietokoneella 110 %; isojen näyttöjen portaat nostettu vastaavasti. Puhelin ennallaan.",
     "Tabletilla Kirjaa-näkymässä paino, uni ja askeleet samalla rivillä (askeleet kuten paino: luku ylhäällä, − ja + alla), palautuminen ja vire puoliksi. Vain kun kaikki kolme ovat seurannassa (#view-log.row3).",
@@ -7447,7 +7463,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"13.11.2026", items:[
-    "Tabletilla kaikki on isompaa ja Kirjaa-näkymässä paino, uni ja askeleet ovat samalla rivillä.",
+    "Tabletilla kaikki on isompaa: Kirjaa-näkymässä paino, uni ja askeleet ovat samalla rivillä, ja treenin sarjakentät ja luvut ovat suurempia.",
     "iPhonella ja iPadilla ohjenapit näyttävät nyt samalta kuin muualla sovelluksessa (ennen sininen emoji).",
     "Järkäle toimii nyt myös tabletilla ja tietokoneella: sisältö levenee näytön mukaan, ja tietokoneella valikko on vasemmassa reunassa. Puhelimessa kaikki pysyy ennallaan.",
     "Palautetta tai kysyttävää? Asetusten lopussa on Palaute kehittäjälle -nappi. Se avaa sähköpostin valmiiksi osoitettuna, ja vastaus tulee suoraan sinulle."
