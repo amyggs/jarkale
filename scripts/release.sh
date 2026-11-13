@@ -84,12 +84,17 @@ sync_site(){ # $1 = kohde, $2 = lähde (index.html:n repo), $3 = domain, $4 = v�
 }
 echo "Omat domainit"
 sync_site "$APP" "$PILOT" "app.jarkale.com" "jarkale-app-v"
+# v2.18.160: julkinen app.jarkale.com ei ole "pilotti" käyttäjälle → alatunniste "Järkäle vX"
+if [ -d "$APP/.git" ]; then sed -i "s/Pilotti v$FOOT<\/span>/Järkäle v$FOOT<\/span>/" "$APP/index.html"; grep -q "Järkäle v$FOOT</span>" "$APP/index.html" || die "app: alatunnisteen vaihto epäonnistui"; fi
 sync_site "$OMA" "$ROOT" "oma.jarkale.com" "jarkale-oma-v"
 [ ${#EXTRA[@]} -gt 0 ] || ok "ei domain-repoja sisarkansioina"
 # jarkale.com = esittelysivu (pilotin esittely.html → index.html) ja tietosuojaseloste (repo jarkale-site).
 SITE="$ROOT/../jarkale-site"
 if [ -d "$SITE/.git" ]; then
-  cp "$PILOT/esittely.html" "$SITE/index.html"
+  # jarkale.com: linkit uuteen osoitteeseen, ei pilottimerkintää (pilotin oma esittely pitää vanhat linkit siirtoon asti)
+  sed -e 's#https://amyggs.github.io/jarkale-pilotti/#https://app.jarkale.com/#g' -e 's#nimenä näkyy amyggs.github.io#nimenä näkyy app.jarkale.com#' \
+      -e 's#<span>Pilotti 2.18 · 2026</span>#<span>Treenipäiväkirja · 2026</span>#' "$PILOT/esittely.html" > "$SITE/index.html"
+  ! grep -q "amyggs.github.io\|Pilotti 2" "$SITE/index.html" || die "jarkale.com: vanha osoite tai pilottimerkintä jäi esittelyyn"
   for f in tietosuoja.html icon-192.png icon-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$SITE/$f"; done
   rm -rf "$SITE/kuvat"; cp -r "$PILOT/kuvat" "$SITE/kuvat"
   mkdir -p "$SITE/fonts"; cp "$ROOT"/fonts/manrope-* "$ROOT"/fonts/LICENSE-manrope.txt "$SITE/fonts/"

@@ -2293,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.159</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.160</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.160", d:"marraskuu 2026", items:[
+    "Julkaisua varten: app.jarkale.com-version alatunniste \"Järkäle vX\" (ei Pilotti), palautteen teknisessä tiedossa sama. jarkale.comin esittelysivun linkit osoittavat app.jarkale.comiin ja Drive-ohje kertoo uuden nimen; pilotin oma esittely pitää vanhat linkit siihen asti, kun pilotit siirretään."
+  ]},
   {v:"2.18.159", d:"marraskuu 2026", items:[
     "Siirto omaan domainiin päälle omassa versiossa: amyggs.github.io/jarkale/ näyttää ilmoituksen ja Siirrä tiedot -napin, joka vie tiedot osoitteeseen oma.jarkale.com. Pilotissa siirto on vielä pois päältä (MOVE_ON.pilotti)."
   ]},
@@ -7528,7 +7531,7 @@ function feedbackEnv(){
   const br=/EdgA?\/(\d+)/.exec(u)?"Edge "+/EdgA?\/(\d+)/.exec(u)[1]:/SamsungBrowser\/(\d+)/.exec(u)?"Samsung Internet "+/SamsungBrowser\/(\d+)/.exec(u)[1]:/Firefox\/(\d+)/.exec(u)?"Firefox "+/Firefox\/(\d+)/.exec(u)[1]:/CriOS\/(\d+)/.exec(u)?"Chrome "+/CriOS\/(\d+)/.exec(u)[1]:/Chrome\/(\d+)/.exec(u)?"Chrome "+/Chrome\/(\d+)/.exec(u)[1]:/Safari/.test(u)?"Safari":"";
   const inst=(matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone?"asennettu":"selaimessa";
   const de=document.documentElement, th=(de.dataset.palette||"")+(de.dataset.theme?" "+(de.dataset.theme==="light"?"vaalea":"tumma"):"");
-  return ["Pilotti v"+ver,[os,br].filter(Boolean).join(", "),inst,th?"teema "+th:""].filter(Boolean).join(" · ");
+  return [(/jarkale\.com$/.test(location.hostname)?"Järkäle v":"Pilotti v")+ver,[os,br].filter(Boolean).join(", "),inst,th?"teema "+th:""].filter(Boolean).join(" · ");
 }
 function feedbackHref(){
   const body="\n\n\n– – –\nTekninen tieto vianetsintää varten (voit poistaa):\n"+feedbackEnv();
