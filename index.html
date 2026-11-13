@@ -2021,7 +2021,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div id="track-recovery-wrap">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <span class="lbl-small" style="margin:0">Palautumisen tunne</span>
-          <button onclick="toggleFieldHint('recovery-hint')" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
+          <button onclick="toggleFieldHint('recovery-hint')" aria-label="Mitä palautumisen asteikko tarkoittaa" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4;font-weight:700;font-family:Georgia,'Times New Roman',serif">i</button>
         </div>
         <div id="recovery-hint" style="display:none;margin-bottom:10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord)">
           <div style="font-size:11px;color:var(--dim);margin-bottom:6px;line-height:1.7">
@@ -2041,7 +2041,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
       <div id="track-motivation-wrap">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <span class="lbl-small" style="margin:0">Yleinen vire</span>
-          <button onclick="toggleFieldHint('motivation-hint')" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
+          <button onclick="toggleFieldHint('motivation-hint')" aria-label="Mitä vireen asteikko tarkoittaa" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4;font-weight:700;font-family:Georgia,'Times New Roman',serif">i</button>
         </div>
         <div id="motivation-hint" style="display:none;margin-bottom:10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord)">
           <div style="font-size:11px;color:var(--dim);margin-bottom:6px;line-height:1.7">
@@ -2293,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.162</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.163</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.163", d:"marraskuu 2026", items:[
+    "iPhone ja iPad: ohjenapit (Palautumisen tunne, Yleinen vire, Päivän tila) näkyivät sinisinä emojeina, koska iOS piirtää ℹ-merkin emojina. Nyt napissa on tekstin värinen i kaikilla laitteilla. Samasta syystä varoitus- ja toistomerkit piirretään tekstinä (U+FE0E)."
+  ]},
   {v:"2.18.162", d:"marraskuu 2026", items:[
     "Siirron ohjeet selkeämmiksi: kortti kertoo, että nappi avaa uuden osoitteen ja vie kirjaukset, treenit ja mitat. Siirron jälkeen vaiheittainen ohje (asennus, Driven yhdistäminen, vanhan kuvakkeen poisto vasta kun tiedot näkyvät), iPhonelle oma versio."
   ]},
@@ -2829,7 +2832,7 @@ const CHANGELOG=[
   ]},
   {v:"2.18.24", d:"lokakuu 2026", items:[
     "Kosketusvärinälle voi valita voimakkuuden: kevyt, normaali tai voimakas. Värinä tuntuu nyt myös painon, unen ja askelten +/−-napeissa.",
-    "Taukoajastimen äänelle voi valita tason: hiljainen, normaali tai kova. ▶-napista voi kokeilla ääntä.",
+    "Taukoajastimen äänelle voi valita tason: hiljainen, normaali tai kova. ▶︎-napista voi kokeilla ääntä.",
     "Kirjaa-näkymä: jos seuraat vain toista parista paino/uni tai palautuminen/vire, kenttä venyy koko leveyteen.",
     "Profiilin pituuskentässä ei enää näy esimerkkiarvoa 190, joka näytti valmiiksi täytetyltä."
   ]},
@@ -3982,7 +3985,7 @@ function parseStored(key){
 function warnCorrupt(){
   if(!CORRUPT_FOUND.length) return;
   const w=CORRUPT_FOUND.slice(); CORRUPT_FOUND=[];
-  setTimeout(()=>jAlert("⚠ Osa tallennetusta datasta ei avautunut ("+w.join(", ")+").\nVioittunut tieto on tallessa erillisenä, eikä sitä ole ylikirjoitettu. Palauta varmuuskopiosta Asetuksista tai kerro tekijälle."),600);
+  setTimeout(()=>jAlert("⚠︎ Osa tallennetusta datasta ei avautunut ("+w.join(", ")+").\nVioittunut tieto on tallessa erillisenä, eikä sitä ole ylikirjoitettu. Palauta varmuuskopiosta Asetuksista tai kerro tekijälle."),600);
 }
 function loadAll() {
   { const e=parseStored("seuranta-entries"); if(e&&typeof e==="object"&&!Array.isArray(e)) S.entries=e; }
@@ -4015,9 +4018,9 @@ function loadAll() {
 function saveAll() {
   const quota = e => e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22;
   try { localStorage.setItem("seuranta-entries",JSON.stringify(S.entries)); }
-  catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
-  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nMittaus ei tallentunut. Lataa varmuuskopio Asetuksista."); }
-  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(e){ if(quota(e)) jAlert("⚠ Selaimen tallennustila täynnä!\nAsetukset eivät tallentuneet. Lataa varmuuskopio Asetuksista."); }
+  catch(e){ if(quota(e)) jAlert("⚠︎ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista ennen kuin data katoaa."); }
+  try { localStorage.setItem("seuranta-meas",JSON.stringify(S.measurements)); } catch(e){ if(quota(e)) jAlert("⚠︎ Selaimen tallennustila täynnä!\nMittaus ei tallentunut. Lataa varmuuskopio Asetuksista."); }
+  try { localStorage.setItem("seuranta-settings",JSON.stringify(S.settings)); } catch(e){ if(quota(e)) jAlert("⚠︎ Selaimen tallennustila täynnä!\nAsetukset eivät tallentuneet. Lataa varmuuskopio Asetuksista."); }
   if(typeof syncMarkDirty==="function") syncMarkDirty();
 }
 
@@ -4137,7 +4140,7 @@ function themeBoot(pal){
     const pad2=x=>String(x).padStart(2,"0");
     o.innerHTML=`<div class="tb-scr"><div class="sp"><div class="sp-bar">JÄRKÄLE</div><div class="sp-lcd"><div class="sp-time">00:00</div><div class="sp-an">${Array.from({length:16},(_,i)=>`<i style="--h0:${8+((i*37)%30)}%;--h1:${40+((i*53)%60)}%;animation-delay:${(i*47)%400}ms"></i>`).join("")}</div>
       <div class="sp-ttl"><span>*** JÄRKÄLE · ${n} kirjausta · putki ${st} pv · ***</span></div></div>
-      <div class="sp-btn"><b>⏮</b><b class="pl">▶</b><b>⏸</b><b>⏹</b><b>⏭</b></div></div></div>`;
+      <div class="sp-btn"><b>⏮︎</b><b class="pl">▶︎</b><b>⏸︎</b><b>⏹︎</b><b>⏭︎</b></div></div></div>`;
     const tm=o.querySelector(".sp-time");
     at(250,()=>o.querySelector(".pl").classList.add("on"));
     for(let i=1;i<=9;i++) at(250+i*260,()=>{ const sec=Math.round(i*st/9)||i; tm.textContent=`${pad2(Math.floor(sec/60)%100)}:${pad2(sec%60)}`; });
@@ -7420,6 +7423,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"13.11.2026", items:[
+    "iPhonella ja iPadilla ohjenapit näyttävät nyt samalta kuin muualla sovelluksessa (ennen sininen emoji).",
     "Järkäle toimii nyt myös tabletilla ja tietokoneella: sisältö levenee näytön mukaan, ja tietokoneella valikko on vasemmassa reunassa. Puhelimessa kaikki pysyy ennallaan.",
     "Palautetta tai kysyttävää? Asetusten lopussa on Palaute kehittäjälle -nappi. Se avaa sähköpostin valmiiksi osoitettuna, ja vastaus tulee suoraan sinulle."
   ]},
@@ -8216,7 +8220,7 @@ function importData(input){
     try{
       let d=JSON.parse(e.target.result);
       const structErr=validateBackup(d);
-      if(structErr){jAlert("⚠ "+structErr);input.value="";return;}
+      if(structErr){jAlert("⚠︎ "+structErr);input.value="";return;}
       d=normalizeImportedData(d);
       const nowCount=Object.keys(S.entries).length;
       const importCount=d.entries?Object.keys(d.entries).length:0;
@@ -8231,7 +8235,7 @@ function importData(input){
           `Sisältää ${importCount} kirjausta (viimeisin ${importLatest||"—"}).\n`+
           `Sinulla on nyt ${nowCount} kirjausta (viimeisin ${nowLatest||"—"}).\n`+
           (d.gym?`Salitreenit: ${d.gym.programs.length} ohjelmaa, ${d.gym.sessions.length} treeniä.\n`:``)+
-          (isNewer?`⚠ HUOMIO: nykyinen datasi on uudempaa kuin varmuuskopio!\n`:``) +
+          (isNewer?`⚠︎ HUOMIO: nykyinen datasi on uudempaa kuin varmuuskopio!\n`:``) +
           `\nHaluatko korvata nykyisen datan varmuuskopiolla? Nykyisestä tilasta otetaan turvakopio.`+
           (syncIsOn()?`\n\nSynkronointi on päällä: palautettu tila siirtyy seuraavalla synkronoinnilla myös Driveen.`:``);
         if(!await jConfirm(msg)) return;
@@ -8239,7 +8243,7 @@ function importData(input){
       const saved=safetyCopy("varmuuskopion palautus");
       applyBackupData(d);
       jAlert(`✓ Data ladattu — ${importCount} kirjausta palautettu.`+(saved?"":"\n(Turvakopiota ei voitu tallentaa: tallennustila on täynnä.)"));
-    }catch(_){jAlert("⚠ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
+    }catch(_){jAlert("⚠︎ Virheellinen tiedosto. Varmista että valitsit oikean JSON-tiedoston.");}
   };
   reader.readAsText(file);
 }
@@ -8560,7 +8564,7 @@ function renderReadiness(){
   el.innerHTML=`<div class="ds-card">
     <div class="ds-head">
       ${head}
-      <button onclick="toggleFieldHint('daystate-hint')" aria-label="Mistä Päivän tila muodostuu" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4">ℹ</button>
+      <button onclick="toggleFieldHint('daystate-hint')" aria-label="Mistä Päivän tila muodostuu" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bord);line-height:1.4;font-weight:700;font-family:Georgia,'Times New Roman',serif">i</button>
     </div>
     <div id="daystate-hint" style="display:none;margin:4px 0 10px;padding:10px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord);font-size:12px;color:var(--dim);line-height:1.6">
       <b style="color:var(--text)">Kehon tila</b> muodostuu unesta, palautumisen tunteesta, aktiivisesta kivusta ja eilisestä treenikuormasta. Kuormittunut = vähintään kaksi kuormitustekijää tai yksi vahva (esim. uni vähintään 2 h alle tavoitteen, palautuminen 1, kipu 4/5 tai enemmän). Palautunut = uni vähintään tavoite, palautuminen vähintään 4 eikä merkittävää kipua.<br><br>
@@ -9418,7 +9422,7 @@ function gymSave(){
   // Synkronointia varten: katsottava/käynnissä oleva treeni saa muokkausajan
   if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||s.id===GU.sessionId) s.updatedAt=now; }); }
   try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); if(typeof syncMarkDirty==="function") syncMarkDirty(); }
-  catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) jAlert("⚠ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
+  catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) jAlert("⚠︎ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
 }
 function gTop(){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=0; }
 const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -10258,7 +10262,7 @@ function renderTimer(){
   el.innerHTML=`<span class="gt-tm" data-raw>${tm}</span>
     <span class="gt-l">${lbl}</span>
     ${over?"":`<button onclick="timerAdd(-15)" aria-label="15 sekuntia vähemmän">−15</button><button onclick="timerAdd(15)" aria-label="15 sekuntia lisää">+15</button>`}
-    ${over?`<button class="p" onclick="timerStart()">Uusi</button>`:`<button class="p" aria-label="${paused?"Jatka":"Pysäytä"}" onclick="timerPause()">${paused?"▶":"❚❚"}</button>`}
+    ${over?`<button class="p" onclick="timerStart()">Uusi</button>`:`<button class="p" aria-label="${paused?"Jatka":"Pysäytä"}" onclick="timerPause()">${paused?"▶︎":"❚❚"}</button>`}
     <button onclick="timerReset()" aria-label="Nollaa">✕</button>
     <span class="gt-bar"><i style="width:${pct}%"></i></span>`;
 }
@@ -10297,7 +10301,7 @@ function gymSettingsHTML(){
   h+=tg(c.autoRest,`setGymOpt('autoRest',${!c.autoRest})`,"Käynnistä tauko automaattisesti","Sarjan kuittaus käynnistää viimeksi käytetyn tauon. Ei liikkeen viimeisen sarjan jälkeen.");
   h+=tg(c.sound,`setGymOpt('sound',${!c.sound})`,"Ajastimen ääni","");
   if(c.sound){ const lv=c.soundLevel||"normal";
-    h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶</button></div>`; }
+    h+=`<div class="g-seg" role="radiogroup" aria-label="Ajastimen äänenvoimakkuus" style="margin:2px 0 10px">${[["quiet","Hiljainen"],["normal","Normaali"],["loud","Kova"]].map(([k,t])=>`<button role="radio" aria-checked="${lv===k}" class="${lv===k?"on":""}" onclick="setGymOpt('soundLevel','${k}');gymTestBeep()">${t}</button>`).join("")}<button onclick="gymTestBeep()" aria-label="Kokeile ääntä" style="flex:0 0 auto;padding:0 12px">▶︎</button></div>`; }
   h+=tg(c.vibrate,`setGymOpt('vibrate',${!c.vibrate})`,"Ajastimen värinä","");
   // v2.18.64 painon pikasäädön askel
   { const st=KG_STEPS.includes(+c.kgStep)?+c.kgStep:1.25;
