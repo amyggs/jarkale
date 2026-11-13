@@ -39,7 +39,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ GU.mode='import'; GU.importText=''; GU.importPreview=null; renderGym(); });
   await p.fill('#g-import','Päivä X\nPenkki 3x8 60');
   await p.getByRole('button',{name:'Esikatsele'}).click();
-  await p.getByRole('button',{name:'Tallenna uudeksi ohjelmaksi'}).click(); await p.waitForTimeout(200);
+  await p.getByRole('button',{name:'Tallenna omaksi ohjelmaksi'}).click(); await p.waitForTimeout(200);
   ok(await p.evaluate(()=>G.programs.map(x=>x.name).join('|')==='Oma ohjelma|Oma ohjelma 2'),'toinen tuonti numeroidaan');
 
   console.log('\nEnsimmäinen treeni');

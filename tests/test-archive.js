@@ -16,12 +16,12 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     await p.locator('button',{hasText:'Tallenna uudeksi ohjelmaksi'}).click(); await p.waitForTimeout(300); };
 
   console.log('\nTuonnin jälkeen');
-  await imp("Vanha ohjelma\n\n1 Rinta\nPenkki 3x8",true);
+  await imp("Vanha ohjelma\n\n1 Rinta\nPenkki 3x8\n\n2 Selkä\nSoutu 3x10",true);
   ok(await p.evaluate(()=>!(window.__jdlgLog||[]).some(m=>/Arkistoidaanko/.test(m))),'ensimmäinen ohjelma: ei kysymystä');
-  await imp("Uusi ohjelma\n\n1 Rinta\nPenkki 4x6",false);
+  await imp("Uusi ohjelma\n\n1 Rinta\nPenkki 4x6\n\n2 Selkä\nSoutu 3x10",false);
   ok(await p.evaluate(()=>(window.__jdlgLog||[]).some(m=>/Arkistoidaanko edellinen ohjelma Vanha ohjelma\?/.test(m))),'uuden tuonnin jälkeen kysytään edellisen arkistointia');
   ok(await p.evaluate(()=>G.programs.filter(x=>!x.archived).length===2),'"Pidä käytössä": molemmat aktiivisia');
-  await imp("Kolmas ohjelma\n\n1 Rinta\nPenkki 5x5",true);
+  await imp("Kolmas ohjelma\n\n1 Rinta\nPenkki 5x5\n\n2 Selkä\nSoutu 3x10",true);
   const st=await p.evaluate(()=>({act:G.programs.filter(x=>!x.archived).map(x=>x.name),arc:G.programs.filter(x=>x.archived).map(x=>x.name),cur:curProgram().name}));
   ok(st.arc.join()==='Uusi ohjelma'&&st.cur==='Kolmas ohjelma'&&st.act.includes('Vanha ohjelma'),'hyväksyntä arkistoi juuri edellisen valitun ohjelman: '+JSON.stringify(st));
   ok(/Arkistoidut ohjelmat \(1\)/.test(await p.locator('#view-treeni').innerText()),'arkistoitu näkyy Treeni-välilehden lopussa');

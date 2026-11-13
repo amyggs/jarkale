@@ -43,6 +43,7 @@ tests/run.sh test-gym.js
 | `test-move.js` | Siirto omaan domainiin kahden originin välillä: ilmoitus piilossa kunnes kytketään, kaikki tiedot siirtyvät, #-osa poistuu, API-avain ei siirry, rikkinäinen linkki ja peruttu vahvistus eivät muuta tietoja |
 | `test-feedback.js` | Palaute kehittäjälle: nappi vain pilotissa (asetukset ja Mitä uutta), mailto osoitteeseen tuki@jarkale.com, mukana versio, laite ja teema mutta ei kirjauksia |
 | `test-layout.js` | Tabletti ja tietokone: puhelin ennallaan (myös askeleet), tabletilla 120 % ja paino/uni/askeleet samalla rivillä, tietokoneella sivupalkki palstan vasemmalla kaikissa 18 teemassa, kaaviot leveinä ja uudelleen piirrettyinä, iso näyttö suurenee |
+| `test-multiprog.js` | Useampi käytössä oleva ohjelma: kaikkien päivät Treeni-välilehdellä (yhden päivän ohjelmat päivinä, monipäiväiset ryhminä), kierto ohjelmien yli, yksi ohjelma ennallaan, tuonti lisää yhden päivän ohjelmaan |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
