@@ -67,6 +67,26 @@ ok "index.html = pääversio + alatunniste \"Pilotti v$FOOT\""
 for f in tietosuoja.html manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png; do cmp -s "$f" "$PILOT/$f" || { cp "$f" "$PILOT/$f"; ok "$f kopioitu pilottiin"; }; done
 bump_cache "$PILOT"
 
+# v2.18.156: omat domainit. app.jarkale.com = pilottiversio (repo jarkale-app), oma.jarkale.com = oma versio (repo jarkale-oma).
+# Rakennetaan vain, jos repot ovat sisarkansioina. Kumpikin saa oman sw.js:n (oma välimuistin etuliite) ja CNAME-tiedoston.
+APP="$ROOT/../jarkale-app"; OMA="$ROOT/../jarkale-oma"; EXTRA=()
+sync_site(){ # $1 = kohde, $2 = lähde (index.html:n repo), $3 = domain, $4 = välimuistin etuliite
+  local dst="$1" src="$2" dom="$3" pre="$4" f
+  [ -d "$dst/.git" ] || return 0
+  cp "$src/index.html" "$dst/index.html"
+  for f in tietosuoja.html manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$dst/$f"; done
+  mkdir -p "$dst/fonts"; cp "$ROOT"/fonts/* "$dst/fonts/"
+  echo "$dom" > "$dst/CNAME"
+  if [ ! -f "$dst/sw.js" ]; then sed -E "s/const CACHE='[a-z-]+v[0-9]+';const PREFIX='[a-z-]+v'/const CACHE='${pre}1';const PREFIX='${pre}'/" "$ROOT/sw.js" > "$dst/sw.js"
+  else local body; body=$(sed -E "1s/.*//" "$ROOT/sw.js"); { head -1 "$dst/sw.js"; echo "$body" | tail -n +2; } > "$dst/sw.js.new" && mv "$dst/sw.js.new" "$dst/sw.js"; fi
+  grep -q "PREFIX='${pre}'" "$dst/sw.js" || die "$(basename "$dst"): sw.js:n etuliite ei ole ${pre}"
+  bump_cache "$dst"; EXTRA+=("$dst"); ok "$(basename "$dst") → $dom"
+}
+echo "Omat domainit"
+sync_site "$APP" "$PILOT" "app.jarkale.com" "jarkale-app-v"
+sync_site "$OMA" "$ROOT" "oma.jarkale.com" "jarkale-oma-v"
+[ ${#EXTRA[@]} -gt 0 ] || ok "ei domain-repoja sisarkansioina"
+
 if [ $RUN_TESTS = 1 ]; then
   echo "Testit"
   command -v fuser >/dev/null && fuser -k 8765/tcp 8766/tcp >/dev/null 2>&1 || true
@@ -75,7 +95,7 @@ fi
 
 if [ -n "$COMMIT_MSG" ]; then
   echo "Julkaisu"
-  for d in "$PILOT" "$ROOT"; do
+  for d in "$PILOT" "${EXTRA[@]}" "$ROOT"; do
     git -C "$d" add -A && git -C "$d" commit -qm "$COMMIT_MSG" && git -C "$d" push -q
     ok "$(basename "$d"): $(git -C "$d" log --oneline -1)"
   done
