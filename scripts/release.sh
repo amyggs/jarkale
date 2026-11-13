@@ -86,6 +86,15 @@ echo "Omat domainit"
 sync_site "$APP" "$PILOT" "app.jarkale.com" "jarkale-app-v"
 sync_site "$OMA" "$ROOT" "oma.jarkale.com" "jarkale-oma-v"
 [ ${#EXTRA[@]} -gt 0 ] || ok "ei domain-repoja sisarkansioina"
+# jarkale.com = esittelysivu (pilotin esittely.html → index.html) ja tietosuojaseloste (repo jarkale-site).
+SITE="$ROOT/../jarkale-site"
+if [ -d "$SITE/.git" ]; then
+  cp "$PILOT/esittely.html" "$SITE/index.html"
+  for f in tietosuoja.html icon-192.png icon-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$SITE/$f"; done
+  rm -rf "$SITE/kuvat"; cp -r "$PILOT/kuvat" "$SITE/kuvat"
+  echo "jarkale.com" > "$SITE/CNAME"
+  EXTRA+=("$SITE"); ok "jarkale-site → jarkale.com"
+fi
 
 if [ $RUN_TESTS = 1 ]; then
   echo "Testit"
@@ -96,7 +105,9 @@ fi
 if [ -n "$COMMIT_MSG" ]; then
   echo "Julkaisu"
   for d in "$PILOT" "${EXTRA[@]}" "$ROOT"; do
-    git -C "$d" add -A && git -C "$d" commit -qm "$COMMIT_MSG" && git -C "$d" push -q
+    git -C "$d" add -A
+    if git -C "$d" diff --cached --quiet; then ok "$(basename "$d"): ei muutoksia"; continue; fi
+    git -C "$d" commit -qm "$COMMIT_MSG" && git -C "$d" push -q
     ok "$(basename "$d"): $(git -C "$d" log --oneline -1)"
   done
 else
