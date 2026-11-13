@@ -2293,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.160</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.161</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.161", d:"marraskuu 2026", items:[
+    "Siirto pilotille päälle (MOVE_ON.pilotti). iPhonessa ja iPadissa siirtokortti ohjaa Driven kautta: ilman Drivea nappi Yhdistä Google Drive, Driven kanssa Synkronoi ja avaa uusi osoite (uusin tila Driveen ennen siirtoa). Syy: Koti-valikon sovelluksella on oma tallennustila, joten linkillä siirretty data jäisi Safariin."
+  ]},
   {v:"2.18.160", d:"marraskuu 2026", items:[
     "Julkaisua varten: app.jarkale.com-version alatunniste \"Järkäle vX\" (ei Pilotti), palautteen teknisessä tiedossa sama. jarkale.comin esittelysivun linkit osoittavat app.jarkale.comiin ja Drive-ohje kertoo uuden nimen; pilotin oma esittely pitää vanhat linkit siihen asti, kun pilotit siirretään."
   ]},
@@ -11897,7 +11900,7 @@ try{
 // poistaa #-osan heti, kysyy vahvistuksen ja tuo datan samalla tavalla kuin varmuuskopion palautus.
 // Ilmoitus kytketään versioittain (v2.18.159: ensin oma versio, pilotti kun oma siirto on todettu toimivaksi). Vastaanotto toimii aina.
 // API-avain ei siirry (se ei ole varmuuskopiossakaan). Testit: window.__MOVE_TEST={target:"…"}.
-const MOVE_ON={oma:true,pilotti:false};
+const MOVE_ON={oma:true,pilotti:true};
 const MOVE_FROM_HOST="amyggs.github.io";
 const MOVE_MAX=1500000; // merkkiä; Chromen osoiteraja on noin 2 Mt
 function moveTarget(){ if(window.__MOVE_TEST) return window.__MOVE_TEST.target;
@@ -11929,12 +11932,22 @@ async function moveSend(){
   if(code.length>MOVE_MAX){ jAlert("Tietoja on niin paljon, ettei niitä voi siirtää linkillä. Vie tiedot tiedostoon (Asetukset → Varmuuskopio) ja tuo tiedosto uudessa osoitteessa."+(syncIsOn()?" Voit myös yhdistää Google Driven uudessa osoitteessa.":"")); return; }
   location.href=moveTarget()+"#siirto="+code;
 }
+async function moveDriveFirst(){ try{ await syncNow(); }catch(_){} renderMoveCard(); }
+async function moveSendIOS(){ try{ await syncNow({toast:true}); }catch(_){} moveSend(); }
 function renderMoveCard(){
   const old=document.getElementById("move-card"); if(old) old.remove();
   if(!moveActive()) return;
   const host=moveTarget().replace(/^https?:\/\//,"").replace(/\/.*$/,"");
   const el=document.createElement("div"); el.id="move-card"; el.className="card move-card";
-  el.innerHTML=`<div class="move-t">Järkäle on muuttanut</div>
+  // v2.18.161: iPhonessa Koti-valikon sovelluksella on oma tallennustila, joten tiedot kulkevat uuteen sovellukseen Driven kautta.
+  const ios=typeof isIOS==="function"&&isIOS(), drive=typeof syncIsOn==="function"&&syncIsOn();
+  el.innerHTML=ios&&!drive?`<div class="move-t">Järkäle on muuttanut</div>
+    <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. iPhonessa tiedot siirtyvät uuteen sovellukseen Google Driven kautta. Yhdistä ensin Drive, sitten siirrä.</div>
+    <button class="btn-primary move-b" onclick="moveDriveFirst()">Yhdistä Google Drive</button>`
+  :ios?`<div class="move-t">Järkäle on muuttanut</div>
+    <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Tietosi ovat Drivessa. Avaa uusi osoite Safarissa, lisää se Koti-valikkoon ja yhdistä siellä Google Drive samalla tilillä. Tiedot pysyvät myös täällä siirtymäajan.</div>
+    <button class="btn-primary move-b" onclick="moveSendIOS()">Synkronoi ja avaa uusi osoite</button>`
+  :`<div class="move-t">Järkäle on muuttanut</div>
     <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Siirrä tietosi yhdellä napautuksella. Ne pysyvät myös täällä siirtymäajan.</div>
     <button class="btn-primary move-b" onclick="moveSend()">Siirrä tiedot</button>`;
   document.body.appendChild(el); // kiinteä kortti alapalkin yläpuolella: näkyy kaikilla välilehdillä

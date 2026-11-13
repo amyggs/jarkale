@@ -13,7 +13,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
   // ilman testikytkintä ilmoitusta ei näy (localhost ei ole vanha osoite)
   await p.goto(OLD); await p.evaluate(()=>sessionStorage.setItem('nomove','1')); await p.reload(); await p.waitForTimeout(600);
-  ok(await p.evaluate(()=>MOVE_ON.pilotti===false&&!moveActive()&&!document.getElementById('move-card')),'ilmoitus piilossa muualla kuin vanhassa osoitteessa, pilotissa vielä pois päältä');
+  ok(await p.evaluate(()=>MOVE_ON.pilotti===true&&MOVE_ON.oma===true&&!moveActive()&&!document.getElementById('move-card')),'ilmoitus piilossa muualla kuin vanhassa osoitteessa');
   await p.evaluate(()=>sessionStorage.removeItem('nomove'));
   // vanha osoite: keksitty historia
   await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1'); localStorage.setItem('seuranta-apikey','sk-testi');
@@ -27,6 +27,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.reload(); await p.waitForTimeout(600);
   const card=await p.locator('#move-card').innerText().catch(()=> '');
   ok(/Järkäle on muuttanut/.test(card)&&/127\.0\.0\.1/.test(card)&&/Siirrä tiedot/.test(card),'vanhassa osoitteessa ilmoitus ja uusi osoite: '+card.replace(/\s+/g,' ').slice(0,90));
+  // iPhone: ilman Drivea kortti pyytää ensin Driven, Driven kanssa siirto kulkee Driven kautta
+  const iosCard=await p.evaluate(()=>{ const o=window.isIOS, so=window.syncIsOn; window.isIOS=()=>true;
+    window.syncIsOn=()=>false; renderMoveCard(); const a=document.getElementById('move-card').innerText;
+    window.syncIsOn=()=>true; renderMoveCard(); const b=document.getElementById('move-card').innerText;
+    window.isIOS=o; window.syncIsOn=so; renderMoveCard(); return {a,b}; });
+  ok(/Yhdistä Google Drive/.test(iosCard.a)&&!/Siirrä tiedot/.test(iosCard.a),'iPhone ilman Drivea: kortti pyytää yhdistämään Driven ensin');
+  ok(/Synkronoi ja avaa uusi osoite/.test(iosCard.b)&&/Koti-valikkoon/.test(iosCard.b),'iPhone Driven kanssa: synkronointi ja ohje Koti-valikkoon');
   const size=await p.evaluate(async()=>(await movePack()).length);
   ok(size>100&&size<1500000,'pakattu siirtolinkki mahtuu rajaan ('+size+' merkkiä)');
   // siirto
