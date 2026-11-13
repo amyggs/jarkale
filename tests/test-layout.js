@@ -17,16 +17,22 @@ ok(r1.cw===340,'puhelin: kaavion leveys ennallaan (340)');
 // tabletti
 const tb=await (await b.newContext({viewport:{width:744,height:1133},serviceWorkers:'block'})).newPage(); tb.on('pageerror',e=>errs.push(e.message));
 await tb.goto('http://localhost:8765/index.html'); await seed(tb,'ampiainen','light');
-const r2=await tb.evaluate(()=>{ const a=document.getElementById('app').getBoundingClientRect(), n=document.getElementById('nav').getBoundingClientRect(); return {aw:a.width,nb:n.bottom,vh:innerHeight,cw:chartW()}; });
-ok(r2.aw===720&&r2.nb>r2.vh-40,'tabletti: palsta 720 px, alapalkki alhaalla');
-ok(r2.cw>600,'tabletti: kaavio sisältöalueen levyinen ('+r2.cw+')');
+const r2=await tb.evaluate(()=>{ const a=document.getElementById('app').getBoundingClientRect(), n=document.getElementById('nav').getBoundingClientRect(); return {aw:a.width,vw:innerWidth,nb:n.bottom,vh:innerHeight,cw:chartW(),z:parseFloat(getComputedStyle(document.body).zoom)||1}; });
+ok(r2.z===1.2&&Math.abs(r2.aw-r2.vw)<2&&r2.nb>r2.vh-40,'tabletti: 120 %, palsta täyttää ruudun, alapalkki alhaalla');
+await tb.evaluate(()=>{ const s=JSON.parse(localStorage.getItem('seuranta-settings')); s.tracking.steps=true; s.tracking.recovery=true; s.tracking.motivation=true; localStorage.setItem('seuranta-settings',JSON.stringify(s)); }); await tb.reload(); await tb.waitForTimeout(500);
+const r3=await tb.evaluate(()=>{ const t=id=>document.getElementById(id).getBoundingClientRect(); const w=t('track-weight-wrap'),sl=t('track-sleep-wrap'),st=t('track-steps-wrap'),rc=t('track-recovery-wrap'),m=t('track-motivation-wrap');
+  return {row:Math.abs(w.top-sl.top)<2&&Math.abs(w.top-st.top)<2&&st.left>sl.left, pair:Math.abs(rc.top-m.top)<2&&rc.top>w.bottom}; });
+ok(r3.row&&r3.pair,'tabletti: paino, uni ja askeleet samalla rivillä, palautuminen ja vire alla rinnakkain');
+const r4=await ph.evaluate(()=>{ const s=JSON.parse(localStorage.getItem('seuranta-settings')); s.tracking.steps=true; localStorage.setItem('seuranta-settings',JSON.stringify(s)); return true; }); await ph.reload(); await ph.waitForTimeout(500);
+ok(await ph.evaluate(()=>{ const w=document.getElementById('track-weight-wrap').getBoundingClientRect(), st=document.getElementById('track-steps-wrap').getBoundingClientRect(); return st.top>w.bottom-2&&Math.abs(st.width-innerWidth+32)<20; }),'puhelin: askeleet ennallaan omalla rivillään');
+ok(r2.cw>500,'tabletti: kaavio sisältöalueen levyinen ('+r2.cw+')');
 // tietokone, kaikki teemat
 const dk=await (await b.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'})).newPage(); dk.on('pageerror',e=>errs.push(e.message));
 await dk.goto('http://localhost:8765/index.html');
 const bad=[];
 for(const pal of PAL) for(const th of ['dark','light']){ await seed(dk,pal,th);
-  const r=await dk.evaluate(()=>{ const a=document.getElementById('app').getBoundingClientRect(), n=document.getElementById('nav').getBoundingClientRect(); return {al:a.left,aw:a.width,nr:n.right,nl:n.left,nh:n.height,nw:n.width,vis:getComputedStyle(document.getElementById('nav')).display!=='none'}; });
-  if(!(r.aw===760&&r.vis&&r.nr<=r.al-8&&r.nl>=0&&r.nh>r.nw&&r.nh<700)) bad.push(pal+'/'+th+' '+JSON.stringify(r)); }
+  const r=await dk.evaluate(()=>{ const a=document.getElementById('app').getBoundingClientRect(), n=document.getElementById('nav').getBoundingClientRect(); return {z:parseFloat(getComputedStyle(document.body).zoom)||1,al:a.left,aw:a.width,nr:n.right,nl:n.left,nh:n.height,nw:n.width,vis:getComputedStyle(document.getElementById('nav')).display!=='none'}; });
+  if(!(Math.abs(r.aw-760*r.z)<2&&r.vis&&r.nr<=r.al-8&&r.nl>=0&&r.nh>r.nw&&r.nh<700)) bad.push(pal+'/'+th+' '+JSON.stringify(r)); }
 ok(bad.length===0,'tietokone: sivupalkki palstan vasemmalla puolella kaikissa 18 teemassa '+bad.join(' | '));
 await dk.evaluate(()=>{ setTab('trendit'); }); await dk.waitForTimeout(400);
 const vb=await dk.evaluate(()=>{ const s=document.querySelector('#view-trendit svg[role=img]'); return s?+s.getAttribute('viewBox').split(' ')[2]:0; });

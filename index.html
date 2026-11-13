@@ -1841,6 +1841,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   background:var(--l-on)!important;color:var(--on-accent)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;}
 [data-palette="lasi"] #view-log .stepper-btn:active,[data-palette="lasi"] #view-log .stars button:active{transform:scale(.94);transition:transform .12s;}
 /* v2.18.54 viikkonauhan pallot samoiksi kupliksi kuin napit */
+[data-palette="lasi"] #week-status,:is([data-palette="soitin"],[data-palette="manageri"]) #week-status{padding:12px 0 10px!important;}
 [data-palette="lasi"] .ws-day .ws-dot{background:var(--l-bub)!important;border:1px solid var(--l-bub-edge)!important;box-shadow:var(--l-bub-sh)!important;}
 [data-palette="lasi"] .ws-day.logged .ws-dot{background:var(--l-on)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--l-on-sh)!important;color:var(--on-accent)!important;}
 [data-palette="lasi"] .ws-day.future .ws-dot{background:transparent!important;border:1px dashed var(--l-bub-edge)!important;box-shadow:none!important;}
@@ -1898,8 +1899,20 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   :root{--appw:720px;}
   #app{max-width:var(--appw);}
   :is([data-palette="kaurapuuro"],[data-palette="ampiainen"],[data-palette="lasi"]) #nav{width:min(calc(100% - 24px),560px);}
-  .gt{left:calc((100vw - var(--appw))/2 + 12px);right:calc((100vw - var(--appw))/2 + 12px);}
+  .gt{left:max(12px,calc(50% - var(--appw)/2 + 12px));right:max(12px,calc(50% - var(--appw)/2 + 12px));}
   .jdlg-c{max-width:520px;}
+  /* paino, uni ja askeleet samalle riville, palautuminen ja vire puoliksi (kun kaikki kolme seurataan) */
+  #view-log.row3.active{grid-template-columns:repeat(6,minmax(0,1fr));}
+  #view-log.row3>:is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap){grid-column:span 2;}
+  #view-log.row3>:is(#track-recovery-wrap,#track-motivation-wrap){grid-column:span 3;}
+  #view-log.row3>#track-steps-wrap{display:flex;flex-direction:column;}
+  #view-log.row3>#track-steps-wrap>.stepper{flex:1 1 auto;display:flex!important;flex-direction:column;align-items:stretch!important;}
+  /* askeleet kuten paino: luku omalla rivillään, − ja + alla */
+  #view-log.row3>#track-steps-wrap .stepper-row{flex:none!important;width:100%;margin-top:auto!important;flex-wrap:wrap;gap:8px;}
+  #view-log.row3>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 100%!important;width:100%!important;min-width:0;text-align:left;font-size:28px!important;height:44px!important;}
+  #view-log.row3>#track-steps-wrap .stepper-row>.stepper-btn{flex:1 1 0!important;width:auto!important;}
+  /* luvun tasaus kuten painossa: vasemmalle kevyissä teemoissa, keskelle näyttöteemoissa */
+  :is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.row3>#track-steps-wrap .stepper-row>input{text-align:center;}
 }
 @media (min-width:1100px){
   :root{--appw:760px;--railw:88px;}
@@ -1918,12 +1931,15 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   .move-card{bottom:24px;}
 }
 /* Isot näytöt: koko sovellus suurenee, jotta palsta vie näytöstä saman osuuden kuin 1440 px:n näytöllä (kuten esittelysivu) */
-@media (min-width:1700px){body{zoom:1.18}}
-@media (min-width:2000px){body{zoom:1.38}}
-@media (min-width:2300px){body{zoom:1.6}}
-@media (min-width:2700px){body{zoom:1.85}}
-@media (min-width:3200px){body{zoom:2.2}}
-@media (min-width:3700px){body{zoom:2.6}}
+/* v2.18.164: tabletilla 120 % (sama asettelu kuin puhelimessa, mutta luettavampi), tietokoneella 110 % */
+@media (min-width:700px){body{zoom:1.2}}
+@media (min-width:1100px){body{zoom:1.1}}
+@media (min-width:1700px){body{zoom:1.25}}
+@media (min-width:2000px){body{zoom:1.45}}
+@media (min-width:2300px){body{zoom:1.65}}
+@media (min-width:2700px){body{zoom:1.9}}
+@media (min-width:3200px){body{zoom:2.25}}
+@media (min-width:3700px){body{zoom:2.65}}
 </style>
 </head>
 <body>
@@ -2293,7 +2309,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.163</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.164</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2343,12 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.164", d:"marraskuu 2026", items:[
+    "Tabletilla koko sovellus 120 % (luettavampi, isommat napit), tietokoneella 110 %; isojen näyttöjen portaat nostettu vastaavasti. Puhelin ennallaan.",
+    "Tabletilla Kirjaa-näkymässä paino, uni ja askeleet samalla rivillä (askeleet kuten paino: luku ylhäällä, − ja + alla), palautuminen ja vire puoliksi. Vain kun kaikki kolme ovat seurannassa (#view-log.row3).",
+    "Viikkonauha keskelle korttia Lasi-, Soitin- ja Manageri-teemoissa (pallot olivat kortin yläreunassa).",
+    "Ajastinpalkin leveys laskettu sisältöpalstasta myös suurennetulla näytöllä."
+  ]},
   {v:"2.18.163", d:"marraskuu 2026", items:[
     "iPhone ja iPad: ohjenapit (Palautumisen tunne, Yleinen vire, Päivän tila) näkyivät sinisinä emojeina, koska iOS piirtää ℹ-merkin emojina. Nyt napissa on tekstin värinen i kaikilla laitteilla. Samasta syystä varoitus- ja toistomerkit piirretään tekstinä (U+FE0E)."
   ]},
@@ -3752,6 +3774,8 @@ function applyTrackingVisibility(){
     const el=document.getElementById("track-"+k+"-wrap");
     if(el) el.style.display=trk(k)?"":"none";
   });
+  // v2.18.164: tabletilla paino, uni ja askeleet samalle riville, kun kaikki kolme ovat käytössä
+  const vl=document.getElementById("view-log"); if(vl) vl.classList.toggle("row3",trk("weight")&&trk("sleep")&&trk("steps"));
   // v2.18.24: parista (paino|uni, palautuminen|vire) yksin valittu venyy koko leveyteen eikä jätä tyhjää puolikasta
   [["weight","sleep"],["recovery","motivation"]].forEach(([a,b])=>{
     const ea=document.getElementById("track-"+a+"-wrap"), eb=document.getElementById("track-"+b+"-wrap");
@@ -4550,8 +4574,8 @@ function movingAvg7(pts,key){
 // v2.18.158: kaaviot piirretään sisältöalueen levyisinä (tabletti ja tietokone), ei venytettynä kuvana.
 // Puhelimessa leveys pysyy 340:ssä, joten puhelimen kaaviot eivät muutu.
 let CHART_WK=null;
-function chartW(){ const c=document.getElementById("content"), w=(c&&c.clientWidth)||0; return CHART_WK=(w>=700?Math.min(Math.round(w-64),760):340); }
-window.addEventListener("resize",()=>{ clearTimeout(window._chartRT); window._chartRT=setTimeout(()=>{ const prev=CHART_WK; if(prev===null) return; const c=document.getElementById("content"), w=(c&&c.clientWidth)||0, k=w>=700?Math.min(Math.round(w-64),760):340; if(k===prev) return;
+function chartW(){ const c=document.getElementById("content"), w=(c&&c.clientWidth)||0; return CHART_WK=(w>=480?Math.min(Math.round(w-64),760):340); }
+window.addEventListener("resize",()=>{ clearTimeout(window._chartRT); window._chartRT=setTimeout(()=>{ const prev=CHART_WK; if(prev===null) return; const c=document.getElementById("content"), w=(c&&c.clientWidth)||0, k=w>=480?Math.min(Math.round(w-64),760):340; if(k===prev) return;
   try{ if(S.tab==="trendit") renderTrendit(); else if(S.tab==="historia") renderHistoria(); else if(S.tab==="treeni") renderGym(); }catch(_){} },250); });
 function chartH(h,W){ return W<=340?h:Math.round(h*Math.min(1.45,1+(W/340-1)*.4)); }
 
@@ -7423,6 +7447,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"13.11.2026", items:[
+    "Tabletilla kaikki on isompaa ja Kirjaa-näkymässä paino, uni ja askeleet ovat samalla rivillä.",
     "iPhonella ja iPadilla ohjenapit näyttävät nyt samalta kuin muualla sovelluksessa (ennen sininen emoji).",
     "Järkäle toimii nyt myös tabletilla ja tietokoneella: sisältö levenee näytön mukaan, ja tietokoneella valikko on vasemmassa reunassa. Puhelimessa kaikki pysyy ennallaan.",
     "Palautetta tai kysyttävää? Asetusten lopussa on Palaute kehittäjälle -nappi. Se avaa sähköpostin valmiiksi osoitettuna, ja vastaus tulee suoraan sinulle."
