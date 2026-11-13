@@ -72,7 +72,7 @@ bump_cache "$PILOT"
 APP="$ROOT/../jarkale-app"; OMA="$ROOT/../jarkale-oma"; EXTRA=()
 sync_site(){ # $1 = kohde, $2 = lähde (index.html:n repo), $3 = domain, $4 = välimuistin etuliite
   local dst="$1" src="$2" dom="$3" pre="$4" f
-  [ -d "$dst/.git" ] || return 0
+  [ -d "$dst/.git" ] || die "$(basename "$dst") puuttuu sisarkansiosta: kloonaa se ennen julkaisua, muuten $dom jää vanhaan versioon"
   cp "$src/index.html" "$dst/index.html"
   for f in tietosuoja.html manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$dst/$f"; done
   mkdir -p "$dst/fonts"; cp "$ROOT"/fonts/* "$dst/fonts/"
@@ -90,6 +90,7 @@ sync_site "$OMA" "$ROOT" "oma.jarkale.com" "jarkale-oma-v"
 [ ${#EXTRA[@]} -gt 0 ] || ok "ei domain-repoja sisarkansioina"
 # jarkale.com = esittelysivu (pilotin esittely.html → index.html) ja tietosuojaseloste (repo jarkale-site).
 SITE="$ROOT/../jarkale-site"
+[ -d "$SITE/.git" ] || die "jarkale-site puuttuu sisarkansiosta: kloonaa se ennen julkaisua, muuten jarkale.com jää vanhaan versioon"
 if [ -d "$SITE/.git" ]; then
   # jarkale.com: linkit uuteen osoitteeseen, ei pilottimerkintää (pilotin oma esittely pitää vanhat linkit siirtoon asti)
   sed -e 's#https://amyggs.github.io/jarkale-pilotti/#https://app.jarkale.com/#g' -e 's#nimenä näkyy amyggs.github.io#nimenä näkyy app.jarkale.com#' \
@@ -110,12 +111,22 @@ fi
 
 if [ -n "$COMMIT_MSG" ]; then
   echo "Julkaisu"
+  # v2.18.167: push yritetään kolmesti (GitHub antaa välillä 503). Epäonnistuessa kerrotaan, mitkä repot ehtivät julkaisuun.
+  DONE=(); LEFT=()
   for d in "$PILOT" "${EXTRA[@]}" "$ROOT"; do
+    n=$(basename "$d")
     git -C "$d" add -A
-    if git -C "$d" diff --cached --quiet; then ok "$(basename "$d"): ei muutoksia"; continue; fi
-    git -C "$d" commit -qm "$COMMIT_MSG" && git -C "$d" push -q
-    ok "$(basename "$d"): $(git -C "$d" log --oneline -1)"
+    if git -C "$d" diff --cached --quiet; then ok "$n: ei muutoksia"; continue; fi
+    git -C "$d" commit -qm "$COMMIT_MSG"
+    pushed=0; for t in 1 2 3; do if git -C "$d" push -q; then pushed=1; break; fi; sleep $((t*5)); done
+    if [ $pushed = 1 ]; then DONE+=("$n"); ok "$n: $(git -C "$d" log --oneline -1)"; else LEFT+=("$n"); echo "  ✗ $n: push epäonnistui kolmesti"; fi
   done
+  if [ ${#LEFT[@]} -gt 0 ]; then
+    echo "  ✗ JULKAISU KESKEN. Julkaistu: ${DONE[*]:-ei mitään}. Julkaisematta: ${LEFT[*]}."
+    echo "    Commitit on tehty paikallisesti. Pushaa puuttuvat käsin, älä aja skriptiä uudelleen:"
+    for n in "${LEFT[@]}"; do echo "    git -C \"$ROOT/../$n\" push"; done
+    exit 1
+  fi
 else
   echo; echo "Valmis julkaistavaksi. Commit + push: scripts/release.sh --commit \"v$FOOT: …\""
 fi

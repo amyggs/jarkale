@@ -34,6 +34,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     window.isIOS=o; window.syncIsOn=so; renderMoveCard(); return {a,b}; });
   ok(/Yhdistä Google Drive/.test(iosCard.a)&&!/Siirrä tiedot/.test(iosCard.a),'iPhone ilman Drivea: kortti pyytää yhdistämään Driven ensin');
   ok(/Synkronoi ja avaa uusi osoite/.test(iosCard.b)&&/Koti-valikkoon/.test(iosCard.b),'iPhone Driven kanssa: synkronointi ja ohje Koti-valikkoon');
+  // v2.18.167: iPhone ei avaa uutta osoitetta, jos Drive-synkronointi epäonnistuu tai jää tekemättä
+  const iosFail=await p.evaluate(async()=>{ const o={sn:window.syncNow,ms:window.moveSend}; let sent=0; window.moveSend=()=>{ sent++; };
+    window.syncNow=async()=>{ SYNC_ERR='Verkkovirhe'; }; await moveSendIOS(); const a=sent;
+    window.syncNow=async()=>{ SYNC_ERR=null; }; await moveSendIOS(); const b=sent;
+    window.syncNow=async()=>{ SYNC_ERR=null; setSyncState({lastSyncAt:Date.now()}); }; await moveSendIOS(); const c=sent;
+    window.syncNow=o.sn; window.moveSend=o.ms; setSyncState({lastSyncAt:0}); return [a,b,c]; });
+  ok(iosFail[0]===0&&iosFail[1]===0&&iosFail[2]===1,'iPhone: siirto vain onnistuneen synkronoinnin jälkeen ('+iosFail.join('/')+')');
   const size=await p.evaluate(async()=>(await movePack()).length);
   ok(size>100&&size<1500000,'pakattu siirtolinkki mahtuu rajaan ('+size+' merkkiä)');
   // siirto
@@ -55,6 +62,10 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.goto(NEW); await p.waitForTimeout(400); await p.evaluate(()=>{ S.entries={}; saveAll(); window.__jdlgAuto=false; });
   await p.goto(NEW+'#siirto='+code); await p.waitForTimeout(1500);
   ok(await p.evaluate(()=>Object.keys(S.entries).length===0),'vahvistuksen peruminen ei tuo tietoja');
+  // v2.18.167: jos turvakopio epäonnistuu, olemassa olevia tietoja ei korvata
+  const kept=await p.evaluate(async(c)=>{ S.entries={'2026-01-05':{date:'2026-01-05',weight:70,created_at:'x',updated_at:'x'}}; saveAll(); window.__jdlgAuto=true;
+    window.safetyCopy=()=>false; history.replaceState(null,'','#siirto='+c); await moveReceive(); return Object.keys(S.entries).length; },code);
+  ok(kept===1,'epäonnistunut turvakopio estää korvaamisen');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

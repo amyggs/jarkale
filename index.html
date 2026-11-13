@@ -2324,7 +2324,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.166</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.167</span>
       </div>
     </div>
   </div>
@@ -2358,6 +2358,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.167", d:"marraskuu 2026", items:[
+    "Siirto uuteen osoitteeseen varmemmaksi (ulkoisen katselmoinnin havainnot): iPhonessa uusi osoite avataan vasta, kun Drive-synkronointi on todetusti onnistunut; virheestä kerrotaan ja tiedot jäävät vanhaan sovellukseen. Jos uudessa osoitteessa on jo tietoja eikä niistä saada turvakopiota, mitään ei korvata.",
+    "Tietosuojaselosteeseen siirtolinkin kuvaus. Julkaisuskripti pysähtyy, jos jokin viidestä reposta puuttuu, yrittää pushia kolmesti ja kertoo osittain epäonnistuneessa julkaisussa, mitkä repot jäivät julkaisematta."
+  ]},
   {v:"2.18.166", d:"marraskuu 2026", items:[
     "Useampi käytössä oleva ohjelma (pilotin havainto: jokainen treenipäivä omana ohjelmanaan, jolloin treenin aloitus vaati joka kerta ohjelman vaihdon): Treeni-välilehti näyttää kaikkien käytössä olevien ohjelmien päivät. Yhden päivän ohjelma näkyy pelkkänä päivänä, monipäiväiset ohjelmat ryhminä nimensä alla, viimeksi treenattu ensin. Yhdellä ohjelmalla näkymä ennallaan.",
     "Seuraavana kierrossa ja Kirjaa-näkymän salikortti valitsevat seuraavan treenin kaikista yhden päivän ohjelmista ja viimeksi treenatusta monipäiväisestä ohjelmasta (vuorottelevat ohjelmat: ehdotus siitä, jota tehdään nyt). Ohjelmat-listan rivi avaa muokkauksen, kun ohjelmia on useita.",
@@ -12011,7 +12015,10 @@ async function moveSend(){
   location.href=moveTarget()+"#siirto="+code;
 }
 async function moveDriveFirst(){ try{ await syncNow(); }catch(_){} renderMoveCard(); }
-async function moveSendIOS(){ try{ await syncNow({toast:true}); }catch(_){} moveSend(); }
+// v2.18.167: siirrytään vasta, kun synkronointi on todetusti onnistunut (ennen: virhe ohitettiin ja siirto jatkui)
+async function moveSendIOS(){ const t0=Date.now(); try{ await syncNow({toast:true}); }catch(_){}
+  const st=syncState(); if(SYNC_ERR||!(st.lastSyncAt>=t0)){ jAlert("Tietoja ei saatu tallennettua Driveen, joten uutta osoitetta ei avattu."+(SYNC_ERR?"\n\n"+SYNC_ERR:"")+"\n\nTarkista verkkoyhteys ja paina nappia uudelleen. Tiedot ovat tallessa tässä sovelluksessa."); return; }
+  moveSend(); }
 function renderMoveCard(){
   const old=document.getElementById("move-card"); if(old) old.remove();
   if(!moveActive()) return;
@@ -12043,7 +12050,8 @@ async function moveReceive(){
   const msg=`Tuodaanko tiedot vanhasta osoitteesta?\n\n${parts.join(", ")||"Ei kirjauksia"}.`+
     (have?`\n\nTässä osoitteessa on jo tietoja. Ne korvataan, ja nykyisestä tilasta otetaan turvakopio.`:"");
   if(!await jConfirm(msg)) return;
-  if(have) safetyCopy("siirto vanhasta osoitteesta");
+  // v2.18.167: ilman onnistunutta turvakopiota olemassa olevia tietoja ei korvata
+  if(have&&!safetyCopy("siirto vanhasta osoitteesta")){ jAlert("Nykyisistä tiedoista ei saatu turvakopiota, joten mitään ei korvattu. Vie tämän osoitteen tiedot ensin tiedostoon (Asetukset → Varmuuskopio) ja siirrä sitten uudelleen vanhasta osoitteesta."); return; }
   applyBackupData(d);
   const ios=typeof isIOS==="function"&&isIOS();
   // v2.18.162: viimeistelyohje vaiheittain; vanhan kuvakkeen poisto vasta, kun tiedot on nähty uudessa sovelluksessa
