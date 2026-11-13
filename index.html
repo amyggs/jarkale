@@ -1143,6 +1143,7 @@ html.su-on #view-log{padding-bottom:0!important;}
 #app{position:fixed;top:0;bottom:0;left:0;right:0;height:auto;}
 /* v2.18.13: Järkäle PT -toiminnot vain Akun omassa versiossa */
 html.pilot .pt-only{display:none!important;}
+html:not(.pilot) .pilot-only{display:none!important;}
 html.ios-sa,html.ios-sa body{height:var(--ios-h,100%);}
 html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 /* ── v2.18.31 Fosfori-teema: vihreä kuvaputkipääte (tumma) ja käänteinen LCD-versio (vaalea) */
@@ -2251,9 +2252,14 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
         <div class="card" id="changelog-content" data-raw></div>
       </div>
 
+      <!-- v2.18.157: palaute kehittäjälle (vain pilotti). Avaa sähköpostin, sovellus ei lähetä mitään itse. -->
+      <button class="pilot-only" onclick="feedbackMail()" style="width:100%;min-height:52px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf);color:var(--text);font-size:15px;font-weight:600;display:flex;align-items:center;padding:0 16px;margin-bottom:8px;cursor:pointer">
+        <span class="ttl-ico" style="flex:1;min-width:0;text-align:left"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z"/><path d="M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5"/></svg>Palaute kehittäjälle</span><span style="font-size:13px;color:var(--dim);flex:none;margin-left:8px">›</span>
+      </button>
+
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.156</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.157</span>
       </div>
     </div>
   </div>
@@ -2287,6 +2293,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.157", d:"marraskuu 2026", items:[
+    "Pilotti: Palaute kehittäjälle -nappi asetusten lopussa ja Mitä uutta -näkymässä. Avaa sähköpostin osoitteeseen tuki@jarkale.com valmiilla otsikolla; viestin loppuun tulee versio, laite, selain ja teema (käyttäjä näkee ja voi poistaa). Sovellus ei lähetä mitään itse.",
+    "Tietosuoja: yhteysosoite tuki@jarkale.com, osoitteet jarkale.com, uusi kohta palautteesta, Googlen kirjautumisikkuna mainittu, esittelysivu ja tietokone mukana."
+  ]},
   {v:"2.18.156", d:"marraskuu 2026", items:[
     "Oma domain valmisteilla: app.jarkale.com tunnistetaan pilottiversioksi (kuten jarkale-pilotti), ja Drive-osion teksti näyttää todellisen osoitteen eikä kiinteää amyggs.github.io. Julkaisuskripti rakentaa myös uudet repot jarkale-app (app.jarkale.com) ja jarkale-oma (oma.jarkale.com), jos ne ovat sisarkansioina."
   ]},
@@ -7348,6 +7358,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"13.11.2026", items:[
+    "Palautetta tai kysyttävää? Asetusten lopussa on Palaute kehittäjälle -nappi. Se avaa sähköpostin valmiiksi osoitettuna, ja vastaus tulee suoraan sinulle."
+  ]},
   {d:"10.11.2026", items:[
     "Mitoissa muutokset eivät ole enää vihreitä tai punaisia. Plus tai miinus kertoo suunnan, ja sinä päätät, onko muutos tavoitteesi mukainen.",
     "Kehon mittaus on helpompi aloittaa: lomakkeessa on lyhyt mittausohje, ja ihopoimumittaus aukeaa linkistä vain, jos käytät rasvapihtejä.",
@@ -7454,6 +7467,22 @@ const PILOT_CHANGELOG=[
     "Saliohjelmat ja treenien kirjaus (vapaaehtoinen): oma ohjelma tekstinä, sarjat ja kilot salilla, edellisen kerran tulokset valmiina."
   ]}
 ];
+// v2.18.157: palaute sähköpostina osoitteeseen tuki@jarkale.com. Mukaan vain versio, laite ja teema, ei kirjauksia.
+const FEEDBACK_TO="tuki@jarkale.com";
+function feedbackEnv(){
+  const u=navigator.userAgent||"", ver=(CHANGELOG[0]&&CHANGELOG[0].v)||"";
+  const os=/Android\s([\d.]+)/.exec(u)?"Android "+/Android\s([\d.]+)/.exec(u)[1]:isIOS()?iosDev()+(/OS (\d+)_(\d+)/.exec(u)?" iOS "+/OS (\d+)_(\d+)/.exec(u).slice(1).join("."):""):/Windows/.test(u)?"Windows":/Mac OS X/.test(u)?"Mac":/Linux/.test(u)?"Linux":"";
+  const br=/EdgA?\/(\d+)/.exec(u)?"Edge "+/EdgA?\/(\d+)/.exec(u)[1]:/SamsungBrowser\/(\d+)/.exec(u)?"Samsung Internet "+/SamsungBrowser\/(\d+)/.exec(u)[1]:/Firefox\/(\d+)/.exec(u)?"Firefox "+/Firefox\/(\d+)/.exec(u)[1]:/CriOS\/(\d+)/.exec(u)?"Chrome "+/CriOS\/(\d+)/.exec(u)[1]:/Chrome\/(\d+)/.exec(u)?"Chrome "+/Chrome\/(\d+)/.exec(u)[1]:/Safari/.test(u)?"Safari":"";
+  const inst=(matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone?"asennettu":"selaimessa";
+  const de=document.documentElement, th=(de.dataset.palette||"")+(de.dataset.theme?" "+(de.dataset.theme==="light"?"vaalea":"tumma"):"");
+  return ["Pilotti v"+ver,[os,br].filter(Boolean).join(", "),inst,th?"teema "+th:""].filter(Boolean).join(" · ");
+}
+function feedbackHref(){
+  const body="\n\n\n– – –\nTekninen tieto vianetsintää varten (voit poistaa):\n"+feedbackEnv();
+  return "mailto:"+FEEDBACK_TO+"?subject="+encodeURIComponent("Järkäle-palaute")+"&body="+encodeURIComponent(body);
+}
+function feedbackMail(){ location.href=feedbackHref(); }
+
 function renderChangelog(){
   const el=document.getElementById("changelog-content"); if(!el) return;
   // v2.18.102: 179 versiota / 51 000 merkkiä oli kehittäjän loki. Oletuksena 5 uusinta, loput napista.
@@ -7468,7 +7497,7 @@ function renderChangelog(){
       ${rel.items.map(it=>`<div style="display:flex;gap:8px;padding:4px 0;font-size:13px;color:var(--dim);line-height:1.5">
         <span style="color:var(--orange);flex-shrink:0">✓</span><span>${esc(it)}</span>
       </div>`).join("")}
-    </div>`).join("")+(SRC.length>5?`<button class="cl-more" onclick="window._clAll=!window._clAll;renderChangelog()">${all?"Näytä vain uusimmat":pilot?"Näytä kaikki ("+SRC.length+")":"Näytä kaikki versiot ("+SRC.length+")"}</button>`:"");
+    </div>`).join("")+(pilot?`<button class="cl-more" onclick="feedbackMail()">Palaute tai kysyttävää? Kirjoita kehittäjälle</button>`:"")+(SRC.length>5?`<button class="cl-more" onclick="window._clAll=!window._clAll;renderChangelog()">${all?"Näytä vain uusimmat":pilot?"Näytä kaikki ("+SRC.length+")":"Näytä kaikki versiot ("+SRC.length+")"}</button>`:"");
 }
 
 // v2.17.14: pysyvä tallennustila. Pyytää selainta olemaan poistamatta sovelluksen dataa tilan loppuessa.

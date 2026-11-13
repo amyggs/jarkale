@@ -41,6 +41,7 @@ tests/run.sh test-gym.js
 | `test-hold.js` | Kirjaa-näkymän −/+ pohjassa: arvo juoksee ja kiihtyy, ei ylimääräistä askelta irrotuksessa, vieritys ei muuta arvoa; askeleet 100 välein sadan ruudukkoon |
 | `test-trainsec.js` | Kirjaa: salitreenipäivänä Salitreeni-nappi ilman treenityyppiä, rasitus ja kulku kortissa ja tallessa; ilman salitreeniä kuten ennen |
 | `test-move.js` | Siirto omaan domainiin kahden originin välillä: ilmoitus piilossa kunnes kytketään, kaikki tiedot siirtyvät, #-osa poistuu, API-avain ei siirry, rikkinäinen linkki ja peruttu vahvistus eivät muuta tietoja |
+| `test-feedback.js` | Palaute kehittäjälle: nappi vain pilotissa (asetukset ja Mitä uutta), mailto osoitteeseen tuki@jarkale.com, mukana versio, laite ja teema mutta ei kirjauksia |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

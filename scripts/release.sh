@@ -92,6 +92,7 @@ if [ -d "$SITE/.git" ]; then
   cp "$PILOT/esittely.html" "$SITE/index.html"
   for f in tietosuoja.html icon-192.png icon-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$SITE/$f"; done
   rm -rf "$SITE/kuvat"; cp -r "$PILOT/kuvat" "$SITE/kuvat"
+  mkdir -p "$SITE/fonts"; cp "$ROOT"/fonts/manrope-* "$ROOT"/fonts/LICENSE-manrope.txt "$SITE/fonts/"
   echo "jarkale.com" > "$SITE/CNAME"
   EXTRA+=("$SITE"); ok "jarkale-site → jarkale.com"
 fi
