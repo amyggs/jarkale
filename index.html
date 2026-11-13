@@ -2293,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.158</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.159</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.159", d:"marraskuu 2026", items:[
+    "Siirto omaan domainiin päälle omassa versiossa: amyggs.github.io/jarkale/ näyttää ilmoituksen ja Siirrä tiedot -napin, joka vie tiedot osoitteeseen oma.jarkale.com. Pilotissa siirto on vielä pois päältä (MOVE_ON.pilotti)."
+  ]},
   {v:"2.18.158", d:"marraskuu 2026", items:[
     "Tabletti ja tietokone: yli 700 px leveällä näytöllä sisältö levenee 720 px:iin, ja yli 1100 px:ssä alapalkki siirtyy palstan vasemmalle puolelle pystypalkiksi. Puhelinnäkymä ei muutu.",
     "Kaaviot piirretään sisältöalueen levyisinä (ennen 340 px:n kuva venyi ja akselien luvut suurenivat). Kaavio piirretään uudelleen, kun ikkunan leveys muuttuu.",
@@ -11889,14 +11892,14 @@ try{
 // Selain sitoo tallennustilan osoitteeseen, joten uusi osoite aloittaa tyhjästä. Vanha osoite näyttää ilmoituksen
 // ja napin "Siirrä tiedot": data pakataan (deflate) URL:n #-osaan, joka ei lähde palvelimelle. Uusi osoite
 // poistaa #-osan heti, kysyy vahvistuksen ja tuo datan samalla tavalla kuin varmuuskopion palautus.
-// Ilmoitus on piilossa, kunnes MOVE_ON = true (kytketään, kun domain on käytössä). Vastaanotto toimii aina.
+// Ilmoitus kytketään versioittain (v2.18.159: ensin oma versio, pilotti kun oma siirto on todettu toimivaksi). Vastaanotto toimii aina.
 // API-avain ei siirry (se ei ole varmuuskopiossakaan). Testit: window.__MOVE_TEST={target:"…"}.
-const MOVE_ON=false;
+const MOVE_ON={oma:true,pilotti:false};
 const MOVE_FROM_HOST="amyggs.github.io";
 const MOVE_MAX=1500000; // merkkiä; Chromen osoiteraja on noin 2 Mt
 function moveTarget(){ if(window.__MOVE_TEST) return window.__MOVE_TEST.target;
   return document.documentElement.classList.contains("pilot")?"https://app.jarkale.com/":"https://oma.jarkale.com/"; }
-function moveActive(){ return !!window.__MOVE_TEST||(MOVE_ON&&location.hostname===MOVE_FROM_HOST); }
+function moveActive(){ return !!window.__MOVE_TEST||(MOVE_ON[document.documentElement.classList.contains("pilot")?"pilotti":"oma"]&&location.hostname===MOVE_FROM_HOST); }
 const b64u={ enc:u8=>{ let s=""; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); },
   dec:t=>{ t=t.replace(/-/g,"+").replace(/_/g,"/"); while(t.length%4) t+="="; const s=atob(t), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; } };
 async function movePack(){

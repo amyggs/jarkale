@@ -11,9 +11,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.abort());
   await ctx.addInitScript(([N])=>{ window.__jdlgAuto=true; if(location.hostname==='localhost'&&!sessionStorage.getItem('nomove')) window.__MOVE_TEST={target:N}; },[NEW]);
   const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
-  // ilman testikytkintä ilmoitusta ei näy (MOVE_ON=false)
+  // ilman testikytkintä ilmoitusta ei näy (localhost ei ole vanha osoite)
   await p.goto(OLD); await p.evaluate(()=>sessionStorage.setItem('nomove','1')); await p.reload(); await p.waitForTimeout(600);
-  ok(await p.evaluate(()=>MOVE_ON===false&&!document.getElementById('move-card')),'ilmoitus piilossa, kunnes siirto kytketään päälle');
+  ok(await p.evaluate(()=>MOVE_ON.pilotti===false&&!moveActive()&&!document.getElementById('move-card')),'ilmoitus piilossa muualla kuin vanhassa osoitteessa, pilotissa vielä pois päältä');
   await p.evaluate(()=>sessionStorage.removeItem('nomove'));
   // vanha osoite: keksitty historia
   await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1'); localStorage.setItem('seuranta-apikey','sk-testi');
