@@ -2293,7 +2293,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.161</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.162</span>
       </div>
     </div>
   </div>
@@ -2327,6 +2327,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.162", d:"marraskuu 2026", items:[
+    "Siirron ohjeet selkeämmiksi: kortti kertoo, että nappi avaa uuden osoitteen ja vie kirjaukset, treenit ja mitat. Siirron jälkeen vaiheittainen ohje (asennus, Driven yhdistäminen, vanhan kuvakkeen poisto vasta kun tiedot näkyvät), iPhonelle oma versio."
+  ]},
   {v:"2.18.161", d:"marraskuu 2026", items:[
     "Siirto pilotille päälle (MOVE_ON.pilotti). iPhonessa ja iPadissa siirtokortti ohjaa Driven kautta: ilman Drivea nappi Yhdistä Google Drive, Driven kanssa Synkronoi ja avaa uusi osoite (uusin tila Driveen ennen siirtoa). Syy: Koti-valikon sovelluksella on oma tallennustila, joten linkillä siirretty data jäisi Safariin."
   ]},
@@ -11948,7 +11951,7 @@ function renderMoveCard(){
     <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Tietosi ovat Drivessa. Avaa uusi osoite Safarissa, lisää se Koti-valikkoon ja yhdistä siellä Google Drive samalla tilillä. Tiedot pysyvät myös täällä siirtymäajan.</div>
     <button class="btn-primary move-b" onclick="moveSendIOS()">Synkronoi ja avaa uusi osoite</button>`
   :`<div class="move-t">Järkäle on muuttanut</div>
-    <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Siirrä tietosi yhdellä napautuksella. Ne pysyvät myös täällä siirtymäajan.</div>
+    <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Nappi avaa uuden osoitteen ja vie sinne kirjauksesi, treenisi ja mittasi. Tiedot pysyvät myös täällä siirtymäajan.</div>
     <button class="btn-primary move-b" onclick="moveSend()">Siirrä tiedot</button>`;
   document.body.appendChild(el); // kiinteä kortti alapalkin yläpuolella: näkyy kaikilla välilehdillä
 }
@@ -11968,8 +11971,10 @@ async function moveReceive(){
   if(have) safetyCopy("siirto vanhasta osoitteesta");
   applyBackupData(d);
   const ios=typeof isIOS==="function"&&isIOS();
-  await jAlert(`✓ Tiedot siirretty.\n\nAsenna Järkäle tästä osoitteesta ja poista vanha sovellus.`+
-    (ios?`\n\niPhonella ja iPadilla Koti-valikkoon lisätty sovellus aloittaa tyhjästä. Yhdistä ensin Google Drive (Asetukset → Varmuuskopio ja Drive), niin tiedot löytyvät sieltä.`:""));
+  // v2.18.162: viimeistelyohje vaiheittain; vanhan kuvakkeen poisto vasta, kun tiedot on nähty uudessa sovelluksessa
+  await jAlert(ios
+    ?`✓ Tiedot siirretty.\n\nViimeistele näin:\n1. Lisää tämä osoite Koti-valikkoon: Jaa → Lisää Koti-valikkoon.\n2. Avaa uusi kuvake ja yhdistä Google Drive samalla tilillä (Asetukset → Varmuuskopio ja Drive). Tiedot tulevat Drivesta, koska Koti-valikon sovellus aloittaa tyhjästä.\n3. Kun näet tietosi uudessa sovelluksessa, voit poistaa vanhan kuvakkeen.`
+    :`✓ Tiedot siirretty.\n\nViimeistele näin:\n1. Asenna Järkäle tästä osoitteesta: selaimen valikko ⋮ → Lisää aloitusnäyttöön → Asenna.\n2. Jos käytit Google Drivea, yhdistä se uudelleen: Asetukset → Varmuuskopio ja Drive.\n3. Kun näet tietosi uudessa sovelluksessa, voit poistaa vanhan kuvakkeen.`);
   location.reload();
 }
 window.addEventListener("load",()=>setTimeout(()=>{ renderMoveCard(); moveReceive(); },250));
