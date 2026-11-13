@@ -429,6 +429,10 @@ html,body{font-family:Manrope,-apple-system,"Segoe UI",system-ui,sans-serif;font
 .wv-it{font-size:13px;font-weight:700;color:var(--text);}
 .wv-it i{font-style:normal;font-weight:600;color:var(--dim);margin-right:3px;}
 #group-training-hdr,#group-health-hdr{font-size:13px!important;letter-spacing:.01em!important;text-transform:none!important;font-weight:700;}
+.move-card{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);z-index:900;margin:0;box-shadow:0 10px 40px rgba(0,0,0,.45);max-width:520px;margin-inline:auto;}
+.move-t{font:800 17px/1.3 Manrope,system-ui,sans-serif;color:var(--text);margin-bottom:6px;}
+.move-s{font:500 14px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:12px;}
+.move-b{width:100%;}
 .tr-card{margin-bottom:12px;}
 .tr-load{margin-top:0;}
 .inj-card{background:var(--surf);border-radius:16px;padding:12px 14px 10px;margin-bottom:10px;}
@@ -2249,7 +2253,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.154</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.155</span>
       </div>
     </div>
   </div>
@@ -2283,6 +2287,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.155", d:"marraskuu 2026", items:[
+    "Valmistelu omaan domainiin siirtoa varten (ei vielä näkyvissä): vanha osoite näyttää ilmoituksen \"Järkäle on muuttanut\" ja napin Siirrä tiedot, kun siirto kytketään päälle. Tiedot pakataan osoitteen #-osaan, joka ei lähde palvelimelle; uusi osoite poistaa sen heti, kysyy vahvistuksen ja tuo tiedot kuten varmuuskopion palautus. API-avain ei siirry. Rikkinäinen linkki tai peruttu vahvistus ei muuta tietoja."
+  ]},
   {v:"2.18.154", d:"marraskuu 2026", items:[
     "Rasvaprosentin luokat tasosanoiksi (rajat ennallaan): Välttämätön → Hyvin matala, Urheilijoilla → Matala, Hyvä kunto → Melko matala, Normaali → Keskitaso, Korkea ennallaan. Tieto siitä, keillä taso on tyypillinen, on selityksessä \"Mistä luvut tulevat?\"."
   ]},
@@ -11795,6 +11802,77 @@ try{
   }
 }catch(_){}
 // Apply saved theme
+
+// ═══ v2.18.155: SIIRTO OMAAN DOMAINIIN ═══════════════════════════════════
+// Selain sitoo tallennustilan osoitteeseen, joten uusi osoite aloittaa tyhjästä. Vanha osoite näyttää ilmoituksen
+// ja napin "Siirrä tiedot": data pakataan (deflate) URL:n #-osaan, joka ei lähde palvelimelle. Uusi osoite
+// poistaa #-osan heti, kysyy vahvistuksen ja tuo datan samalla tavalla kuin varmuuskopion palautus.
+// Ilmoitus on piilossa, kunnes MOVE_ON = true (kytketään, kun domain on käytössä). Vastaanotto toimii aina.
+// API-avain ei siirry (se ei ole varmuuskopiossakaan). Testit: window.__MOVE_TEST={target:"…"}.
+const MOVE_ON=false;
+const MOVE_FROM_HOST="amyggs.github.io";
+const MOVE_MAX=1500000; // merkkiä; Chromen osoiteraja on noin 2 Mt
+function moveTarget(){ if(window.__MOVE_TEST) return window.__MOVE_TEST.target;
+  return document.documentElement.classList.contains("pilot")?"https://app.jarkale.fi/":"https://oma.jarkale.fi/"; }
+function moveActive(){ return !!window.__MOVE_TEST||(MOVE_ON&&location.hostname===MOVE_FROM_HOST); }
+const b64u={ enc:u8=>{ let s=""; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); },
+  dec:t=>{ t=t.replace(/-/g,"+").replace(/_/g,"/"); while(t.length%4) t+="="; const s=atob(t), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; } };
+async function movePack(){
+  flushPendingAutoSave(); cleanupEmptyEntries();
+  const json=JSON.stringify({version:6,exported:new Date().toISOString(),entryCount:Object.keys(S.entries).length,entries:S.entries,measurements:S.measurements||[],settings:S.settings,gym:G,moved:true});
+  const raw=new TextEncoder().encode(json);
+  if(typeof CompressionStream==="function"){
+    const z=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
+    return "z1."+b64u.enc(z);
+  }
+  return "j1."+b64u.enc(raw);
+}
+async function moveUnpack(code){
+  const i=code.indexOf("."), kind=code.slice(0,i), u=b64u.dec(code.slice(i+1));
+  let raw=u;
+  if(kind==="z1") raw=new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+  else if(kind!=="j1") throw new Error("tuntematon muoto");
+  return JSON.parse(new TextDecoder().decode(raw));
+}
+async function moveSend(){
+  haptic(10);
+  let code;
+  try{ code=await movePack(); }catch(_){ jAlert("Siirtoa ei voitu valmistella. Vie tiedot tiedostoon (Asetukset → Varmuuskopio) ja tuo ne uudessa osoitteessa."); return; }
+  if(code.length>MOVE_MAX){ jAlert("Tietoja on niin paljon, ettei niitä voi siirtää linkillä. Vie tiedot tiedostoon (Asetukset → Varmuuskopio) ja tuo tiedosto uudessa osoitteessa."+(syncIsOn()?" Voit myös yhdistää Google Driven uudessa osoitteessa.":"")); return; }
+  location.href=moveTarget()+"#siirto="+code;
+}
+function renderMoveCard(){
+  const old=document.getElementById("move-card"); if(old) old.remove();
+  if(!moveActive()) return;
+  const host=moveTarget().replace(/^https?:\/\//,"").replace(/\/.*$/,"");
+  const el=document.createElement("div"); el.id="move-card"; el.className="card move-card";
+  el.innerHTML=`<div class="move-t">Järkäle on muuttanut</div>
+    <div class="move-s">Uusi osoite on <b>${esc(host)}</b>. Siirrä tietosi yhdellä napautuksella. Ne pysyvät myös täällä siirtymäajan.</div>
+    <button class="btn-primary move-b" onclick="moveSend()">Siirrä tiedot</button>`;
+  document.body.appendChild(el); // kiinteä kortti alapalkin yläpuolella: näkyy kaikilla välilehdillä
+}
+async function moveReceive(){
+  const h=location.hash||""; if(!h.startsWith("#siirto=")) return;
+  const code=h.slice(8);
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){} // data ei jää osoiteriville eikä historiaan
+  let d;
+  try{ d=await moveUnpack(code); const err=validateBackup(d); if(err) throw new Error(err); d=normalizeImportedData(d); }
+  catch(_){ jAlert("Siirtolinkki ei toiminut. Avaa Järkäle vanhasta osoitteesta ja yritä uudelleen, tai vie tiedot tiedostoon ja tuo ne täällä."); return; }
+  const n=Object.keys(d.entries||{}).length, gs=d.gym?(d.gym.sessions||[]).length:0, ms=(d.measurements||[]).length;
+  const parts=[gs?`${gs} treeniä`:"",n?`${n} päiväkirjausta`:"",ms?`${ms} mittausta`:""].filter(Boolean);
+  const have=Object.keys(S.entries).length+(G.sessions||[]).length;
+  const msg=`Tuodaanko tiedot vanhasta osoitteesta?\n\n${parts.join(", ")||"Ei kirjauksia"}.`+
+    (have?`\n\nTässä osoitteessa on jo tietoja. Ne korvataan, ja nykyisestä tilasta otetaan turvakopio.`:"");
+  if(!await jConfirm(msg)) return;
+  if(have) safetyCopy("siirto vanhasta osoitteesta");
+  applyBackupData(d);
+  const ios=typeof isIOS==="function"&&isIOS();
+  await jAlert(`✓ Tiedot siirretty.\n\nAsenna Järkäle tästä osoitteesta ja poista vanha sovellus.`+
+    (ios?`\n\niPhonella ja iPadilla Koti-valikkoon lisätty sovellus aloittaa tyhjästä. Yhdistä ensin Google Drive (Asetukset → Varmuuskopio ja Drive), niin tiedot löytyvät sieltä.`:""));
+  location.reload();
+}
+window.addEventListener("load",()=>setTimeout(()=>{ renderMoveCard(); moveReceive(); },250));
+window.addEventListener("hashchange",()=>moveReceive()); // linkki avattu, kun sovellus on jo auki
 
 // ═══ v2.15.0: SUOMALAINEN DESIMAALIPILKKU NÄKYVÄÄN TEKSTIIN ══════════════
 // Kaikki näkyvä teksti käy läpi yhden muuntimen: 108.5 → 108,5. Päiväykset (6.10.) ja versionumerot (2.14.7)
