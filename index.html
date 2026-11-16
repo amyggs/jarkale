@@ -1045,6 +1045,9 @@ html.g-run #view-treeni{padding-bottom:96px!important;}
 .ed-form .ex-menu{margin:0;}
 .ed-addrow{margin-top:10px;}
 .ed-parse{font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);margin:6px 2px 0;min-height:0;}
+.ex-sug{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);}
+.ex-sug .tr-pill{min-height:38px;padding:0 14px;white-space:normal;text-align:left;}
+.ex-sug button i{font-style:normal;font-weight:600;color:var(--dim);}
 .ed-parse b{color:var(--text);}
 .ed-dayfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font:600 12px Manrope,system-ui,sans-serif;color:var(--dim);}
 .ed-dayfoot select{margin-left:4px;height:34px;border-radius:8px;border:1.5px solid var(--bord);background:var(--surf);color:var(--text);font:600 13px Manrope,system-ui,sans-serif;padding:0 6px;max-width:150px;}
@@ -2322,7 +2325,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.169</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.170</span>
       </div>
     </div>
   </div>
@@ -2356,6 +2359,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.170", d:"marraskuu 2026", items:[
+    "Liikkeen nimeä kirjoitettaessa ehdotetaan aiemmin kirjattuja samankaltaisia liikkeitä (\"Aiemmin kirjattu: Penkkipunnerrus · 14 krt\"): ohjelman muokkauksessa, treenin aikana lisättäessä ja Vaihda liike -kohdassa. Napautus vaihtaa nimen ja historia jatkuu; kirjoittamalla eteenpäin syntyy uusi liike kuten ennen. Estää saman liikkeen historian jakautumisen eri kirjoitusasuihin.",
+    "Ohjelman muokkauksessa liikkeen nimeäminen täsmälleen aiemmin kirjatun liikkeen nimiseksi liittää sen tämän liikkeen historiaan."
+  ]},
   {v:"2.18.169", d:"marraskuu 2026", items:[
     "Muut asetukset: Näyttö-kortti poistettu. Se oli alapalkin värin selvitystä varten, ja asia on ratkaistu."
   ]},
@@ -7467,6 +7474,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"16.11.2026", items:[
+    "Kun kirjoitat liikkeen nimeä, sovellus ehdottaa aiemmin tekemiäsi samankaltaisia liikkeitä. Napauttamalla ehdotusta liike jatkaa vanhaa historiaa, ja viime kerran tulokset näkyvät, vaikka kirjoittaisit nimen hieman eri tavalla."
+  ]},
   {d:"13.11.2026", items:[
     "Jos sinulla on useampi ohjelma, esimerkiksi jokainen treenipäivä omana ohjelmanaan, kaikki päivät näkyvät nyt suoraan Treeni-välilehdellä. Ohjelmaa ei tarvitse enää vaihtaa ennen treeniä.",
     "Tabletilla kaikki on isompaa: Kirjaa-näkymässä paino, uni ja askeleet ovat samalla rivillä, ja treenin sarjakentät ja luvut ovat suurempia.",
@@ -9794,6 +9804,31 @@ function exResolveKey(name){
   const n=exNorm(name); const o=Object.values(known).find(o=>exNorm(o.name)===n||exNorm(o.key)===n);
   return o?o.key:k;
 }
+// v2.18.170: kirjoitettaessa ehdotetaan aiemmin kirjattuja samankaltaisia liikkeitä (sama logiikka kuin tuonnissa + alkuosan täsmäys),
+// jotta eri tavoin kirjoitettu nimi ei aloita uutta historiaa. Ei kysymyksiä: napautus vaihtaa nimen, kirjoittamisen jatkaminen tekee uuden liikkeen.
+function exSuggest(name){
+  const n=exNorm(name); if(!n||n.replace(/ /g,"").length<3) return [];
+  const known=Object.values(gKnownEx()).filter(o=>o.n>0);
+  if(known.some(o=>o.key===exKey(name)||exNorm(o.name)===n)) return [];
+  const nz=n.replace(/ /g,"");
+  return known.map(o=>{ const on=exNorm(o.name); const lv=exSimilarity(name,o.name);
+      const pre=on.startsWith(n)||on.replace(/ /g,"").startsWith(nz); return {o,sc:lv*10+(pre?5:0)}; })
+    .filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc||b.o.n-a.o.n).slice(0,3).map(x=>x.o);
+}
+function exSugHTML(name,inputId){
+  const list=exSuggest(name); if(!list.length) return "";
+  return `<div class="ex-sug"><span>Aiemmin kirjattu:</span>${list.map(o=>`<button type="button" class="tr-pill" onmousedown="event.preventDefault()" onclick="exSugPick('${inputId}',this.dataset.n)" data-n="${esc(o.name)}">${esc(o.name)} <i>· ${o.n}\u00a0krt</i></button>`).join("")}</div>`;
+}
+function exSugPick(inputId,name){
+  const inp=document.getElementById(inputId); if(!inp) return;
+  const v=inp.value, p=parseExLine(v), i=p&&p.name?v.toLowerCase().indexOf(p.name.toLowerCase()):-1; // nimi voi olla kirjoitettu pienellä (parseExLine isontaa)
+  inp.value=i>=0?v.slice(0,i)+name+v.slice(i+p.name.length):name;
+  inp.dispatchEvent(new Event("input"));
+  if(/^g-exn-/.test(inputId)){ inp.dispatchEvent(new Event("change")); return; } // ohjelman liikkeen nimi tallentuu heti
+  inp.focus();
+}
+function exSugInto(elId,v,inputId){ const el=document.getElementById(elId); if(el) el.innerHTML=exSugHTML((v||"").trim(),inputId); }
+function gAddPreview(v){ const el=document.getElementById("g-addex-sug"); if(!el) return; const p=parseExLine(v); el.innerHTML=p?exSugHTML(p.name,"g-addex"):""; }
 function blankEx(name){ return {name,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:""}; }
 
 // ── Ohjelmat
@@ -11139,8 +11174,8 @@ function gymSessionHTML(s){
     }
     const prevSets=setsBefore(ex.key,s);
     h+=`<div class="ex${live&&ei===firstOpen?" active":""}" data-ex="${ex.id}">
-      <div class="ex-top">${GU.rename===ex.id?`<input class="g-in" id="g-rename" value="${esc(ex.name)}" style="flex:1" onkeydown="if(event.key==='Enter')gRenameEx('${sid}',${ei})"><button class="tr-go" onclick="gRenameEx('${sid}',${ei})">OK</button>`
-        :`<span class="ex-n">${esc(ex.name)}</span><button class="ex-more" aria-label="Lisätoiminnot" onclick="GU.menu=GU.menu==='${ex.id}'?null:'${ex.id}';GU.rename=null;renderGym()">⋯</button>`}</div>`;
+      <div class="ex-top">${GU.rename===ex.id?`<input class="g-in" id="g-rename" value="${esc(ex.name)}" style="flex:1" oninput="exSugInto('g-rename-sug',this.value,'g-rename')" onkeydown="if(event.key==='Enter')gRenameEx('${sid}',${ei})"><button class="tr-go" onclick="gRenameEx('${sid}',${ei})">OK</button>`
+        :`<span class="ex-n">${esc(ex.name)}</span><button class="ex-more" aria-label="Lisätoiminnot" onclick="GU.menu=GU.menu==='${ex.id}'?null:'${ex.id}';GU.rename=null;renderGym()">⋯</button>`}</div>${GU.rename===ex.id?`<div id="g-rename-sug"></div>`:""}`;
     if(GU.menu===ex.id&&GU.rename!==ex.id){
       h+=`<div class="ex-menu"><button onclick="GU.rename='${ex.id}';renderGym();setTimeout(()=>document.getElementById('g-rename')?.select(),0)">Vaihda liike</button><button onclick="gSkip('${sid}',${ei})">${ex.skipped?"Palauta":"Ohita"}</button>
         <button onclick="gMoveEx('${sid}',${ei},-1)" ${ei?"":"disabled"}>↑</button><button onclick="gMoveEx('${sid}',${ei},1)" ${ei<s.exercises.length-1?"":"disabled"}>↓</button><button class="danger" onclick="gRemoveEx('${sid}',${ei})">Poista</button>
@@ -11186,7 +11221,7 @@ function gymSessionHTML(s){
     if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value);this.nextElementSibling&&(this.nextElementSibling.disabled=!this.value.trim())">${esc(ex.userNote||"")}</textarea><button class="g-pinbtn" ${(ex.userNote||"").trim()?"":"disabled"} onclick="gPinFromNote('${sid}',${ei})">${ico("pin",14)} Kiinnitä liikkeeseen${exMeta(ex.key).pin?" (korvaa nykyisen)":""}</button>`;
     h+=`</div>`;
   });
-  h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div>`;
+  h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" oninput="gAddPreview(this.value)" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div><div id="g-addex-sug"></div>`;
   if(live) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gOpenFinish()">Lopeta treeni</button>`;
   else{ if(GU.editPast===s.id) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gEditPastDone()">Tallenna muutokset</button>`;
   h+=`<button class="g-link danger" style="margin-top:18px" onclick="discardSession('${s.id}')">Poista treeni</button>`; }
@@ -11232,7 +11267,7 @@ function gymEditHTML(p){
       h+=`<button class="ed-l${open?" open":""}" onclick="GU.openEx=GU.openEx==='${e.id}'?null:'${e.id}';renderGym()"><span class="x">${esc(e.name)}${e.note&&!open?`<span class="ed-note">${esc(e.note)}</span>`:""}${histOf(e)&&!open?`<span class="ed-note ed-hl">Historia: ${esc(histOf(e).name)}</span>`:""}</span><span class="g">${goalTxt(e)||"ei tavoitetta"}</span></button>`;
       if(open){ const ho=histOf(e);
         h+=`<div class="ed-form">
-          <input class="g-in" value="${esc(e.name)}" aria-label="Liikkeen nimi" placeholder="Liikkeen nimi" onchange="gEdit(p=>{const x=p.days[${di}].exercises[${xi}];x.name=this.value.trim()||x.name;});renderGym()">
+          <input class="g-in" id="g-exn-${e.id}" value="${esc(e.name)}" aria-label="Liikkeen nimi" placeholder="Liikkeen nimi" oninput="exSugInto('g-exn-sug-${e.id}',this.value,this.id)" onchange="gEdit(p=>{const x=p.days[${di}].exercises[${xi}];x.name=this.value.trim()||x.name;const k=exResolveKey(x.name);const o=gKnownEx()[k];if(k!==x.key&&o&&o.n)x.key=k;});renderGym()"><div id="g-exn-sug-${e.id}"></div>
           <input class="g-in" value="${esc(goalInputTxt(e))}" aria-label="Tavoite" placeholder="Tavoite, esim. 3x8-10 80" onchange="gSetGoal(${di},${xi},this.value)">
           <input class="g-in" value="${esc(e.note||"")}" aria-label="Ohje" placeholder="Ohje (valinnainen)" onchange="gEdit(p=>p.days[${di}].exercises[${xi}].note=this.value.trim())">
           ${ho?`<div class="ed-hist">Historia ja ennätykset tulevat liikkeestä <b>${esc(ho.name)}</b> (${ho.n} ${ho.n===1?"kerta":"kertaa"}). Jos se on eri liike, erota tämä omaksi liikkeekseen.<button class="tr-pill" onclick="gUnlinkEx(${di},${xi})">Erota omaksi liikkeeksi</button></div>`:""}
@@ -11253,7 +11288,7 @@ function gymEditHTML(p){
 function gParsePreview(dayId,v){
   const el=document.getElementById("g-prev-"+dayId); if(!el) return;
   const p=parseExLine(v);
-  el.innerHTML=p?`Tallentuu: <b>${esc(p.name)}</b>${p.sets?` · <b>${goalTxt(p)}</b>`:" · ei tavoitetta"}`:"";
+  el.innerHTML=p?`Tallentuu: <b>${esc(p.name)}</b>${p.sets?` · <b>${goalTxt(p)}</b>`:" · ei tavoitetta"}`+exSugHTML(p.name,"g-add-"+dayId):"";
 }
 function gAddTplEx(di,dayId){
   const inp=document.getElementById("g-add-"+dayId); const p=parseExLine(inp&&inp.value); if(!p) return;
