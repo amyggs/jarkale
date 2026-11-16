@@ -40,7 +40,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
 
   console.log('\nEri liike, kun vanhalla on jo tehty sarja');
   await p.evaluate(()=>{ const e=gSession(G.activeId).exercises[0]; GU.rename=e.id; renderGym(); });
-  await p.fill('#g-rename','Käsipainopunnerrus'); await p.evaluate(()=>gRenameEx(G.activeId,0)); await p.waitForTimeout(150);
+  await p.fill('#g-rename','Käsipainopunnerrus'); await p.evaluate(()=>{ window.__jdlgAuto=false; return gRenameEx(G.activeId,0); }); await p.waitForTimeout(150);
   const all=await p.evaluate(()=>gSession(G.activeId).exercises.map(e=>({name:e.name,sets:e.sets.map(x=>[x.kg,x.reps,x.done]),goal:e.goal})));
   ok(all.length===2&&all[0].name.toLowerCase()==='penkkipunnerrus'&&all[0].sets.length===1&&all[0].sets[0][0]===82.5&&all[0].sets[0][2],'tehty sarja jää Penkkipunnerrukselle (82,5 × 8)');
   ok(all[1].name==='Käsipainopunnerrus'&&all[1].sets.length===2&&all[1].sets.every(x=>x[0]===null&&x[1]===null&&!x[2]),'uusi liike perään 2 tyhjällä sarjalla');
@@ -65,6 +65,17 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.evaluate(()=>gSession(G.activeId).exercises[1].sets[1].kg===31.25),'+ lähtee kopioidusta painosta (30 → 31,25)');
   await p.locator('[data-set="1-1"] .ck').click(); await p.waitForTimeout(100);
   ok(await p.evaluate(()=>{ const r=gSession(G.activeId).exercises[1].sets[1]; return r.done&&r.reps===12; }),'kuittaus ilman kirjoittamista tallentaa kopioidut toistot (12)');
+  console.log('\nv2.18.171: nimen korjaus, kun sarjoja on tehty');
+  const fix=await p.evaluate(async()=>{ const s=gSession(G.activeId); const e=s.exercises[0]; window.__jdlgAuto=true; document.getElementById('g-rename')?.remove();
+    document.body.insertAdjacentHTML('beforeend','<input id="g-rename" value="Vinopenkki Smith">'); await gRenameEx(s.id,0); const x=s.exercises[0];
+    return {n:s.exercises.length,name:x.name,key:x.key===exKey('Vinopenkki Smith'),kg:x.sets[0].kg,done:x.sets[0].done}; });
+  ok(fix.n===2&&fix.name==='Vinopenkki Smith'&&fix.key&&fix.kg===82.5&&fix.done,'Korjaa nimi: sarjat siirtyvät uudelle nimelle, ei uutta riviä');
+  const saved=await p.evaluate(async()=>{ const s=gSession(G.activeId); const e=s.exercises[1];
+    s.exercises.push({id:gid(),key:exKey('Väärä'),name:'Väärä',goal:{sets:1},note:'',skipped:false,added:true,replaces:e.id,feel:null,userNote:'',sets:[{kg:null,reps:null,done:false}]});
+    const sid=s.id; finishSession(true); delete window.__jdlgAuto; const s2=gSession(sid); document.getElementById('g-rename')?.remove();
+    document.body.insertAdjacentHTML('beforeend','<input id="g-rename" value="Kaapelipunnerrus">'); await gRenameEx(sid,1);
+    return {n:s2.exercises.length,name:s2.exercises[1].name,done:s2.exercises[1].sets.filter(r=>r.done).length}; });
+  ok(saved.n===2&&saved.name==='Kaapelipunnerrus'&&saved.done===2,'tallennettu treeni: nimi korjautuu ilman kysymystä, aiemman vaihdon tyhjä rivi poistuu');
   ok(errs.length===0,'ei sivuvirheitä'+(errs.length?' '+errs[0]:''));
   await b.close();
   console.log(`\n${pass} / ${pass+fail} läpi`); process.exit(fail?1:0);

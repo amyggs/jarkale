@@ -2325,7 +2325,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.170</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.171</span>
       </div>
     </div>
   </div>
@@ -2359,6 +2359,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.171", d:"marraskuu 2026", items:[
+    "Vaihda liike, kun sarjoja on jo tehty: tallennetussa treenissä nimi korjataan ja tehdyt sarjat siirtyvät uudelle nimelle (ennen jäi vanha liike sarjoineen ja perään tuli tyhjä uusi liike). Käynnissä olevassa treenissä kysytään: Korjaa nimi vai Vaihdoin liikkeen. Aiemmista vaihdoista jääneet tyhjät rivit poistuvat samalla."
+  ]},
   {v:"2.18.170", d:"marraskuu 2026", items:[
     "Liikkeen nimeä kirjoitettaessa ehdotetaan aiemmin kirjattuja samankaltaisia liikkeitä (\"Aiemmin kirjattu: Penkkipunnerrus · 14 krt\"): ohjelman muokkauksessa, treenin aikana lisättäessä ja Vaihda liike -kohdassa. Napautus vaihtaa nimen ja historia jatkuu; kirjoittamalla eteenpäin syntyy uusi liike kuten ennen. Estää saman liikkeen historian jakautumisen eri kirjoitusasuihin.",
     "Ohjelman muokkauksessa liikkeen nimeäminen täsmälleen aiemmin kirjatun liikkeen nimiseksi liittää sen tämän liikkeen historiaan."
@@ -7475,6 +7478,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"16.11.2026", items:[
+    "Jos kirjasit liikkeen väärällä nimellä, Vaihda liike korjaa nyt nimen ja tehdyt sarjat siirtyvät oikealle liikkeelle. Kesken treenin sovellus kysyy, korjataanko nimi vai vaihdoitko oikeasti liikettä.",
     "Kun kirjoitat liikkeen nimeä, sovellus ehdottaa aiemmin tekemiäsi samankaltaisia liikkeitä. Napauttamalla ehdotusta liike jatkaa vanhaa historiaa, ja viime kerran tulokset näkyvät, vaikka kirjoittaisit nimen hieman eri tavalla."
   ]},
   {d:"13.11.2026", items:[
@@ -10097,7 +10101,7 @@ function gNote(sid,ei,v){ const s=gSession(sid); s.exercises[ei].userNote=v; gym
 function gSkip(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; ex.skipped=!ex.skipped; GU.menu=null; gymSave(); renderGym(); }
 async function gRemoveEx(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; if(doneSets(ex).length&&!await jConfirm(`Poistetaanko ${ex.name} ja sen kirjatut sarjat tästä treenistä?`,{ok:"Poista",danger:true})) return; s.exercises.splice(ei,1); GU.menu=null; gymSave(); renderGym(); }
 function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=ei+d; if(j<0||j>=a.length) return; [a[ei],a[j]]=[a[j],a[ei]]; GU.menu=null; gymSave(); renderGym(); }
-function gRenameEx(sid,ei){
+async function gRenameEx(sid,ei){
   const inp=document.getElementById("g-rename"); const v=inp&&inp.value.trim(); if(!v) return;
   const s=gSession(sid); const ex=s.exercises[ei];
   const oldKey=ex.key, newKey=exResolveKey?exResolveKey(v):exKey(v);
@@ -10109,6 +10113,13 @@ function gRenameEx(sid,ei){
   // jäljellä olevilla sarjoilla (ennen: tehdyt sarjat siirtyivät uuden liikkeen nimelle). Aiempien treenien historia ei muutu.
   const done=ex.sets.filter(r=>r.done), left=Math.max(1,ex.sets.length-done.length);
   const fresh=()=>[...Array(left)].map(()=>({kg:null,reps:null,done:false}));
+  // v2.18.171: tehdyt sarjat väärällä nimellä → nimen korjaus, sarjat siirtyvät uudelle nimelle. Tallennetussa treenissä aina näin
+  // (treenin jälkeen ei vaihdeta liikettä kesken); käynnissä olevassa kysytään. Aiemmista vaihdoista jääneet tyhjät rivit poistetaan.
+  if(done.length&&(s.endedAt||await jConfirm(`${ex.name}: ${done.length} ${done.length===1?"sarja":"sarjaa"} on jo tehty. Kirjasitko ne väärällä nimellä vai vaihdoitko liikettä kesken treenin?`,{ok:"Korjaa nimi",cancel:"Vaihdoin liikkeen"}))){
+    ex.name=v; ex.key=newKey; ex.renamed=true;
+    s.exercises=s.exercises.filter(x=>!(x.replaces===ex.id&&!x.sets.some(r=>r.done)));
+    gymSave(); renderGym(); if(s.endedAt) showSavedToast("Nimi korjattu, sarjat säilyivät"); return;
+  }
   if(done.length){
     ex.sets=done;
     s.exercises.splice(ei+1,0,{id:gid(),key:newKey,name:v,goal:{sets:left,repsMin:null,repsMax:null,max:false,weight:null,groups:null},note:"",
