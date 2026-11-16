@@ -77,6 +77,7 @@ sync_site(){ # $1 = kohde, $2 = lähde (index.html:n repo), $3 = domain, $4 = v�
   for f in tietosuoja.html manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$dst/$f"; done
   mkdir -p "$dst/fonts"; cp "$ROOT"/fonts/* "$dst/fonts/"
   echo "$dom" > "$dst/CNAME"
+  printf 'User-agent: *\nAllow: /\n' > "$dst/robots.txt"
   if [ ! -f "$dst/sw.js" ]; then sed -E "s/const CACHE='[a-z-]+v[0-9]+';const PREFIX='[a-z-]+v'/const CACHE='${pre}1';const PREFIX='${pre}'/" "$ROOT/sw.js" > "$dst/sw.js"
   else local body; body=$(sed -E "1s/.*//" "$ROOT/sw.js"); { head -1 "$dst/sw.js"; echo "$body" | tail -n +2; } > "$dst/sw.js.new" && mv "$dst/sw.js.new" "$dst/sw.js"; fi
   grep -q "PREFIX='${pre}'" "$dst/sw.js" || die "$(basename "$dst"): sw.js:n etuliite ei ole ${pre}"
@@ -87,6 +88,8 @@ sync_site "$APP" "$PILOT" "app.jarkale.com" "jarkale-app-v"
 # v2.18.160: julkinen app.jarkale.com ei ole "pilotti" käyttäjälle → alatunniste "Järkäle vX"
 if [ -d "$APP/.git" ]; then sed -i "s/Pilotti v$FOOT<\/span>/Järkäle v$FOOT<\/span>/" "$APP/index.html"; grep -q "Järkäle v$FOOT</span>" "$APP/index.html" || die "app: alatunnisteen vaihto epäonnistui"; fi
 sync_site "$OMA" "$ROOT" "oma.jarkale.com" "jarkale-oma-v"
+# v2.18.168: oma.jarkale.com on henkilökohtainen versio → ei hakukoneisiin (canonical pois, noindex tilalle)
+sed -i 's#<link rel="canonical" href="https://app.jarkale.com/">#<meta name="robots" content="noindex">#' "$OMA/index.html"; grep -q 'name="robots" content="noindex"' "$OMA/index.html" || die "oma: noindex puuttuu"
 [ ${#EXTRA[@]} -gt 0 ] || ok "ei domain-repoja sisarkansioina"
 # jarkale.com = esittelysivu (pilotin esittely.html → index.html) ja tietosuojaseloste (repo jarkale-site).
 SITE="$ROOT/../jarkale-site"
@@ -100,6 +103,8 @@ if [ -d "$SITE/.git" ]; then
   rm -rf "$SITE/kuvat"; cp -r "$PILOT/kuvat" "$SITE/kuvat"
   mkdir -p "$SITE/fonts"; cp "$ROOT"/fonts/manrope-* "$ROOT"/fonts/LICENSE-manrope.txt "$SITE/fonts/"
   echo "jarkale.com" > "$SITE/CNAME"
+  printf 'User-agent: *\nAllow: /\nSitemap: https://jarkale.com/sitemap.xml\n' > "$SITE/robots.txt"
+  printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://jarkale.com/</loc></url>\n<url><loc>https://jarkale.com/tietosuoja.html</loc></url>\n</urlset>\n' > "$SITE/sitemap.xml"
   EXTRA+=("$SITE"); ok "jarkale-site → jarkale.com"
 fi
 

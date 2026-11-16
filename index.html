@@ -12,6 +12,8 @@
 <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=4">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=4">
 <title>Järkäle</title>
+<meta name="description" content="Järkäle on ilmainen treenipäiväkirja sille, jolla on jo ohjelma. Ohjelma sisään liittämällä teksti, salilla viime kerran luvut valmiina, kehitys yhdellä silmäyksellä. Ei tiliä, tiedot omassa puhelimessa.">
+<link rel="canonical" href="https://app.jarkale.com/">
 <script>
 // v2.18.12: iPhonen kotivalikkosovelluksessa (standalone) sivun korkeus raportoidaan ilman tilarivia ja kotipalkkia,
 // jolloin alapalkki jää irti alareunasta. Käytetään näytön todellista korkeutta. Vain iOS standalone.
@@ -2324,7 +2326,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.167</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.168</span>
       </div>
     </div>
   </div>
@@ -2358,6 +2360,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.168", d:"marraskuu 2026", items:[
+    "Hakukoneet: sivujen kuvaus ja pääosoite (canonical) jarkale.comiin, sovellukseen ja tietosuojaan; jarkale.comille robots.txt ja sivukartta; oma.jarkale.com jätetään hakukoneiden ulkopuolelle. Käyttäjälle ei näy muutosta."
+  ]},
   {v:"2.18.167", d:"marraskuu 2026", items:[
     "Siirto uuteen osoitteeseen varmemmaksi (ulkoisen katselmoinnin havainnot): iPhonessa uusi osoite avataan vasta, kun Drive-synkronointi on todetusti onnistunut; virheestä kerrotaan ja tiedot jäävät vanhaan sovellukseen. Jos uudessa osoitteessa on jo tietoja eikä niistä saada turvakopiota, mitään ei korvata.",
     "Tietosuojaselosteeseen siirtolinkin kuvaus. Julkaisuskripti pysähtyy, jos jokin viidestä reposta puuttuu, yrittää pushia kolmesti ja kertoo osittain epäonnistuneessa julkaisussa, mitkä repot jäivät julkaisematta."
