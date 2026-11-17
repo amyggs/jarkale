@@ -1095,6 +1095,9 @@ html.g-run #view-treeni{padding-bottom:96px!important;}
 .news-card .ni{margin-top:8px;}
 .news-card .ni b{display:block;font:800 15px Manrope,system-ui,sans-serif;color:var(--text);}
 .news-card .ni p{margin:3px 0 6px;font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);}
+.news-card.sv .sv-o{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.news-card.sv .sv-o .tr-pill{width:100%;justify-content:flex-start;text-align:left;white-space:normal;min-height:42px;padding:8px 14px;}
+.news-card.sv .na{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
 .news-card .ni button{border:none;background:none;padding:4px 0;font:700 13px Manrope,system-ui,sans-serif;color:var(--text);text-decoration:underline;}
 .news-card .na{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
 .news-card .na a{font:600 13px Manrope,system-ui,sans-serif;color:var(--dim);}
@@ -2325,7 +2328,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.174</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.175</span>
       </div>
     </div>
   </div>
@@ -2359,6 +2362,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.175", d:"marraskuu 2026", items:[
+    "Kysely kehittäjälle (vain käyttäjien versio): kortti Kirjaa- ja Treeni-näkymässä, kun sovellusta on käytetty viikko ja treenejä on vähintään 3 tai kirjauspäiviä 7. Kysymyksiä 4–6 (salikysymys vain salin käyttäjille, päiväseurantakysymys vain kehoa seuraaville), jokaisen voi ohittaa. Vastaukset tallentuvat laitteelle ja lähtevät sähköpostina osoitteeseen tuki@jarkale.com vasta, kun käyttäjä lähettää viestin itse; mukana versio ja kirjausten lukumäärät, ei kirjauksia. Tietosuojaseloste päivitetty."
+  ]},
   {v:"2.18.174", d:"marraskuu 2026", items:[
     "Drive-osion teksti: Googlen ikkunassa sovellus näkyy nimellä Järkäle tai sovelluksen osoitteella (brändin vahvistuksen jälkeen nimi voi näkyä kummin tahansa)."
   ]},
@@ -11855,7 +11861,7 @@ function newsPending(){
 }
 // v2.18.120: sama kortti myös Treeni-kodissa – pelkkää treeniä kirjaava aloittaa Treeni-välilehdeltä eikä näe Kirjaa-näkymää
 function newsCardHTML(){
-  const list=newsPending(); if(!list.length) return "";
+  const list=newsPending(); if(!list.length) return surveyCardHTML();
   return `<div class="news-card"><span class="nk">Uutta Järkäleessä</span>
     ${list.map(n=>`<div class="ni"><b>${n.title}</b><p>${n.text}</p>${n.act?`<button onclick="newsGo('${n.go}')">${n.act} ›</button>`:""}</div>`).join("")}
     <div class="na"><a href="esittely.html#uutta" target="_blank" rel="noopener">Lue lisää</a><button class="tr-go" onclick="newsDismiss()">Selvä</button></div></div>`;
@@ -11870,6 +11876,61 @@ function newsDismiss(){
   const seen=new Set(newsSeen()); PILOT_NEWS.forEach(n=>seen.add(n.id));
   try{ localStorage.setItem(NEWS_KEY,JSON.stringify([...seen])); }catch(_){}
   haptic(8); renderNewsCard(); if(S.tab==="treeni"&&GU.mode==="home") renderGym();
+}
+// v2.18.175: kysely kehittäjälle (vain käyttäjien versio). Ei palvelinta: vastaukset kootaan sähköpostiin, jonka käyttäjä lähettää itse.
+// Kysymykset mukautuvat: salikysymys vain salin käyttäjille, päiväseurantakysymys vain kehoa seuraaville. Vastaukset talteen laitteelle.
+const SURVEY_ID="v1", SURVEY_KEY="jarkale-survey-"+SURVEY_ID;
+const SURVEY_QS=[
+  {id:"why",t:"Miksi käytät Järkälettä etkä muuta sovellusta tai muistiinpanoja?",o:["Viime kerran luvut valmiina","Ohjelman tuonti tekstinä","Kirjaus on nopeaa","Ei tiliä eikä maksua","Tuntemukset ja kivut samassa paikassa","Muu syy"]},
+  {id:"slow",t:"Missä kohdassa salilla menee turhaa aikaa?",o:["Treenin aloitus","Painon tai toistojen muutos","Liikkeen vaihto","Treenin lopetus","Ei missään"],when:()=>gymOn()},
+  {id:"daily",t:"Onko päivittäisestä seurannasta (uni, palautuminen, vire, kivut) ollut sinulle hyötyä?",o:["Kyllä, näen mikä vaikuttaa mihin","Kirjaan, mutta en juuri katso tuloksia","Kirjaan vain treenejä","Ei ole"],when:()=>["weight","sleep","recovery","motivation","injury"].some(k=>trk(k))},
+  {id:"extra",t:"Mikä tuntuu sovelluksessa turhalta tai sekavalta?",text:true},
+  {id:"switch",t:"Mikä saisi sinut vaihtamaan toiseen sovellukseen?",text:true},
+  {id:"rec",t:"Kenelle suosittelisit Järkälettä?",o:["Treenikaverille, jolla on valmentaja","Kenelle tahansa salilla kävijälle","Hyvinvointia seuraavalle","En kenellekään vielä"]}
+];
+function surveyState(){ try{ return {a:{},step:0,sent:false,snooze:0,...JSON.parse(localStorage.getItem(SURVEY_KEY)||"{}")}; }catch(_){ return {a:{},step:0,sent:false,snooze:0}; } }
+function surveySave(st){ try{ localStorage.setItem(SURVEY_KEY,JSON.stringify(st)); }catch(_){} }
+function surveyQs(){ return SURVEY_QS.filter(q=>!q.when||q.when()); }
+function surveyUse(){
+  const days=new Set(Object.keys(S.entries||{}).filter(d=>hasMeaningfulEntry(S.entries[d])));
+  const gs=((typeof G!=="undefined"&&G.sessions)||[]).filter(x=>!x.source&&x.endedAt);
+  gs.forEach(x=>x.date&&days.add(x.date));
+  const first=[...days].sort()[0]; const since=first?Math.round((Date.now()-new Date(first+"T12:00:00").getTime())/864e5):0;
+  const E=Object.values(S.entries||{});
+  return {since,gym:gs.length,sleep:E.filter(e=>e.sleep!=null).length,weight:E.filter(e=>e.weight!=null).length,meas:(S.measurements||[]).length,days:days.size};
+}
+function surveyDue(){
+  if(!document.documentElement.classList.contains("pilot")) return false;
+  const st=surveyState(); if(st.sent||Date.now()<st.snooze) return false;
+  const u=surveyUse(); return u.since>=7&&(u.gym>=3||u.days>=7);
+}
+function surveyCardHTML(){
+  if(!surveyDue()) return "";
+  const st=surveyState(), qs=surveyQs(), n=qs.length;
+  const head=(r)=>`<span class="nk">Kysely kehittäjälle${r?` · ${r}`:""}</span>`;
+  if(!st.started) return `<div class="news-card sv">${head("")}<div class="ni"><b>${n} kysymystä, alle minuutti</b><p>Vastauksesi ohjaavat, mitä Järkäleessä korjataan seuraavaksi. Vastaukset lähtevät vasta, kun lähetät ne itse sähköpostilla.</p></div><div class="na"><button class="tr-pill" onclick="surveySnooze()">Ei nyt</button><button class="tr-go" onclick="surveyGo(0)">Vastaa</button></div></div>`;
+  if(st.step>=n) return `<div class="news-card sv">${head("valmis")}<div class="ni"><b>Kiitos vastauksista!</b><p>Lähetä ne sähköpostilla. Näet viestin ennen lähettämistä, ja mukana on vain vastauksesi, versio ja kirjausten lukumäärät.</p></div><div class="na"><button class="tr-pill" onclick="surveyGo(0)">Muuta vastauksia</button><button class="tr-go" onclick="surveySend()">Avaa sähköposti</button></div></div>`;
+  const q=qs[st.step], cur=st.a[q.id]||"";
+  const body=q.text?`<textarea id="sv-txt" class="g-in" rows="3" placeholder="Vapaaehtoinen" style="width:100%;margin-top:8px">${esc(cur)}</textarea>
+      <div class="na"><button class="tr-pill" onclick="surveyAns('${q.id}','')">Ohita</button><button class="tr-go" onclick="surveyAns('${q.id}',document.getElementById('sv-txt').value)">Seuraava</button></div>`
+    :`<div class="sv-o">${q.o.map(o=>`<button class="tr-pill${cur===o?" on":""}" data-v="${esc(o)}" onclick="surveyAns('${q.id}',this.dataset.v)">${esc(o)}</button>`).join("")}</div>
+      <div class="na"><button class="tr-pill" onclick="surveyAns('${q.id}','')">Ohita</button></div>`;
+  return `<div class="news-card sv">${head(`${st.step+1}/${n}`)}<div class="ni"><b>${esc(q.t)}</b></div>${body}</div>`;
+}
+function surveyRender(){ renderNewsCard(); if(S.tab==="treeni"&&GU.mode==="home") renderGym(); }
+function surveyGo(step){ const st=surveyState(); st.started=true; st.step=step; surveySave(st); haptic(8); surveyRender(); }
+function surveyAns(id,v){ const st=surveyState(); v=(v||"").trim(); if(v) st.a[id]=v; else delete st.a[id]; st.step++; surveySave(st); haptic(8); surveyRender(); }
+function surveySnooze(){ const st=surveyState(); st.snooze=Date.now()+7*864e5; surveySave(st); haptic(8); surveyRender(); }
+function surveyBody(){
+  const st=surveyState(), u=surveyUse();
+  const lines=surveyQs().map((q,i)=>`${i+1} ${q.t}\n   ${st.a[q.id]||"(ei vastausta)"}`);
+  const bg=[feedbackEnv(),`käytössä ${u.since} pv`,`kirjauspäiviä ${u.days}`,gymOn()?`salitreenejä ${u.gym}`:"",u.sleep?`unikirjauksia ${u.sleep}`:"",u.weight?`painokirjauksia ${u.weight}`:"",`mittauksia ${u.meas}`,syncIsOn()?"Drive käytössä":"Drive ei käytössä"].filter(Boolean).join(" · ");
+  return lines.join("\n\n")+"\n\n– – –\nTausta: "+bg;
+}
+function surveySend(){
+  const st=surveyState(); st.sent=true; surveySave(st);
+  location.href="mailto:"+FEEDBACK_TO+"?subject="+encodeURIComponent("Järkäle-kysely "+SURVEY_ID)+"&body="+encodeURIComponent(surveyBody());
+  setTimeout(surveyRender,300);
 }
 function newsGo(key){
   newsDismiss();
