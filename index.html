@@ -2325,7 +2325,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.171</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.172</span>
       </div>
     </div>
   </div>
@@ -2359,6 +2359,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.172", d:"marraskuu 2026", items:[
+    "Ohjelman tekstituonnin ohjeeseen: kuvana tai paperilla olevan ohjelman voi muuttaa tekstiksi esimerkiksi ChatGPT:llä ja liittää sen. Järkäle ei itse lähetä kuvia minnekään."
+  ]},
   {v:"2.18.171", d:"marraskuu 2026", items:[
     "Vaihda liike, kun sarjoja on jo tehty: tallennetussa treenissä nimi korjataan ja tehdyt sarjat siirtyvät uudelle nimelle (ennen jäi vanha liike sarjoineen ja perään tuli tyhjä uusi liike). Käynnissä olevassa treenissä kysytään: Korjaa nimi vai Vaihdoin liikkeen. Aiemmista vaihdoista jääneet tyhjät rivit poistuvat samalla."
   ]},
@@ -11333,7 +11336,7 @@ async function gArchiveProg(){
 function gymImportHTML(){
   const pv=GU.importPreview;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Muistiinpanosta tai tekstitiedostosta</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
-    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.</div>
+    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.<br><br>Onko ohjelma kuvana tai paperilla? Pyydä esimerkiksi ChatGPT:tä kirjoittamaan kuvasta teksti ja liitä se tähän.</div>
     <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
     <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=gMatchImport(parseProgramText(GU.importText));renderGym()">Esikatsele</button>`;
   if(pv){
