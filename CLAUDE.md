@@ -4,15 +4,20 @@ Henkilökohtainen treeni- ja hyvinvointiseuranta. Yksi HTML-tiedosto (`index.htm
 
 ## Repot
 - `amyggs/jarkale` (tämä): oma versio, kaikki kehitys tänne.
-- `amyggs/jarkale-pilotti`: pilottikäyttäjien versio. **Älä muokkaa pilotin `index.html`:ää käsin.** Se on tämän repon `index.html`, jossa alatunniste on "Pilotti vX", ja sen tekee `scripts/release.sh`. Pilotti tunnistetaan osoitteesta (`html.pilot`): PT-ominaisuudet piilossa (`.pt-only`), oma uutiskortti (`PILOT_NEWS`) ja oma Mitä uutta (`PILOT_CHANGELOG`).
-- Työskentele niin, että pilotti on sisarkansiona: `../jarkale-pilotti`.
+- `amyggs/jarkale-pilotti`: pilottikäyttäjien versio. **Älä muokkaa pilotin `index.html`:ää käsin.** Se on tämän repon `index.html`, jossa alatunniste on "Pilotti vX", ja sen tekee `scripts/release.sh`. Pilotti tunnistetaan osoitteesta (`html.pilot`: polku `jarkale-pilotti` tai `app.jarkale.com`): PT-ominaisuudet piilossa (`.pt-only`), oma uutiskortti (`PILOT_NEWS`), oma Mitä uutta (`PILOT_CHANGELOG`) ja palautenappi (`.pilot-only`). Pilotin `esittely.html` on jarkale.comin etusivun lähde, ja sitä muokataan pilotin repossa.
+- Oma domain (13.11.2026). Kolme julkaisurepoa, joita ei muokata käsin (`release.sh` kirjoittaa ne):
+  - `amyggs/jarkale-site` → jarkale.com: pilotin `esittely.html` (linkit app.jarkale.comiin), `tietosuoja.html`, kuvat, fontit, `robots.txt`, `sitemap.xml`.
+  - `amyggs/jarkale-app` → app.jarkale.com: pilottiversio, alatunniste "Järkäle vX", sw-etuliite `jarkale-app-v`.
+  - `amyggs/jarkale-oma` → oma.jarkale.com: kehittäjän oma versio, `noindex`, sw-etuliite `jarkale-oma-v`.
+  - Vanhat amyggs.github.io-osoitteet toimivat siirtymäajan (siirtokortti, `MOVE_ON`), sulku aikaisintaan helmikuussa 2027.
+- Kaikki repot sisarkansioina: `../jarkale-pilotti`, `../jarkale-app`, `../jarkale-oma`, `../jarkale-site`. `release.sh` pysähtyy, jos jokin puuttuu: kloonaa ne ensin.
 
 ## Julkaisu
 1. Tee muutos `index.html`:ään.
 2. Nosta alatunnisteen versio (`Järkäle tracking vX.Y.Z`) ja lisää kohta `CHANGELOG`in alkuun (sama versio).
 3. Jos muutos on pilotille merkittävä (hän huomaa sen tai hyötyy siitä), lisää kohta myös `PILOT_CHANGELOG`iin: päivämäärä otsikkona, käyttäjän näkökulmasta, ei versionumeroita. Korjaukset, joita käyttäjä ei huomaa, teemakohtaiset hienosäädöt ja kehittäjämerkinnät vain `CHANGELOG`iin.
 4. Uusi testi → lisää se `tests/run.sh`:n listaan ja `tests/README.md`:n taulukkoon.
-5. `scripts/release.sh` tarkistaa version, nostaa välimuistin (`sw.js`) molemmissa repoissa, ajaa `node --check`, rakentaa pilotin ja ajaa testit. `--commit "vX.Y.Z: …"` tekee lisäksi commitin ja pushin molempiin.
+5. `scripts/release.sh` tarkistaa version, nostaa välimuistin (`sw.js`), ajaa `node --check`, rakentaa pilotin ja kolme julkaisurepoa ja ajaa testit. `--commit "vX.Y.Z: …"` tekee lisäksi commitin ja pushin kaikkiin viiteen (muuttumattomat ohitetaan, push yritetään kolmesti). Jos push jää kesken, skripti listaa julkaisematta jääneet: pushaa ne käsin, älä aja skriptiä uudelleen (versiotarkistus estää).
 6. GitHub Actions ajaa testit jokaisesta pushista (`.github/workflows/tests.yml`). Tulokset kirjoitetaan ajon huomautuksiksi, joten ne näkyvät ilman lokia: `gh run view <id> --repo amyggs/jarkale` (ANNOTATIONS: yhteenveto kaikista tiedostoista, epäonnistuneista oma virherivi).
 
 Älä julkaise, jos yksikin testi epäonnistuu.
