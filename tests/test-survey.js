@@ -32,7 +32,7 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(flow.done,'viimeisen jälkeen lähetysnäkymä');
   ok(flow.body.includes('Kirjaus on nopeaa')&&flow.body.includes('Liikaa teemoja')&&flow.body.includes('(ei vastausta)'),'viestissä vastaukset ja ohitetut');
   ok(/kirjauspäiviä 10/.test(flow.body)&&/salitreenejä 0/.test(flow.body)&&/Drive ei käytössä/.test(flow.body),'viestissä lukumäärät');
-  ok(!/80|weight/.test(flow.body.split('Tausta:')[1]||'x'),'viestissä ei kirjausten arvoja');
+  ok(!/kg|weight|· 80 |\b7 h\b/.test(flow.body.split('Tausta:')[1]||'x'),'viestissä ei kirjausten arvoja (painot, unet)');
   const sent=await p.evaluate(()=>{ const st=surveyState(); st.sent=true; st.sentQs=SURVEY_QS.map(q=>q.id); surveySave(st); return surveyCardHTML(); });
   ok(sent==='','lähetyksen jälkeen kortti ei näy');
   // v2.18.175:n jo lähettäneet: vain teemakysymys lisäkysymyksenä
