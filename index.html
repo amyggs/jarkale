@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.178</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.179</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.179", d:"marraskuu 2026", items:[
+    "Uusi käyttäjä pääsee suoraan lisäämään ohjelman: Uutta Järkäleessä -kortti näytetään vain palaaville käyttäjille (ennen uusi käyttäjä sai ensimmäiseksi koko ruudun uutislistan ennen Uusi ohjelma- ja Liitä ohjelma -nappeja). Varmuuskopiokehote näkyy vasta, kun on ensimmäinen kirjaus tai ohjelma. Löytyi ulkoisesta läpikäynnistä."
+  ]},
   {v:"2.18.178", d:"marraskuu 2026", items:[
     "Esittelysivu tietokoneella: Mitä voit seurata -kortit viidessä sarakkeessa (ennen neljä, ja viides kortti venyi koko rivin levyiseksi). Puhelimessa ennallaan. Sovellukseen ei muutoksia."
   ]},
@@ -11868,9 +11871,18 @@ const PILOT_NEWS=[
 ];
 const NEWS_KEY="jarkale-news-seen";
 function newsSeen(){ try{ return JSON.parse(localStorage.getItem(NEWS_KEY)||"[]"); }catch(_){ return []; } }
+// v2.18.179: onko käyttäjällä vielä mitään omaa (uusi käyttäjä ei näe uutisia eikä varmuuskopiokehotetta ennen ensimmäistä kirjausta)
+function userHasData(){
+  try{ if(Object.keys(S.entries||{}).some(d=>hasMeaningfulEntry(S.entries[d]))) return true;
+    if((S.measurements||[]).length) return true;
+    if(typeof G!=="undefined"&&((G.sessions||[]).length||(G.programs||[]).some(x=>!x.junk&&x.days.some(d=>d.exercises.length)))) return true;
+  }catch(_){} return false;
+}
 function newsPending(){
   if(!document.documentElement.classList.contains("pilot")) return [];
   try{ if(localStorage.getItem("seuranta-setup-done")!=="1") return []; }catch(_){ return []; }
+  // Uutiset ovat palaaville käyttäjille: uusi käyttäjä kuittaa nykyiset uutiset näkemättä niitä, jotta ensimmäisenä on oman ohjelman lisääminen.
+  if(!userHasData()){ try{ localStorage.setItem(NEWS_KEY,JSON.stringify([...new Set([...newsSeen(),...PILOT_NEWS.map(n=>n.id)])])); }catch(_){} return []; }
   const seen=new Set(newsSeen());
   return PILOT_NEWS.filter(n=>!seen.has(n.id)&&!(n.skip&&n.skip()));
 }
@@ -11975,6 +11987,7 @@ const FB_LATER="jarkale-fb-later";
 function firstBackupDue(){
   try{
     if(localStorage.getItem("seuranta-setup-done")!=="1") return false;
+    if(!userHasData()) return false; // v2.18.179: vasta kun on jotain varmuuskopioitavaa
     if(parseInt(localStorage.getItem("lastExport")||"0")) return false;
     const st=syncState(); if(st.enabled||st.lastSyncAt) return false;
     const later=parseInt(localStorage.getItem(FB_LATER)||"0");

@@ -8,7 +8,7 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
       localStorage.setItem('seuranta-settings',JSON.stringify({tracking:trkBody?{weight:true,sleep:true,training:true}:{training:true},gym:{enabled:gym}}));
       const E={},now=new Date().toISOString(); for(let i=1;i<=days;i++){ const d=new Date(Date.now()-i*864e5).toISOString().slice(0,10); E[d]={date:d,weight:80,sleep:7,created_at:now,updated_at:now}; }
       localStorage.setItem('seuranta-entries',JSON.stringify(E)); },[days,gym,trkBody]);
-    await p.reload(); await p.waitForTimeout(400);
+    await p.reload(); await p.waitForFunction(()=>typeof surveyCardHTML==='function'&&typeof PILOT_NEWS!=='undefined'&&typeof G!=='undefined'); await p.waitForTimeout(300);
     await p.evaluate(()=>localStorage.setItem(NEWS_KEY,JSON.stringify(PILOT_NEWS.map(n=>n.id)))); };
   await setup(10,false,true);
   ok(await p.evaluate(()=>surveyCardHTML()==="")===true,'oma versio: ei kyselyä');

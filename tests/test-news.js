@@ -8,6 +8,8 @@ await p.evaluate(()=>{localStorage.clear();localStorage.setItem('lastExport',Str
 await p.reload();await p.waitForTimeout(500);
 ok(!(await p.locator('#news-card').isVisible()),'uusi käyttäjä aloitusnäkymässä: ei uutiskorttia');
 await p.evaluate(()=>{localStorage.setItem('seuranta-setup-done','1');});await p.reload();await p.waitForTimeout(500);
+ok(!(await p.locator('#news-card').isVisible()),'v2.18.179: uusi käyttäjä ilman kirjauksia: ei uutiskorttia, ohjelman lisäys ensin');
+await p.evaluate(()=>{localStorage.removeItem('jarkale-news-seen');const d=new Date(Date.now()-864e5).toISOString().slice(0,10);S.entries[d]={date:d,weight:80,created_at:'x',updated_at:'x'};saveAll();});await p.reload();await p.waitForTimeout(500);
 const t=await p.locator('#news-card').innerText().catch(()=>'');
 ok(/Google Driveen/.test(t)&&/Saliohjelma/.test(t),'pilotti: kortissa Drive ja sali');
 

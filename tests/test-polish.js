@@ -25,7 +25,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(go.bot<=go.h&&/Aloita näillä · 4 valittu/.test(go.txt),'Aloita-nappi näkyy ilman vieritystä ('+Math.round(go.bot)+' ≤ '+go.h+'): '+go.txt);
   await p.locator('.su-go').click(); await p.waitForTimeout(400);
   ok(await shown('#nav')&&await shown('#date-nav'),'aloituksen jälkeen alapalkki ja päivämäärä palaavat');
-  ok(await shown('#first-backup'),'aloituksen jälkeen tarjotaan varmuuskopiota');
+  ok(!(await shown('#first-backup')),'v2.18.179: heti aloituksen jälkeen ei varmuuskopiokehotetta (ei vielä mitään tallennettavaa)');
+  await p.evaluate(()=>{ const d=today(); S.entries[d]={date:d,weight:80,created_at:'x',updated_at:'x'}; saveAll(); renderAll(); }); await p.waitForTimeout(300);
+  ok(await shown('#first-backup'),'ensimmäisen kirjauksen jälkeen tarjotaan varmuuskopiota');
   await p.locator('.su-choice').count().then(n=>ok(n===0,'aloitusnäkymä suljettu'));
   // Takaisin-polku: valinnat säilyvät, oletuksia ei lisätä uudelleen jos käyttäjä on jo valinnut
   await fresh();
