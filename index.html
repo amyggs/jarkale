@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.182</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.183</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.183", d:"marraskuu 2026", items:[
+    "Kyselyyn kysymys maksuhalukkuudesta: En maksaisi / 1–2 € kuukaudessa / 3–5 € kuukaudessa / Kertamaksun, en kuukausimaksua. Jo vastanneet saavat sen lisäkysymyksenä teemakysymyksen kanssa."
+  ]},
   {v:"2.18.182", d:"marraskuu 2026", items:[
     "Ohjelman tekstituonti tunnistaa saman liikkeen eri toistotavoitteet myös pilkulla eroteltuina (\"2 x 6-8, 1 x 10-12\") ja pyramidina (\"3 x 8/10/12\" = sarjat 8, 10 ja 12 toistoa). Ennen pilkun jälkeinen osa ja pyramidin muut toistot katosivat. Esittelysivulle maininta eri toistotavoitteista sarjoittain."
   ]},
@@ -11928,13 +11931,15 @@ const SURVEY_QS=[
   {id:"themes",t:"Teemoja karsitaan. Mitkä haluat säilyttää?",themes:true},
   {id:"extra",t:"Mikä tuntuu sovelluksessa turhalta tai sekavalta?",text:true},
   {id:"switch",t:"Mikä saisi sinut vaihtamaan toiseen sovellukseen?",text:true},
+  {id:"pay",t:"Maksaisitko Järkäleestä?",o:["En maksaisi","1–2 € kuukaudessa","3–5 € kuukaudessa","Kertamaksun, en kuukausimaksua"]},
   {id:"rec",t:"Kenelle suosittelisit Järkälettä?",o:["Treenikaverille, jolla on valmentaja","Kenelle tahansa salilla kävijälle","Hyvinvointia seuraavalle","En kenellekään vielä"]}
 ];
 function surveyState(){ try{ return {a:{},step:0,sent:false,snooze:0,...JSON.parse(localStorage.getItem(SURVEY_KEY)||"{}")}; }catch(_){ return {a:{},step:0,sent:false,snooze:0}; } }
 function surveySave(st){ try{ localStorage.setItem(SURVEY_KEY,JSON.stringify(st)); }catch(_){} }
 function surveyQs(){ return SURVEY_QS.filter(q=>!q.when||q.when()); }
 // v2.18.176: lisäkysymykset jo vastanneille. Lähetetyt kysymykset muistetaan (sentQs); v2.18.175:n lähettäjillä kaikki paitsi teemat.
-function surveySentQs(st){ return st.sentQs||(st.sent?SURVEY_QS.filter(q=>q.id!=="themes").map(q=>q.id):[]); }
+const SURVEY_V175=["why","slow","daily","extra","switch","rec"]; // v2.18.175:n kysymykset (lähettäjillä ei sentQs-listaa)
+function surveySentQs(st){ return st.sentQs||(st.sent?SURVEY_V175:[]); }
 function surveyPending(st){ const sq=surveySentQs(st); return surveyQs().filter(q=>!sq.includes(q.id)); }
 function surveyUse(){
   const days=new Set(Object.keys(S.entries||{}).filter(d=>hasMeaningfulEntry(S.entries[d])));
