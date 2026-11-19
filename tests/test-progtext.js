@@ -42,6 +42,12 @@ const TXT=["Ohjelma testi 1/2026","","Jokainen sarja failureen saakka.","","1 Ri
   ok(tb.b==='Päivä 1: Penkkipunnerrus 3 × 8–10 · 60 kg | Ylätalja 3 × 10–12','erilliset Sarjat- ja Toistot-sarakkeet, paino: '+tb.b);
   ok(tb.c==='Maanantai: Kyykky 3 × 5 | Penkki 3 × 8 // Torstai: Maastaveto 2 × 5','Päivä-sarake treenipäiviksi: '+tb.c);
   ok(tb.d==='Day A: Bench Press 4 × 6–8 [RPE 8]','englanninkielinen taulukko: '+tb.d);
+  // v2.18.182: eri toistotavoitteet pilkulla ja pyramidina
+  const mx=await p.evaluate(()=>['Penkki 2*6-8, 1*10-12 + R/P + DS','Vinopenkki 3 x 8 / 10 / 12','Kyykky 3 x 12/10/8 60 kg','Ylätalja 3 x 10-12, viimeinen sarja hitaasti'].map(t=>{const r=parseExLine(t);return goalTxt(r)+'|'+r.note;}));
+  ok(mx[0]==='2\u00a0×\u00a06–8 + 1\u00a0×\u00a010–12 + R/P + DS|'||mx[0].replace(/\u00a0/g,' ')==='2 × 6–8 + 1 × 10–12 + R/P + DS|','pilkulla eroteltu toinen toistotavoite säilyy ('+mx[0]+')');
+  ok(mx[1].replace(/\u00a0/g,' ')==='1 × 8 + 1 × 10 + 1 × 12|','pyramidi 3 x 8/10/12 → sarjoittain ('+mx[1]+')');
+  ok(/1 × 12 \+ 1 × 10 \+ 1 × 8 · 60 kg/.test(mx[2].replace(/\u00a0/g,' ')),'laskeva pyramidi ja paino ('+mx[2]+')');
+  ok(mx[3].replace(/\u00a0/g,' ')==='3 × 10–12|viimeinen sarja hitaasti','pilkun jälkeinen ohje jää ohjeeksi');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

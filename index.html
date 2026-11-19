@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.181</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.182</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.182", d:"marraskuu 2026", items:[
+    "Ohjelman tekstituonti tunnistaa saman liikkeen eri toistotavoitteet myös pilkulla eroteltuina (\"2 x 6-8, 1 x 10-12\") ja pyramidina (\"3 x 8/10/12\" = sarjat 8, 10 ja 12 toistoa). Ennen pilkun jälkeinen osa ja pyramidin muut toistot katosivat. Esittelysivulle maininta eri toistotavoitteista sarjoittain."
+  ]},
   {v:"2.18.181", d:"marraskuu 2026", items:[
     "Esittelysivu: Sarja yhdellä napautuksella -korttiin koettu rasittavuus RPE- tai RIR-asteikolla, Paino ja keho -korttiin rasvaprosentin kaavat (US Navy, Jackson–Pollock) ja FFMI. Sovellukseen ei muutoksia."
   ]},
@@ -9578,10 +9581,15 @@ function parseExLine(text){
   if(!name) return blank;
   // tavoiteryhmät: "2 * 6-8 & 1 * 8-12"
   let rest=t.slice(start); const groups=[];
-  const gRe=new RegExp("^"+GOAL_G,"i"), joinRe=/^\s*(?:&|\+|ja|sekä)\s*/i;
+  // v2.18.182: myös pilkku ("2 x 6-8, 1 x 10-12") ja pyramidi "3 x 8/10/12" (toistot sarjoittain, kun määrä täsmää)
+  const gRe=new RegExp("^"+GOAL_G,"i"), joinRe=/^\s*(?:&|\+|ja|sekä|,)\s*/i;
   for(;;){
     const g=rest.match(gRe); if(!g) break;
-    groups.push(parseGroup(g)); rest=rest.slice(g[0].length);
+    const pg=parseGroup(g); rest=rest.slice(g[0].length);
+    const pyr=!pg.isMax&&pg.max==null?rest.match(/^(?:\s*\/\s*\d{1,2}\b)+/):null;
+    const reps=pyr?[pg.min,...pyr[0].split("/").slice(1).map(x=>parseInt(x,10))]:null;
+    if(reps&&reps.length===pg.sets&&reps.every(r=>r>0&&r<100)){ reps.forEach(r=>groups.push({sets:1,min:r,max:null,isMax:false})); rest=rest.slice(pyr[0].length); }
+    else groups.push(pg);
     const j=rest.match(joinRe); if(j&&gRe.test(rest.slice(j[0].length))){ rest=rest.slice(j[0].length); continue; }
     break;
   }
