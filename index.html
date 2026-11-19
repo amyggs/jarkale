@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.184</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.185</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.185", d:"marraskuu 2026", items:[
+    "Liikkeen sivulla Yhdistä toiseen liikkeeseen: jos sama liike on kirjattu eri nimillä (esim. Vinopenkkipunnerruslaite ja Vinopenkki Smith), kaikki kerrat siirtyvät valitulle liikkeelle myös ohjelmissa, ja edelliset tulokset, ennätykset ja käyrä lasketaan yhdessä. Listassa samankaltaiset ensin; samassa treenissä olevia liikkeitä ei tarjota. Turvakopio ennen yhdistämistä, alkuperäinen nimi talteen (mergedFrom), peruttavissa kohdeliikkeen sivulta. Synkronoituu Driveen (treenin ja ohjelman updatedAt)."
+  ]},
   {v:"2.18.184", d:"marraskuu 2026", items:[
     "Liikkeen sivulta Takaisin palaa samaan kohtaan Liikkeiden kehitys -listaa, josta liike avattiin (ennen sivun alkuun).",
     "Liikkeen sivu kertoo, miksi kehityskäyrää ei vielä ole: käyrä näkyy, kun liike on tehty vähintään kaksi kertaa."
@@ -7527,6 +7530,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"19.11.2026", items:[
+    "Saman liikkeen eri nimet voi yhdistää: avaa liike ja valitse Yhdistä toiseen liikkeeseen. Kaikki kerrat siirtyvät valitulle liikkeelle, ja yhdistämisen voi perua.",
     "Liikkeen sivulta takaisin tultaessa lista jatkuu siitä kohdasta, josta avasit liikkeen. Jos liike on tehty vasta kerran, sivu kertoo, että käyrä tulee näkyviin toisen kerran jälkeen."
   ]},
   {d:"16.11.2026", items:[
@@ -10721,7 +10725,7 @@ function applyRunMode(){
 }
 // v2.18.184: liikkeen sivulta takaisin samaan kohtaan listaa, josta liike avattiin
 function gOpenEx(key){ const v=document.getElementById("view-treeni"); GU.retScroll=v?v.scrollTop:0; GU.mode="exercise"; GU.exKey=key; renderGym(); gTop(); }
-function gBack(){ const ret=GU.mode==="exercise"?GU.retScroll:null; GU.retScroll=null; GU.justFinished=null; GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym();
+function gBack(){ const ret=GU.mode==="exercise"?GU.retScroll:null; GU.retScroll=null; GU.mergeFrom=null; GU.justFinished=null; GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym();
   if(ret!=null){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=ret; } else gTop(); }
 const gBackLink=(txt)=>`<button class="g-back" onclick="gBack()">‹ ${txt||"Treeni"}</button>`;
 function lastDoneOfDay(dayId){ const s=G.sessions.filter(x=>x.endedAt&&x.dayId===dayId).sort((a,b)=>b.startedAt-a.startedAt)[0]; return s||null; }
@@ -11530,7 +11534,53 @@ function gymChartHTML(H){
   }
   return h+`</div>`;
 }
+// v2.18.185: liikkeen yhdistäminen toiseen (saman liikkeen eri nimet). Tallennetut kerrat siirtyvät kohdeliikkeelle,
+// alkuperäinen nimi talteen (mergedFrom) → peruttavissa. Turvakopio ennen. Ei tarjota liikettä, joka on samassa treenissä.
+function gMergeCands(from){
+  const known=gKnownEx(), fromName=(known[from]||{}).name||from;
+  const same=new Set(); G.sessions.forEach(s=>{ if(s.exercises.some(e=>e.key===from)) s.exercises.forEach(e=>same.add(e.key)); });
+  return Object.values(known).filter(o=>o.key!==from&&o.n>0&&!same.has(o.key))
+    .map(o=>{ const a=exNorm(fromName).replace(/ /g,""), b2=exNorm(o.name).replace(/ /g,""); let cp=0; while(cp<a.length&&a[cp]===b2[cp]) cp++;
+      return {o,lv:(exSimilarity(fromName,o.name)||0)*100+(cp>=4?cp:0)}; }) // samankaltaisuus, sitten yhteinen alku (Vinopenkki…)
+    .sort((a,b)=>b.lv-a.lv||b.o.n-a.o.n||a.o.name.localeCompare(b.o.name,"fi")).map(x=>x.o);
+}
+function gymMergeHTML(from){
+  const known=gKnownEx(), f=known[from]||{name:from,n:0}, list=gMergeCands(from), k=esc(JSON.stringify(from));
+  let h=`<div class="view-hero"><button class="g-back" onclick="GU.mergeFrom=null;renderGym();gTop()">‹ ${esc(f.name)}</button><div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">Yhdistä toiseen liikkeeseen</div><div class="tr-h2">${esc(f.name)} · ${f.n} kertaa</div></div></div></div>`;
+  h+=`<div class="g-hint">Valitse liike, joka on oikeasti sama. Kaikki tämän liikkeen kerrat siirtyvät sille, ja edelliset tulokset, ennätykset ja käyrä lasketaan yhdessä. Yhdistämisen voi perua.</div>`;
+  if(!list.length) return h+`<div class="g-hint">Muita liikkeitä ei ole. Liikkeet, jotka ovat samassa treenissä tämän kanssa, eivät näy, koska ne ovat eri liikkeitä.</div>`;
+  h+=`<div class="tr-list">`+list.map(o=>`<button class="tr-row tr-btn" onclick="gMergeAsk(${k},${esc(JSON.stringify(o.key))})"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${o.n}\u00a0${o.n===1?"kerta":"kertaa"} · viimeksi ${gDay(o.last)}</div></div><span class="chev">›</span></button>`).join("")+`</div>`;
+  return h+`<div class="g-hint" style="margin-top:10px">Liikkeet, jotka ovat samassa treenissä tämän kanssa, eivät näy listassa.</div><div style="height:30px"></div>`;
+}
+async function gMergeAsk(from,to){
+  const known=gKnownEx(), f=known[from], t=known[to]; if(!f||!t) return;
+  const ok=await jConfirm(`Yhdistetäänkö ${f.name} (${f.n} ${f.n===1?"kerta":"kertaa"}) liikkeeseen ${t.name}?\n\nKaikki kerrat siirtyvät nimelle ${t.name}, myös ohjelmissa. Ennen yhdistämistä otetaan turvakopio, ja yhdistämisen voi perua ${t.name}-liikkeen sivulta.`,{ok:"Yhdistä",cancel:"Peruuta"});
+  if(ok) gMergeEx(from,to);
+}
+function gMergeEx(from,to){
+  const known=gKnownEx(), t=known[to]; if(!t||from===to) return false;
+  if(!safetyCopy("liikkeiden yhdistäminen")){ jAlert("Turvakopiota ei saatu tehtyä, joten liikkeitä ei yhdistetty."); return false; }
+  const now=Date.now(); let n=0;
+  G.sessions.forEach(s=>{ let ch=false; s.exercises.forEach(e=>{ if(e.key===from){ if(!e.mergedFrom) e.mergedFrom={key:e.key,name:e.name}; e.key=to; e.name=t.name; ch=true; n++; } }); if(ch) s.updatedAt=now; });
+  G.programs.forEach(p=>{ let ch=false; p.days.forEach(d=>d.exercises.forEach(e=>{ if(e.key===from){ if(!e.mergedFrom) e.mergedFrom={key:e.key,name:e.name}; e.key=to; e.name=t.name; ch=true; } })); if(ch) p.updatedAt=now; });
+  const fm=exMeta(from), tm=exMeta(to); const patch={}; if(fm.pin&&!tm.pin) patch.pin=fm.pin; if(fm.group&&!tm.group) patch.group=fm.group;
+  if(Object.keys(patch).length) exMetaSet(to,patch); else gymSave();
+  GU.mergeFrom=null; GU.mode="exercise"; GU.exKey=to; renderGym(); gTop(); showSavedToast(`Yhdistetty: ${n} ${n===1?"kerta":"kertaa"} siirtyi`); haptic(15); return true;
+}
+function gMergedInto(key){ // mistä liikkeistä tähän on yhdistetty: [{key,name,n}]
+  const m={}; G.sessions.forEach(s=>s.exercises.forEach(e=>{ if(e.key===key&&e.mergedFrom&&e.mergedFrom.key!==key){ const o=m[e.mergedFrom.key]||(m[e.mergedFrom.key]={key:e.mergedFrom.key,name:e.mergedFrom.name,n:0}); o.n++; } }));
+  return Object.values(m);
+}
+async function gMergeUndo(to,from){
+  const list=gMergedInto(to), o=list.find(x=>x.key===from); if(!o) return;
+  if(!await jConfirm(`Perutaanko yhdistäminen? ${o.n} ${o.n===1?"kerta palaa":"kertaa palaa"} nimelle ${o.name}.`,{ok:"Peru yhdistäminen",cancel:"Peruuta"})) return;
+  const now=Date.now();
+  G.sessions.forEach(s=>{ let ch=false; s.exercises.forEach(e=>{ if(e.key===to&&e.mergedFrom&&e.mergedFrom.key===from){ e.key=e.mergedFrom.key; e.name=e.mergedFrom.name; delete e.mergedFrom; ch=true; } }); if(ch) s.updatedAt=now; });
+  G.programs.forEach(p=>{ let ch=false; p.days.forEach(d=>d.exercises.forEach(e=>{ if(e.key===to&&e.mergedFrom&&e.mergedFrom.key===from){ e.key=e.mergedFrom.key; e.name=e.mergedFrom.name; delete e.mergedFrom; ch=true; } })); if(ch) p.updatedAt=now; });
+  gymSave(); renderGym(); showSavedToast("Yhdistäminen peruttu"); haptic(15);
+}
 function gymExerciseHTML(key){
+  if(GU.mergeFrom===key) return gymMergeHTML(key);
   const H=exerciseHistory(key);
   const name=H.length?H[H.length-1].ex.name:key;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(name)}</div><div class="tr-h2">${H.length} kertaa</div></div></div></div>`;
@@ -11552,7 +11602,11 @@ function gymExerciseHTML(key){
   h+=gymChartHTML(H);
   h+=`<div class="tr-sec">Kaikki kerrat</div><div class="tr-list">`;
   h+=H.slice().reverse().map(x=>`<button class="tr-row tr-btn" onclick="openSession('${x.s.id}')"><div class="t"><div class="n" style="font-weight:600">${gDay(x.s.date)}${x.ex.feel?` · ${feelTxt(x.ex.feel).toLowerCase()}`:""}</div><div class="s">${setsTxt(doneRows(x.ex))}${effTxt(x.sets)?` · ${effTxt(x.sets)}`:""}</div>${x.ex.userNote?`<div class="s" style="color:var(--text)">${esc(x.ex.userNote)}</div>`:""}</div><span class="chev">›</span></button>`).join("");
-  return h+`</div><div style="height:30px"></div>`;
+  h+=`</div>`;
+  const k2=esc(JSON.stringify(key));
+  gMergedInto(key).forEach(o=>{ h+=`<div class="g-hint" style="margin-top:12px">Yhdistetty liikkeestä ${esc(o.name)} (${o.n} ${o.n===1?"kerta":"kertaa"}). <button class="g-link" onclick="gMergeUndo(${k2},${esc(JSON.stringify(o.key))})">Peru yhdistäminen</button></div>`; });
+  h+=`<button class="tr-pill" style="margin-top:14px" onclick="GU.mergeFrom=${k2};renderGym();gTop()">Yhdistä toiseen liikkeeseen</button>`;
+  return h+`<div style="height:30px"></div>`;
 }
 
 // ── Trendit: jakson liikekehitys (vain kun ominaisuus on päällä ja dataa on)
