@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.183</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.184</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,10 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.184", d:"marraskuu 2026", items:[
+    "Liikkeen sivulta Takaisin palaa samaan kohtaan Liikkeiden kehitys -listaa, josta liike avattiin (ennen sivun alkuun).",
+    "Liikkeen sivu kertoo, miksi kehityskäyrää ei vielä ole: käyrä näkyy, kun liike on tehty vähintään kaksi kertaa."
+  ]},
   {v:"2.18.183", d:"marraskuu 2026", items:[
     "Kyselyyn kysymys maksuhalukkuudesta: En maksaisi / 1–2 € kuukaudessa / 3–5 € kuukaudessa / Kertamaksun, en kuukausimaksua. Jo vastanneet saavat sen lisäkysymyksenä teemakysymyksen kanssa."
   ]},
@@ -7522,6 +7526,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"19.11.2026", items:[
+    "Liikkeen sivulta takaisin tultaessa lista jatkuu siitä kohdasta, josta avasit liikkeen. Jos liike on tehty vasta kerran, sivu kertoo, että käyrä tulee näkyviin toisen kerran jälkeen."
+  ]},
   {d:"16.11.2026", items:[
     "Jos kirjasit liikkeen väärällä nimellä, Vaihda liike korjaa nyt nimen ja tehdyt sarjat siirtyvät oikealle liikkeelle. Kesken treenin sovellus kysyy, korjataanko nimi vai vaihdoitko oikeasti liikettä.",
     "Kun kirjoitat liikkeen nimeä, sovellus ehdottaa aiemmin tekemiäsi samankaltaisia liikkeitä. Napauttamalla ehdotusta liike jatkaa vanhaa historiaa, ja viime kerran tulokset näkyvät, vaikka kirjoittaisit nimen hieman eri tavalla."
@@ -10712,7 +10719,10 @@ function applyRunMode(){
   try{ const s=S.tab==="treeni"&&GU.mode==="session"&&gSession(GU.sessionId); on=!!s&&!s.endedAt; }catch(_){}
   document.documentElement.classList.toggle("g-run",on);
 }
-function gBack(){ GU.justFinished=null; GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym(); gTop(); }
+// v2.18.184: liikkeen sivulta takaisin samaan kohtaan listaa, josta liike avattiin
+function gOpenEx(key){ const v=document.getElementById("view-treeni"); GU.retScroll=v?v.scrollTop:0; GU.mode="exercise"; GU.exKey=key; renderGym(); gTop(); }
+function gBack(){ const ret=GU.mode==="exercise"?GU.retScroll:null; GU.retScroll=null; GU.justFinished=null; GU.mode="home"; GU.menu=null; GU.finishing=false; renderGym();
+  if(ret!=null){ const v=document.getElementById("view-treeni"); if(v) v.scrollTop=ret; } else gTop(); }
 const gBackLink=(txt)=>`<button class="g-back" onclick="gBack()">‹ ${txt||"Treeni"}</button>`;
 function lastDoneOfDay(dayId){ const s=G.sessions.filter(x=>x.endedAt&&x.dayId===dayId).sort((a,b)=>b.startedAt-a.startedAt)[0]; return s||null; }
 
@@ -10814,7 +10824,7 @@ function gExRowsHTML(shown){
     const badge=tr.dir?`<span class="g-trend ${tr.dir}" aria-label="Viimeisin kerta edelliseen verrattuna: ${tr.dirTxt}">${tr.dir==="up"?"↑":tr.dir==="down"?"↓":"→"}</span>`:"";
     const stall=tr.sinceBest>=3?` · <span class="g-stall">ennätys ${tr.sinceBest} kertaa sitten</span>`:"";
     const prevTop=tr.prev?setOneTxt(tr.prev.top):"";
-    return `<button class="tr-row tr-btn" onclick="GU.mode='exercise';GU.exKey=${esc(JSON.stringify(o.key))};renderGym();gTop()"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${gDay(o.last)}${top?` · ${top}`:""}${prevTop?`, edellinen ${prevTop}`:` · ${o.n} ${o.n===1?"kerta":"kertaa"}`}${stall}</div></div>${badge}<span class="chev">›</span></button>`;
+    return `<button class="tr-row tr-btn" onclick="gOpenEx(${esc(JSON.stringify(o.key))})"><div class="t"><div class="n">${esc(o.name)}</div><div class="s">${gDay(o.last)}${top?` · ${top}`:""}${prevTop?`, edellinen ${prevTop}`:` · ${o.n} ${o.n===1?"kerta":"kertaa"}`}${stall}</div></div>${badge}<span class="chev">›</span></button>`;
   }).join("");
   return h;
 }
@@ -11474,7 +11484,7 @@ function gymChartHTML(H){
   const anyKg=H.some(x=>x.top.kg!=null);
   const mode=GU.chartMode==="tot"?"tot":anyKg?(GU.chartMode||"e1"):"reps";
   const data=mode==="tot"?H:anyKg?H.filter(x=>x.top.kg!=null):H;
-  if(data.length<2) return "";
+  if(data.length<2) return `<div class="g-hint" style="margin:14px 0 4px">Kehityskäyrä näkyy, kun liike on tehty vähintään kaksi kertaa.</div>`;
   const val=x=>mode==="tot"?totReps(x):mode==="e1"?x.e1:mode==="kg"?x.top.kg:x.top.reps;
   // Aikaväli: valittu tai seuraava pidempi; jos yksikään väli ei kata kahta kertaa (liike tehty kauan sitten), kaksi viimeisintä
   const opts=chartRangeOpts(data), want=GU.chartRange||chartRangePref(), wi=CHART_RANGES.findIndex(r=>r[0]===want);
@@ -12122,7 +12132,7 @@ window.addEventListener("popstate",e=>{
   if(NAV_PENDING){ NAV_PENDING=false; NAV_LEN=jk; navUpdate(); return; }
   // Käyttäjän takaisin-ele: noustaan taso ylöspäin
   NAV_LEN=jk;
-  if(S.tab==="treeni"&&GU.mode!=="home"){ GU.mode="home"; GU.menu=null; GU.finishing=false; GU.justFinished=null; renderGym(); gTop(); }
+  if(S.tab==="treeni"&&GU.mode!=="home"){ gBack(); } // v2.18.184: sama paluu kuin Takaisin-napilla (liikkeen sivulta listan kohtaan)
   else if(S.tab!=="log") setTab("log");
   navUpdate();
 });
