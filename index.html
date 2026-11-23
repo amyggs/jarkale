@@ -2340,7 +2340,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.189</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.190</span>
       </div>
     </div>
   </div>
@@ -2374,6 +2374,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.190", d:"marraskuu 2026", items:[
+    "Korjattu: aiempien kertojen avaaminen alemmasta liikkeestä hyppäsi seuraavan liikkeen kohdalle, koska lista aukeaa kaikkiin liikkeisiin ja yläpuoliset kortit kasvoivat. Napautettu rivi pysyy nyt paikallaan, kun lista aukeaa tai sulkeutuu."
+  ]},
   {v:"2.18.189", d:"marraskuu 2026", items:[
     "Treenin aikana liikkeen kehitys kuin vihkossa: Viimeksi-rivin napautus avaa sen alle neljä aiempaa kertaa (päivä ja sarjat, uusimmasta vanhimpaan) ja linkin Koko historia. Auki/kiinni muistetaan kaikille liikkeille. Liikkeen sivulta paluu vie takaisin käynnissä olevaan treeniin samaan kohtaan."
   ]},
@@ -9987,7 +9990,13 @@ function prevHist(key,sess,n){
 }
 const PREV_HIST_KEY="jarkale-prevhist";
 function prevHistOpen(){ try{ return localStorage.getItem(PREV_HIST_KEY)==="1"; }catch(_){ return false; } }
-function prevHistToggle(){ try{ localStorage.setItem(PREV_HIST_KEY,prevHistOpen()?"0":"1"); }catch(_){} renderGym(); }
+// v2.18.190: lista aukeaa kaikkiin liikkeisiin, joten yläpuolisten korttien kasvu siirsi napautetun rivin pois näkyvistä.
+// Napautettu Viimeksi-rivi pidetään samassa kohdassa ruutua.
+function prevHistToggle(exId){
+  const v=document.getElementById("view-treeni"), sel=exId?`.ex-prev-t[data-ex="${exId}"]`:null, el=sel&&document.querySelector(sel), y0=el?el.getBoundingClientRect().top:null;
+  try{ localStorage.setItem(PREV_HIST_KEY,prevHistOpen()?"0":"1"); }catch(_){} renderGym();
+  const el2=sel&&document.querySelector(sel); if(v&&el2&&y0!=null) v.scrollTop+=el2.getBoundingClientRect().top-y0;
+}
 function prevFor(key,sess){
   const mk=key+"|"+(sess?sess.id:"");
   if(PREV_MEMO&&PREV_MEMO.has(mk)) return PREV_MEMO.get(mk);
@@ -11324,7 +11333,7 @@ function gymSessionHTML(s){
     if(prev){
       // v2.18.189: aiemmat kerrat Viimeksi-rivin alle (kuin vihkossa). Napautus avaa/sulkee; valinta muistetaan kaikille liikkeille.
       const older=prevHist(ex.key,s,4), hOpen=older.length&&prevHistOpen();
-      h+=`<div class="ex-prev${older.length?" ex-prev-t":""}"${older.length?` role="button" tabindex="0" aria-expanded="${hOpen}" onclick="prevHistToggle()" onkeydown="if(event.key==='Enter')prevHistToggle()"`:""}>Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.rows||prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${effTxt(prev.sets)?` · ${effTxt(prev.sets)}`:""}${prev.note?` <button class="nt" onclick="event.stopPropagation();GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}${older.length?`<span class="ex-ph-chev" aria-hidden="true">${hOpen?"⌃":"⌄"}</span>`:""}</div>`;
+      h+=`<div class="ex-prev${older.length?" ex-prev-t":""}"${older.length?` role="button" tabindex="0" data-ex="${ex.id}" aria-expanded="${hOpen}" onclick="prevHistToggle('${ex.id}')" onkeydown="if(event.key==='Enter')prevHistToggle('${ex.id}')"`:""}>Viimeksi ${gDay(prev.date)}: ${setsTxt(prev.rows||prev.sets)}${prev.feel?` · ${feelTxt(prev.feel).toLowerCase()}`:""}${effTxt(prev.sets)?` · ${effTxt(prev.sets)}`:""}${prev.note?` <button class="nt" onclick="event.stopPropagation();GU.prevNote['${ex.id}']=!GU.prevNote['${ex.id}'];renderGym()">${ico("note",14)} huomio</button>`:""}${older.length?`<span class="ex-ph-chev" aria-hidden="true">${hOpen?"⌃":"⌄"}</span>`:""}</div>`;
       if(prev.note&&GU.prevNote[ex.id]) h+=`<div class="ex-pnote">${esc(prev.note)}</div>`;
       if(hOpen) h+=`<div class="ex-ph">${older.map(x=>`<div><span>${gDay(x.s.date)}</span><span>${setsTxt(doneRows(x.ex))}</span></div>`).join("")}<button class="g-link" onclick="gOpenEx(${esc(JSON.stringify(ex.key))},true)">Koko historia ›</button></div>`;
     }
