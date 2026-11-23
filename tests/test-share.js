@@ -23,6 +23,20 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(r.made>=1,'kuva tehtiin');
   ok(r.dlg[0]&&/kuvana vai tekstinä/.test(r.dlg[0])&&r.dlg[1]==='Kuva on valmis.','vanhentunut lupa: kysytään Jaa kuva ('+r.dlg.join(' / ')+')');
   ok(r.log.join(',')==='file,file'&&!r.alerted,'jaetaan kuvana toisella napautuksella, ei vaihtoa tekstiin');
+  // v2.18.196: Tallenna kuva – Androidilla lataus (png), ei jakovalikkoa; valintaikkunassa kolmas valinta omalla rivillään
+  const sv=await p.evaluate(async()=>{
+    const id=G.sessions[0].id; let shared=0, dl=null; navigator.share=async()=>{ shared++; };
+    const oc=window.jConfirm; let opt=null; window.jConfirm=async(msg,o)=>{ opt=o; return 'extra'; };
+    const ca=HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click=function(){ dl=this.download; };
+    await gShareSession(id); HTMLAnchorElement.prototype.click=ca; window.jConfirm=oc;
+    return {extra:opt&&opt.extra,shared,dl};
+  });
+  ok(sv.extra==='Tallenna kuva'&&/^jarkale-treeni-\d{4}-\d\d-\d\d\.png$/.test(sv.dl||'')&&sv.shared===0,'Tallenna kuva lataa kuvan ('+sv.dl+') eikä avaa jakoa');
+  await p.evaluate(()=>{ jConfirm('Jaetaanko treeni kuvana vai tekstinä?',{ok:'Kuvana',cancel:'Tekstinä',extra:'Tallenna kuva',choice:true}); });
+  await p.waitForTimeout(300);
+  const lay=await p.evaluate(()=>{ const r=q=>document.querySelector(q).getBoundingClientRect(); const a=r('.jdlg-no'),b=r('.jdlg-ok'),c=r('.jdlg-x'); return {row:Math.abs(a.top-b.top)<1, below:c.top>=b.bottom, full:Math.abs(c.width-(b.right-a.left))<2}; });
+  ok(lay.row&&lay.below&&lay.full,'valintaikkuna: Tekstinä | Kuvana, Tallenna kuva koko leveänä alla');
+  await p.locator('.jdlg-x').click(); await p.waitForTimeout(250);
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();

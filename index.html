@@ -1618,6 +1618,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .g-sum-hero small{display:block;font:600 12px/1.35 Manrope,system-ui,sans-serif;margin-top:3px;opacity:.9;overflow-wrap:break-word;}
 .jdlg-a button{flex:1;height:48px;border-radius:12px;border:none;font:700 15px Manrope,system-ui,sans-serif;}
 .jdlg-no{background:var(--surf2);color:var(--text);}
+/* v2.18.196: kolmas valinta omalle rivilleen (esim. Tallenna kuva) */
+.jdlg-a.ex{flex-wrap:wrap;}
+.jdlg-a .jdlg-x{flex:1 0 100%;height:44px;background:transparent;color:var(--text);border:1px solid var(--bord);}
 .jdlg-ok{background:var(--seg-on);color:var(--on-accent);}
 .jdlg-ok.danger{background:var(--red);color:var(--bg);}
 @media (prefers-reduced-motion:reduce){.jdlg,.jdlg-c{transition:none;}}
@@ -2362,7 +2365,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.195</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.196</span>
       </div>
     </div>
   </div>
@@ -2427,6 +2430,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.196", d:"marraskuu 2026", items:[
+    "Treenin jakoon kolmas valinta Tallenna kuva (Akun havainto: jako Instagramiin ei onnistunut). Android ja tietokone: kuva latautuu (Lataukset, näkyy galleriassa), josta sen voi lisätä mihin tahansa sovellukseen. iPhone/iPad: Koti-valikon sovellus ei tallenna latauksia kuviin, joten avautuu jakovalikko, jossa on Tallenna kuva. jConfirmiin lisävalinta o.extra (koko leveä nappi kahden alla)."
+  ]},
   {v:"2.18.195", d:"marraskuu 2026", items:[
     "Pilotin uutiskortti \"Isompi teksti\" (Valitse koko → Asetukset → Ulkoasu), ei näy, jos koko on jo valittu. Esittelysivulle tekstin koko ja teemojen vaihdon polku Asetukset → Ulkoasu."
   ]},
@@ -7625,6 +7631,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"23.11.2026 ilta", items:[
+    "Treenin kuvan voi nyt myös tallentaa puhelimeen (Jaa → Tallenna kuva). Sen jälkeen kuvan voi lisätä esimerkiksi Instagramiin galleriasta."
+  ]},
   {d:"23.11.2026", items:[
     "Uusi asetus: Tekstin koko (Asetukset → Ulkoasu). Valitse Normaali, Iso tai Järkäle, jos teksti on pientä.",
     "Jos puhelimessa on iso tekstikoko, Järkäle mahtuu paremmin ruudulle: alapalkki, taukonapit ja pitkät liikkeiden nimet eivät enää mene päällekkäin tai katkea kesken sanan.",
@@ -8268,12 +8277,13 @@ function jConfirm(msg,o={}){
     w.innerHTML=`<div class="jdlg-c"><div class="jdlg-h"><img src="./icon-192.png?v=4" alt=""><span>Järkäle</span></div>
       <div class="jdlg-t">${esc(first)}</div>${rest?`<div class="jdlg-m">${esc(rest)}</div>`:""}
       ${o.check?`<label class="jdlg-chk"><input type="checkbox"${o.check.value?" checked":""}> ${esc(o.check.label)}</label>`:""}
-      <div class="jdlg-a">${o.alert?"":`<button class="jdlg-no">${esc(o.cancel||"Peruuta")}</button>`}<button class="jdlg-ok${o.danger?" danger":""}">${esc(o.ok||"OK")}</button></div></div>`;
+      <div class="jdlg-a${o.extra?" ex":""}">${o.alert?"":`<button class="jdlg-no">${esc(o.cancel||"Peruuta")}</button>`}<button class="jdlg-ok${o.danger?" danger":""}">${esc(o.ok||"OK")}</button>${o.extra?`<button class="jdlg-x">${esc(o.extra)}</button>`:""}</div></div>`;
     let done=false; const close=v=>{ if(done) return; done=true; if(o.check){ const cb=w.querySelector(".jdlg-chk input"); if(cb) o.check.value=cb.checked; } document.removeEventListener("keydown",kd); w.classList.add("out"); setTimeout(()=>w.remove(),160); res(v); };
     const kd=e=>{ if(e.key==="Escape") close(o.choice?null:false); };
     w.addEventListener("click",e=>{ if(e.target===w&&!o.alert) close(o.choice?null:false); });
     w.querySelector(".jdlg-ok").onclick=()=>close(true);
     const no=w.querySelector(".jdlg-no"); if(no) no.onclick=()=>close(false);
+    const ex=w.querySelector(".jdlg-x"); if(ex) ex.onclick=()=>close("extra"); // v2.18.196
     document.addEventListener("keydown",kd);
     document.body.appendChild(w); requestAnimationFrame(()=>w.classList.add("in"));
     setTimeout(()=>{ try{ w.querySelector(".jdlg-ok").focus({preventScroll:true}); }catch(_){} },30);
@@ -11136,6 +11146,17 @@ function sessionShareText(s,opt){
 // v2.18.61 Treenin yhteenveto kuvana. Piirretään canvasiin nykyisen teeman väreillä ja fonteilla (ei ulkoisia kirjastoja).
 // v2.18.186: kuva voidaan tehdä etukäteen (blobP), koska Android sallii jakoikkunan vain hetken napautuksen jälkeen.
 // Jos lupa ehti vanhentua kuvan piirron aikana (NotAllowedError), kysytään uudelleen valmiin kuvan kanssa: uusi napautus = uusi lupa.
+// v2.18.196: kuvan tallennus. Android/tietokone: lataus (näkyy galleriassa Lataukset-kansiossa). iPhone/iPad: Koti-valikon sovellus ei
+// tallenna latauksia kuviin, joten avataan jakovalikko, jonka ensimmäinen valinta on "Tallenna kuva".
+async function gSaveImage(s,blobP){
+  const blob=await blobP, fname=`jarkale-treeni-${s.date}.png`;
+  if(isIOS()){ const file=new File([blob],fname,{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file]}); return; }
+      catch(e){ if(!e||e.name!=="NotAllowedError") throw e; if(!await jConfirm("Kuva on valmis.\nValitse jakovalikosta Tallenna kuva.",{ok:"Avaa",cancel:"Peruuta"})) return; await navigator.share({files:[file]}); return; } } }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+  showSavedToast("Kuva tallennettu (Lataukset)");
+}
 async function gShareImage(s,opt,blobP){
   const blob=await (blobP||gSessionImage(s,opt));
   const fname=`jarkale-treeni-${s.date}.png`;
@@ -11336,13 +11357,15 @@ async function gShareSession(id){
   // v2.18.61: kuvana (teeman väreissä) tai tekstinä
   // v2.18.107: liikkeiden huomiot (voivat sisältää esim. kiputietoa) eivät lähde jakoon, ellei niitä valita erikseen
   const hasNotes=s.exercises.some(e=>(e.userNote||"").trim());
-  const o={ok:"Kuvana",cancel:"Tekstinä",choice:true}; if(hasNotes) o.check={label:"Näytä liikkeiden huomiot",value:false};
+  // v2.18.196: Tallenna kuva – kuva puhelimeen, josta sen voi lisätä esim. Instagramiin, vaikka suora jako ei onnistuisi
+  const o={ok:"Kuvana",cancel:"Tekstinä",extra:"Tallenna kuva",choice:true}; if(hasNotes) o.check={label:"Näytä liikkeiden huomiot",value:false};
   // v2.18.186: kuva piirretään jo valinnan aikana, jolloin jako avautuu heti napautuksesta
   const pre={}; const preP=notes=>pre[notes]||(pre[notes]=gSessionImage(s,{notes}));
   const p0=preP(false); p0.catch(()=>{}); if(hasNotes){ const p1=preP(true); p1.catch(()=>{}); }
   const how=await jConfirm("Jaetaanko treeni kuvana vai tekstinä?\nKuva tehdään nykyisen teeman väreillä.",o);
   if(how===null) return;
   const opt={notes:!!(o.check&&o.check.value)};
+  if(how==="extra"){ try{ await gSaveImage(s,preP(opt.notes)); }catch(e){ if(!e||e.name!=="AbortError") jAlert("Kuvan tallennus ei onnistunut."); } return; }
   if(how===true){ try{ await gShareImage(s,opt,preP(opt.notes)); return; }catch(e){ if(e&&e.name==="AbortError") return; jAlert("Kuvan teko ei onnistunut. Jaetaan tekstinä."); } }
   const text=sessionShareText(s,opt);
   try{ if(navigator.share){ await navigator.share({title:`Treeni: ${s.dayName}`,text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
