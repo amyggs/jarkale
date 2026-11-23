@@ -2365,7 +2365,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.196</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.197</span>
       </div>
     </div>
   </div>
@@ -2430,6 +2430,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.197", d:"marraskuu 2026", items:[
+    "Pilotin Mitä uutta: kuvan tallennus saman päivän ryhmään (oli erillinen otsikko \"23.11.2026 ilta\")."
+  ]},
   {v:"2.18.196", d:"marraskuu 2026", items:[
     "Treenin jakoon kolmas valinta Tallenna kuva (Akun havainto: jako Instagramiin ei onnistunut). Android ja tietokone: kuva latautuu (Lataukset, näkyy galleriassa), josta sen voi lisätä mihin tahansa sovellukseen. iPhone/iPad: Koti-valikon sovellus ei tallenna latauksia kuviin, joten avautuu jakovalikko, jossa on Tallenna kuva. jConfirmiin lisävalinta o.extra (koko leveä nappi kahden alla)."
   ]},
@@ -7631,10 +7634,8 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
-  {d:"23.11.2026 ilta", items:[
-    "Treenin kuvan voi nyt myös tallentaa puhelimeen (Jaa → Tallenna kuva). Sen jälkeen kuvan voi lisätä esimerkiksi Instagramiin galleriasta."
-  ]},
   {d:"23.11.2026", items:[
+    "Treenin kuvan voi nyt myös tallentaa puhelimeen (Jaa → Tallenna kuva). Sen jälkeen kuvan voi lisätä esimerkiksi Instagramiin galleriasta.",
     "Uusi asetus: Tekstin koko (Asetukset → Ulkoasu). Valitse Normaali, Iso tai Järkäle, jos teksti on pientä.",
     "Jos puhelimessa on iso tekstikoko, Järkäle mahtuu paremmin ruudulle: alapalkki, taukonapit ja pitkät liikkeiden nimet eivät enää mene päällekkäin tai katkea kesken sanan.",
     "Näet treenin aikana, miten liike on kehittynyt: napauta Viimeksi-riviä, niin sen alle tulevat aiemmat kerrat. Lista pysyy auki, kunnes suljet sen.",
