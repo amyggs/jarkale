@@ -37,9 +37,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); const t=document.querySelector('#training-section .tr-sumbtn').textContent.replace(/\u00a0/g,' ').replace(/ ?›$/,' ›'); TR_OPEN=S.date; renderTrainingSection(); return t; })==='✓ Salitreeni · rasitus 4 · lisää kulku ›','v2.18.151: rivi kertoo, mitä puuttuu (kulku)');
   await p.locator('#training-section button',{hasText:'Normaalisti'}).click(); await p.waitForTimeout(150);
   v=await sec();
-  ok(/1 liikettä · 2 sarjaa · .*min · rasitus 4 · normaalisti/.test(v.card),'kortissa rasitus ja kulku: '+v.card);
+  ok(/1 liikettä · 2 sarjaa · .*min · rasitus 4 · kulku normaali/.test(v.card),'kortissa rasitus ja kulku: '+v.card);
   await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); }); v=await sec();
-  ok(/^✓ Salitreeni · rasitus 4 · normaalisti ?›$/.test(v.btn),'suljettu rivi kertoo rasituksen ja kulun: '+v.btn);
+  ok(/^✓ Salitreeni · rasitus 4 · kulku normaali ?›$/.test(v.btn),'suljettu rivi kertoo rasituksen ja kulun: '+v.btn);
   await p.evaluate(()=>flushPendingAutoSave&&flushPendingAutoSave());
   const e=await p.evaluate(()=>{ const x=S.entries[today()]; return {l:x.training_load,o:x.training_outcome,d:x.training_done}; });
   ok(e.l===4&&e.o==='normal'&&e.d===true,'tallentuu päivän kirjaukseen: '+JSON.stringify(e));

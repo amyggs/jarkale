@@ -2344,7 +2344,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.191</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.192</span>
       </div>
     </div>
   </div>
@@ -2378,6 +2378,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.192", d:"marraskuu 2026", items:[
+    "Salitreenin tiivis rivi Kirjaa-näkymässä ja salitreenikortissa: \"rasitus 4 · kulku normaali\" (myös kulku parempi / kulku heikompi). Ennen pelkkä \"normaalisti\" ei kertonut, mitä se kuvaa."
+  ]},
   {v:"2.18.191", d:"marraskuu 2026", items:[
     "Kirjaa-näkymän salitreenirivi (\"✓ Salitreeni · rasitus 4 · normaalisti\"): nuoli on omana osanaan napin oikeassa reunassa eikä putoa yksin omalle rivilleen, kun teksti rivittyy (iso järjestelmäfontti tai kapea näyttö). Väliviiva pysyy edellisen sanan perässä. Tarkistettu 9 teemaa × 2, 360 ja 412 px."
   ]},
@@ -8412,9 +8415,9 @@ function importData(input){
 // ═══ JULKAISU 1: RAKENTEINEN LISÄDATA ═══════════════════════════
 // Canonical enumit (lukittu). Exportissa käytetään näitä arvoja, ei suomenkielisiä labeleita.
 const TRAINING_OUTCOMES=[
-  {id:"worse", l:"Heikommin kuin normaalisti", short:"Heikommin"},
-  {id:"normal",l:"Normaalisti",                short:"Normaalisti"},
-  {id:"better",l:"Paremmin kuin normaalisti",  short:"Paremmin"},
+  {id:"worse", l:"Heikommin kuin normaalisti", short:"Heikommin",   kulku:"kulku heikompi"},
+  {id:"normal",l:"Normaalisti",                short:"Normaalisti", kulku:"kulku normaali"},
+  {id:"better",l:"Paremmin kuin normaalisti",  short:"Paremmin",    kulku:"kulku parempi"},
 ];
 const TRAINING_MODIFICATIONS=[
   {id:"deliberate_lightening", l:"Kevensin tarkoituksella"},
@@ -9055,10 +9058,10 @@ function renderTrainingSection(){
     const oc=TRAINING_OUTCOMES.find(o=>o.id===S.training_outcome);
     // v2.18.151: rivi kertoo myös, mitä puuttuu
     const ld=S.training_load!=null;
-    const bits=["✓ Salitreeni",ld?`rasitus ${S.training_load}`:(oc?"lisää rasitus":""),oc?oc.short.toLowerCase():(ld?"lisää kulku":"lisää rasitus ja kulku")].filter(Boolean).join(" · ");
+    const bits=["✓ Salitreeni",ld?`rasitus ${S.training_load}`:(oc?"lisää rasitus":""),oc?oc.kulku:(ld?"lisää kulku":"lisää rasitus ja kulku")].filter(Boolean).join(" · ");
     const shortTxt=bits;
     el.innerHTML=`<div class="card tr-card"><div class="chips" style="flex-wrap:nowrap;margin-bottom:${cardio?"12px":"0"}">
-      <button class="chip grow tr-tg on tr-sumbtn" aria-expanded="false" onclick="TR_OPEN=S.date;renderTrainingSection()"><span class="trs-t">${shortTxt.replace(/ · /g,"\u00a0· ")}</span><span class="trs-c" aria-hidden="true">›</span></button>
+      <button class="chip grow tr-tg on tr-sumbtn" aria-expanded="false" onclick="TR_OPEN=S.date;renderTrainingSection()"><span class="trs-t">${shortTxt.split(" · ").map(b=>/^(rasitus|kulku) /.test(b)?b.replace(" ","\u00a0"):b).join("\u00a0· ")}</span><span class="trs-c" aria-hidden="true">›</span></button>
       <button class="chip tr-tg${cardio?" on":""}" aria-pressed="${!!cardio}" onclick="toggleTraining('cardio')">${cardio?"✓ ":""}Cardio</button></div>${cardio?trCardioHTML():""}</div>`;
     return;
   }
@@ -10747,7 +10750,7 @@ function renderLogGymCard(){
   } else if(doneToday.length){
     // v2.18.149: päivän rasitus ja kulku näkyvät kortissa (samat tiedot kuin alla Treeni-osiossa), viimeisen treenin rivillä
     const oc=TRAINING_OUTCOMES.find(o=>o.id===S.training_outcome);
-    const dayTxt=[S.training_load!=null?`rasitus ${S.training_load}`:"",oc?oc.short.toLowerCase():""].filter(Boolean).map(t=>` · ${t}`).join("");
+    const dayTxt=[S.training_load!=null?`rasitus ${S.training_load}`:"",oc?oc.kulku:""].filter(Boolean).map(t=>` · ${t}`).join("");
     h=doneToday.map((s,i)=>{ const st=sessionStats(s); return `<div class="tw"><span class="ic done">${ico("check",20)}</span><div class="t"><div class="n">${esc(s.dayName)}</div><div class="s">${st.done} liikettä · ${st.sets} sarjaa${s.endedAt?` · ${durTxt(s.endedAt-s.startedAt).replace(/ /g,"\u00a0")}`:""}${i===doneToday.length-1?dayTxt:""}</div></div><button class="tr-go ghost" onclick="openSession('${s.id}')">Avaa</button></div>`; }).join("");
   }
   // v2.18.17: ei Aloita-tilaa lepopäivinä (oli käytännössä kehote). v2.18.114: suunniteltuna treenipäivänä (Tavoitteet → treenipäivät)
