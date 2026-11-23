@@ -24,9 +24,26 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   console.log('\nKun dataa on');
   await p.evaluate(()=>{ const pr=newProgram('P'); pr.days[0].exercises.push(newEx({name:'Penkki',sets:3})); touchProg(pr); gymSave(); setTab('treeni'); GU.mode='home'; renderGym(); }); await p.waitForTimeout(200);
   const tr=await p.locator('#view-treeni').innerText();
-  ok(/iPhone voi poistaa tietosi/.test(tr)&&/Yhdistä Google Drive/.test(tr)&&/aloittaa tyhjänä/.test(tr),'Treeni-näkymässä siirtokortti: Drive ensin, Koti-valikon Järkäle tyhjä');
+  ok(/Nämä tiedot ovat vain tässä selaimessa/.test(tr)&&/Ohjelmasi/.test(tr)&&/Yhdistä Google Drive/.test(tr)&&/eikä sitä saa takaisin/.test(tr),'Treeni-näkymässä riskikortti: mitä katoaa, milloin, ei palaudu');
   await p.locator('#view-treeni .ios-card .ios-later').click(); await p.waitForTimeout(200);
-  ok(!/iPhone voi poistaa tietosi/.test(await p.locator('#view-treeni').innerText()),'Myöhemmin piilottaa kortin');
+  ok(!/vain tässä selaimessa/.test(await p.locator('#view-treeni').innerText()),'Myöhemmin piilottaa kortin');
+
+  console.log('\nRiskissä olevat määrät ja Myöhemmin-ajan lyheneminen (v2.18.187)');
+  const rk=await p.evaluate(async()=>{
+    const pr=G.programs[0]; const H=x=>{ localStorage.setItem('jarkale-ios-later',String(Date.now()-x*3600e3)); return !!iosDataCardHTML(); };
+    const a=[H(47),H(49)];
+    for(let i=0;i<5;i++){ await startSession(pr.id,pr.days[0].id); const s=activeSession(); s.date=new Date(Date.now()-(20-i)*864e5).toISOString().slice(0,10); s.exercises.forEach(e=>e.sets.forEach(r=>{r.kg=60;r.reps=8;r.done=true;})); finishSession(true); }
+    S.entries[new Date(Date.now()-3*864e5).toISOString().slice(0,10)]={mood:4}; S.entries[today()]={mood:3};
+    const b=[H(23),H(25)]; localStorage.removeItem('jarkale-ios-later');
+    const txt=document.createElement('div'); txt.innerHTML=iosDataCardHTML(); const safe=document.createElement('div'); safe.innerHTML=gSafetyHTML();
+    return {a,b,t:txt.textContent,safe:safe.textContent};
+  });
+  ok(rk.a[0]===false&&rk.a[1]===true,'vähän dataa: Myöhemmin piilottaa 2 päiväksi');
+  ok(rk.b[0]===false&&rk.b[1]===true,'5 treeniä: Myöhemmin piilottaa vain 1 päiväksi');
+  ok(/5\s+treeniä ja 2\s+kirjausta 2\s+viikon ajalta/.test(rk.t)&&/eikä niitä saa takaisin/.test(rk.t),'kortissa määrät ja aika ('+rk.t.slice(0,140)+')');
+  ok(/5 treeniä on tallessa vain tässä selaimessa/.test(rk.safe)&&/iPhone voi poistaa ne/.test(rk.safe),'treenin lopussa iPhone-kohtainen muistutus');
+  const dr=await p.evaluate(()=>{ const o=window.syncState; window.syncState=()=>({...o(),enabled:true}); localStorage.setItem('jarkale-ios-later',String(Date.now()-3*864e5)); const a=iosDataCardHTML(); localStorage.removeItem('jarkale-ios-later'); const b=iosDataCardHTML(); const c=gSafetyHTML(); window.syncState=o; return {a:!!a,b,c}; });
+  ok(!dr.a&&/Lisää Järkäle Koti-valikkoon/.test(dr.b)&&/tallessa/.test(dr.b)&&!dr.c,'Drive yhdistetty: rauhallisempi kortti 7 päivän välein, ei treenin lopun muistutusta');
 
   console.log('\nKoti-valikosta avattuna ja Androidissa');
   await p.evaluate(()=>{ localStorage.removeItem('jarkale-ios-later'); Object.defineProperty(navigator,'standalone',{value:true,configurable:true}); });

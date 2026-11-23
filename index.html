@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.187</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.188</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.188", d:"marraskuu 2026", items:[
+    "iPhone selaimessa ilman Drivea: varoituskortti kertoo, mitä on riskissä (esim. \"5 treeniä ja 2 kirjausta 2 viikon ajalta\"), milloin se voi kadota (viikon käyttötauko) ja ettei sitä saa takaisin. Myöhemmin piilottaa kortin 2 päiväksi, 5 treenin tai 2 viikon jälkeen 1 päiväksi (ennen 7 päivää, sama kuin iOS:n poistoraja). Treenipäivien kirjauksia ei lasketa tuplana.",
+    "Treenin lopun muistutus iPhonen selaimessa: \"vain tässä selaimessa\", ja että iPhone voi poistaa treenit viikon tauon jälkeen.",
+    "Drive yhdistetty, mutta selaimessa: rauhallisempi kortti (tiedot tallessa, Koti-valikko pitää ne puhelimessa), 7 päivän välein."
+  ]},
   {v:"2.18.187", d:"marraskuu 2026", items:[
     "Ohjelmatekstin vihkomerkinnät: paino × toistot × sarjat (\"Kyykky 140x5x3\" → 3 × 5 · 140 kg) ja sarjat × toistot × paino (\"3x5x140\"). Paino tunnistetaan desimaalista tai koosta (vähintään 20); monitulkintainen rivi jää ennalleen.",
     "Korjattu: prosentti luettiin painoksi (\"5x5 75 %\" → 75 kg). Prosentti jää nyt liikkeen ohjeeksi.",
@@ -7539,6 +7544,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"23.11.2026", items:[
+    "iPhonella selaimessa Järkäle kertoo nyt tarkemmin, mitkä tiedot ovat vaarassa kadota ja miten ne saa talteen.",
     "Ohjelman voi kirjoittaa myös vihkotyyliin: \"Kyykky 140x5x3\" tarkoittaa kolmea viiden toiston sarjaa 140 kilolla. Prosentit (\"5x5 75 %\") jäävät ohjeeksi eivätkä muutu kiloiksi.",
     "Treenin jako kuvana toimii nyt ensimmäisellä yrittämällä myös pitkissä treeneissä.",
     "Lääkkeen viikonpäivät alkavat maanantaista kuten muuallakin."
@@ -12131,14 +12137,34 @@ const IN_APP_HTML=()=>`<div class="ios-card"><div class="ios-h">Avaa Järkäle s
 const IOS_STEPS=`<ol class="ios-steps"><li>Avaa tämä sivu <b>Safarissa</b>, jos käytät muuta selainta.</li><li>Paina jakonappia <span class="ios-share" aria-hidden="true">⎙</span> ja valitse <b>Lisää Koti-valikkoon</b>.</li><li>Avaa Järkäle Koti-valikosta ja käytä sitä jatkossa sieltä.</li></ol>`;
 const IOS_SETUP_HTML=()=>`<div class="ios-card"><div class="ios-h">${iosDev()==="iPad"?"iPadilla":"iPhonella"}: lisää Järkäle ensin Koti-valikkoon</div><div class="ios-t">Selaimessa käytettynä ${iosDev()} tai selain voi poistaa tietosi, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikon Järkäle pitää ne tallessa, mutta aloittaa tyhjänä, joten tee tämä ennen kirjaamista.</div>${IOS_STEPS}</div>`;
 const IOS_LATER="jarkale-ios-later";
+// v2.18.187: riskissä oleva data konkreettisesti (iPhone, selain, ei Drivea): määrät ja aika, ja "Myöhemmin" lyhenee datan kertyessä
+function iosRiskStats(){
+  const done=G.sessions.filter(x=>x.endedAt), sd=new Set(done.map(x=>x.date)), ent=Object.keys(S.entries||{}).filter(d=>!sd.has(d)); // treenipäivän kirjaus ei tuplana
+  const dates=[...done.map(x=>x.date),...ent].filter(Boolean).sort();
+  const days=dates.length?Math.max(0,Math.round((Date.parse(today())-Date.parse(dates[0]))/864e5)):0;
+  return {ses:done.length,ent:ent.length,days};
+}
+function iosRiskTxt(r){
+  const parts=[]; if(r.ses) parts.push(`${r.ses}\u00a0${r.ses===1?"treeni":"treeniä"}`); if(r.ent) parts.push(`${r.ent}\u00a0${r.ent===1?"kirjaus":"kirjausta"}`);
+  const span=r.days>=14?` ${Math.floor(r.days/7)}\u00a0viikon ajalta`:r.days>=2?` ${r.days}\u00a0päivän ajalta`:"";
+  return parts.length?parts.join(" ja ")+span:"Ohjelmasi";
+}
+function iosLaterMs(drive,r){ return drive?7*864e5:(r.ses>=5||r.days>14?864e5:2*864e5); }
 function iosDataCardHTML(){
   if(!iosNeedsInstall()||localStorage.getItem("seuranta-setup-done")!=="1") return "";
   const has=Object.keys(S.entries||{}).length||G.sessions.length||G.programs.length; if(!has) return "";
-  try{ const l=parseInt(localStorage.getItem(IOS_LATER)||"0"); if(l&&Date.now()-l<7*864e5) return ""; }catch(_){ }
-  const drive=syncState().enabled;
-  return `<div class="card ios-card"><div class="ios-h">${ico("save",17)} ${iosDev()} voi poistaa tietosi</div><div class="ios-t">Selaimessa käytettynä ${iosDev()} tai selain voi poistaa Järkäleen tiedot, esimerkiksi viikon käyttötauon jälkeen tai kun selaimen historia tyhjennetään. Koti-valikkoon lisätty Järkäle pitää ne tallessa, mutta aloittaa tyhjänä. Siirrä tiedot näin:</div>
-    <ol class="ios-steps"><li>${drive?"Google Drive on yhdistetty ✓":`<b>Yhdistä Google Drive</b> tai tee varmuuskopio.`}</li><li>Avaa tämä sivu <b>Safarissa</b> → jakonappi <span class="ios-share" aria-hidden="true">⎙</span> → <b>Lisää Koti-valikkoon</b>.</li><li>Avaa Järkäle Koti-valikosta ja yhdistä sama Google Drive (tai palauta varmuuskopio), niin tiedot palaavat.</li></ol>
-    <div class="ios-b">${drive?"":SYNC_AVAILABLE?`<button class="tr-go" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="tr-go" onclick="goBackup()">Tee varmuuskopio</button>`}<button class="tr-pill ios-later" onclick="try{localStorage.setItem(IOS_LATER,String(Date.now()))}catch(_){};renderFirstBackup();if(S.tab==='treeni')renderGym()">Myöhemmin</button></div></div>`;
+  const drive=syncState().enabled, r=iosRiskStats();
+  try{ const l=parseInt(localStorage.getItem(IOS_LATER)||"0"); if(l&&Date.now()-l<iosLaterMs(drive,r)) return ""; }catch(_){ }
+  const later=`<button class="tr-pill ios-later" onclick="try{localStorage.setItem(IOS_LATER,String(Date.now()))}catch(_){};renderFirstBackup();if(S.tab==='treeni')renderGym()">Myöhemmin</button>`;
+  if(!drive){
+    const t=iosRiskTxt(r), one=!r.ses&&!r.ent||r.ses+r.ent===1;
+    return `<div class="card ios-card"><div class="ios-h">${ico("save",17)} Nämä tiedot ovat vain tässä selaimessa</div><div class="ios-t"><b>${t}.</b> Jos et avaa Järkälettä viikkoon, ${iosDev()} voi poistaa ${one?"sen":"ne"}, eikä ${one?"sitä":"niitä"} saa takaisin. Myös selaimen historian tyhjennys poistaa ${one?"sen":"ne"}.</div>
+    <ol class="ios-steps"><li><b>Yhdistä Google Drive</b> tai tee varmuuskopio. Silloin tiedot säilyvät, vaikka puhelin poistaisi ne.</li><li>Lisää Järkäle Koti-valikkoon: jakonappi <span class="ios-share" aria-hidden="true">⎙</span> → <b>Lisää Koti-valikkoon</b>. Avaa se sieltä ja yhdistä sama Drive, niin tiedot palaavat.</li></ol>
+    <div class="ios-b">${SYNC_AVAILABLE?`<button class="tr-go" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="tr-go" onclick="goBackup()">Tee varmuuskopio</button>`}${later}</div></div>`;
+  }
+  return `<div class="card ios-card"><div class="ios-h">${ico("save",17)} Lisää Järkäle Koti-valikkoon</div><div class="ios-t">Google Drive on yhdistetty ✓, joten tietosi ovat tallessa. Selaimessa ${iosDev()} voi silti poistaa ne puhelimesta viikon käyttötauon jälkeen, ja ne pitää silloin hakea Drivesta. Koti-valikkoon lisätty Järkäle pitää ne puhelimessa.</div>
+    <ol class="ios-steps"><li>Avaa tämä sivu <b>Safarissa</b> → jakonappi <span class="ios-share" aria-hidden="true">⎙</span> → <b>Lisää Koti-valikkoon</b>.</li><li>Avaa Järkäle Koti-valikosta ja yhdistä sama Google Drive, niin tiedot palaavat.</li></ol>
+    <div class="ios-b">${later}</div></div>`;
 }
 function renderFirstBackup(){
   const el=document.getElementById("first-backup"); if(!el) return;
@@ -12166,6 +12192,7 @@ function gSafetyHTML(){
   try{ if(syncState().enabled) return ""; }catch(_){ return ""; }
   const n=G.sessions.filter(x=>x.endedAt).length;
   const act=SYNC_AVAILABLE?`<button class="tr-go" onclick="syncNow()">Yhdistä Google Driveen</button>`:`<button class="tr-go" onclick="goBackup()">Tee varmuuskopio</button>`;
+  if(iosNeedsInstall()) return `<div class="g-safe">${ico("save",16)}<div><b>${n>1?`${n} treeniä on tallessa`:"Treeni on tallessa"} vain tässä selaimessa.</b> Jos et avaa Järkälettä viikkoon, ${iosDev()} voi poistaa ${n>1?"ne":"sen"}, eikä ${n>1?"niitä":"sitä"} saa takaisin.${SYNC_AVAILABLE?" Driveen yhdistetty kopio säilyy ja päivittyy itsestään.":""}${act}</div></div>`;
   return `<div class="g-safe">${ico("save",16)}<div><b>${n>1?`${n} treeniä on tallessa`:"Treeni on tallessa"} vain tässä puhelimessa.</b> Jos tyhjennät selaimen historian tai evästeet, ne katoavat.${SYNC_AVAILABLE?" Driveen yhdistetty kopio päivittyy itsestään.":""}${act}</div></div>`;
 }
 function goBackup(){ openSettingsSection("data"); }
