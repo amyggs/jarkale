@@ -49,6 +49,7 @@ tests/run.sh test-gym.js
 | `test-exmerge.js` | Liikkeen yhdistäminen: ehdokkaat (samassa treenissä olevat pois), turvakopion puuttuessa ei muutosta, kerrat ja ohjelman liike siirtyvät, updatedAt synkronointia varten, historia yhdessä, peruminen palauttaa |
 | `test-share.js` | Treenin jako kuvana: kuva tehdään etukäteen; jos jakolupa ehti vanhentua, kysytään Jaa kuva valmiin kuvan kanssa eikä vaihdeta tekstiin |
 | `test-prevhist.js` | Aiemmat kerrat treenin aikana Viimeksi-rivin alla: avaus ja sulku muistetaan, uusimmasta vanhimpaan, Koko historia ja paluu käynnissä olevaan treeniin |
+| `test-textscale.js` | Iso järjestelmän tekstikoko (fonttikoot × 1,6, 360 px): alapalkki, taukonapit ja tunnusluvut mahtuvat samankokoisina, pitkä liikkeen nimi ei katkea kesken sanan, Drive-nappi ei leikkaudu |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

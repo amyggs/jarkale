@@ -1594,7 +1594,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ex-grp-h[aria-expanded="true"]{background:var(--surf2);}
 .g-editpast{width:100%;height:46px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
 .ios-card{border:1.5px solid var(--orange);border-radius:14px;padding:14px;margin:0 0 14px;background:var(--surf);} .ios-h{display:flex;gap:8px;align-items:center;font:800 15px Manrope,system-ui,sans-serif;color:var(--text);} .ios-t{font:500 13px/1.5 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:6px;} .ios-steps{margin:8px 0 0;padding-left:20px;font:500 13px/1.55 Manrope,system-ui,sans-serif;color:var(--text);} .ios-steps li{margin:3px 0;} .ios-share{display:inline-block;font-size:15px;line-height:1;} .ios-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;} .ios-b .tr-go{height:44px;padding:0 18px;}
-.g-safe{display:flex;gap:10px;align-items:flex-start;margin:12px 0 4px;padding:12px;border-radius:12px;border:1.5px solid var(--orange);font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--text);} .g-safe>svg{flex:none;color:var(--orange);margin-top:2px;} .g-safe b{font-weight:700;} .g-safe .tr-go{display:block;margin-top:10px;height:40px;padding:0 16px;}
+.g-safe{display:flex;gap:10px;align-items:flex-start;margin:12px 0 4px;padding:12px;border-radius:12px;border:1.5px solid var(--orange);font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--text);} .g-safe>svg{flex:none;color:var(--orange);margin-top:2px;} .g-safe b{font-weight:700;} .g-safe .tr-go{display:block;margin-top:10px;min-height:42px;height:auto;padding:2px 16px;box-sizing:border-box;}
 .g-editbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;margin:12px 0;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:10px 12px;border-radius:12px;background:var(--surf2);font:600 13px/1.4 Manrope,system-ui,sans-serif;color:var(--text);}
 .g-editbar span{flex:1;}
 .g-editbar .tr-go{height:38px;padding:0 16px;}
@@ -1979,6 +1979,15 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 @media (min-width:2700px){body{zoom:1.9}}
 @media (min-width:3200px){body{zoom:2.25}}
 @media (min-width:3700px){body{zoom:2.65}}
+
+/* v2.18.193: iso järjestelmän tekstikoko (Androidin tekstikoko kasvattaa vain tekstiä). Sovitus pienentää tekstiä vain, jos se ei mahdu
+   (fitText); normaalikoossa mikään ei muutu. */
+#nav button{min-width:0;}
+#nav button span.lbl{display:block;max-width:100%;white-space:nowrap;overflow-x:clip;}
+.gt .gt-q{min-width:0;white-space:nowrap;overflow-x:clip;}
+.g-stats b,.g-stats span{overflow-x:clip;}
+.tr-go{line-height:1.25;padding-top:6px;padding-bottom:6px;}
+.set .pr{top:calc(7px - 1em);}
 </style>
 </head>
 <body>
@@ -2344,7 +2353,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.192</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.193</span>
       </div>
     </div>
   </div>
@@ -2378,6 +2387,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.193", d:"marraskuu 2026", items:[
+    "Iso järjestelmän tekstikoko (Androidin tekstikoko kasvattaa vain tekstiä): tekstin sovitus (fitText) pienentää yksirivisen tekstin vain, jos se ei mahdu, ja saman rivin tekstit samaan kokoon: alapalkki, taukonapit, liikkeen tunnusluvut. Pitkä liikkeen nimi (treenikortti, liikkeen sivu) pienenee ennemmin kuin katkeaa kesken sanan. Drive-nappi saa rivittyä leikkautumatta, ENNÄTYS-merkki ei peitä toistolukua, Trendien unen tavoite rivittyy. Testattu tekstikoot 100 / 130 / 160 % kymmenessä näkymässä 360 ja 412 px; normaalikoossa ulkoasu pikselilleen ennallaan. Testi test-textscale."
+  ]},
   {v:"2.18.192", d:"marraskuu 2026", items:[
     "Salitreenin tiivis rivi Kirjaa-näkymässä ja salitreenikortissa: \"rasitus 4 · kulku normaali\" (myös kulku parempi / kulku heikompi). Ennen pelkkä \"normaalisti\" ei kertonut, mitä se kuvaa."
   ]},
@@ -4606,7 +4618,7 @@ function buildSummaryHTML(curr,prev,rangeLabel,asOfDate){
     ${curr.avgWeight!=null?`<div class="ws-stat"><div class="k">Paino ka</div><div class="v">${curr.avgWeight.toFixed(1)}<small> kg</small></div>
       <div class="s wrap">${curr.weightRate!=null?(trendReliable?`${curr.weightRate>0.005?"↑ +":curr.weightRate<-0.005?"↓ ":"→ "}${Math.abs(curr.weightRate).toFixed(2)} kg/vko`:(curr.weightRate>0.05?"nouseva":curr.weightRate<-0.05?"laskeva":"tasainen")+" · vähän dataa"):"&nbsp;"}</div></div>`:""}
     ${curr.avgSleep!=null?`<div class="ws-stat"><div class="k">Uni ka</div><div class="v">${(()=>{const [hh,mm]=fmtSleepHM(curr.avgSleep).split(":").map(Number);return `${hh}<small> h</small>${mm?` ${mm}<small> min</small>`:""}`;})()}</div>
-      <div class="s">${curr.avgSleep>=sleepGoalS?"tavoitteessa":`tavoite ${fmtSleepText(sleepGoalS)}`}</div></div>`:""}
+      <div class="s wrap">${curr.avgSleep>=sleepGoalS?"tavoitteessa":`tavoite ${fmtSleepText(sleepGoalS)}`}</div></div>`:""}
   </div>`:"";
   return `<div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -7566,6 +7578,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"23.11.2026", items:[
+    "Jos puhelimessa on iso tekstikoko, Järkäle mahtuu paremmin ruudulle: alapalkki, taukonapit ja pitkät liikkeiden nimet eivät enää mene päällekkäin tai katkea kesken sanan.",
     "Näet treenin aikana, miten liike on kehittynyt: napauta Viimeksi-riviä, niin sen alle tulevat aiemmat kerrat. Lista pysyy auki, kunnes suljet sen.",
     "iPhonella selaimessa Järkäle kertoo nyt tarkemmin, mitkä tiedot ovat vaarassa kadota ja miten ne saa talteen.",
     "Ohjelman voi kirjoittaa myös vihkotyyliin: \"Kyykky 140x5x3\" tarkoittaa kolmea viiden toiston sarjaa 140 kilolla. Prosentit (\"5x5 75 %\") jäävät ohjeeksi eivätkä muutu kiloiksi.",
@@ -10455,14 +10468,14 @@ function renderTimer(){
   const show=gymOn()&&S.tab==="treeni"&&GU.mode==="session"&&activeSession()&&GU.sessionId===G.activeId;
   if(!show){ if(el) el.style.display="none"; return; }
   if(!el){ el=document.createElement("div"); el.id="gym-timer"; document.body.appendChild(el); }
-  el.style.display="";
+  if(el.style.display==="none"){ el.style.display=""; if(typeof fitText==="function") fitText(); } // v2.18.193: näkyviin tullessa sovitus
   const t=G.timer, left=timerLeft();
   if(left==null){
     if(el.dataset.shape==="idle|"+t.dur) return;
     el.dataset.shape="idle|"+t.dur;
     el.className="gt idle";
     el.innerHTML=`<span class="gt-l">Tauko</span>${[60,90,120,180].map(s=>`<button class="gt-q${t.dur===s?" on":""}" onclick="timerStart(${s})">${mmss(s*1000)}</button>`).join("")}<button class="gt-q" aria-label="Oma aika" onclick="timerCustom()">…</button>`;
-    return;
+    if(typeof fitText==="function") fitText(); return;
   }
   const over=left<=0, paused=t.pausedLeft!=null, late=over&&-left>15000;
   const pct=over?100:Math.max(0,Math.min(100,100-left/((t.once||t.dur)*1000)*100));
@@ -10781,6 +10794,7 @@ function renderGym(){
   renderTimer(); timerLoop();
   navUpdate();
   applyRunMode();
+  if(typeof fitText==="function") fitText(); // v2.18.193: ennen piirtoa (ei välähdystä isolla tekstikoolla)
 }
 // v2.18.102: käynnissä olevan treenin aikana alapalkki piiloon (taukopalkki + alapalkki veivät ~20 % ruudusta).
 // Poistuminen: "‹ Treeni (jatkuu taustalla)" tai Androidin takaisin-ele, jolloin alapalkki palaa.
@@ -12284,6 +12298,35 @@ function navUpdate(){
   if(NAV_LEN>d){ const n=NAV_LEN-d; NAV_PENDING=true; try{ history.go(-n); }catch(_){ NAV_PENDING=false; NAV_LEN=d; } return; }
   while(NAV_LEN<d){ NAV_LEN++; try{ history.pushState({jk:NAV_LEN},""); }catch(_){} }
 }
+
+// v2.18.193: tekstin sovitus isolla järjestelmän tekstikoolla. Yksirivinen teksti (alapalkki, taukonapit, liikkeen tunnusluvut)
+// ja pitkät liikkeiden nimet (ei katkea kesken sanan) pienenevät, kunnes ne mahtuvat (yksirivinen enintään ~35 %, nimet ~25 %). Normaalikoossa ei muutosta.
+const FIT_ONE="#nav button span.lbl,.gt .gt-q,.g-stats b,.g-stats span", FIT_WORD=".ex-n,.tr-h1";
+function fitEl(el,word){
+  if(!el.clientWidth) return; // piilossa: jätetään ennalleen (mitataan, kun näkyy)
+  const tr=el.style.transition; el.style.transition="none"; // napeissa siirtymä: fonttikoko muuttuisi viiveellä ja mittaus menisi ohi
+  if(el.dataset.fitPx){ el.style.fontSize=""; delete el.dataset.fitPx; }
+  if(word) el.style.overflowWrap="normal";
+  // yksirivinen: tekstin oma leveys vs. sisältöalue (napin scrollWidth ei ole luotettava); nimi: scrollWidth (pisin sana)
+  const cs=getComputedStyle(el), avail=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const rg=document.createRange(); const isOver=()=>{ if(word) return el.scrollWidth>el.clientWidth; rg.selectNodeContents(el); return rg.getBoundingClientRect().width>avail+0.5; };
+  let over=isOver();
+  if(over){ let f=parseFloat(cs.fontSize); el.dataset.fitPx="1";
+    for(let i=0,n=word?6:8;i<n&&over;i++){ f*=0.95; el.style.fontSize=f.toFixed(2)+"px"; over=isOver(); } }
+  if(word) el.style.overflowWrap="";
+  void el.offsetWidth; el.style.transition=tr;
+}
+// Saman rivin tekstit samaan kokoon (alapalkki, taukonapit, tunnuslukulaatikot): pienin sovitettu koko kaikille.
+const FIT_GROUPS=[["#nav button span.lbl","#nav"],[".gt .gt-q",".gt"],[".g-stats b",".g-stats"],[".g-stats span",".g-stats"]];
+function fitText(){ try{
+  document.querySelectorAll(FIT_ONE).forEach(el=>fitEl(el,false)); document.querySelectorAll(FIT_WORD).forEach(el=>fitEl(el,true));
+  FIT_GROUPS.forEach(([sel,root])=>document.querySelectorAll(root).forEach(r=>{ const els=[...r.querySelectorAll(sel)].filter(e=>e.clientWidth); const fitted=els.filter(e=>e.dataset.fitPx); if(!fitted.length) return;
+    const min=Math.min(...fitted.map(e=>parseFloat(e.style.fontSize))); els.forEach(e=>{ e.dataset.fitPx="1"; e.style.fontSize=min.toFixed(2)+"px"; }); }));
+}catch(_){} }
+let FIT_RAF=0; function fitSoon(){ if(FIT_RAF) return; FIT_RAF=requestAnimationFrame(()=>{ FIT_RAF=0; fitText(); }); }
+let FIT_RO=null; function fitWatch(el){ try{ if(!FIT_RO) FIT_RO=new ResizeObserver(fitSoon); if(el&&!el._fitRO){ el._fitRO=1; FIT_RO.observe(el); } }catch(_){} }
+try{ new MutationObserver(()=>{ fitWatch(document.getElementById("gym-timer")); fitSoon(); }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]}); fitWatch(document.getElementById("nav"));
+  new MutationObserver(fitSoon).observe(document.documentElement,{attributes:true,attributeFilter:["class"]}); /* näkymän vaihto, treenitila */ addEventListener("resize",fitSoon); document.fonts&&document.fonts.ready.then(fitSoon); fitSoon(); }catch(_){}
 window.addEventListener("popstate",e=>{
   const jk=(e.state&&e.state.jk)||0;
   if(NAV_PENDING){ NAV_PENDING=false; NAV_LEN=jk; navUpdate(); return; }
