@@ -38,6 +38,9 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   // peruminen
   const u=await p.evaluate(async k=>{ window.__jdlgAuto=true; await gMergeUndo(k.smi,k.lai); return {a:exerciseHistory(k.lai).length,b:exerciseHistory(k.smi).length,pn:G.programs.find(x=>x.name==='A').days[0].exercises[0].name,left:G.sessions.some(s=>s.exercises.some(e=>e.mergedFrom))}; },k);
   ok(u.a===3&&u.b===1&&u.pn==='Vinopenkkipunnerruslaite'&&!u.left,'peruminen palauttaa alkuperäiset nimet ja ohjelman');
+  // v2.18.187: katsottu vanha treeni ei saa uutta muokkausaikaa paluun jälkeen (synkronointi voisi muuten jyrätä toisen laitteen muutoksen)
+  const bump=await p.evaluate(async k=>{ const s=G.sessions[0]; const u0=s.updatedAt; await new Promise(r=>setTimeout(r,20)); openSession(s.id); gBack(); await new Promise(r=>setTimeout(r,20)); gSetGroup(k.kap,'Rinta'); return [u0,s.updatedAt]; },k);
+  ok(bump[0]===bump[1],'paluun jälkeen vanhan treenin muokkausaika ei muutu');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();

@@ -2334,7 +2334,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.186</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.187</span>
       </div>
     </div>
   </div>
@@ -2368,6 +2368,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.187", d:"marraskuu 2026", items:[
+    "Ohjelmatekstin vihkomerkinnät: paino × toistot × sarjat (\"Kyykky 140x5x3\" → 3 × 5 · 140 kg) ja sarjat × toistot × paino (\"3x5x140\"). Paino tunnistetaan desimaalista tai koosta (vähintään 20); monitulkintainen rivi jää ennalleen.",
+    "Korjattu: prosentti luettiin painoksi (\"5x5 75 %\" → 75 kg). Prosentti jää nyt liikkeen ohjeeksi.",
+    "Synkronointi: vanha treeni sai uuden muokkausajan, jos sen oli avannut ja palannut takaisin ja tallensi sen jälkeen jotain muuta (esim. liikkeen lihasryhmän). Toisella laitteella samaan treeniin tehty muutos saattoi silloin jäädä alle. Muokkausaika päivittyy nyt vain, kun treeni on auki."
+  ]},
   {v:"2.18.186", d:"marraskuu 2026", items:[
     "Treenin jako kuvana: kuva piirretään jo, kun valitset kuvan tai tekstin, joten jakoikkuna avautuu heti. Jos Android ehtii silti estää jaon (pitkä treeni, hidas puhelin), sovellus näyttää Jaa kuva -napin valmiin kuvan kanssa eikä vaihda tekstiin. Ennen pitkän treenin jako saattoi epäonnistua ensimmäisillä kerroilla (Kuvan teko ei onnistunut).",
     "Viikko alkaa maanantaista kaikkialla: lääkkeen viikonpäivävalinta (ennen sunnuntaista) ja lääkkeen päivälista. Tallennetut valinnat eivät muutu. Muut viikonpäivänäkymät (treenipäivät, viikkonauha, viikkoyhteenveto, kuukausikuva) alkoivat jo maanantaista."
@@ -7534,6 +7539,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"23.11.2026", items:[
+    "Ohjelman voi kirjoittaa myös vihkotyyliin: \"Kyykky 140x5x3\" tarkoittaa kolmea viiden toiston sarjaa 140 kilolla. Prosentit (\"5x5 75 %\") jäävät ohjeeksi eivätkä muutu kiloiksi.",
     "Treenin jako kuvana toimii nyt ensimmäisellä yrittämällä myös pitkissä treeneissä.",
     "Lääkkeen viikonpäivät alkavat maanantaista kuten muuallakin."
   ]},
@@ -9545,7 +9551,8 @@ function exGrpToggle(g){ const o=exGrpOpen(); o[g]=!o[g]; try{ localStorage.setI
 function gSetGroup(key,g){ exMetaSet(key,{grp:g===exGroupAuto(exerciseHistory(key).slice(-1)[0]?.ex.name||key)?"":g}); renderGym(); }
 function gymSave(){
   // Synkronointia varten: katsottava/käynnissä oleva treeni saa muokkausajan
-  if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||s.id===GU.sessionId) s.updatedAt=now; }); }
+  if(typeof SYNC_APPLYING==="undefined"||!SYNC_APPLYING){ const now=Date.now(); G.sessions.forEach(s=>{ if(s.id===G.activeId||(GU.mode==="session"&&s.id===GU.sessionId)) s.updatedAt=now; }); }
+  // v2.18.187: katsottu treeni vain, kun se on auki (ennen paluun jälkeenkin → vanha versio voitti toisen laitteen muutoksen)
   try{ localStorage.setItem(GYM_KEY,JSON.stringify(G)); if(typeof syncMarkDirty==="function") syncMarkDirty(); }
   catch(e){ if(e&&(e.name==="QuotaExceededError"||e.code===22)) jAlert("⚠︎ Selaimen tallennustila täynnä!\nLataa varmuuskopio heti Asetuksista."); }
 }
@@ -9594,7 +9601,13 @@ function parseGroup(m){
   return {sets:parseInt(m[1],10),min:a,max:b,isMax};
 }
 function parseExLine(text){
-  const t=cleanLine(text); if(!t) return null;
+  let t=cleanLine(text); if(!t) return null;
+  // v2.18.187: vihkomerkintä paino × toistot × sarjat ("Kyykky 140x5x3" = 3 × 5 painolla 140) tai sarjat × toistot × paino ("3x5x140").
+  // Paino tunnistetaan desimaalista tai koosta (≥ 20). Jos kumpikaan pää ei ole paino, rivi jää ennalleen.
+  { const v=t.match(/^(.*?\S)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?\s*[x×*]\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?\s*[x×*]\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(kg)?(?=\s|$|[,;(])(.*)$/i);
+    if(v){ const isW=s=>/[.,]/.test(s)||parseFloat(s)>=20, isI=s=>/^\d{1,2}$/.test(s)&&+s>0;
+      if(isW(v[2])&&isI(v[3])&&isI(v[4])) t=`${v[1]} ${v[4]}x${v[3]} ${v[2]}kg${v[6]}`;
+      else if(isW(v[4])&&isI(v[2])&&isI(v[3])) t=`${v[1]} ${v[2]}x${v[3]} ${v[4]}kg${v[6]}`; } }
   const blank={name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:"",parsed:false};
   const m0=t.match(GOAL_START_RE);
   if(!m0) return blank;
@@ -9617,7 +9630,8 @@ function parseExLine(text){
   }
   if(!groups.length) return blank;
   let weight=null;
-  const w=rest.match(/^\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?(?=\s|$|[,;)])/i);
+  // v2.18.187: prosentti ei ole paino ("5x5 75 %" → ohjeeksi, ei 75 kg)
+  const w=rest.match(/^\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)(?!\s*%)(?![\d.,])\s*(?:kg)?(?=\s|$|[,;)])/i);
   if(w){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
   // v2.18.117: "+ R/P + DS + R/P" → lisärivit viimeisen työsarjan perään (rest-pause, pudotussarja)
   // v2.18.119: myös "drop set", "rest pause", "rest-pause", "(DS)", "+ 2 DS", "DS × 2". Myo-repsit ja proosa jäävät ohjeeksi.

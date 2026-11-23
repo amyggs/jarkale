@@ -48,6 +48,15 @@ const TXT=["Ohjelma testi 1/2026","","Jokainen sarja failureen saakka.","","1 Ri
   ok(mx[1].replace(/\u00a0/g,' ')==='1 × 8 + 1 × 10 + 1 × 12|','pyramidi 3 x 8/10/12 → sarjoittain ('+mx[1]+')');
   ok(/1 × 12 \+ 1 × 10 \+ 1 × 8 · 60 kg/.test(mx[2].replace(/\u00a0/g,' ')),'laskeva pyramidi ja paino ('+mx[2]+')');
   ok(mx[3].replace(/\u00a0/g,' ')==='3 × 10–12|viimeinen sarja hitaasti','pilkun jälkeinen ohje jää ohjeeksi');
+  // v2.18.187: vihkomerkinnät ja prosentti
+  const vh=await p.evaluate(()=>['Kyykky 140x5x3','Penkki 3x5x140','Penkki 12,5x10x3','Kyykky 5x5 75 %','Kyykky 5x3 @ 80%','Kyykky 5x5 72,5','Hauis 3x10x12'].map(t=>{const r=parseExLine(t);return [r.name,r.sets,r.repsMin,r.weight,r.note].join('|');}));
+  ok(vh[0]==='Kyykky|3|5|140|','paino × toistot × sarjat: 140x5x3 → 3 × 5 · 140 kg ('+vh[0]+')');
+  ok(vh[1]==='Penkki|3|5|140|','sarjat × toistot × paino: 3x5x140 ('+vh[1]+')');
+  ok(vh[2]==='Penkki|3|10|12.5|','desimaalipaino ensin: 12,5x10x3 ('+vh[2]+')');
+  ok(vh[3]==='Kyykky|5|5||75 %','prosentti ei ole paino: 5x5 75 % ('+vh[3]+')');
+  ok(vh[4]==='Kyykky|5|3||@ 80%','@ 80% ohjeeksi ('+vh[4]+')');
+  ok(vh[5]==='Kyykky|5|5|72.5|','desimaalipaino perässä edelleen painoksi ('+vh[5]+')');
+  ok(vh[6].startsWith('Hauis|3|10|')&&!vh[6].includes('|12|'),'monitulkintainen 3x10x12 ei arvaa painoa ('+vh[6]+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
