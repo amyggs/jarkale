@@ -47,6 +47,7 @@ tests/run.sh test-gym.js
 | `test-exsug.js` | Liikkeen nimen ehdotukset kirjoitettaessa: eri kirjoitusasu ja nimen alku ehdottavat vanhaa liikettä, napautus vaihtaa nimen ja säilyttää tavoitteen, historia jatkuu (editori, treenin lisäys, Vaihda liike) |
 | `test-survey.js` | Kysely kehittäjälle: vain käyttäjien versiossa ja viikon käytön jälkeen, mukautuvat kysymykset (sali / päiväseuranta), kulku, ohitus, viestin sisältö (vastaukset ja lukumäärät, ei kirjauksia), Ei nyt ja lähetyksen jälkeen piilossa |
 | `test-exmerge.js` | Liikkeen yhdistäminen: ehdokkaat (samassa treenissä olevat pois), turvakopion puuttuessa ei muutosta, kerrat ja ohjelman liike siirtyvät, updatedAt synkronointia varten, historia yhdessä, peruminen palauttaa |
+| `test-share.js` | Treenin jako kuvana: kuva tehdään etukäteen; jos jakolupa ehti vanhentua, kysytään Jaa kuva valmiin kuvan kanssa eikä vaihdeta tekstiin |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

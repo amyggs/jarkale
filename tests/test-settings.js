@@ -119,6 +119,11 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(/−3/.test(mc.txt)&&/\+1/.test(mc.txt),'etumerkki kertoo suunnan');
   ok(!/Vihreä\/punainen/.test(mc.txt)&&!/\bHyvä\b(?! kunto)/.test(mc.txt),'ei arvottavaa selitystä eikä FFMI-luokkaa "Hyvä"');
 
+  // v2.18.186: viikko alkaa maanantaista myös lääkkeen päivävalinnassa ja päivälistassa
+  const md=await p.evaluate(()=>{ showMedForm(); const bs=[...document.querySelectorAll('button[onclick^="toggleMedFormDay"]')].map(b=>b.textContent.trim());
+    S.settings.medications=[{id:'m1',name:'Testi',dose:1,unit:'mg',days:[0,1,5]}]; cancelMedForm(); renderMedSettings(); const t=document.body.textContent; return {bs,list:/Ma, Pe, Su/.test(t)}; });
+  ok(md.bs[0]==='Ma'&&md.bs[6]==='Su','lääkkeen päivävalinta Ma…Su ('+md.bs.join(' ')+')');
+  ok(md.list,'lääkkeen päivälista maanantaista (Ma, Pe, Su)');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
