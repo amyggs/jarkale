@@ -2362,7 +2362,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.194</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.195</span>
       </div>
     </div>
   </div>
@@ -2427,6 +2427,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.195", d:"marraskuu 2026", items:[
+    "Pilotin uutiskortti \"Isompi teksti\" (Valitse koko → Asetukset → Ulkoasu), ei näy, jos koko on jo valittu. Esittelysivulle tekstin koko ja teemojen vaihdon polku Asetukset → Ulkoasu."
+  ]},
   {v:"2.18.194", d:"marraskuu 2026", items:[
     "Asetukset → Ulkoasu → Tekstin koko: Normaali / Iso (115 %) / Järkäle (130 %). Napit näkyvät omassa koossaan. Vain teksti kasvaa, asettelu pysyy; vaikuttaa heti, laitekohtainen (ei synkronoidu). Toteutus: tyylien px-fonttikoot ja -rivivälit kerrotaan, samoin elementtien omat koot niiden ilmestyessä, ja tekstin sovitus hoitaa ahtaat kohdat. Erityisesti iPhonen Koti-valikon sovellukselle, jossa ei ole Safarin tekstikokoa.",
     "Tekstin sovitus myös päivämääräriville (VKO-merkki pienenee samassa suhteessa) ja tunnuslukujen selitteisiin. Tarkistettu Järkäle-koko kaikissa 9 teemassa × 2 (360 px) ja kolme kokoa kymmenessä näkymässä."
@@ -12077,6 +12080,8 @@ function renderSyncUI(){
 // v2.18.14: pilotin uutiskortti. Vain isot, käyttäjän kielellä kirjoitetut uutiset (ei jokaista versiota).
 // Näytetään kerran Kirjaa-näkymässä; ohitetaan uutinen, jonka ominaisuus on jo käytössä.
 const PILOT_NEWS=[
+  {id:"2026-11-teksti",title:"Isompi teksti",text:"Jos teksti on pientä, valitse tekstin koko: Normaali, Iso tai Järkäle. Vain teksti kasvaa, joten kaikki mahtuu edelleen ruudulle. Valinta koskee tätä laitetta.",
+   act:"Valitse koko",go:"theme",skip:()=>typeof TS_K!=="undefined"&&TS_K!==1},
   {id:"2026-10-hist",title:"Tuo treenihistoriasi Strongista tai Hevystä",text:"Vanhat treenit tulevat liikkeiden historiaan ja ennätyksiin, joten vertailu jatkuu siitä, mihin jäit. Myös Strongin Jaa treeni -tekstin voi liittää uudeksi ohjelmaksi.",
    act:"Tuo historia",go:"histimport",skip:()=>!gymOn()||G.sessions.some(s=>s.importBatch)},
   {id:"2026-10-ilme",title:"Uusi ilme",text:"Uusi logo ja nimi Järkäle, kelluva alapalkki ja yläreuna teeman väreissä. Kirjattu kipu pienenee yhdeksi riviksi, ja treenin ennätysmerkki näkyy sen kentän kohdalla, joka parani.",
