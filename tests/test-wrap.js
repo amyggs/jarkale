@@ -74,6 +74,13 @@ Pakaraprässi laitteessa 3 * 10 - 12`;
       ok(!bad.length&&r.sw<=W+1,`${v}: ei keskeltä katkenneita sanoja${r.sw>W+1?', vaakaylivuoto '+r.sw+' px':''}${bad.length?': '+bad.slice(0,4).join(', '):''}`);
     }
   }
+  // v2.18.191: Kirjaa-näkymän salitreenirivin nuoli oikeassa reunassa ja keskellä myös rivittyessä (Akun kuva: nuoli omalla rivillään)
+  const trs=await p.evaluate(async()=>{ const s0=G.sessions.find(x=>x.endedAt); const keep=s0.date; s0.date=today(); setTab('log'); S.date=today(); S.training_done=true; S.showExtra=true; renderLog(); S.training_load=4; S.training_outcome=TRAINING_OUTCOMES[0].id; TR_OPEN=null; renderTrainingSection();
+    const bt=document.querySelector('.tr-sumbtn'); if(!bt) return null; const res=[];
+    for(const fs of ['','17px']){ bt.style.fontSize=fs; await new Promise(r=>setTimeout(r,30)); const t=bt.querySelector('.trs-t').getBoundingClientRect(), c=bt.querySelector('.trs-c').getBoundingClientRect(), br=bt.getBoundingClientRect();
+      res.push(c.left>=t.right-0.5&&c.right<=br.right+0.5&&Math.abs((c.top+c.bottom)/2-(br.top+br.bottom)/2)<3); }
+    bt.style.fontSize=''; s0.date=keep; return res; });
+  ok(trs&&trs.every(x=>x===true),'salitreenirivin nuoli oikeassa reunassa myös rivittyessä '+JSON.stringify(trs));
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

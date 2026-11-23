@@ -15,7 +15,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1'); localStorage.setItem('lastExport',String(Date.now()));
     localStorage.setItem('seuranta-settings',JSON.stringify({palette:'ampiainen',theme:'dark',tracking:{training:true,recovery:true},gym:{enabled:true}})); });
   await p.reload(); await p.waitForTimeout(500);
-  const sec=()=>p.evaluate(()=>{ const el=document.getElementById('training-section'); return {txt:el.innerText.replace(/\s+/g,' '), btn:el.querySelector('.tr-tg')?.textContent.trim(), src:el.querySelector('.tr-gymsrc')?.innerText||'', card:document.getElementById('gym-card')?.innerText.replace(/\s+/g,' ')||''}; });
+  const sec=()=>p.evaluate(()=>{ const el=document.getElementById('training-section'); return {txt:el.innerText.replace(/\s+/g,' '), btn:el.querySelector('.tr-tg')?.textContent.replace(/\u00a0/g,' ').trim(), src:el.querySelector('.tr-gymsrc')?.innerText||'', card:document.getElementById('gym-card')?.innerText.replace(/\s+/g,' ')||''}; });
   // ilman salitreeniä: käsin kirjattava treeni kuten ennen
   await p.evaluate(()=>{ setTab('log'); toggleTraining('done'); });
   let v=await sec();
@@ -27,19 +27,19 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     setTab('log'); loadDayIntoForm(S.date); renderLog(); });
   await p.waitForTimeout(200);
   v=await sec();
-  ok(/^✓ Salitreeni · lisää rasitus ja kulku ›$/.test(v.btn)&&!/Rasitustaso/.test(v.txt),'v2.18.150: salitreenipäivänä yksi rivi: '+v.btn);
+  ok(/^✓ Salitreeni · lisää rasitus ja kulku ?›$/.test(v.btn)&&!/Rasitustaso/.test(v.txt),'v2.18.150: salitreenipäivänä yksi rivi: '+v.btn);
   ok(/Cardio/.test(v.txt)&&!/Treenityyppi/.test(v.txt),'Cardio säilyy, treenityyppi ei näy');
   ok(/Selkä ja hauikset/.test(v.card),'treenin nimi kortissa');
   await p.locator('#training-section .tr-sumbtn').click(); await p.waitForTimeout(100);
   v=await sec();
   ok(v.btn==='✓ Salitreeni'&&/Rasitustaso/.test(v.txt)&&/Treenin kulku/.test(v.txt)&&/\+ Treenihuomio/.test(v.txt)&&!/Treenityyppi/.test(v.txt),'napautus avaa kentät; huomio linkin takana');
   await p.evaluate(()=>setTrainingLoad(4));
-  ok(await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); const t=document.querySelector('#training-section .tr-sumbtn').textContent; TR_OPEN=S.date; renderTrainingSection(); return t; })==='✓ Salitreeni · rasitus 4 · lisää kulku ›','v2.18.151: rivi kertoo, mitä puuttuu (kulku)');
+  ok(await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); const t=document.querySelector('#training-section .tr-sumbtn').textContent.replace(/\u00a0/g,' ').replace(/ ?›$/,' ›'); TR_OPEN=S.date; renderTrainingSection(); return t; })==='✓ Salitreeni · rasitus 4 · lisää kulku ›','v2.18.151: rivi kertoo, mitä puuttuu (kulku)');
   await p.locator('#training-section button',{hasText:'Normaalisti'}).click(); await p.waitForTimeout(150);
   v=await sec();
   ok(/1 liikettä · 2 sarjaa · .*min · rasitus 4 · normaalisti/.test(v.card),'kortissa rasitus ja kulku: '+v.card);
   await p.evaluate(()=>{ TR_OPEN=null; renderTrainingSection(); }); v=await sec();
-  ok(v.btn==='✓ Salitreeni · rasitus 4 · normaalisti ›','suljettu rivi kertoo rasituksen ja kulun: '+v.btn);
+  ok(/^✓ Salitreeni · rasitus 4 · normaalisti ?›$/.test(v.btn),'suljettu rivi kertoo rasituksen ja kulun: '+v.btn);
   await p.evaluate(()=>flushPendingAutoSave&&flushPendingAutoSave());
   const e=await p.evaluate(()=>{ const x=S.entries[today()]; return {l:x.training_load,o:x.training_outcome,d:x.training_done}; });
   ok(e.l===4&&e.o==='normal'&&e.d===true,'tallentuu päivän kirjaukseen: '+JSON.stringify(e));

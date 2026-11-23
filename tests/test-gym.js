@@ -350,7 +350,7 @@ const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d);};
   ok(fe.snap,'kulun asetus lukitsee Päivän tila -snapshotin kuten Kirjaa-näkymässä');
   await p.evaluate(()=>setTab('log'));
   ok(await p.evaluate(()=>S.training_done===true&&S.training_load===4&&S.training_outcome==='better'),'Kirjaa-näkymä näyttää arvot');
-  ok(/rasitus 4 · paremmin/.test(await p.locator('#training-section .tr-sumbtn').textContent()),'v2.18.150: Kirjaa-rivi kertoo rasituksen ja kulun');
+  ok(/rasitus 4 · paremmin/.test((await p.locator('#training-section .tr-sumbtn').textContent()).replace(/\u00a0/g,' ')),'v2.18.150: Kirjaa-rivi kertoo rasituksen ja kulun');
   await p.evaluate(()=>{ TR_OPEN=S.date; renderTrainingSection(); }); // lisäseurannat voivat olla piilossa
   ok(await p.locator('.tr-load button.active',{hasText:'4'}).count()===1,'Kirjaa: rasitus 4 valittuna, kun rivi avataan');
   // ohitus: kyselyyn ei vastata → käsin kirjattu säilyy
