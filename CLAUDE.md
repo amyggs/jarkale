@@ -58,4 +58,4 @@ Uni, askeleet ja paino ovat kelloissa jo valmiina; Järkäleen oma arvo kehon pu
 - Tekstit kertovat käyttäjälle, mitä tapahtuu ja miksi. Ei teknistä jargonia.
 
 ## Tilan seuranta
-Projektin päätökset ja versiohistoria ovat Clauden projektin dokumenteissa (`claude/jarkale-tracking-tila.md` ja jatko-osa `claude/jarkale-tracking-tila-jatko.md`). Lue ne ennen isompia muutoksia, jos ne ovat saatavilla.
+Projektin päätökset ja versiohistoria ovat Clauden projektin dokumenteissa (`claude/jarkale-tracking-tila.md`, jatko-osat `claude/jarkale-tracking-tila-jatko.md` ja `claude/jarkale-tracking-tila-jatko-2.md`; uusin tila ja avoimet asiat jälkimmäisessä). Lue ne ennen isompia muutoksia, jos ne ovat saatavilla.
