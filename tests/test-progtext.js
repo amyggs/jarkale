@@ -57,6 +57,18 @@ const TXT=["Ohjelma testi 1/2026","","Jokainen sarja failureen saakka.","","1 Ri
   ok(vh[4]==='Kyykky|5|3||@ 80%','@ 80% ohjeeksi ('+vh[4]+')');
   ok(vh[5]==='Kyykky|5|5|72.5|','desimaalipaino perässä edelleen painoksi ('+vh[5]+')');
   ok(vh[6].startsWith('Hauis|3|10|')&&!vh[6].includes('|12|'),'monitulkintainen 3x10x12 ei arvaa painoa ('+vh[6]+')');
+  // v2.18.200: nousevat sarjat, jokaisella oma paino
+  const rp=await p.evaluate(async()=>{ const f=t=>{ const x=parseExLine(t); return [x.name,x.sets,goalTxt(x).replace(/\u00a0/g,' '),goalInputTxt(x),x.note].join('|'); };
+    const out={a:f('Penkki 150x3, 160x2, 170x1'),b:f('Maastaveto 180x3x2, 200x1'),c:f('Penkki 92,5x8, 95x6,97,5x4 + DS'),d:f('Penkki 150 kg x 3; 160 kg x 2 kova päivä'),e:f('Penkki 2 x 6-8, 1 x 10-12'),g:f('Kyykky 140x5x3')};
+    const pr=newProgram('R'); pr.days[0].exercises.push({...newEx(parseExLine('Penkki 150x3, 160x2, 170x1'))}); touchProg(pr); gymSave();
+    await startSession(pr.id,pr.days[0].id); const s=activeSession(); const ex=s.exercises[0]; out.gh=ex.sets.map((r,i)=>{ const g=ghostFor(s,ex,i); return g.kg+'x'+g.reps; }).join(',');
+    ex.sets.forEach(r=>{ r.kg=null; }); discardSession&&0; finishSession(true); return out; });
+  ok(rp.a==='Penkki|3|150 kg × 3 · 160 kg × 2 · 170 kg × 1|150x3, 160x2, 170x1|','nousevat sarjat: oma paino ja toistot sarjoittain ('+rp.a+')');
+  ok(rp.b==='Maastaveto|3|180 kg × 3, 3 · 200 kg × 1|180x3x2, 200x1|','paino × toistot × sarjat listassa ('+rp.b+')');
+  ok(/^Penkki\|3\|92,5 kg × 8 · 95 kg × 6 · 97,5 kg × 4 \+ DS\|92,5x8, 95x6, 97,5x4 \+ DS\|$/.test(rp.c),'desimaalipainot ja pudotussarja ('+rp.c+')');
+  ok(rp.d==='Penkki|2|150 kg × 3 · 160 kg × 2|150x3, 160x2|kova päivä','kg-merkintä, puolipiste ja ohje perässä ('+rp.d+')');
+  ok(rp.e.startsWith('Penkki|3|2 × 6–8 + 1 × 10–12')&&rp.g.startsWith('Kyykky|3|3 × 5 · 140 kg'),'aiemmat muodot ennallaan');
+  ok(rp.gh==='150x3,160x2,170x1','treenissä jokaisen sarjan valmis paino ja toistot ohjelmasta ('+rp.gh+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

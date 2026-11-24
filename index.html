@@ -2370,7 +2370,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.199</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.200</span>
       </div>
     </div>
   </div>
@@ -2435,6 +2435,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.200", d:"marraskuu 2026", items:[
+    "Ohjelmatekstiin nousevat (tai vaihtelevat) sarjat, jokaisella oma paino: \"Kyykky 100x5, 120x3, 140x1\" = paino × toistot sarjoittain, myös × sarjat (\"180x3x2, 200x1\"), kg-merkintä, puolipiste, \"ja\" ja pudotussarja perässä. Paino tunnistetaan desimaalista tai koosta (≥ 20); \"Hauis 12x10, 14x8\" tulkitaan edelleen sarjoiksi × toistoiksi. Tavoiteryhmään sarjakohtainen paino (groups[].weight): treenissä jokaisen sarjan valmis paino ja toistot ohjelmasta, tavoiteteksti \"100 kg × 5 · 120 kg × 3 · 140 kg × 1\", muokkausteksti palautuu samaan muotoon.",
+    "Tuonnin ohjeessa yleinen termi tekoäly (ei ChatGPT) ja uusi rivi: ei vielä ohjelmaa? Pyydä tekoälyä tekemään ohjelma tai aloita treeni ilman ohjelmaa. Järkäle ei itse tee eikä ehdota ohjelmia."
+  ]},
   {v:"2.18.199", d:"marraskuu 2026", items:[
     "Treeni ilman ohjelmaa (Akun päätös 24.11., ChatGPT-katselmointi ja vihkokäyttäjä): Treeni-välilehden rivi ＋ Treeni ilman ohjelmaa ja tyhjätilan kolmas aloitustapa. Yksi napautus aloittaa treenin nimellä Treeni, lisäyskenttä valmiina; tunnettu liike saa viime kerran sarjamäärän ja luvut, uusi alkaa yhdellä sarjalla. Ohjelmien kierto ei huomioi sitä.",
     "Päivän valinta vapaan treenin otsikossa (myös mennyt päivä, ei tuleva): aloitus- ja lopetusaika siirtyvät samalle päivälle, päiväkirjan treenimerkintä siirtyy. Vanhat vihkotreenit voi kirjata jälkikäteen.",
@@ -7649,6 +7653,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"24.11.2026", items:[
+    "Ohjelmaan voi kirjoittaa nousevat sarjat, joissa jokaisella on oma paino: \"Kyykky 100x5, 120x3, 140x1\". Treenissä jokaisen sarjan paino ja toistot ovat valmiina.",
     "Treenin voi aloittaa ilman ohjelmaa: Treeni-välilehti → ＋ Treeni ilman ohjelmaa. Lisää liikkeet sitä mukaa kuin teet, ja aiemmat liikkeet tulevat ehdotuksiksi viime kerran lukuineen. Treenin päivän voi vaihtaa myös menneeseen.",
     "Vapaasta treenistä voi tallentaa ohjelman yhteenvedon kohdasta Tallenna ohjelmaksi."
   ]},
@@ -9724,21 +9729,29 @@ function parseExLine(text){
   let t=cleanLine(text); if(!t) return null;
   // v2.18.187: vihkomerkintä paino × toistot × sarjat ("Kyykky 140x5x3" = 3 × 5 painolla 140) tai sarjat × toistot × paino ("3x5x140").
   // Paino tunnistetaan desimaalista tai koosta (≥ 20). Jos kumpikaan pää ei ole paino, rivi jää ennalleen.
+  if(!/\d\s*(?:kg)?\s*[x×*]\s*\d{1,2}(?:\s*[x×*]\s*\d{1,2})?\s*(?:[,;&]|\bja\b)\s*\d{1,3}(?:[.,]\d{1,2})?\s*(?:kg)?\s*[x×*]\s*\d/i.test(t)) // v2.18.200: lista → nousevat sarjat alla
   { const v=t.match(/^(.*?\S)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?\s*[x×*]\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:kg)?\s*[x×*]\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*(kg)?(?=\s|$|[,;(])(.*)$/i);
     if(v){ const isW=s=>/[.,]/.test(s)||parseFloat(s)>=20, isI=s=>/^\d{1,2}$/.test(s)&&+s>0;
       if(isW(v[2])&&isI(v[3])&&isI(v[4])) t=`${v[1]} ${v[4]}x${v[3]} ${v[2]}kg${v[6]}`;
       else if(isW(v[4])&&isI(v[2])&&isI(v[3])) t=`${v[1]} ${v[2]}x${v[3]} ${v[4]}kg${v[6]}`; } }
   const blank={name:t,sets:null,repsMin:null,repsMax:null,max:false,weight:null,note:"",parsed:false};
-  const m0=t.match(GOAL_START_RE);
-  if(!m0) return blank;
-  const start=m0.index+m0[1].length;
+  // v2.18.200: nousevat (tai vaihtelevat) sarjat, jokaisella oma paino: "Penkki 150x3, 160x2, 170x1" = paino × toistot (× sarjat).
+  // Vähintään kaksi kohtaa, paino tunnistetaan desimaalista tai koosta (≥ 20), toistot 1–30.
+  const RW="(\\d{1,3}(?:[.,]\\d{1,2})?)\\s*(?:kg)?\\s*[x×*]\\s*(\\d{1,2})(?:\\s*[x×*]\\s*(\\d{1,2}))?";
+  const ramp=t.match(new RegExp("^(.*?\\S)\\s+("+RW.replace(/\((?!\?)/g,"(?:")+"(?:\\s*(?:[,;&]|\\bja\\b)\\s*"+RW.replace(/\((?!\?)/g,"(?:")+")+)(?=\\s|$|[+(])(.*)$","i"));
+  let rampG=null;
+  if(ramp){ const ents=[...ramp[2].matchAll(new RegExp(RW,"gi"))].map(m=>({w:gNum(m[1]),raw:m[1],r:+m[2],n:m[3]?+m[3]:1}));
+    if(ents.length>=2&&ents.every(e=>(/[.,]/.test(e.raw)||e.w>=20)&&e.r>=1&&e.r<=30&&e.n>=1&&e.n<=10)) rampG=ents; }
+  const m0=rampG?null:t.match(GOAL_START_RE);
+  if(!m0&&!rampG) return blank;
+  const start=rampG?ramp[1].length:m0.index+m0[1].length;
   let name=t.slice(0,start).trim().replace(/[\s:,(–-]+$/,"");
   if(!name) return blank;
   // tavoiteryhmät: "2 * 6-8 & 1 * 8-12"
-  let rest=t.slice(start); const groups=[];
+  let rest=rampG?ramp[3]:t.slice(start); const groups=rampG?rampG.map(e=>({sets:e.n,min:e.r,max:null,isMax:false,w:e.w})):[];
   // v2.18.182: myös pilkku ("2 x 6-8, 1 x 10-12") ja pyramidi "3 x 8/10/12" (toistot sarjoittain, kun määrä täsmää)
   const gRe=new RegExp("^"+GOAL_G,"i"), joinRe=/^\s*(?:&|\+|ja|sekä|,)\s*/i;
-  for(;;){
+  for(;!rampG;){
     const g=rest.match(gRe); if(!g) break;
     const pg=parseGroup(g); rest=rest.slice(g[0].length);
     const pyr=!pg.isMax&&pg.max==null?rest.match(/^(?:\s*\/\s*\d{1,2}\b)+/):null;
@@ -9752,7 +9765,7 @@ function parseExLine(text){
   let weight=null;
   // v2.18.187: prosentti ei ole paino ("5x5 75 %" → ohjeeksi, ei 75 kg)
   const w=rest.match(/^\s*(?:@|·|,)?\s*(\d{1,3}(?:[.,]\d{1,2})?)(?!\s*%)(?![\d.,])\s*(?:kg)?(?=\s|$|[,;)])/i);
-  if(w){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
+  if(w&&!rampG){ weight=gNum(w[1]); rest=rest.slice(w[0].length); }
   // v2.18.117: "+ R/P + DS + R/P" → lisärivit viimeisen työsarjan perään (rest-pause, pudotussarja)
   // v2.18.119: myös "drop set", "rest pause", "rest-pause", "(DS)", "+ 2 DS", "DS × 2". Myo-repsit ja proosa jäävät ohjeeksi.
   let extras=null;
@@ -9762,7 +9775,7 @@ function parseExLine(text){
     (extras=extras||[]).push(...Array(n).fill(k)); rest=rest.slice(xm[0].length); }
   let note=rest.replace(/^\s*(?:toistot|toistoa|reps|krt)\b/i,"").replace(/^[\s,;:)–—/-]+/,"").replace(/[\s(]+$/,"").trim();
   if(/^\([^()]*\)$/.test(note)) note=note.slice(1,-1).trim();   // v2.18.129: "(RIR 2, tauko 2 min)" → ilman sulkeita
-  const grp=groups.length>1?groups.map(g=>({sets:g.sets,repsMin:g.isMax?null:g.min,repsMax:g.isMax?null:g.max,max:g.isMax})):null;
+  const grp=groups.length>1?groups.map(g=>({sets:g.sets,repsMin:g.isMax?null:g.min,repsMax:g.isMax?null:g.max,max:g.isMax,...(g.w!=null?{weight:g.w}:{})})):null;
   // Pilkun jälkeinen tarkenne nimestä ohjeeksi: "Leuanveto leveä myötäote, kevennä kumppareilla" → ohje.
   // v2.18.116: vain sulkeiden ulkopuolinen pilkku. Pitkä sulkeissa oleva ohje (≥ 3 sanaa) siirtyy ohjeeksi;
   // lyhyt tarkenne kuten "(Barbell)" tai "(KP)" jää nimeen.
@@ -9797,15 +9810,17 @@ function kindPop(el,k){
   d._t=setTimeout(kindPopClose,6000);
 }
 function kindPopClose(){ const d=document.getElementById("kind-pop"); if(d){ clearTimeout(d._t); d.remove(); } }
-function goalGroupsDiffer(g){ if(!g||!g.groups||g.groups.length<2) return false; const k=x=>[x.repsMin??"",x.repsMax??"",!!x.max].join("|"), a=k(g.groups[0]); return g.groups.some(x=>k(x)!==a); }
+function goalGroupsDiffer(g){ if(!g||!g.groups||g.groups.length<2) return false; const k=x=>[x.repsMin??"",x.repsMax??"",!!x.max,x.weight??""].join("|"), a=k(g.groups[0]); return g.groups.some(x=>k(x)!==a); }
+const goalHasGroupKg=g=>!!(g&&g.groups&&g.groups.length>1&&g.groups.some(x=>x.weight!=null)); // v2.18.200: sarjakohtaiset painot
 function goalTxt(g){
   if(!g||!g.sets) return "";
   if(g.groups&&g.groups.length>1&&!goalGroupsDiffer(g)) g={...g,...g.groups[0],sets:g.groups.reduce((n,x)=>n+x.sets,0),groups:null};
   if(g.repsMin==null&&!g.max&&!(g.groups&&g.groups.length>1)) return `${g.sets} ${g.sets===1?"sarja":"sarjaa"}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
+  if(goalHasGroupKg(g)) return g.groups.map(x=>`${x.weight!=null?fmtKg(x.weight)+"\u00a0kg\u00a0×\u00a0":""}${Array(x.sets).fill(repsTxt(x)).join(", ")}`).join(" · ")+extrasTxt(g);
   const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets} × ${repsTxt(x)}`).join(" + "):`${g.sets} × ${repsTxt(g)}`;
   return `${body}${extrasTxt(g)}${g.weight!=null?` · ${fmtKg(g.weight)} kg`:""}`;
 }
-function goalInputTxt(g){ if(!g.sets) return ""; const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets}x${repsTxt(x,"-")}`).join(" & "):`${g.sets}x${repsTxt(g,"-")}`; return `${body}${g.weight!=null?" "+fmtKg(g.weight):""}${extrasTxt(g)}`; }
+function goalInputTxt(g){ if(!g.sets) return ""; if(goalHasGroupKg(g)) return g.groups.map(x=>`${fmtKg(x.weight??0)}x${x.repsMin??1}${x.sets>1?"x"+x.sets:""}`).join(", ")+extrasTxt(g); const body=g.groups&&g.groups.length>1?g.groups.map(x=>`${x.sets}x${repsTxt(x,"-")}`).join(" & "):`${g.sets}x${repsTxt(g,"-")}`; return `${body}${g.weight!=null?" "+fmtKg(g.weight):""}${extrasTxt(g)}`; }
 // Sarjan oma tavoite (sarjakohtaisissa tavoitteissa ryhmän mukaan), muuten liikkeen tavoite
 function setGoalAt(g,i){
   if(!g) return null;
@@ -10246,7 +10261,7 @@ function ghostBase(s,ex,i){
   const pr=prev&&prev.sets[Math.min(i,prev.sets.length-1)];
   if(pr) return {kg:pr.kg,reps:pr.reps};
   const g=ex.goal||{}, sg=setGoalAt(g,i)||{};
-  return {kg:g.weight??null,reps:sg.max?null:(sg.repsMin??null)};
+  return {kg:sg.weight??g.weight??null,reps:sg.max?null:(sg.repsMin??null)};
 }
 const KG_STEPS=[0.5,1,1.25,2.5,5];
 function kgStep(){ const v=+gymCfg().kgStep; return KG_STEPS.includes(v)?v:1.25; }
@@ -11624,7 +11639,7 @@ async function gArchiveProg(){
 function gymImportHTML(){
   const pv=GU.importPreview;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Muistiinpanosta tai tekstitiedostosta</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
-    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.<br><br>Onko ohjelma kuvana tai paperilla? Pyydä esimerkiksi ChatGPT:tä kirjoittamaan kuvasta teksti ja liitä se tähän.</div>
+    <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.<br><br>Onko ohjelma kuvana tai paperilla? Pyydä tekoälyä kirjoittamaan kuvasta teksti ja liitä se tähän.<br><br>Ei vielä ohjelmaa? Voit pyytää tekoälyä tekemään sinulle ohjelman ja liittää sen tähän, tai aloittaa treenin ilman ohjelmaa.</div>
     <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
     <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=gMatchImport(parseProgramText(GU.importText));renderGym()">Esikatsele</button>`;
   if(pv){
