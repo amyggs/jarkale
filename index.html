@@ -2365,7 +2365,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.197</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.198</span>
       </div>
     </div>
   </div>
@@ -2430,6 +2430,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.198", d:"marraskuu 2026", items:[
+    "Synkronointi: saman treenin muokkaus kahdella laitteella synkronointien välissä. Ennen treeni ratkaistiin kokonaisena uudemman aikaleiman mukaan, jolloin toisen laitteen kuitattu sarja tai lisätty liike katosi (todennettu testillä). Nyt, jos molemmat laitteet muuttivat treeniä edellisen synkronoinnin jälkeen, uudempi voittaa ristiriidoissa, mutta toisen laitteen kuitatut sarjat ja lisätyt liikkeet säilyvät (sessUnion). Jos vain toinen muutti, vanha kopio ei palauta poistettua sarjaa.",
+    "Uudet testit: varmuuskopion täysi kierros kaikilla tietotyypeillä kenttäkohtaisesti, myös vanhan muodon varmuuskopio (test-roundtrip), ja rinnakkainen muokkaus (test-syncconcurrent)."
+  ]},
   {v:"2.18.197", d:"marraskuu 2026", items:[
     "Pilotin Mitä uutta: kuvan tallennus saman päivän ryhmään (oli erillinen otsikko \"23.11.2026 ilta\")."
   ]},
@@ -11925,7 +11929,21 @@ function mergeMaps(a,b,ts,tombs){
   return out;
 }
 // Yhdistää paikallisen ja Driven datan. Puhdas funktio (testattava).
-function syncMerge(local,remote,localDirtySinceSync){
+// v2.18.198: saman treenin rinnakkainen muokkaus. Jos molemmat laitteet muuttivat treeniä edellisen synkronoinnin jälkeen
+// (aikaleimat > lastSyncAt), uudempi voittaa ristiriidoissa, mutta häviävän version kuitatut sarjat ja lisätyt liikkeet säilyvät.
+// Jos vain toinen muutti, toinen on vanha kopio → ei yhdistetä (poistettu sarja ei palaa).
+function sessUnion(w,l){
+  const out=JSON.parse(JSON.stringify(w)); let changed=false;
+  (l.exercises||[]).forEach(lx=>{
+    const wx=out.exercises.find(e=>e.id===lx.id);
+    if(!wx){ if((lx.sets||[]).some(r=>r.done)){ out.exercises.push(JSON.parse(JSON.stringify(lx))); changed=true; } return; }
+    (lx.sets||[]).forEach((r,i)=>{ if(!r.done) return; const wr=wx.sets[i];
+      if(!wr){ wx.sets.push(JSON.parse(JSON.stringify(r))); changed=true; }
+      else if(!wr.done){ wx.sets[i]=JSON.parse(JSON.stringify(r)); changed=true; } });
+  });
+  return changed?out:w;
+}
+function syncMerge(local,remote,localDirtySinceSync,lastSyncAt=0){
   const tombs={};
   ["e","s","p","m"].forEach(k=>{ tombs[k]={...(remote.tombs&&remote.tombs[k]||{})}; Object.entries(local.tombs&&local.tombs[k]||{}).forEach(([id,t])=>{ tombs[k][id]=Math.max(tombs[k][id]||0,t); }); });
   const entries=mergeMaps(local.entries,remote.entries,tsOf,tombs.e);
@@ -11934,7 +11952,11 @@ function syncMerge(local,remote,localDirtySinceSync){
   const meas=Object.values(mergeMaps(mArr(local.measurements),mArr(remote.measurements),measTs,tombs.m)).sort((a,b)=>a.date.localeCompare(b.date));
   const sTs=s=>s?(s.updatedAt||s.endedAt||s.startedAt||0):0;
   const byId=arr=>Object.fromEntries((arr||[]).map(x=>[x.id,x]));
-  const sessions=Object.values(mergeMaps(byId(local.gym&&local.gym.sessions),byId(remote.gym&&remote.gym.sessions),sTs,tombs.s)).sort((a,b)=>a.startedAt-b.startedAt);
+  const lS=byId(local.gym&&local.gym.sessions), rS=byId(remote.gym&&remote.gym.sessions);
+  const sMap=mergeMaps(lS,rS,sTs,tombs.s);
+  if(lastSyncAt) Object.keys(sMap).forEach(id=>{ const a=lS[id], b=rS[id]; if(!a||!b||sTs(a)<=lastSyncAt||sTs(b)<=lastSyncAt) return;
+    const w=sMap[id], l=w===a?b:a; const u=sessUnion(w,l); if(u!==w){ u.updatedAt=Math.max(sTs(a),sTs(b))+1; sMap[id]=u; } });
+  const sessions=Object.values(sMap).sort((a,b)=>a.startedAt-b.startedAt);
   const pTs=p=>p?(p.updatedAt||p.createdAt||0):0;
   const programs=Object.values(mergeMaps(byId(local.gym&&local.gym.programs),byId(remote.gym&&remote.gym.programs),pTs,tombs.p)).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   // Asetukset kokonaisuutena: paikalliset, jos niitä on muutettu edellisen synkronoinnin jälkeen, muuten Driven
@@ -12002,7 +12024,7 @@ async function syncNow(opts={}){
       if((remote.version||1)>1) throw new Error("Drivessa on uudemman Järkäle-version tallennus. Päivitä sovellus ennen synkronointia.");
       // Ensimmäisellä synkronoinnilla Driven asetukset voittavat (uusi puhelin saa tavoitteet, lääkkeet ja teeman)
       const dirty=!!st.lastSyncAt&&(st.dirtyAt||0)>(st.lastSyncAt||0);
-      out=syncMerge(local,remote,dirty);
+      out=syncMerge(local,remote,dirty,st.lastSyncAt||0);
       // v2.18.19: jos käyttäjä muutti jotain latauksen aikana, yhdistettyä tilaa ei sovelleta puhelimeen (se korvaisi
       // uuden muutoksen). Yhdistetty tila lähetetään silti Driveen, ja uusi synkronointi hakee sen perään.
       const sig=x=>JSON.stringify([x.entries,x.measurements,x.gym.programs,x.gym.sessions,x.settings,x.gym.curProgramId]);
