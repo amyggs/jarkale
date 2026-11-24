@@ -1995,6 +1995,11 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 /* v2.18.194: päivämäärärivi mahtuu (leveät fontit + iso teksti): sovitus pienentää */
 :has(>#date-display){min-width:0;}
 #date-display{overflow-x:clip;}
+/* v2.18.199: treeni ilman ohjelmaa – päivän valinta otsikossa, Tallenna ohjelmaksi */
+.g-dch{position:relative;display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 12px;border-radius:999px;border:1px solid var(--bord);background:var(--surf2);color:var(--text);font:600 13px Manrope,system-ui,sans-serif;}
+.g-dch input{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:0;cursor:pointer;}
+.tr-free .n{color:var(--text);}
+.g-saveprog{margin-top:12px;border-radius:14px;}
 /* v2.18.194: tekstin koko (Normaali / Iso / Järkäle) – napit omassa koossaan */
 .ts-row{display:flex;gap:8px;}
 .ts-row .chip{flex:1;min-height:52px;font-weight:700;color:var(--text);}
@@ -2365,7 +2370,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.198</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.199</span>
       </div>
     </div>
   </div>
@@ -2430,6 +2435,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.199", d:"marraskuu 2026", items:[
+    "Treeni ilman ohjelmaa (Akun päätös 24.11., ChatGPT-katselmointi ja vihkokäyttäjä): Treeni-välilehden rivi ＋ Treeni ilman ohjelmaa ja tyhjätilan kolmas aloitustapa. Yksi napautus aloittaa treenin nimellä Treeni, lisäyskenttä valmiina; tunnettu liike saa viime kerran sarjamäärän ja luvut, uusi alkaa yhdellä sarjalla. Ohjelmien kierto ei huomioi sitä.",
+    "Päivän valinta vapaan treenin otsikossa (myös mennyt päivä, ei tuleva): aloitus- ja lopetusaika siirtyvät samalle päivälle, päiväkirjan treenimerkintä siirtyy. Vanhat vihkotreenit voi kirjata jälkikäteen.",
+    "Yhteenvedossa Tallenna ohjelmaksi: tehdyistä liikkeistä ohjelma (sarjamäärä, toistoväli, R/P- ja DS-rivit, ei painoja), avautuu muokkaukseen nimeämistä varten. Testi test-freesession."
+  ]},
   {v:"2.18.198", d:"marraskuu 2026", items:[
     "Synkronointi: saman treenin muokkaus kahdella laitteella synkronointien välissä. Ennen treeni ratkaistiin kokonaisena uudemman aikaleiman mukaan, jolloin toisen laitteen kuitattu sarja tai lisätty liike katosi (todennettu testillä). Nyt, jos molemmat laitteet muuttivat treeniä edellisen synkronoinnin jälkeen, uudempi voittaa ristiriidoissa, mutta toisen laitteen kuitatut sarjat ja lisätyt liikkeet säilyvät (sessUnion). Jos vain toinen muutti, vanha kopio ei palauta poistettua sarjaa.",
     "Uudet testit: varmuuskopion täysi kierros kaikilla tietotyypeillä kenttäkohtaisesti, myös vanhan muodon varmuuskopio (test-roundtrip), ja rinnakkainen muokkaus (test-syncconcurrent)."
@@ -7638,6 +7648,10 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"24.11.2026", items:[
+    "Treenin voi aloittaa ilman ohjelmaa: Treeni-välilehti → ＋ Treeni ilman ohjelmaa. Lisää liikkeet sitä mukaa kuin teet, ja aiemmat liikkeet tulevat ehdotuksiksi viime kerran lukuineen. Treenin päivän voi vaihtaa myös menneeseen.",
+    "Vapaasta treenistä voi tallentaa ohjelman yhteenvedon kohdasta Tallenna ohjelmaksi."
+  ]},
   {d:"23.11.2026", items:[
     "Treenin kuvan voi nyt myös tallentaa puhelimeen (Jaa → Tallenna kuva). Sen jälkeen kuvan voi lisätä esimerkiksi Instagramiin galleriasta.",
     "Uusi asetus: Tekstin koko (Asetukset → Ulkoasu). Valitse Normaali, Iso tai Järkäle, jos teksti on pientä.",
@@ -10145,6 +10159,42 @@ function exE1(ex,s){
   const b=pool.reduce((a,r)=>e1rm(r.kg,r.reps)>e1rm(a.kg,a.reps)?r:a);
   return {v:Math.round(e1rm(b.kg,b.reps)*2)/2,set:b,rough:!ok.length};
 }
+// v2.18.199: treeni ilman ohjelmaa. Tavallinen treeni (programId null, free:true), liikkeet lisätään sitä mukaa kuin tehdään.
+// Kierto ei huomioi sitä (ei ohjelmapäivää). Päivän voi vaihtaa (myös menneeseen: vanhat vihkotreenit), ja tehdystä treenistä voi tallentaa ohjelman.
+async function startFreeSession(){
+  if(activeSession()&&!await jConfirm("Toinen treeni on kesken. Aloitetaanko uusi? Keskeneräinen treeni tallentuu sellaisenaan.")) return;
+  if(activeSession()) finishSession(true);
+  const now=Date.now();
+  const s={id:gid(),programId:null,dayId:null,free:true,date:today(),startedAt:now,endedAt:null,programName:"",dayName:"Treeni",trainingType:"",exercises:[]};
+  G.sessions.push(s); G.activeId=s.id; gymSave();
+  GU.mode="session"; GU.sessionId=s.id; GU.finishing=false; GU.expanded={}; GU.menu=null;
+  gymWakeLock(true); renderGym(); gTop(); renderLogGymCard();
+  setTimeout(()=>document.getElementById("g-addex")?.focus(),60);
+}
+function gSetSessionDate(sid,ds){
+  const s=gSession(sid); if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(ds)||ds>today()||ds===s.date) return;
+  const delta=Date.parse(ds)-Date.parse(s.date);
+  const linked=s.endedAt&&sessionStats(s).sets>0; if(linked) gymUnlinkEntry(s);
+  s.date=ds; s.startedAt+=delta; if(s.endedAt) s.endedAt+=delta; else s.dayShift=(s.dayShift||0)+delta;
+  s.exercises.forEach(e=>(e.sets||[]).forEach(r=>{ if(r.at) r.at+=delta; }));
+  if(linked) gymLinkEntry(s);
+  gymSave(); renderGym(); renderLogGymCard();
+}
+function gSessDateHTML(s){
+  const lbl=s.date===today()?"tänään":gDay(s.date);
+  return `<label class="g-dch">${ico("calendar",14)}<span>${lbl}</span><input type="date" value="${s.date}" max="${today()}" aria-label="Treenin päivä" onchange="gSetSessionDate('${s.id}',this.value)"></label>`;
+}
+function gSaveAsProgram(sid){
+  const s=gSession(sid); if(!s) return;
+  const ex=s.exercises.filter(e=>!e.skipped&&doneSets(e).length);
+  if(!ex.length) return;
+  const pr=newProgram("Oma ohjelma"); pr.days[0].name="Treeni";
+  pr.days[0].exercises=ex.map(e=>{ const ds=doneSets(e), reps=ds.map(r=>r.reps).filter(x=>x!=null);
+    const x=newEx({name:e.name,sets:ds.length,repsMin:reps.length?Math.min(...reps):null,repsMax:reps.length&&Math.max(...reps)!==Math.min(...reps)?Math.max(...reps):null});
+    x.key=e.key; const kinds=(e.sets||[]).filter(r=>r.kind&&r.done).map(r=>r.kind); if(kinds.length) x.extras=kinds; return x; });
+  touchProg(pr); s.savedProgramId=pr.id; gymSave();
+  const c=G.curProgramId; gOpenEdit(pr.id,true); if(GU.editSnap) GU.editSnap.cur=c;
+}
 async function startSession(progId,dayId){
   const p=gProg(progId); const d=p&&p.days.find(x=>x.id===dayId); if(!p||!d) return;
   if(activeSession()&&!await jConfirm("Toinen treeni on kesken. Aloitetaanko uusi? Keskeneräinen treeni tallentuu sellaisenaan.")) return;
@@ -10352,7 +10402,7 @@ async function gAddEx(sid){
     return;
   }
   const key=exResolveKey(p.name), prev=prevFor(key,s);
-  const n=p.sets||(prev?prev.sets.length:3);
+  const n=p.sets||(prev?prev.sets.length:(s.free?1:3));
   s.exercises.push({id:gid(),key,name:p.name,goal:goalFields(p),note:p.note||"",
     skipped:false,added:true,feel:null,userNote:"",sets:[...Array(n)].map(()=>({kg:null,reps:null,done:false}))});
   gymSave(); renderGym();
@@ -10369,7 +10419,7 @@ function finishSession(silent){
     return;
   }
   s.exercises.forEach(ex=>(ex.sets||[]).forEach(r=>{ if(r.done&&r.reps==null) r.done=false; }));
-  if(!s.endedAt) s.endedAt=Date.now();
+  if(!s.endedAt) s.endedAt=Date.now()+(s.dayShift||0); // v2.18.199: menneelle päivälle siirretty treeni
   if(GU.updateTpl&&!silent) updateTemplateFromSession(s);
   if(G.activeId===s.id) G.activeId=null;
   G.timer.endsAt=null; G.timer.pausedLeft=null;
@@ -10898,6 +10948,7 @@ function gymHomeHTML(){
     h+=`<div class="g-empty"><div class="n">Tee oma ohjelma</div><div class="s">Kirjoita liikkeet riveinä, esim. <b>Penkkipunnerrus 3x8-10 80</b>, tai liitä valmis ohjelma tekstinä.<br>Ei kirjoitettua ohjelmaa? Kirjoita liikkeet, joita teet nyt salilla. Niistä tulee ohjelma, jota voit muokata myöhemmin.</div>
       <button class="tr-go" style="width:100%;height:46px;margin-top:14px" onclick="const c=G.curProgramId;const p=newProgram();gOpenEdit(p.id,true);GU.editSnap.cur=c">+ Uusi ohjelma</button>
       <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="GU.mode='import';GU.importText='';GU.importPreview=null;renderGym()">Liitä ohjelma tekstinä</button>
+      <button class="tr-go ghost" style="width:100%;height:46px;margin-top:8px" onclick="startFreeSession()">Treeni ilman ohjelmaa</button>
       <label class="hi-emptylink">Tuo vanha historia Strongista tai Hevystä (CSV)<input type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gHistFile(this)"></label></div>`;
   } else {
     // v2.18.27 Seuraavana: päivä, joka on tehty pisimpään sitten; kertaakaan tekemätön on vanhin (ohjelman järjestyksessä).
@@ -10920,6 +10971,7 @@ function gymHomeHTML(){
       let r=`<button class="tr-row tr-btn${on?" tr-next":""}${op?" tr-open":""}" ${d.exercises.length?"":"disabled"} aria-expanded="${op}" onclick="GU.dayOpen=GU.dayOpen==='${d.id}'?null:'${d.id}';renderGym()"><div class="t">${d.id===next?`<div class="tr-nx">Seuraavana kierrossa</div>`:""}<div class="n">${esc(label)}</div><div class="s">${d.exercises.length} liikettä${l?` · viimeksi ${gDay(l.date)}`:" · ei vielä tehty"}</div></div>${on&&!op?`<span class="tr-go" role="button" onclick="event.stopPropagation();startSession('${p.id}','${d.id}')">Aloita</span>`:`<span class="chev${op?" open":""}">›</span>`}</button>`;
       if(op) r+=`<div class="tr-pv">${d.exercises.map(e=>{ const pv=prevFor(e.key,null); return `<div class="tr-pe"><div class="tr-pe-h"><b>${esc(e.name)}</b><span>${goalTxt(e)||""}</span></div>${pv?`<div class="tr-pe-l">Viimeksi ${gDay(pv.date)}: ${setsTxt(pv.rows||pv.sets)}</div>`:""}</div>`; }).join("")}<div class="tr-pv-act"><button class="tr-pv-x" onclick="GU.dayOpen=null;renderGym()">Sulje</button><button class="tr-go tr-pv-go" onclick="startSession('${p.id}','${d.id}')">Aloita treeni</button></div></div>`;
       return r; }).join(""); }).join("");
+    h+=`<button class="tr-row tr-btn tr-free" onclick="startFreeSession()"><div class="t"><div class="n">＋ Treeni ilman ohjelmaa</div><div class="s">Kirjaa liikkeet sitä mukaa kuin teet</div></div></button>`; // v2.18.199
     h+=`</div>`;
     // v2.18.29: Ohjelmat-osio päivälistan alla: käytössä oleva + muut aktiiviset riveinä (vaihto napautuksella),
     // sitten "+ Uusi ohjelma", joka avaa vaihtoehdot (tekstistä / tyhjästä), lopuksi arkistoidut.
@@ -11390,10 +11442,11 @@ function gymSessionHTML(s){
   const live=!s.endedAt, st=sessionStats(s);
   const firstOpen=s.exercises.findIndex((e,i)=>!e.skipped&&!exMini(s,e,i)&&e.sets.some(r=>!r.done));
   let h=`<div class="view-hero">${gBackLink(live?"Treeni (jatkuu taustalla)":"Treeni")}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(s.dayName)}</div>
-    <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div></div>
+    <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div>${s.free&&(live||GU.editPast===s.id)?gSessDateHTML(s):""}</div>
     ${live?`<button class="tr-pill dark" onclick="gOpenFinish()">Lopeta</button>`:""}</div>${live?gProgHTML(s):""}</div>`;
   if(!live&&GU.editPast!==s.id) h+=gymSummaryHTML(s,GU.justFinished===s.id);   // v2.18.135: muokatessa yhteenveto piiloon, sarjat heti näkyviin
   // v2.18.56: tallennettu treeni avautuu vain luettavaksi; muokkaus erikseen, ettei vanhaa treeniä muuteta vahingossa
+  if(!live&&GU.editPast!==s.id&&s.free&&!s.savedProgramId&&s.exercises.some(e=>doneSets(e).length)) h+=`<button class="tr-row tr-btn g-saveprog" onclick="gSaveAsProgram('${s.id}')"><div class="t"><div class="n">Tallenna ohjelmaksi</div><div class="s">Tee tämän treenin liikkeistä ja sarjamääristä ohjelma</div></div><span class="ch">›</span></button>`;
   if(!live&&GU.editPast!==s.id) return h+`<button class="tr-go ghost g-editpast" onclick="GU.editPast='${s.id}';renderGym()">${ico("edit",16)} Muokkaa treeniä</button><div style="height:24px"></div>`;
   if(!live) h+=`<div class="g-editbar"><span>Muokkaat tallennettua treeniä. Muutokset tallentuvat heti.</span><button class="tr-go" onclick="gEditPastDone()">Tallenna</button></div>`;
   if(live&&GU.finishing){
@@ -11469,7 +11522,8 @@ function gymSessionHTML(s){
     if(GU.note[ex.id]||ex.userNote) h+=`<textarea class="g-note" rows="2" placeholder="Huomio liikkeestä (valinnainen)…" oninput="gNote('${sid}',${ei},this.value);this.nextElementSibling&&(this.nextElementSibling.disabled=!this.value.trim())">${esc(ex.userNote||"")}</textarea><button class="g-pinbtn" ${(ex.userNote||"").trim()?"":"disabled"} onclick="gPinFromNote('${sid}',${ei})">${ico("pin",14)} Kiinnitä liikkeeseen${exMeta(ex.key).pin?" (korvaa nykyisen)":""}</button>`;
     h+=`</div>`;
   });
-  h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="+ Lisää liike, esim. Hauis 3x12" enterkeyhint="done" oninput="gAddPreview(this.value)" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div><div id="g-addex-sug"></div>`;
+  if(s.free&&!s.exercises.length) h+=`<div class="g-hint" style="margin:6px 0 10px">Kirjoita liike, jonka teet. Aiemmin kirjatut liikkeet tulevat ehdotuksiksi viime kerran lukuineen.</div>`;
+  h+=`<div class="g-addrow"><input class="g-in" id="g-addex" placeholder="${s.free?"+ Lisää liike, esim. Penkkipunnerrus":"+ Lisää liike, esim. Hauis 3x12"}" enterkeyhint="done" oninput="gAddPreview(this.value)" onkeydown="if(event.key==='Enter')gAddEx('${s.id}')"><button class="tr-go" onclick="gAddEx('${s.id}')">Lisää</button></div><div id="g-addex-sug"></div>`;
   if(live) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gOpenFinish()">Lopeta treeni</button>`;
   else{ if(GU.editPast===s.id) h+=`<button class="tr-go" style="width:100%;height:50px;margin-top:16px" onclick="gEditPastDone()">Tallenna muutokset</button>`;
   h+=`<button class="g-link danger" style="margin-top:18px" onclick="discardSession('${s.id}')">Poista treeni</button>`; }
