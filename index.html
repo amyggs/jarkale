@@ -2370,7 +2370,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.200</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.201</span>
       </div>
     </div>
   </div>
@@ -2435,6 +2435,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.201", d:"marraskuu 2026", items:[
+    "Mittauslomakkeen luonnos tallentuu jokaisella näppäilyllä ja palautuu, jos sovellus suljetaan ennen tallennusta (testaajan havainto: Android sulki Järkäleen taustalla, ja mittaukset katosivat). Ilmoitus \"Tallentamaton mittaus palautettiin\". Peruminen kysyy, jos arvoja on syötetty. Sama ohjelmatuonnin liitetylle tekstille (Tyhjennä-linkki).",
+    "FFMI myös ihopoimurasvaprosentista omana rivinään (FFMI · Navy / FFMI · ihopoimu, taulukossa FFMI (Navy) / FFMI (ihopoimu)). Erillinen sarja, ei korvaa Navy-arvoa, jotta käyrässä ei ole laskutavan vaihtumisesta johtuvia hyppyjä. Testaajan havainto: pihdeillä 10,1 % → FFMI 25,4, Järkäle näytti vain Navy-arvon 23,3. Testit test-measdraft ja test-settings."
+  ]},
   {v:"2.18.200", d:"marraskuu 2026", items:[
     "Ohjelmatekstiin nousevat (tai vaihtelevat) sarjat, jokaisella oma paino: \"Kyykky 100x5, 120x3, 140x1\" = paino × toistot sarjoittain, myös × sarjat (\"180x3x2, 200x1\"), kg-merkintä, puolipiste, \"ja\" ja pudotussarja perässä. Paino tunnistetaan desimaalista tai koosta (≥ 20); \"Hauis 12x10, 14x8\" tulkitaan edelleen sarjoiksi × toistoiksi. Tavoiteryhmään sarjakohtainen paino (groups[].weight): treenissä jokaisen sarjan valmis paino ja toistot ohjelmasta, tavoiteteksti \"100 kg × 5 · 120 kg × 3 · 140 kg × 1\", muokkausteksti palautuu samaan muotoon.",
     "Tuonnin ohjeessa yleinen termi tekoäly (ei ChatGPT) ja uusi rivi: ei vielä ohjelmaa? Pyydä tekoälyä tekemään ohjelma tai aloita treeni ilman ohjelmaa. Järkäle ei itse tee eikä ehdota ohjelmia."
@@ -4178,6 +4182,13 @@ const fmtDate = ds => {
 
 let MED_FORM = { show:false, editing:null, name:"", dose:"", unit:"mg", days:[] };
 let MEAS_FORM = { show:false, editing:null, date:today(), values:{}, comment:"" };
+// v2.18.201: mittauslomakkeen luonnos talteen jokaisella näppäilyllä. Kaverin havainto: Android sulki sovelluksen taustalla
+// (toinen sovellus auki), ja tallentamattomat mittaukset katosivat. Luonnos palautuu avattaessa, poistuu tallennuksessa ja perumisessa.
+const MEAS_DRAFT_KEY="jarkale-meas-draft";
+function measDraftSave(){ try{ if(MEAS_FORM.show&&MEAS_FORM.dirty) localStorage.setItem(MEAS_DRAFT_KEY,JSON.stringify({...MEAS_FORM,restored:false,at:Date.now()})); else localStorage.removeItem(MEAS_DRAFT_KEY); }catch(_){} }
+function measDirty(){ MEAS_FORM.dirty=true; measDraftSave(); }
+try{ const d=JSON.parse(localStorage.getItem(MEAS_DRAFT_KEY)||"null");
+  if(d&&d.dirty&&d.values&&Date.now()-(d.at||0)<30*864e5) MEAS_FORM={show:true,editing:d.editing||null,date:d.date||today(),values:d.values,comment:d.comment||"",sfOpen:!!d.sfOpen,dirty:true,restored:true}; }catch(_){}
 
 let S = {
   tab: "log",
@@ -6811,7 +6822,9 @@ function measDerived(m){
   const bf=calcNavyBF(m.wn,m.neck,ht,m.hips);
   const w=findWeightNear(m.date);
   const ffmi=calcFFMI(w,bf,ht), fmi=calcFMI(w,bf,ht);
-  return {navy:bf??null, jp:calcJPBodyFat(m,null,age)??null, ffmi:ffmi?ffmi.norm:null, fmi:fmi?fmi.fmi:null, weight:w??null};
+  // v2.18.201: FFMI myös ihopoimurasvaprosentista (erillinen sarja, ei korvaa Navy-arvoa: lähteen vaihtuminen tekisi käyrään hyppyjä)
+  const jp=calcJPBodyFat(m,null,age)??null, ffmiJ=calcFFMI(w,jp,ht);
+  return {navy:bf??null, jp, ffmi:ffmi?ffmi.norm:null, ffmiJP:ffmiJ?ffmiJ.norm:null, fmi:fmi?fmi.fmi:null, weight:w??null};
 }
 function measFmtDate(ds,withYear){const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.${withYear?d.getFullYear():""}`;}
 function measDelta(d,dir,unit){
@@ -6852,6 +6865,7 @@ function measSetProfile(k,v){ const n=parseNum(v); if(n==null||!(n>0)) return; s
 function measSetGender(g){ setGender(g); renderMeasurements(); }
 // v2.15.2: "Lisää mittaus" sivun yläosaan (Ampiaisessa keltaiselle pohjalle); lomakkeen ollessa auki yläosa on tyhjä
 function renderMeasurements(){
+  measDraftSave();
   const r=renderMeasurementsInner();
   const hero=document.getElementById("mitat-hero"), btn=document.querySelector("#historia-content .mo-add");
   if(hero){ hero.replaceChildren(); if(btn) hero.appendChild(btn); }
@@ -6883,7 +6897,8 @@ function renderMeasurementsInner(){
       {l:"Vyötärö napa", u:" cm", dir:-1, get:(m)=>m.wn, cat:null},
       {l:"Rasvaprosentti · Navy", u:" %", dir:-1, get:(m,d)=>d.navy, cat:v=>bfCategory(v)},
       {l:"Rasvaprosentti · ihopoimu", u:" %", dir:-1, get:(m,d)=>d.jp, cat:v=>bfCategory(v)},
-      {l:"FFMI · rasvaton massa", u:"", dir:1, get:(m,d)=>d.ffmi, cat:v=>ffmiCategory(v)},
+      {l:"FFMI · Navy", u:"", dir:1, get:(m,d)=>d.ffmi, cat:v=>ffmiCategory(v)},
+      {l:"FFMI · ihopoimu", u:"", dir:1, get:(m,d)=>d.ffmiJP, cat:v=>ffmiCategory(v)},
     ];
     let rows="";
     kpis.forEach(k=>{
@@ -6914,7 +6929,7 @@ function renderMeasurementsInner(){
       ${window._measInfoOpen?`<div class="mo-info">
         <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
         <p><b>Ihopoimu (Jackson-Pollock 3-kohta)</b> on erillinen, rinnakkainen arvio. Tulos riippuu eniten siitä, osuuko poimu joka kerta samaan kohtaan.</p>
-        <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista. <b>FMI</b> on sama rasvamassasta.</p>
+        <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista, ja jos ihopoimut on mitattu, erikseen myös ihopoimuarviosta. Rasvaprosenttiarviot voivat erota selvästi: lihaksikkaalla Navy-kaava arvioi rasvaprosentin usein korkeammaksi, koska vyötärönympärys kasvaa myös lihaksista. <b>FMI</b> on sama rasvamassasta (Navy).</p>
         <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Luvun vieressä oleva merkki (esim. Matala, Keskitaso) on yleinen viiteluokka, ei arvio sinun tavoitteestasi. Rasvaprosentissa hyvin matala vastaa elimistölle välttämätöntä rasvaa, matala on tyypillinen urheilijoilla ja melko matala kuntoilijoilla.</p>
       </div>`:""}
     </div>`;
@@ -6934,7 +6949,8 @@ function renderMeasurementsInner(){
     const calc=[
       mkRow("Navy",der.map(d=>d.navy),-1,"%"),
       mkRow("Ihopoimu (JP)",der.map(d=>d.jp),-1,"%"),
-      mkRow("FFMI",der.map(d=>d.ffmi),1,""),
+      mkRow("FFMI (Navy)",der.map(d=>d.ffmi),1,""),
+      mkRow("FFMI (ihopoimu)",der.map(d=>d.ffmiJP),1,""),
       mkRow("FMI",der.map(d=>d.fmi),-1,""),
       mkRow("Paino",der.map(d=>d.weight),0,"kg"),
     ].join("");
@@ -6969,22 +6985,23 @@ function buildMeasFormHTML(){
   const fv=k=>f.values[k]==null?"":String(f.values[k]).replace(".",",");
   const bfHint=!genderSet
     ? `${ico("alert",13)} Rasvaprosentti- ja FFMI-arvio tarvitsevat sukupuolen (laskentakaava) ja pituuden. Mittaukset tallentuvat silti normaalisti.`
-    : `${ico("bulb",13)} Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>${ico("dumbbell",13)} FFMI: lasketaan automaattisesti painosta, Navy-rasvaprosentista ja pituudesta. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
+    : `${ico("bulb",13)} Navy-metodi: ${isFemale?"Vyötärö (napa) + kaula + lantio + pituus profiilissa = rasvaprosentti.":"Vyötärö (napa) + kaula + pituus profiilissa = rasvaprosentti."} Karkea arvio — ei huomioi lihasmassaa.<br>${ico("dumbbell",13)} FFMI: lasketaan automaattisesti painosta, rasvaprosentista ja pituudesta, erikseen Navy-arviosta ja ihopoimuista, jos ne on mitattu. Kertoo lihasmassan suhteessa pituuteen — hyvä tapa seurata kehittyykö lihasmassa vai vain paino.`;
   return `<div class="card" style="margin-bottom:14px;border-color:rgba(249,115,22,.4)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <span style="color:var(--text);font-weight:600">${f.editing?"Muokkaa mittausta":"Uusi mittaus"}</span>
       <button onclick="cancelMeasForm()" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer">×</button>
     </div>
+    ${f.restored?`<div class="mf-guide" style="border-color:var(--orange)">${ico("save",13)} Tallentamaton mittaus palautettiin. Tarkista arvot ja tallenna.</div>`:""}
     <div class="mf-guide">Täytä vain ne mitat, joita seuraat. Mittaa aina samasta kohdasta ja samaan aikaan päivästä, niin luvut ovat vertailukelpoisia. Vyötärö mitataan navan kohdalta sekä 5 cm sen ylä- ja alapuolelta.</div>
     <div style="margin-bottom:12px">
       <div class="lbl-small">Päivämäärä</div>
-      <input type="date" id="mfd-date" value="${f.date}" max="${today()}" onchange="MEAS_FORM.date=this.value" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
+      <input type="date" id="mfd-date" value="${f.date}" max="${today()}" onchange="MEAS_FORM.date=this.value;measDirty()" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       ${MEAS_FIELDS.map(fld=>`<div>
         <div class="lbl-small">${fld.l}</div>
         <div style="position:relative">
-          <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
+          <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value);measDirty()" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
           <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none">cm</span>
         </div>
       </div>`).join("")}
@@ -7007,7 +7024,7 @@ function buildMeasFormHTML(){
           ${sfFields.map(fld=>`<div>
             <div class="lbl-small">${fld.l}</div>
             <div style="position:relative">
-              <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value)" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
+              <input type="text" inputmode="decimal" id="mfd-${fld.k}" value="${fv(fld.k)}" placeholder="—" oninput="MEAS_FORM.values['${fld.k}']=parseNum(this.value);measDirty()" style="width:100%;height:42px;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--orange);font-size:15px;font-weight:700;text-align:center;outline:none;box-sizing:border-box">
               <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none">mm</span>
             </div>
             <div style="font-size:11px;color:var(--dim);margin-top:4px;line-height:1.35">${SKINFOLD_SITE_INFO[fld.k]||""}</div>
@@ -7018,7 +7035,7 @@ function buildMeasFormHTML(){
     <div id="meas-form-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:8px">Lisää ainakin yksi mittausarvo ennen tallennusta.</div>
     <div style="margin-bottom:14px">
       <div class="lbl-small">Huomio (valinnainen)</div>
-      <textarea id="mfd-comment" rows="2" placeholder="esim. mittasin heti aamulla, eri mittanauha..." oninput="MEAS_FORM.comment=this.value" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:10px 12px;resize:none;outline:none;box-sizing:border-box">${esc(f.comment||"")}</textarea>
+      <textarea id="mfd-comment" rows="2" placeholder="esim. mittasin heti aamulla, eri mittanauha..." oninput="MEAS_FORM.comment=this.value;measDirty()" style="width:100%;background:var(--surf2);border:1.5px solid var(--bord);border-radius:12px;color:var(--text);font-size:13px;padding:10px 12px;resize:none;outline:none;box-sizing:border-box">${esc(f.comment||"")}</textarea>
     </div>
     <div style="display:flex;gap:8px">
       <button onclick="saveMeasForm()" class="btn-primary" style="flex:1">Tallenna</button>
@@ -7042,7 +7059,8 @@ function startEditMeas(date){
   renderMeasurements();
   window.scrollTo({top:0,behavior:"smooth"});
 }
-function cancelMeasForm(){
+async function cancelMeasForm(){
+  if(MEAS_FORM.dirty&&!await jConfirm("Hylätäänkö mittaus? Tallentamattomat arvot poistetaan.",{ok:"Hylkää",cancel:"Jatka muokkausta",danger:true})) return;
   MEAS_FORM={show:false,editing:null,date:today(),values:{},comment:""};
   renderMeasurements();
 }
@@ -7652,6 +7670,10 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"25.11.2026", items:[
+    "Mittaukset eivät enää katoa, jos sovellus sulkeutuu ennen tallennusta: keskeneräinen mittaus palautuu, kun avaat Järkäleen uudelleen. Sama koskee liitettävää ohjelmatekstiä.",
+    "Jos mittaat ihopoimut pihdeillä, Mitat näyttää FFMI:n myös ihopoimuarvion mukaan Navy-arvon rinnalla."
+  ]},
   {d:"24.11.2026", items:[
     "Ohjelmaan voi kirjoittaa nousevat sarjat, joissa jokaisella on oma paino: \"Kyykky 100x5, 120x3, 140x1\". Treenissä jokaisen sarjan paino ja toistot ovat valmiina.",
     "Treenin voi aloittaa ilman ohjelmaa: Treeni-välilehti → ＋ Treeni ilman ohjelmaa. Lisää liikkeet sitä mukaa kuin teet, ja aiemmat liikkeet tulevat ehdotuksiksi viime kerran lukuineen. Treenin päivän voi vaihtaa myös menneeseen.",
@@ -11636,11 +11658,17 @@ async function gArchiveProg(){
 }
 
 // ── Tekstituonti (esim. Keepistä): paikallinen jäsennin, esikatselu ennen tallennusta
+// v2.18.201: liitettävän ohjelmatekstin luonnos (Wordista kopioidessa sovellus voi sulkeutua taustalla välissä)
+const IMPORT_DRAFT_KEY="jarkale-import-draft";
+function importDraftSet(v){ try{ if(v&&v.trim()) localStorage.setItem(IMPORT_DRAFT_KEY,v); else localStorage.removeItem(IMPORT_DRAFT_KEY); }catch(_){} }
+function importDraftGet(){ try{ return localStorage.getItem(IMPORT_DRAFT_KEY)||""; }catch(_){ return ""; } }
 function gymImportHTML(){
+  let restored=false; if(!GU.importText&&!GU.importPreview){ const d=importDraftGet(); if(d){ GU.importText=d; restored=true; } }
   const pv=GU.importPreview;
   let h=`<div class="view-hero">${gBackLink()}<div class="tr-hero-row"><div><div class="tr-h1">Liitä ohjelma</div><div class="tr-h2">Muistiinpanosta tai tekstitiedostosta</div></div><button class="tr-pill" onclick="gBack()">Peruuta</button></div></div>
     <div class="g-hint">Liitä koko ohjelma sellaisenaan. Treenipäivien otsikot ja rivit kuten <b>Penkkipunnerrus 3 * 8 - 12</b> tunnistetaan, ohjetekstit ohitetaan. Myös Strongin Jaa treeni -teksti ja taulukko (esim. tekoälyn tekemä ohjelma) käyvät sellaisenaan. Puuttuvia arvoja ei keksitä.<br><br>Onko ohjelma kuvana tai paperilla? Pyydä tekoälyä kirjoittamaan kuvasta teksti ja liitä se tähän.<br><br>Ei vielä ohjelmaa? Voit pyytää tekoälyä tekemään sinulle ohjelman ja liittää sen tähän, tai aloittaa treenin ilman ohjelmaa.</div>
-    <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value">${esc(GU.importText||"")}</textarea>
+    ${restored?`<div class="g-hint" style="color:var(--text)">${ico("save",13)} Keskeneräinen teksti palautettiin. <button class="g-link" style="padding:0" onclick="importDraftSet('');GU.importText='';renderGym()">Tyhjennä</button></div>`:""}
+    <textarea class="g-note" id="g-import" rows="10" placeholder="1 Rinta, olkapäät ja ojentajat&#10;Vipunostolaite sivuille 4 * 6 - 10&#10;Vinopenkkipunnerruslaite 3 * 6 - 10&#10;&#10;2 Selkä ja hauikset&#10;Ylätalja rusettikahvalla 3 * 6 - 8" oninput="GU.importText=this.value;importDraftSet(this.value)">${esc(GU.importText||"")}</textarea>
     <button class="tr-go" style="width:100%;height:46px;margin-top:8px" onclick="GU.importText=document.getElementById('g-import').value;GU.importPreview=gMatchImport(parseProgramText(GU.importText));renderGym()">Esikatsele</button>`;
   if(pv){
     if(!pv.length) h+=`<div class="g-hint" style="margin-top:12px">Tekstistä ei löytynyt liikkeitä.</div>`;
@@ -11673,6 +11701,7 @@ function gMatchRow(e,di,ei){
   return `<label class="ed-match"><input type="checkbox" ${m.use?"checked":""} onchange="GU.importPreview[${di}].exercises[${ei}].match.use=this.checked"> <span>Sama liike kuin <b>${esc(m.name)}</b>${meta}</span></label>`;
 }
 async function gImportSave(append){
+  importDraftSet(""); // v2.18.201
   const prevProg=append?null:curProgram();
   const days=(GU.importPreview||[]).filter(d=>d.include).map(({include,rest,raw,...d})=>({...d,exercises:d.exercises.map(({unparsed,match,...e})=>match&&match.use?{...e,key:match.key}:e)}));
   if(!days.length) return;

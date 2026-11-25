@@ -124,6 +124,15 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     S.settings.medications=[{id:'m1',name:'Testi',dose:1,unit:'mg',days:[0,1,5]}]; cancelMedForm(); renderMedSettings(); const t=document.body.textContent; return {bs,list:/Ma, Pe, Su/.test(t)}; });
   ok(md.bs[0]==='Ma'&&md.bs[6]==='Su','lääkkeen päivävalinta Ma…Su ('+md.bs.join(' ')+')');
   ok(md.list,'lääkkeen päivälista maanantaista (Ma, Pe, Su)');
+  // v2.18.201: FFMI myös ihopoimuista (kaverin havainto: pihdeillä 10,1 % → FFMI 25,4, Järkäle näytti vain Navy-arvon)
+  const fj=await p.evaluate(()=>{ const h0=S.settings.profile?.height, a0=S.settings.profile?.age, g0=S.settings.gender;
+    S.settings.profile={...(S.settings.profile||{}),height:185,age:35}; S.settings.gender='male';
+    const m={date:today(),wn:88,neck:42,sf_chest:6,sf_abd:12,sf_thigh:9};
+    const old=window.findWeightNear; window.findWeightNear=()=>98; const d=measDerived(m); const d2=measDerived({date:today(),wn:88,neck:42}); window.findWeightNear=old;
+    S.settings.profile={...S.settings.profile,height:h0,age:a0}; S.settings.gender=g0;
+    const exp=calcFFMI(98,d.jp,185).norm; return {jp:d.jp,fj:d.ffmiJP,exp,navy:d.ffmi,none:d2.ffmiJP,ref:calcFFMI(98,10.1,185).norm}; });
+  ok(fj.fj===fj.exp&&fj.fj!==fj.navy&&fj.none===null,'FFMI lasketaan erikseen ihopoimurasvaprosentista (JP '+fj.jp+' % → '+fj.fj+', Navy '+fj.navy+'), ilman ihopoimuja ei riviä');
+  ok(fj.ref===25.4,'kaava täsmää kaverin laskuriin: 185 cm, 98 kg, 10,1 % → 25,4');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

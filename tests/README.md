@@ -53,6 +53,7 @@ tests/run.sh test-gym.js
 | `test-roundtrip.js` | Varmuuskopion täysi kierros: kaikki tietotyypit → tiedosto → tyhjä selain → palautus → kenttäkohtainen vertailu (myös uudelleenkäynnistyksen jälkeen); vanhan muodon (versio 1) varmuuskopio ja vanha kipukenttä |
 | `test-syncconcurrent.js` | Saman treenin muokkaus kahdella laitteella: uudempi voittaa ristiriidoissa, toisen laitteen kuitatut sarjat ja lisätyt liikkeet säilyvät; vanha kopio ei palauta poistettua sarjaa |
 | `test-freesession.js` | Treeni ilman ohjelmaa: aloitus yhdellä napautuksella, nimiehdotukset ja viime kerran luvut, uusi liike 1 sarja, päivän vaihto menneeseen (historia ja päiväkirja), Tallenna ohjelmaksi ilman painoja, kierto ennallaan, tyhjää ei tallenneta |
+| `test-measdraft.js` | Mittauslomakkeen ja ohjelmatuonnin tekstin luonnos säilyy, vaikka sovellus suljetaan ennen tallennusta; tallennus ja peruminen poistavat luonnoksen; FFMI ihopoimuista omana rivinään |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
