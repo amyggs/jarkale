@@ -2370,7 +2370,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.201</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.202</span>
       </div>
     </div>
   </div>
@@ -2435,6 +2435,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.202", d:"marraskuu 2026", items:[
+    "Asetusten lääkekortissa otsikko Lääkkeet (kortti alkoi suoraan lääkelistalla). Kausien alku- ja loppupäivä suomalaisittain (1.6.2026, ei 2026-06-01)."
+  ]},
   {v:"2.18.201", d:"marraskuu 2026", items:[
     "Mittauslomakkeen luonnos tallentuu jokaisella näppäilyllä ja palautuu, jos sovellus suljetaan ennen tallennusta (testaajan havainto: Android sulki Järkäleen taustalla, ja mittaukset katosivat). Ilmoitus \"Tallentamaton mittaus palautettiin\". Peruminen kysyy, jos arvoja on syötetty. Sama ohjelmatuonnin liitetylle tekstille (Tyhjennä-linkki).",
     "FFMI myös ihopoimurasvaprosentista omana rivinään (FFMI · Navy / FFMI · ihopoimu, taulukossa FFMI (Navy) / FFMI (ihopoimu)). Erillinen sarja, ei korvaa Navy-arvoa, jotta käyrässä ei ole laskutavan vaihtumisesta johtuvia hyppyjä. Testaajan havainto: pihdeillä 10,1 % → FFMI 25,4, Järkäle näytti vain Navy-arvon 23,3. Testit test-measdraft ja test-settings."
@@ -7191,6 +7194,8 @@ function toggleSeasonsEnabled(){
   renderTrendit(); // päivittää painograafin vyöhykkeet heti
 }
 
+// v2.18.202: päivämäärä suomalaisittain (2026-06-01 → 1.6.2026)
+const fiDate=d=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d||"")); return m?`${+m[3]}.${+m[2]}.${m[1]}`:String(d||""); };
 function renderSeasons(){
   const el=document.getElementById("seasons-section"); if(!el) return;
   const on=!!S.settings.seasonsEnabled;
@@ -7212,7 +7217,7 @@ function renderSeasons(){
       <span style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
       <div style="flex:1;cursor:pointer" onclick="startEditSeason(${s.id})">
         <div style="color:var(--text);font-size:13px;font-weight:600">${esc(s.name)}</div>
-        <div style="color:var(--dim);font-size:11px">${s.startDate}${endDate?` – ${endDate}`:""}${s.durationWeeks?` · ${s.durationWeeks} vko`:""}</div>
+        <div style="color:var(--dim);font-size:11px">${fiDate(s.startDate)}${endDate?` – ${fiDate(endDate)}`:""}${s.durationWeeks?` · ${s.durationWeeks} vko`:""}</div>
       </div>
       <button onclick="startEditSeason(${s.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteSeason(${s.id})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
@@ -9351,7 +9356,8 @@ function adjMedDose(mid,medId,delta){
 
 function renderMedSettings(){
   const meds=S.settings.medications||[];
-  let h="";
+  // v2.18.202: otsikko kuten muissa korteissa (Akun havainto: kortti alkoi suoraan lääkelistalla)
+  let h=`<div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:6px">${ico("pill",18)} Lääkkeet</div>`;
   meds.forEach(med=>{
     h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bord)">
       <div style="flex:1">

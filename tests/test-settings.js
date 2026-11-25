@@ -133,6 +133,10 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     const exp=calcFFMI(98,d.jp,185).norm; return {jp:d.jp,fj:d.ffmiJP,exp,navy:d.ffmi,none:d2.ffmiJP,ref:calcFFMI(98,10.1,185).norm}; });
   ok(fj.fj===fj.exp&&fj.fj!==fj.navy&&fj.none===null,'FFMI lasketaan erikseen ihopoimurasvaprosentista (JP '+fj.jp+' % → '+fj.fj+', Navy '+fj.navy+'), ilman ihopoimuja ei riviä');
   ok(fj.ref===25.4,'kaava täsmää kaverin laskuriin: 185 cm, 98 kg, 10,1 % → 25,4');
+  // v2.18.202: lääkekortin otsikko ja kausien päivämäärä suomalaisittain
+  const mh=await p.evaluate(()=>{ S.settings.medications=[{id:'x',name:'T',dose:'40 mg',days:[2,3,5,0]}]; S.settings.seasons=[{id:1,type:'bulk',startDate:'2026-06-01'}]; S.settings.seasonsEnabled=true; renderMedSettings(); renderSeasons();
+    return {h:document.getElementById('meds-management').innerText.split('\n')[0].trim(),d:document.getElementById('seasons-section').innerText}; });
+  ok(mh.h==='Lääkkeet'&&/1\.6\.2026/.test(mh.d)&&!/2026-06-01/.test(mh.d),'lääkekortissa otsikko, kauden alku 1.6.2026 ('+mh.h+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
