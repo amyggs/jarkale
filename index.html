@@ -2052,6 +2052,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ph-vb .g-dch{margin-top:0;background:#1a1a1a;border-color:#444;color:#fff;min-height:40px;}
 .ph-del{height:40px;padding:0 14px;border-radius:10px;border:1px solid #6b2b2b;background:transparent;color:#ff9b9b;font:600 13px Manrope,system-ui,sans-serif;cursor:pointer;}
 .ph-more{width:100%;margin-top:12px;}
+.ph-info{background:var(--surf2);border-radius:12px;padding:12px;margin:8px 0 10px;font-size:13px;color:var(--text);line-height:1.5;}
+.ph-info ul{margin:6px 0 10px;padding-left:18px;} .ph-info li{margin:3px 0;}
+.ph-warn{color:var(--text);font-weight:600;}
 .ph-bk{margin-top:14px;padding-top:14px;border-top:1px solid var(--bord);}
 .ph-bt{font-size:12px;color:var(--dim);line-height:1.5;margin:4px 0 8px;}
 </style>
@@ -2429,7 +2432,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.208</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.209</span>
       </div>
     </div>
   </div>
@@ -2494,6 +2497,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.209", d:"marraskuu 2026", items:[
+    "Kehityskuvat: kameralla juuri otettu kuva tallennetaan alkuperäisenä myös puhelimen latauksiin (Android ei yleensä jätä sitä galleriaan). Galleriasta valittuja ei tallenneta uudelleen.",
+    "Kuvat 1600 px (ennen 1200), koska jaettu kuva menee valmentajalle. Lisäysnäkymässä kerrotaan, että Järkäle tallentaa pienennetyn kopion.",
+    "Ensimmäisellä kerralla kuitattava selitys: kuvat vain tässä puhelimessa, eivät varmuuskopiossa eivätkä Drivessa, Tallenna kuvat. Muistutus osion yläreunassa, jos uusia kuvia ei ole tallennettu tiedostoon 30 päivään."
+  ]},
   {v:"2.18.208", d:"marraskuu 2026", items:[
     "Tietosuojaseloste päivitetty (26.11.2026): kehityskuvat ovat vain laitteella, eivät ole varmuuskopiossa eivätkä Drivessa, kopio vain itse tallennettaessa tai jaettaessa, ei tekoälyanalyysiin, poistaminen."
   ]},
@@ -6960,7 +6968,7 @@ function renderMeasurements(){
 // ═══ KEHITYSKUVAT (v2.18.207, vaihe 1: vain oma versio, ei vielä Drivea) ═══
 // Kuvat IndexedDB:ssä (localStorage ei riitä). Päivä ja kulma samassa tietueessa kuvan kanssa, joten zip-tiedosto palauttaa kaiken.
 // Järkäle näyttää kuvat ja viikon aamupainojen keskiarvon; ei arvioi kuvia.
-const PH_DB="jarkale-photos", PH_EXP="jarkale-photos-export";
+const PH_DB="jarkale-photos", PH_EXP="jarkale-photos-export", PH_INFO="jarkale-photos-info";
 const PH_ANG={front:"Edestä",side:"Sivulta",back:"Takaa"};
 const PH={list:[],loaded:false,urls:{},draft:null,cmp:null,view:null,all:false};
 function photosAvail(){ return !document.documentElement.classList.contains("pilot"); }
@@ -6994,7 +7002,7 @@ function phPick(){ const i=document.getElementById("ph-file"); if(i){ i.value=""
 async function phResize(file){
   let bmp; try{ bmp=await createImageBitmap(file,{imageOrientation:"from-image"}); }
   catch(_){ bmp=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); }); }
-  const W=bmp.width,H=bmp.height,k=Math.min(1,1200/Math.max(W,H)),w=Math.max(1,Math.round(W*k)),h=Math.max(1,Math.round(H*k));
+  const W=bmp.width,H=bmp.height,k=Math.min(1,1600/Math.max(W,H)),w=Math.max(1,Math.round(W*k)),h=Math.max(1,Math.round(H*k));
   const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h); try{ bmp.close&&bmp.close(); }catch(_){}
   const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.82)); if(!blob) throw new Error("toBlob"); return {blob,w,h};
 }
@@ -7006,7 +7014,7 @@ async function phFiles(input){
   if(PH.draft) phDraftCancel();
   PH.draft={date:lm.length?lm[lm.length-1]:t,items:[],busy:true,extra:files.length>6,failed:0}; renderPhotos();
   const cn=phCustomNames(), d=PH.draft;
-  for(let i=0;i<use.length;i++){ try{ const r=await phResize(use[i]); if(PH.draft!==d) return; d.items.push({...r,url:URL.createObjectURL(r.blob),angle:i<3?["front","side","back"][i]:(cn[i-3]||"__new")}); }catch(_){ d.failed++; } }
+  for(let i=0;i<use.length;i++){ try{ const r=await phResize(use[i]); if(PH.draft!==d) return; d.items.push({...r,url:URL.createObjectURL(r.blob),orig:use[i],cam:!!use[i].lastModified&&Date.now()-use[i].lastModified<120000,angle:i<3?["front","side","back"][i]:(cn[i-3]||"__new")}); }catch(_){ d.failed++; } }
   d.busy=false; renderPhotos();
   try{ document.querySelector(".ph-draft")?.scrollIntoView({behavior:"smooth",block:"start"}); }catch(_){}
 }
@@ -7014,7 +7022,7 @@ function phDraftHTML(){ const d=PH.draft, cn=phCustomNames();
   const opts=a=>[["front","Edestä"],["side","Sivulta"],["back","Takaa"],...cn.map(c=>[c,phAngLbl(c)]),["__new","Oma nimi…"]]
     .map(([v,l])=>`<option value="${esc(v)}"${v===a?" selected":""}>${esc(l)}</option>`).join("");
   return `<div class="ph-draft"><div class="ph-dh"><b>Uudet kuvat</b><label class="g-dch">${ico("calendar",14)}<span>${d.date===today()?"tänään":gDay(d.date)}</span><input type="date" value="${d.date}" max="${today()}" aria-label="Kuvien päivä" onchange="phDraftDate(this.value)"></label></div>
-    ${d.busy?`<div class="ph-sub">Käsitellään kuvia…</div>`:""}
+    <div class="ph-sub">${d.busy?"Käsitellään kuvia…":`Järkäle tallentaa kuvista pienennetyn kopion. Alkuperäiset jäävät puhelimeesi.${d.items.some(it=>it.cam)?" Kameralla otettu kuva tallennetaan myös puhelimen latauksiin.":""}`}</div>
     <div class="ph-grid">${d.items.map((it,i)=>`<div class="ph-di"><div class="ph-im"><img src="${it.url}" alt=""><button class="ph-dx" onclick="phDraftDrop(${i})" aria-label="Jätä tämä kuva pois">✕</button></div>
       <select aria-label="Kuvakulma" onchange="phDraftAngle(${i},this.value)">${opts(it.angle)}</select>${it.angle==="__new"?`<input type="text" maxlength="30" placeholder="esim. Hauis" value="${esc(it.name||"")}" oninput="PH.draft.items[${i}].name=this.value">`:""}</div>`).join("")}</div>
     ${d.failed?`<div class="ph-sub">${d.failed} ${d.failed===1?"kuvaa":"kuvaa"} ei voitu lukea.</div>`:""}${d.extra?`<div class="ph-sub">Kerralla enintään 6 kuvaa, mukana ensimmäiset 6.</div>`:""}
@@ -7030,6 +7038,8 @@ async function phSave(){
     return {id:"ph"+now.toString(36)+i+Math.random().toString(36).slice(2,6),date:d.date,angle:a,w:it.w,h:it.h,createdAt:now+i,blob:it.blob}; });
   try{ await phTx("readwrite",st=>{ recs.forEach(r=>st.put(r)); }); }
   catch(_){ jAlert("Kuvia ei voitu tallentaa.\nPuhelimen tallennustila voi olla täynnä."); return; }
+  // v2.18.209: kameralla juuri otettu kuva ei Androidilla yleensä jää galleriaan → alkuperäinen puhelimen latauksiin
+  d.items.filter(it=>it.cam&&it.orig).forEach((it,i)=>{ const a=recs[d.items.indexOf(it)].angle; setTimeout(()=>phDownload(it.orig,`jarkale-${d.date}-${phSlug(phAngLbl(a))}.jpg`),i*300); });
   d.items.forEach(it=>URL.revokeObjectURL(it.url)); PH.draft=null;
   recs.forEach(r=>PH.list.push(phMeta(r))); PH.list.sort(phSort); haptic(10); renderPhotos();
 }
@@ -7041,7 +7051,7 @@ function renderPhotos(){
   if(!PH.loaded){ phLoad().then(renderPhotos); return; }
   const weeks=phWeeks(), n=PH.list.length;
   let h=`<div class="card ph-card"><div class="ph-h">${ico("camera",18)}<b>Kehityskuvat</b>${weeks.length?`<span>${weeks.length}\u00a0${weeks.length===1?"viikko":"viikkoa"}</span>`:""}</div>
-    <div class="ph-sub">Kuvat ovat vain tässä puhelimessa.${n?` <button class="ph-link" onclick="phExport()">Tallenna kuvat</button>`:""}</div>`;
+    ${phInfoHTML()}${!n&&!phInfoSeen()?"":`<div class="ph-sub">${phSaveTxt()}</div>`}`;
   if(PH.draft) h+=phDraftHTML();
   else h+=`<div class="ph-acts"><button class="ph-add" onclick="phPick()">${ico("camera",16)} Lisää kuvat</button>${weeks.length>=2?`<button class="ph-btn${PH.cmp?" on":""}" onclick="phCmpToggle()">Vertaa</button>`:""}</div>`;
   if(!n&&!PH.draft) h+=`<div class="ph-empty">Lisää esimerkiksi kerran viikossa kuvat edestä, sivulta ja takaa. Kuvat ryhmitellään viikoittain, ja viikon kohdalla näkyy aamupainojen keskiarvo. <button class="ph-link" onclick="phImportPick()">Palauta tallennetut kuvat</button></div>`;
@@ -7056,6 +7066,18 @@ function renderPhotos(){
   el.innerHTML=h+`</div>`; phHydrate(el);
   if(PH.view) phViewRender();
 }
+function phInfoSeen(){ try{ return localStorage.getItem(PH_INFO)==="1"; }catch(_){ return false; } }
+function phInfoHTML(){ if(phInfoSeen()) return "";
+  return `<div class="ph-info"><b>Näin kuvat tallentuvat</b><ul><li>Kuvat ovat vain tässä puhelimessa, Järkäleen omassa muistissa. Ne eivät näy galleriassa.</li><li>Ne eivät ole tavallisessa varmuuskopiossa eivätkä Drivessa.</li><li>Tallenna ne talteen kohdasta Tallenna kuvat (yksi tiedosto). Samasta tiedostosta ne palautetaan.</li></ul><button class="ph-btn" onclick="try{localStorage.setItem(PH_INFO,'1')}catch(_){};renderPhotos()">Selvä</button></div>`; }
+// v2.18.209: muistutus, jos uusia kuvia ei ole tallennettu tiedostoon 30 päivään (tai koskaan). Ei estä mitään.
+function phSaveState(){ let last=0; try{ last=parseInt(localStorage.getItem(PH_EXP)||"0")||0; }catch(_){}
+  const unsaved=PH.list.filter(p=>(p.createdAt||0)>last), oldest=unsaved.length?Math.min(...unsaved.map(p=>p.createdAt||Date.now())):0;
+  return {last,unsaved:unsaved.length,remind:unsaved.length>0&&Date.now()-(last||oldest)>30*864e5}; }
+function phSaveTxt(){ const n=PH.list.length; if(!n) return "Kuvat ovat vain tässä puhelimessa.";
+  const st=phSaveState(), btn=` <button class="ph-link" onclick="phExport()">Tallenna kuvat</button>`;
+  if(st.remind){ const wk=Math.floor((Date.now()-(st.last||Math.min(...PH.list.map(p=>p.createdAt||Date.now()))))/(7*864e5));
+    return `<span class="ph-warn">${ico("alert",14)} ${st.last?`Kuvia ei ole tallennettu ${wk}\u00a0viikkoon.`:`Kuvia ei ole vielä tallennettu, ja vanhimmat ovat ${wk}\u00a0viikon takaa.`}</span>${btn}`; }
+  return `Kuvat ovat vain tässä puhelimessa.${st.last?` Tallennettu viimeksi ${fiDate(iso(new Date(st.last)))}.`:""}${btn}`; }
 function phCmpToggle(){ PH.cmp=PH.cmp?null:{}; renderPhotos(); }
 function phCmpHTML(weeks){
   const c=PH.cmp, asc=[...weeks].reverse();

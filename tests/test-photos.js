@@ -24,7 +24,7 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   await p.setInputFiles('#ph-file',files(4,big)); await p.waitForFunction(()=>PH.draft&&!PH.draft.busy,null,{timeout:15000});
   const d1=await p.evaluate(()=>({n:PH.draft.items.length,a:PH.draft.items.map(i=>i.angle).join(','),inp:document.querySelectorAll('.ph-di input').length,wh:PH.draft.items[0].w+'x'+PH.draft.items[0].h}));
   ok(d1.n===4&&d1.a==='front,side,back,__new'&&d1.inp===1,'luonnos: kulmat Edestä/Sivulta/Takaa ja neljännelle oman nimen kenttä ('+d1.a+')');
-  ok(d1.wh==='900x1200','kuva pienennetään 1200 pikseliin ('+d1.wh+')');
+  ok(d1.wh==='1200x1600','kuva pienennetään 1600 pikseliin ('+d1.wh+')');
   await p.locator('.ph-di input').fill('Hauis jännitetty');
   await p.evaluate(d=>phDraftDate(d),D.lastWed); await p.evaluate(()=>phSave()); await p.waitForFunction(()=>!PH.draft&&PH.list.length===4);
   // 2) kaksi kuvaa tälle päivälle
@@ -85,10 +85,25 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
     S.settings.tracking={weight:true}; setTab('historia'); renderMeasurements(); return {a,bo,sec:document.getElementById('photos-sec').innerHTML,n:PH.list.length}; });
   ok(!sel.a&&sel.bo&&sel.sec===''&&sel.n===5,'Valitse kaikki ei ota kuvia; mitat+kuvat = mittatila; pois päältä piilottaa osion, kuvat säilyvät');
   // 10b) yli 3 viikkoa: oletuksena 3 uusinta + Näytä kaikki
-  const mw=await p.evaluate(async()=>{ S.settings.tracking={weight:true,photos:true}; const b=await phBlob(PH.list[0].id); const recs=[1,2,3].map(i=>{ const d=new Date(today()+'T00:00:00'); d.setDate(d.getDate()-7*(i+1)); return {id:'phx'+i,date:iso(d),angle:'front',w:900,h:1200,createdAt:Date.now(),blob:b}; });
+  const mw=await p.evaluate(async()=>{ S.settings.tracking={weight:true,photos:true}; const b=await phBlob(PH.list[0].id); const recs=[1,2,3].map(i=>{ const d=new Date(today()+'T00:00:00'); d.setDate(d.getDate()-7*(i+1)); return {id:'phx'+i,date:iso(d),angle:'front',w:1200,h:1600,createdAt:Date.now(),blob:b}; });
     await phTx('readwrite',st=>{ recs.forEach(r=>st.put(r)); }); recs.forEach(r=>PH.list.push(phMeta(r))); PH.list.sort(phSort); setTab('historia'); renderMeasurements();
     const a=document.querySelectorAll('.ph-wk').length, t=document.querySelector('.ph-more')?.innerText.replace(/\u00a0/g,' '); document.querySelector('.ph-more').click(); return {a,t,b:document.querySelectorAll('.ph-wk').length,weeks:phWeeks().length}; });
   ok(mw.a===3&&mw.b===mw.weeks&&/Näytä kaikki \(\d+ viikkoa\)/.test(mw.t),'yli 3 viikkoa: 3 uusinta ja Näytä kaikki ('+mw.t+')');
+  // 12) v2.18.209: ohje ensimmäisellä kerralla, tallennusmuistutus, kameralla otetun alkuperäinen talteen
+  const inf=await p.evaluate(()=>{ localStorage.removeItem(PH_INFO); S.settings.tracking={weight:true,photos:true}; setTab('historia'); renderMeasurements(); const a=!!document.querySelector('.ph-info')&&/eivät ole tavallisessa varmuuskopiossa/.test(document.querySelector('.ph-info').innerText);
+    document.querySelector('.ph-info button').click(); return {a,b:!document.querySelector('.ph-info'),c:localStorage.getItem(PH_INFO)}; });
+  ok(inf.a&&inf.b&&inf.c==='1','selitys ensimmäisellä kerralla, Selvä kuittaa pysyvästi');
+  const rem=await p.evaluate(()=>{ const t=()=>document.querySelector('#photos-sec .ph-sub').innerText.replace(/\u00a0/g,' ');
+    localStorage.setItem(PH_EXP,String(Date.now())); renderPhotos(); const fresh=t();
+    PH.list[0].createdAt=Date.now()-40*864e5; PH.list[1].createdAt=Date.now(); localStorage.setItem(PH_EXP,String(Date.now()-35*864e5)); renderPhotos(); const old=t();
+    localStorage.removeItem(PH_EXP); renderPhotos(); const never=t(); return {fresh,old,never}; });
+  ok(/Tallennettu viimeksi/.test(rem.fresh)&&!/ei ole/.test(rem.fresh),'tuore tallennus: ei muistutusta ('+rem.fresh+')');
+  ok(/Kuvia ei ole tallennettu 5 viikkoon/.test(rem.old)&&/ei ole vielä tallennettu/.test(rem.never),'muistutus 30 päivän jälkeen ja jos ei koskaan ('+rem.old+' | '+rem.never+')');
+  const camDl=[]; const cl=d=>camDl.push(d.suggestedFilename()); p.on('download',cl);
+  await p.setInputFiles('#ph-file',[{name:'kamera.png',mimeType:'image/png',buffer:sm}]); await p.waitForFunction(()=>PH.draft&&!PH.draft.busy);
+  const camTxt=await p.evaluate(()=>({cam:PH.draft.items[0].cam,t:document.querySelector('.ph-draft .ph-sub').innerText}));
+  await p.evaluate(()=>phSave()); await p.waitForTimeout(900); p.off('download',cl);
+  ok(camTxt.cam&&/pienennetyn kopion/.test(camTxt.t)&&/latauksiin/.test(camTxt.t)&&camDl.length===1&&/^jarkale-\d{4}-\d{2}-\d{2}-edesta\.jpg$/.test(camDl[0]),'kameralla otettu: alkuperäinen latauksiin ja siitä kerrotaan ('+camDl.join(',')+')');
   // 11) pilotissa ei vielä näy
   const pl=await p.evaluate(()=>{ document.documentElement.classList.add('pilot'); S.settings.tracking={weight:true,photos:true}; const keys=getTrackingGroups().flatMap(g=>g.items.map(i=>i.key)); renderPhotos(); renderPhotoBackupRow();
     const r={k:keys.includes('photos'),sec:document.getElementById('photos-sec').innerHTML,bk:document.getElementById('photo-backup-row').innerHTML}; document.documentElement.classList.remove('pilot'); return r; });
