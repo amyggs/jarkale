@@ -2004,6 +2004,56 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ts-row{display:flex;gap:8px;}
 .ts-row .chip{flex:1;min-height:52px;font-weight:700;color:var(--text);}
 .ts-note{font:500 12px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:10px;}
+/* v2.18.207 kehityskuvat */
+.ph-card{margin-bottom:12px;}
+.ph-h{display:flex;align-items:center;gap:8px;color:var(--text);font-size:15px;}
+.ph-h b{flex:1;font-weight:700;}
+.ph-h span{font-size:12px;color:var(--dim);}
+.ph-sub{font-size:12px;color:var(--dim);line-height:1.5;margin:4px 0 10px;}
+.ph-empty{font-size:13px;color:var(--dim);line-height:1.55;margin-top:12px;}
+.ph-link{background:none;border:none;padding:0;color:var(--orange);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.ph-acts{display:flex;gap:8px;margin-top:4px;}
+.ph-add{flex:1;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1.5px solid var(--orange);background:transparent;color:var(--orange);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer;}
+.ph-btn{min-height:44px;padding:0 16px;border-radius:12px;border:1.5px solid var(--bord);background:var(--surf2);color:var(--text);font:600 13px Manrope,system-ui,sans-serif;cursor:pointer;}
+.ph-btn.on{border-color:var(--orange);}
+.ph-wk{border-top:1px solid var(--bord);margin-top:14px;padding-top:12px;}
+.ph-wh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:13px;color:var(--text);}
+.ph-wl b{font-weight:700;} .ph-wl span{color:var(--dim);}
+.ph-wa{color:var(--dim);} .ph-wa b{color:var(--text);font-weight:700;}
+.ph-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.ph-th{display:block;padding:0;border:none;background:none;text-align:left;cursor:pointer;min-width:0;}
+.ph-im{position:relative;display:block;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--surf2);}
+.ph-im img{width:100%;height:100%;object-fit:cover;display:block;}
+.ph-al{display:block;font-size:11px;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ph-wf{text-align:right;margin-top:6px;font-size:13px;}
+.ph-draft{background:var(--surf2);border-radius:12px;padding:12px;margin-top:4px;}
+.ph-dh{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text);font-size:14px;margin-bottom:10px;}
+.ph-dh .g-dch{margin-top:0;background:var(--surf);}
+.ph-di{min-width:0;} .ph-di select,.ph-di input{width:100%;height:36px;margin-top:6px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:12px;padding:0 6px;outline:none;}
+.ph-dx{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:13px;cursor:pointer;}
+.ph-draft .ph-acts{margin-top:12px;}
+.ph-cmp{background:var(--surf2);border-radius:12px;padding:10px;margin-top:12px;}
+.ph-cg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.ph-cc{min-width:0;} .ph-cc select{width:100%;height:36px;margin-bottom:6px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:12px;padding:0 6px;outline:none;}
+.ph-ci{display:block;width:100%;padding:0;border:none;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--surf);cursor:pointer;}
+.ph-ci img{width:100%;height:100%;object-fit:cover;display:block;}
+.ph-ci.none{display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--dim);padding:8px;cursor:default;}
+.ph-cw{font-size:12px;color:var(--dim);margin-top:4px;}
+.ph-chips{margin-top:10px;flex-wrap:wrap;}
+.ph-view{position:fixed;inset:0;z-index:9000;background:#000;display:flex;flex-direction:column;color:#fff;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);}
+.ph-vt{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;font:600 14px Manrope,system-ui,sans-serif;}
+.ph-vt button{width:44px;height:44px;border:none;background:none;color:#fff;font-size:20px;cursor:pointer;}
+.ph-vi{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
+.ph-vi img{max-width:100%;max-height:100%;object-fit:contain;}
+.ph-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:none;border-radius:10px;background:rgba(0,0,0,.45);color:#fff;font-size:30px;cursor:pointer;}
+.ph-nav.l{left:6px;} .ph-nav.r{right:6px;}
+.ph-vb{display:flex;align-items:center;gap:8px;padding:10px 12px 14px;flex-wrap:wrap;}
+.ph-vb select{flex:1;min-width:110px;height:40px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:#fff;font-size:13px;padding:0 8px;}
+.ph-vb .g-dch{margin-top:0;background:#1a1a1a;border-color:#444;color:#fff;min-height:40px;}
+.ph-del{height:40px;padding:0 14px;border-radius:10px;border:1px solid #6b2b2b;background:transparent;color:#ff9b9b;font:600 13px Manrope,system-ui,sans-serif;cursor:pointer;}
+.ph-more{width:100%;margin-top:12px;}
+.ph-bk{margin-top:14px;padding-top:14px;border-top:1px solid var(--bord);}
+.ph-bt{font-size:12px;color:var(--dim);line-height:1.5;margin:4px 0 8px;}
 </style>
 </head>
 <body>
@@ -2259,6 +2309,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
     <!-- MITAT VIEW -->
     <div id="view-historia" class="view">
       <div class="view-hero" id="mitat-hero"></div>
+      <div id="photos-sec"></div>
+      <input type="file" id="ph-file" accept="image/*" multiple hidden onchange="phFiles(this)">
+      <input type="file" id="ph-zip" accept=".zip,application/zip" hidden onchange="phImport(this)">
       <div id="historia-content"></div>
     </div>
 
@@ -2291,6 +2344,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
           <div id="persist-status" style="font-size:12px;color:var(--dim);line-height:1.5;margin:-4px 0 12px"></div>
           <button onclick="resetAllData()" style="width:100%;height:38px;border-radius:8px;border:1.5px solid rgba(239,68,68,.3);background:transparent;color:var(--red);font-size:13px">Nollaa kirjaukset</button>
           <div id="safety-copy-row"></div>
+          <div id="photo-backup-row"></div>
         </div>
       </div>
 
@@ -2375,7 +2429,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.206</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.207</span>
       </div>
     </div>
   </div>
@@ -2440,6 +2494,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.207", d:"marraskuu 2026", items:[
+    "Kehityskuvat, vaihe 1 (vain oma versio, ei vielä pilotissa): Mitä seuraat → Kehityskuvat. Mitat-välilehdellä kuvat viikoittain uusin ensin, viikon aamupainojen keskiarvo, vertailu kahden viikon välillä kulmittain, koko näytön katselu, kulman ja päivän muutos, poisto. Kulmat Edestä / Sivulta / Takaa + omat nimet (muistetaan), 1–6 kuvaa kerralla, päivä kuvista tai valittavissa.",
+    "Kuvat tallennetaan IndexedDB:hen pienennettyinä (1200 px, JPEG). Ne eivät ole varmuuskopiossa eivätkä Drivessa: Asetukset → Varmuuskopio ja Drive → Tallenna kuvat (zip) / Palauta kuvat. Viikon kuvat voi jakaa jakovalikolla (esim. valmentajan kansioon).",
+    "iPhonen tietoriskikortti laskee myös kuvat."
+  ]},
   {v:"2.18.206", d:"marraskuu 2026", items:[
     "Lääkelomakkeen annoskenttä on nyt \"Kerta-annos\", ja sen alla näkyy heti laskelma (esim. 100 mg × 4 päivää = 400 mg/vko). Viikkoannoksen kirjoittaminen kerta-annokseksi näkyy ennen tallennusta."
   ]},
@@ -3560,7 +3619,7 @@ const CARDIO_TYPES=[
   "Kävely","Juoksu","Pyöräily","Uinti","HIIT","Soutu","Muu",
 ];
 // ═══ IKONIT (v2.11.1): oma viivaikonisarja emojien tilalle, väri currentColor ═══
-const ICONS={"scale": "<rect x=\"3.5\" y=\"4\" width=\"17\" height=\"16\" rx=\"4\"/><path d=\"M8 10.5a4.6 4.6 0 0 1 8 0\"/><path d=\"M12 11.5l1.8-2.6\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z\"/>", "steps": "<path d=\"M8.2 3.5c1.6 0 2.6 1.9 2.6 4.4 0 2.2-.9 3.6-2.4 3.6S5.8 10 5.8 7.8c0-2.4.9-4.3 2.4-4.3z\"/><path d=\"M6.4 14.5h3.9v1.6a1.95 1.95 0 0 1-3.9 0z\"/><path d=\"M15.8 7.5c1.5 0 2.4 1.9 2.4 4.3 0 2.2-1.1 3.7-2.6 3.7s-2.4-1.4-2.4-3.6c0-2.5 1-4.4 2.6-4.4z\"/><path d=\"M13.7 18.5h3.9v.6a1.95 1.95 0 0 1-3.9 0z\"/>", "ruler": "<rect x=\"2.5\" y=\"8\" width=\"19\" height=\"8\" rx=\"1.6\"/><path d=\"M6.5 8v3M10 8v4M13.5 8v3M17 8v4\"/>", "battery": "<rect x=\"2.5\" y=\"7\" width=\"16.5\" height=\"10\" rx=\"2.5\"/><path d=\"M21.5 10.5v3\"/><path d=\"M6 10.5v3M9.5 10.5v3M13 10.5v3\"/>", "bolt": "<path d=\"M13 2.8 5 13.4h6.6l-1 7.8 8-10.7h-6.7z\"/>", "dumbbell": "<path d=\"M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11\"/>", "bike": "<circle cx=\"5.8\" cy=\"16.2\" r=\"3.3\"/><circle cx=\"18.2\" cy=\"16.2\" r=\"3.3\"/><path d=\"M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8\"/>", "bandage": "<rect x=\"2.6\" y=\"8.4\" width=\"18.8\" height=\"7.2\" rx=\"3.6\" transform=\"rotate(-45 12 12)\"/><path d=\"M10.2 10.2h.01M13.8 13.8h.01M10.2 13.8h.01M13.8 10.2h.01\"/>", "heart": "<path d=\"M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z\"/><path d=\"M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2\"/>", "drop": "<path d=\"M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.6 12 3.2 12 3.2z\"/><path d=\"M9.3 14.4a2.8 2.8 0 0 0 2.4 2.6\"/>", "head": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M7.4 10.6 9.6 8.8l2 2.8 2.3-2.8 2.7 1.8\"/><path d=\"M9.2 15.6h5.6\"/>", "flower": "<circle cx=\"12\" cy=\"12\" r=\"2.3\"/><path d=\"M12 9.7c-1.6-2.6-1.6-4.6 0-6.2 1.6 1.6 1.6 3.6 0 6.2M14.3 12c2.6-1.6 4.6-1.6 6.2 0-1.6 1.6-3.6 1.6-6.2 0M12 14.3c1.6 2.6 1.6 4.6 0 6.2-1.6-1.6-1.6-3.6 0-6.2M9.7 12c-2.6 1.6-4.6 1.6-6.2 0 1.6-1.6 3.6-1.6 6.2 0\"/>", "pill": "<rect x=\"2.5\" y=\"9\" width=\"11.5\" height=\"6\" rx=\"3\"/><path d=\"M8.25 9v6\"/><circle cx=\"17.5\" cy=\"12\" r=\"3.8\"/><path d=\"M14.9 14.6l5.2-5.2\"/>", "note": "<path d=\"M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z\"/><path d=\"M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5\"/>", "sparkle": "<path d=\"M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z\"/><path d=\"M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 4.5v-.8a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 3.7v.8M8.8 10.5h6.4M8.8 14.5h4.2\"/>", "save": "<path d=\"M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z\"/><path d=\"M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.6\"/><circle cx=\"12\" cy=\"12\" r=\".9\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "user": "<circle cx=\"12\" cy=\"8.2\" r=\"4\"/><path d=\"M4.6 20.5a7.4 7.4 0 0 1 14.8 0\"/>", "palette": "<path d=\"M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z\"/><circle cx=\"7.6\" cy=\"11.2\" r=\".9\"/><circle cx=\"10\" cy=\"7.4\" r=\".9\"/><circle cx=\"14.6\" cy=\"7.4\" r=\".9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3\"/>", "phone": "<rect x=\"6.5\" y=\"2.8\" width=\"11\" height=\"18.4\" rx=\"2.5\"/><path d=\"M11 17.6h2\"/>", "sliders": "<path d=\"M4 6h10M4 12h4M12 12h8M4 18h12\"/><circle cx=\"17\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>", "flame": "<path d=\"M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z\"/><path d=\"M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z\"/>", "trophy": "<path d=\"M7.5 4.5h9v5a4.5 4.5 0 0 1-9 0z\"/><path d=\"M7.5 6.3H4.6a3 3 0 0 0 3.2 3.8M16.5 6.3h2.9a3 3 0 0 1-3.2 3.8M12 14v3.4M8.5 20.5h7M9.6 17.4h4.8\"/>", "trend_down": "<path d=\"M3 7.5l6 6 4-4 8 8\"/><path d=\"M15.2 17.5H21v-5.8\"/>", "trend_up": "<path d=\"M3 16.5l6-6 4 4 8-8\"/><path d=\"M15.2 6.5H21v5.8\"/>", "chart": "<path d=\"M3.5 20.5h17\"/><path d=\"M7 16.5V11M12 16.5V6.5M17 16.5v-4.5\"/>", "alert": "<path d=\"M10.3 4.3 2.9 17.6A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-2.9L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.2M12 16.8h.01\"/>", "bulb": "<path d=\"M9.2 18h5.6M10.2 21h3.6\"/><path d=\"M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/><path d=\"M13.5 6.5l4 4\"/>", "coin": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M15.2 8.8a4.1 4.1 0 1 0 0 6.4M7.6 11h5.6M7.6 13.4h5.6\"/>", "check": "<path d=\"M4.5 12.5l4.6 4.5L19.5 7\"/>", "pin": "<path d=\"M9 3.5h6l-1 5 3.5 3.5v1.5h-11V12L10 8.5z\"/><path d=\"M12 13.5v7\"/>", "activity": "<path d=\"M3 12h4l2.5-6.5 5 13L17 12h4\"/>", "nav_log": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/>"};
+const ICONS={"camera": "<path d=\"M4 8.5h3.2l1.6-2.5h6.4l1.6 2.5H20v10.5H4z\"/><circle cx=\"12\" cy=\"13.5\" r=\"3.4\"/>", "scale": "<rect x=\"3.5\" y=\"4\" width=\"17\" height=\"16\" rx=\"4\"/><path d=\"M8 10.5a4.6 4.6 0 0 1 8 0\"/><path d=\"M12 11.5l1.8-2.6\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z\"/>", "steps": "<path d=\"M8.2 3.5c1.6 0 2.6 1.9 2.6 4.4 0 2.2-.9 3.6-2.4 3.6S5.8 10 5.8 7.8c0-2.4.9-4.3 2.4-4.3z\"/><path d=\"M6.4 14.5h3.9v1.6a1.95 1.95 0 0 1-3.9 0z\"/><path d=\"M15.8 7.5c1.5 0 2.4 1.9 2.4 4.3 0 2.2-1.1 3.7-2.6 3.7s-2.4-1.4-2.4-3.6c0-2.5 1-4.4 2.6-4.4z\"/><path d=\"M13.7 18.5h3.9v.6a1.95 1.95 0 0 1-3.9 0z\"/>", "ruler": "<rect x=\"2.5\" y=\"8\" width=\"19\" height=\"8\" rx=\"1.6\"/><path d=\"M6.5 8v3M10 8v4M13.5 8v3M17 8v4\"/>", "battery": "<rect x=\"2.5\" y=\"7\" width=\"16.5\" height=\"10\" rx=\"2.5\"/><path d=\"M21.5 10.5v3\"/><path d=\"M6 10.5v3M9.5 10.5v3M13 10.5v3\"/>", "bolt": "<path d=\"M13 2.8 5 13.4h6.6l-1 7.8 8-10.7h-6.7z\"/>", "dumbbell": "<path d=\"M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11\"/>", "bike": "<circle cx=\"5.8\" cy=\"16.2\" r=\"3.3\"/><circle cx=\"18.2\" cy=\"16.2\" r=\"3.3\"/><path d=\"M5.8 16.2 9.5 9h6l2.7 7.2M9.5 9 8.4 6.5H6.5M15.5 9l-3.6 7.2H5.8\"/>", "bandage": "<rect x=\"2.6\" y=\"8.4\" width=\"18.8\" height=\"7.2\" rx=\"3.6\" transform=\"rotate(-45 12 12)\"/><path d=\"M10.2 10.2h.01M13.8 13.8h.01M10.2 13.8h.01M13.8 10.2h.01\"/>", "heart": "<path d=\"M20.4 8.8c0 5-8.4 10.7-8.4 10.7S3.6 13.8 3.6 8.8A4.3 4.3 0 0 1 12 6.6a4.3 4.3 0 0 1 8.4 2.2z\"/><path d=\"M6.5 12.2h2.7l1.4-2.2 2.3 4.4 1.4-2.2h3.2\"/>", "drop": "<path d=\"M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.6 12 3.2 12 3.2z\"/><path d=\"M9.3 14.4a2.8 2.8 0 0 0 2.4 2.6\"/>", "head": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M7.4 10.6 9.6 8.8l2 2.8 2.3-2.8 2.7 1.8\"/><path d=\"M9.2 15.6h5.6\"/>", "flower": "<circle cx=\"12\" cy=\"12\" r=\"2.3\"/><path d=\"M12 9.7c-1.6-2.6-1.6-4.6 0-6.2 1.6 1.6 1.6 3.6 0 6.2M14.3 12c2.6-1.6 4.6-1.6 6.2 0-1.6 1.6-3.6 1.6-6.2 0M12 14.3c1.6 2.6 1.6 4.6 0 6.2-1.6-1.6-1.6-3.6 0-6.2M9.7 12c-2.6 1.6-4.6 1.6-6.2 0 1.6-1.6 3.6-1.6 6.2 0\"/>", "pill": "<rect x=\"2.5\" y=\"9\" width=\"11.5\" height=\"6\" rx=\"3\"/><path d=\"M8.25 9v6\"/><circle cx=\"17.5\" cy=\"12\" r=\"3.8\"/><path d=\"M14.9 14.6l5.2-5.2\"/>", "note": "<path d=\"M14.5 3.2H6.6A1.6 1.6 0 0 0 5 4.8v14.4a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6V7.7z\"/><path d=\"M14.5 3.2v4.5H19M8.5 12.5h7M8.5 16h4.5\"/>", "sparkle": "<path d=\"M11 3.5l1.7 4.8 4.8 1.7-4.8 1.7L11 16.5l-1.7-4.8L4.5 10l4.8-1.7z\"/><path d=\"M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 4.5v-.8a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 3.7v.8M8.8 10.5h6.4M8.8 14.5h4.2\"/>", "save": "<path d=\"M4.5 4.5h12.3l2.7 2.7v11.8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z\"/><path d=\"M8 4.5v4h7v-4M7.8 20v-5.5h8.4V20\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.6\"/><circle cx=\"12\" cy=\"12\" r=\".9\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "user": "<circle cx=\"12\" cy=\"8.2\" r=\"4\"/><path d=\"M4.6 20.5a7.4 7.4 0 0 1 14.8 0\"/>", "palette": "<path d=\"M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.7-.8 1.7-1.6 0-1.2-1-1.5-1-2.5 0-.9.7-1.6 1.6-1.6h2.4a4.1 4.1 0 0 0 4.1-4.1C20.8 6.7 16.9 3.2 12 3.2z\"/><circle cx=\"7.6\" cy=\"11.2\" r=\".9\"/><circle cx=\"10\" cy=\"7.4\" r=\".9\"/><circle cx=\"14.6\" cy=\"7.4\" r=\".9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.9M12 19.3v1.9M2.8 12h1.9M19.3 12h1.9M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3\"/>", "phone": "<rect x=\"6.5\" y=\"2.8\" width=\"11\" height=\"18.4\" rx=\"2.5\"/><path d=\"M11 17.6h2\"/>", "sliders": "<path d=\"M4 6h10M4 12h4M12 12h8M4 18h12\"/><circle cx=\"17\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>", "flame": "<path d=\"M12 21c-3.8 0-6.4-2.6-6.4-6.1 0-3.2 2.2-5.3 3.5-7.4.5 1.6 1.2 2.7 2.4 3.2.3-3.2 1.6-5.7 3.8-7.4-.1 3.1 2.9 5.6 2.9 10.3C18.2 18 15.6 21 12 21z\"/><path d=\"M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.3-2.5 2.2-3.8.9 1.2 3 2.2 3 3.8 0 1.5-1.1 2.5-2.6 2.5z\"/>", "trophy": "<path d=\"M7.5 4.5h9v5a4.5 4.5 0 0 1-9 0z\"/><path d=\"M7.5 6.3H4.6a3 3 0 0 0 3.2 3.8M16.5 6.3h2.9a3 3 0 0 1-3.2 3.8M12 14v3.4M8.5 20.5h7M9.6 17.4h4.8\"/>", "trend_down": "<path d=\"M3 7.5l6 6 4-4 8 8\"/><path d=\"M15.2 17.5H21v-5.8\"/>", "trend_up": "<path d=\"M3 16.5l6-6 4 4 8-8\"/><path d=\"M15.2 6.5H21v5.8\"/>", "chart": "<path d=\"M3.5 20.5h17\"/><path d=\"M7 16.5V11M12 16.5V6.5M17 16.5v-4.5\"/>", "alert": "<path d=\"M10.3 4.3 2.9 17.6A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-2.9L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.2M12 16.8h.01\"/>", "bulb": "<path d=\"M9.2 18h5.6M10.2 21h3.6\"/><path d=\"M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/><path d=\"M13.5 6.5l4 4\"/>", "coin": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M15.2 8.8a4.1 4.1 0 1 0 0 6.4M7.6 11h5.6M7.6 13.4h5.6\"/>", "check": "<path d=\"M4.5 12.5l4.6 4.5L19.5 7\"/>", "pin": "<path d=\"M9 3.5h6l-1 5 3.5 3.5v1.5h-11V12L10 8.5z\"/><path d=\"M12 13.5v7\"/>", "activity": "<path d=\"M3 12h4l2.5-6.5 5 13L17 12h4\"/>", "nav_log": "<path d=\"M4 20h4L19 9l-4-4L4 16v4z\"/>"};
 function ico(n,s=18,cls=""){ const p=ICONS[n]; if(!p) return ""; return `<svg class="ico${cls?" "+cls:""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`; }
 function icoTile(n){ return `<span class="ico-tile">${ico(n,18)}</span>`; }
 const MEAS_FIELDS = [
@@ -3887,6 +3946,7 @@ function getTrackingGroups(){
       {key:"sleep",    lbl:"Uni", icon:"moon"},
       {key:"steps",    lbl:"Askeleet", icon:"steps"},
       {key:"body",     lbl:"Kehon mitat ja rasvaprosentti", icon:"ruler"},
+      ...(photosAvail()?[{key:"photos", lbl:"Kehityskuvat", icon:"camera"}]:[]), // v2.18.207
     ]},
     {label:"Päivittäinen fiilis", items:[
       {key:"recovery",   lbl:"Palautuminen (1–5)", icon:"battery"},
@@ -3976,7 +4036,7 @@ function saveTrackingSettings(btn){
 
 function selectAllTracking(){
   if(!S.settings.tracking) S.settings.tracking={};
-  getTrackingGroups().forEach(g=>g.items.forEach(item=>{S.settings.tracking[item.key]=true;}));
+  getTrackingGroups().forEach(g=>g.items.forEach(item=>{ if(item.key!=="photos") S.settings.tracking[item.key]=true; })); // kuvat erillinen valinta
   saveAll();
   renderTrackingSection();
   applyTrackingVisibility();
@@ -4002,7 +4062,7 @@ function renderTrackingSection(){
     });
   });
   const allKeys=getTrackingGroups().flatMap(g=>g.items.map(i=>i.key));
-  const allOn=allKeys.every(k=>t[k]===true);
+  const allOn=allKeys.every(k=>k==="photos"||t[k]===true);
   if(!allOn) h+=`<button onclick="selectAllTracking()" style="width:100%;height:38px;border-radius:8px;border:1.5px solid var(--bord);background:transparent;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;margin-top:12px">Valitse kaikki</button>`;
   if(!allKeys.some(k=>t[k]===true)) h+=`<div style="margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border-radius:8px;font-size:13px;color:var(--red)">${ico("alert",15)} Valitse ainakin yksi seuranta</div>`;
   h+=`<button onclick="saveTrackingSettings(this)" class="btn-primary" style="width:100%;margin-top:14px">Tallenna valinnat</button>`;
@@ -4138,14 +4198,14 @@ function toggleTrackingSetup(key){
 // sovellus avautuu Mitat-sivulle ja Kirjaa-näkymä ohjaa sinne.
 function isBodyOnly(){
   const t=S.settings.tracking; if(!t||t.body!==true) return false;
-  return Object.entries(t).every(([k,v])=>k==="body"||v!==true);
+  return Object.entries(t).every(([k,v])=>k==="body"||k==="photos"||v!==true);
 }
 // v2.18.85: pelkkää treeniä kirjaava (treenimoduuli päällä, mikään päiväseuranta ei). Trendit näyttää vain treenit,
 // eikä Mitat-välilehteä tarjota ennen kuin kehon seuranta otetaan käyttöön tai mittauksia on jo olemassa.
 function isGymOnly(){ const t=S.settings.tracking; return gymOn()&&!!t&&!Object.values(t).some(Boolean); }
 function applyNavVisibility(){
   const h=document.getElementById("nav-historia"); if(!h) return;
-  const hide=isGymOnly()&&!(S.measurements||[]).length;
+  const hide=isGymOnly()&&!(S.measurements||[]).length&&!photosOn();
   h.style.display=hide?"none":"";
   if(hide&&S.tab==="historia") setTab("log");
 }
@@ -6891,8 +6951,233 @@ function renderMeasurements(){
   const r=renderMeasurementsInner();
   const hero=document.getElementById("mitat-hero"), btn=document.querySelector("#historia-content .mo-add");
   if(hero){ hero.replaceChildren(); if(btn) hero.appendChild(btn); }
+  try{ renderPhotos(); }catch(_){}
   return r;
 }
+// ═══ KEHITYSKUVAT (v2.18.207, vaihe 1: vain oma versio, ei vielä Drivea) ═══
+// Kuvat IndexedDB:ssä (localStorage ei riitä). Päivä ja kulma samassa tietueessa kuvan kanssa, joten zip-tiedosto palauttaa kaiken.
+// Järkäle näyttää kuvat ja viikon aamupainojen keskiarvon; ei arvioi kuvia.
+const PH_DB="jarkale-photos", PH_EXP="jarkale-photos-export";
+const PH_ANG={front:"Edestä",side:"Sivulta",back:"Takaa"};
+const PH={list:[],loaded:false,urls:{},draft:null,cmp:null,view:null,all:false};
+function photosAvail(){ return !document.documentElement.classList.contains("pilot"); }
+function photosOn(){ return photosAvail()&&trk("photos"); }
+function phDB(){ return new Promise((res,rej)=>{ if(!window.indexedDB) return rej(new Error("idb")); const r=indexedDB.open(PH_DB,1);
+  r.onupgradeneeded=()=>{ const db=r.result; if(!db.objectStoreNames.contains("photos")) db.createObjectStore("photos",{keyPath:"id"}); };
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function phTx(mode,fn){ const db=await phDB(); return new Promise((res,rej)=>{ const tx=db.transaction("photos",mode), st=tx.objectStore("photos"); let out; const rq=fn(st);
+  if(rq) rq.onsuccess=()=>{ out=rq.result; }; tx.oncomplete=()=>{ db.close(); res(out); }; tx.onerror=tx.onabort=()=>{ db.close(); rej(tx.error); }; }); }
+const phMeta=p=>({id:p.id,date:p.date,angle:p.angle,w:p.w,h:p.h,createdAt:p.createdAt});
+function phAngOrd(a){ const i=["front","side","back"].indexOf(a); return i<0?3:i; }
+const phSort=(a,b)=>a.date.localeCompare(b.date)||phAngOrd(a.angle)-phAngOrd(b.angle)||(a.createdAt||0)-(b.createdAt||0);
+async function phLoad(){ try{ const all=await phTx("readonly",st=>st.getAll()); PH.list=(all||[]).map(phMeta).sort(phSort); }catch(_){ PH.list=[]; } PH.loaded=true; }
+function phAngLbl(a){ return PH_ANG[a]||String(a||"").replace(/^c:/,"")||"Muu"; }
+function phCustomNames(){ return [...new Set(PH.list.map(p=>p.angle).filter(a=>/^c:/.test(a)))]; }
+async function phBlob(id){ try{ const r=await phTx("readonly",st=>st.get(id)); return r?r.blob:null; }catch(_){ return null; } }
+async function phUrl(id){ if(PH.urls[id]) return PH.urls[id]; const b=await phBlob(id); if(!b) return null; return PH.urls[id]=URL.createObjectURL(b); }
+function phHydrate(root){ root.querySelectorAll("img[data-ph]").forEach(async im=>{ const u=await phUrl(im.dataset.ph); if(u) im.src=u; }); }
+const phKg=v=>String(+(+v).toFixed(1)).replace(".",",");
+function phWeekKey(ds){ const d=new Date(ds+"T00:00:00"); d.setDate(d.getDate()-(d.getDay()+6)%7); return iso(d); }
+function phWeeks(){ const m={}; PH.list.forEach(p=>{ const k=phWeekKey(p.date); (m[k]=m[k]||[]).push(p); }); return Object.keys(m).sort().reverse().map(k=>({mon:k,photos:m[k]})); }
+function phWeightAvg(mon){ const d=new Date(mon+"T00:00:00"), v=[]; for(let i=0;i<7;i++){ const e=S.entries[iso(d)]; if(e&&e.weight!=null&&e.weight!==""&&isFinite(+e.weight)) v.push(+e.weight); d.setDate(d.getDate()+1); }
+  return v.length?{avg:v.reduce((a,b)=>a+b,0)/v.length,n:v.length}:null; }
+function phWeekNo(mon){ return isoWeekNo(new Date(mon+"T00:00:00")); }
+function phWeekLbl(w){ const d=new Date(w.mon+"T00:00:00"), yr=d.getFullYear()!==new Date().getFullYear(); const days=[...new Set(w.photos.map(p=>p.date))].sort();
+  const dl=days.length===1?gDay(days[0]):`${measFmtDate(days[0])}–${measFmtDate(days[days.length-1])}`;
+  return `<b>Vko\u00a0${phWeekNo(w.mon)}</b>${yr?` ${d.getFullYear()}`:""} <span>${dl}</span>`; }
+
+// ── lisäys ──
+function phPick(){ const i=document.getElementById("ph-file"); if(i){ i.value=""; i.click(); } }
+async function phResize(file){
+  let bmp; try{ bmp=await createImageBitmap(file,{imageOrientation:"from-image"}); }
+  catch(_){ bmp=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); }); }
+  const W=bmp.width,H=bmp.height,k=Math.min(1,1200/Math.max(W,H)),w=Math.max(1,Math.round(W*k)),h=Math.max(1,Math.round(H*k));
+  const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h); try{ bmp.close&&bmp.close(); }catch(_){}
+  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.82)); if(!blob) throw new Error("toBlob"); return {blob,w,h};
+}
+async function phFiles(input){
+  const files=[...(input.files||[])].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|heic)$/i.test(f.name)); if(!files.length) return;
+  const use=files.slice(0,6), t=today();
+  // päivä: valittujen kuvien oma päivä (gallerian vanhat kuvat), muuten tänään; muutettavissa
+  const lm=use.map(f=>f.lastModified?iso(new Date(f.lastModified)):t).filter(d=>d<=t).sort();
+  if(PH.draft) phDraftCancel();
+  PH.draft={date:lm.length?lm[lm.length-1]:t,items:[],busy:true,extra:files.length>6,failed:0}; renderPhotos();
+  const cn=phCustomNames(), d=PH.draft;
+  for(let i=0;i<use.length;i++){ try{ const r=await phResize(use[i]); if(PH.draft!==d) return; d.items.push({...r,url:URL.createObjectURL(r.blob),angle:i<3?["front","side","back"][i]:(cn[i-3]||"__new")}); }catch(_){ d.failed++; } }
+  d.busy=false; renderPhotos();
+  try{ document.querySelector(".ph-draft")?.scrollIntoView({behavior:"smooth",block:"start"}); }catch(_){}
+}
+function phDraftHTML(){ const d=PH.draft, cn=phCustomNames();
+  const opts=a=>[["front","Edestä"],["side","Sivulta"],["back","Takaa"],...cn.map(c=>[c,phAngLbl(c)]),["__new","Oma nimi…"]]
+    .map(([v,l])=>`<option value="${esc(v)}"${v===a?" selected":""}>${esc(l)}</option>`).join("");
+  return `<div class="ph-draft"><div class="ph-dh"><b>Uudet kuvat</b><label class="g-dch">${ico("calendar",14)}<span>${d.date===today()?"tänään":gDay(d.date)}</span><input type="date" value="${d.date}" max="${today()}" aria-label="Kuvien päivä" onchange="phDraftDate(this.value)"></label></div>
+    ${d.busy?`<div class="ph-sub">Käsitellään kuvia…</div>`:""}
+    <div class="ph-grid">${d.items.map((it,i)=>`<div class="ph-di"><div class="ph-im"><img src="${it.url}" alt=""><button class="ph-dx" onclick="phDraftDrop(${i})" aria-label="Jätä tämä kuva pois">✕</button></div>
+      <select aria-label="Kuvakulma" onchange="phDraftAngle(${i},this.value)">${opts(it.angle)}</select>${it.angle==="__new"?`<input type="text" maxlength="30" placeholder="esim. Hauis" value="${esc(it.name||"")}" oninput="PH.draft.items[${i}].name=this.value">`:""}</div>`).join("")}</div>
+    ${d.failed?`<div class="ph-sub">${d.failed} ${d.failed===1?"kuvaa":"kuvaa"} ei voitu lukea.</div>`:""}${d.extra?`<div class="ph-sub">Kerralla enintään 6 kuvaa, mukana ensimmäiset 6.</div>`:""}
+    <div class="ph-acts"><button class="btn-primary" style="flex:1" onclick="phSave()">Tallenna</button><button class="ph-btn" onclick="phDraftCancel()">Peruuta</button></div></div>`; }
+function phDraftDate(v){ if(PH.draft&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&v<=today()){ PH.draft.date=v; renderPhotos(); } }
+function phDraftAngle(i,v){ PH.draft.items[i].angle=v; renderPhotos(); if(v==="__new") setTimeout(()=>{ try{ document.querySelectorAll(".ph-di")[i].querySelector("input").focus(); }catch(_){} },30); }
+function phDraftDrop(i){ const it=PH.draft.items.splice(i,1)[0]; if(it) URL.revokeObjectURL(it.url); if(!PH.draft.items.length&&!PH.draft.busy) PH.draft=null; renderPhotos(); }
+function phDraftCancel(){ (PH.draft?.items||[]).forEach(it=>URL.revokeObjectURL(it.url)); PH.draft=null; renderPhotos(); }
+async function phSave(){
+  const d=PH.draft; if(!d||d.busy||!d.items.length) return;
+  const now=Date.now();
+  const recs=d.items.map((it,i)=>{ let a=it.angle; if(a==="__new"){ const v=String(it.name||"").trim().slice(0,30); a="c:"+(v||"Muu"); }
+    return {id:"ph"+now.toString(36)+i+Math.random().toString(36).slice(2,6),date:d.date,angle:a,w:it.w,h:it.h,createdAt:now+i,blob:it.blob}; });
+  try{ await phTx("readwrite",st=>{ recs.forEach(r=>st.put(r)); }); }
+  catch(_){ jAlert("Kuvia ei voitu tallentaa.\nPuhelimen tallennustila voi olla täynnä."); return; }
+  d.items.forEach(it=>URL.revokeObjectURL(it.url)); PH.draft=null;
+  recs.forEach(r=>PH.list.push(phMeta(r))); PH.list.sort(phSort); haptic(10); renderPhotos();
+}
+
+// ── näkymä ──
+function renderPhotos(){
+  const el=document.getElementById("photos-sec"); if(!el) return;
+  if(!photosOn()){ el.innerHTML=""; return; }
+  if(!PH.loaded){ phLoad().then(renderPhotos); return; }
+  const weeks=phWeeks(), n=PH.list.length;
+  let h=`<div class="card ph-card"><div class="ph-h">${ico("camera",18)}<b>Kehityskuvat</b>${weeks.length?`<span>${weeks.length}\u00a0${weeks.length===1?"viikko":"viikkoa"}</span>`:""}</div>
+    <div class="ph-sub">Kuvat ovat vain tässä puhelimessa.${n?` <button class="ph-link" onclick="phExport()">Tallenna kuvat</button>`:""}</div>`;
+  if(PH.draft) h+=phDraftHTML();
+  else h+=`<div class="ph-acts"><button class="ph-add" onclick="phPick()">${ico("camera",16)} Lisää kuvat</button>${weeks.length>=2?`<button class="ph-btn${PH.cmp?" on":""}" onclick="phCmpToggle()">Vertaa</button>`:""}</div>`;
+  if(!n&&!PH.draft) h+=`<div class="ph-empty">Lisää esimerkiksi kerran viikossa kuvat edestä, sivulta ja takaa. Kuvat ryhmitellään viikoittain, ja viikon kohdalla näkyy aamupainojen keskiarvo. <button class="ph-link" onclick="phImportPick()">Palauta tallennetut kuvat</button></div>`;
+  if(PH.cmp&&weeks.length>=2) h+=phCmpHTML(weeks);
+  // vuodessa ~50 viikkoa: oletuksena 3 uusinta, ettei Mitat-sivun mittaukset jää kauas alas
+  const shown=PH.all?weeks:weeks.slice(0,3);
+  shown.forEach(w=>{ const wa=phWeightAvg(w.mon);
+    h+=`<div class="ph-wk" data-wk="${w.mon}"><div class="ph-wh"><span class="ph-wl">${phWeekLbl(w)}</span>${wa?`<span class="ph-wa">paino ka <b>${phKg(wa.avg)}\u00a0kg</b> (${wa.n}\u00a0pv)</span>`:""}</div>
+      <div class="ph-grid">${w.photos.map(p=>`<button class="ph-th" onclick="phOpen('${p.id}')"><span class="ph-im"><img data-ph="${p.id}" alt=""></span><span class="ph-al">${esc(phAngLbl(p.angle))}</span></button>`).join("")}</div>
+      <div class="ph-wf"><button class="ph-link" onclick="phShareWeek('${w.mon}')">Jaa viikon kuvat</button></div></div>`; });
+  if(weeks.length>3) h+=`<button class="ph-btn ph-more" onclick="PH.all=!PH.all;renderPhotos()">${PH.all?"Näytä vain uusimmat":`Näytä kaikki (${weeks.length}\u00a0viikkoa)`}</button>`;
+  el.innerHTML=h+`</div>`; phHydrate(el);
+  if(PH.view) phViewRender();
+}
+function phCmpToggle(){ PH.cmp=PH.cmp?null:{}; renderPhotos(); }
+function phCmpHTML(weeks){
+  const c=PH.cmp, asc=[...weeks].reverse();
+  if(!weeks.some(w=>w.mon===c.a)) c.a=asc[0].mon; if(!weeks.some(w=>w.mon===c.b)) c.b=asc[asc.length-1].mon;
+  const wa=weeks.find(w=>w.mon===c.a), wb=weeks.find(w=>w.mon===c.b);
+  c.angs=[...new Set([...wa.photos,...wb.photos].map(p=>p.angle))].sort((x,y)=>phAngOrd(x)-phAngOrd(y)||x.localeCompare(y));
+  if(!c.angs.includes(c.ang)) c.ang=c.angs[0];
+  const opt=sel=>asc.map(w=>`<option value="${w.mon}"${w.mon===sel?" selected":""}>Vko ${phWeekNo(w.mon)} · ${measFmtDate(w.photos[0].date)}</option>`).join("");
+  const col=(w,k)=>{ const p=w.photos.find(x=>x.angle===c.ang), wv=phWeightAvg(w.mon);
+    return `<div class="ph-cc"><select aria-label="Viikko" onchange="PH.cmp.${k}=this.value;renderPhotos()">${opt(w.mon)}</select>
+      ${p?`<button class="ph-ci" onclick="phOpen('${p.id}')"><img data-ph="${p.id}" alt=""></button>`:`<div class="ph-ci none">Ei kuvaa tästä kulmasta</div>`}
+      <div class="ph-cw">${wv?`paino ka ${phKg(wv.avg)}\u00a0kg`:"\u00a0"}</div></div>`; };
+  return `<div class="ph-cmp"><div class="ph-cg">${col(wa,"a")}${col(wb,"b")}</div>
+    <div class="chips ph-chips">${c.angs.map((a,i)=>`<button class="chip grow${a===c.ang?" on":""}" onclick="PH.cmp.ang=PH.cmp.angs[${i}];renderPhotos()">${esc(phAngLbl(a))}</button>`).join("")}</div></div>`;
+}
+function phOpen(id){ PH.view={id}; phViewRender(); }
+function phViewClose(){ PH.view=null; document.getElementById("ph-view")?.remove(); }
+function phViewRender(){
+  const p=PH.list.find(x=>x.id===PH.view?.id); let w=document.getElementById("ph-view");
+  if(!p){ if(w) w.remove(); PH.view=null; return; }
+  if(!w){ w=document.createElement("div"); w.id="ph-view"; w.className="ph-view"; w.setAttribute("role","dialog"); w.setAttribute("aria-modal","true"); document.body.appendChild(w); }
+  const wk=phWeeks().find(x=>x.mon===phWeekKey(p.date)), sib=wk?wk.photos:[p], i=sib.findIndex(x=>x.id===p.id);
+  const angs=["front","side","back",...phCustomNames()]; if(!angs.includes(p.angle)) angs.push(p.angle);
+  w.innerHTML=`<div class="ph-vt"><span>${esc(phAngLbl(p.angle))} · ${fiDate(p.date)}</span><button onclick="phViewClose()" aria-label="Sulje">✕</button></div>
+    <div class="ph-vi"><img data-ph="${p.id}" alt="${esc(phAngLbl(p.angle))}">${i>0?`<button class="ph-nav l" onclick="phOpen('${sib[i-1].id}')" aria-label="Edellinen kuva">‹</button>`:""}${i<sib.length-1?`<button class="ph-nav r" onclick="phOpen('${sib[i+1].id}')" aria-label="Seuraava kuva">›</button>`:""}</div>
+    <div class="ph-vb"><select aria-label="Kuvakulma" onchange="phSetAngle('${p.id}',this.value)">${angs.map(a=>`<option value="${esc(a)}"${a===p.angle?" selected":""}>${esc(phAngLbl(a))}</option>`).join("")}</select>
+      <label class="g-dch">${ico("calendar",14)}<span>${gDay(p.date)}</span><input type="date" value="${p.date}" max="${today()}" aria-label="Kuvan päivä" onchange="phSetDate('${p.id}',this.value)"></label>
+      <button class="ph-del" onclick="phDelete('${p.id}')">Poista</button></div>`;
+  phHydrate(w);
+}
+async function phUpdate(id,patch){
+  try{ await phTx("readwrite",st=>{ const rq=st.get(id); rq.onsuccess=()=>{ if(rq.result) st.put({...rq.result,...patch}); }; }); }
+  catch(_){ jAlert("Muutos ei tallentunut."); return; }
+  const m=PH.list.find(x=>x.id===id); if(m) Object.assign(m,patch); PH.list.sort(phSort); renderPhotos();
+}
+function phSetAngle(id,a){ phUpdate(id,{angle:a}); }
+function phSetDate(id,d){ if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=today()) phUpdate(id,{date:d}); }
+async function phDelete(id){
+  const p=PH.list.find(x=>x.id===id); if(!p) return;
+  if(!await jConfirm(`Poistetaanko kuva?\n${phAngLbl(p.angle)}, ${fiDate(p.date)}. Kuvaa ei saa takaisin, ellei se ole tallennetuissa kuvissa.`,{ok:"Poista",danger:true})) return;
+  try{ await phTx("readwrite",st=>st.delete(id)); }catch(_){ jAlert("Kuvaa ei voitu poistaa."); return; }
+  PH.list=PH.list.filter(x=>x.id!==id); if(PH.urls[id]){ URL.revokeObjectURL(PH.urls[id]); delete PH.urls[id]; }
+  phViewClose(); renderPhotos(); try{ renderPhotoBackupRow(); }catch(_){}
+}
+
+// ── jakaminen ──
+function phSlug(s){ return String(s).toLowerCase().replace(/[äå]/g,"a").replace(/ö/g,"o").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"kuva"; }
+function phDownload(blob,name){ const u=URL.createObjectURL(blob), a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),5000); }
+async function phShareWeek(mon){
+  const w=phWeeks().find(x=>x.mon===mon); if(!w) return;
+  const wn=phWeekNo(mon), used={}, files=[];
+  for(const p of w.photos){ const b=await phBlob(p.id); if(!b) continue; let n=`vko${wn}-${phSlug(phAngLbl(p.angle))}`; used[n]=(used[n]||0)+1; if(used[n]>1) n+=`-${used[n]}`; files.push(new File([b],n+".jpg",{type:"image/jpeg"})); }
+  if(!files.length) return;
+  try{ if(navigator.canShare&&navigator.share&&navigator.canShare({files})){ await navigator.share({files}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  files.forEach((f,i)=>setTimeout(()=>phDownload(f,f.name),i*300));
+}
+
+// ── zip-tallennus ja -palautus (pakkaamaton: JPEG on jo pakattu) ──
+const PH_CRC=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function phCrc(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=PH_CRC[(c^u8[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function phZip(files){
+  const enc=new TextEncoder(), parts=[], cen=[]; let off=0;
+  const dt=new Date(), T=(dt.getHours()<<11)|(dt.getMinutes()<<5)|(dt.getSeconds()>>1), D=((dt.getFullYear()-1980)<<9)|((dt.getMonth()+1)<<5)|dt.getDate();
+  files.forEach(f=>{ const nm=enc.encode(f.name), crc=phCrc(f.data), sz=f.data.length;
+    const l=new DataView(new ArrayBuffer(30)); l.setUint32(0,0x04034b50,true); l.setUint16(4,20,true); l.setUint16(6,0x0800,true); l.setUint16(10,T,true); l.setUint16(12,D,true); l.setUint32(14,crc,true); l.setUint32(18,sz,true); l.setUint32(22,sz,true); l.setUint16(26,nm.length,true);
+    parts.push(l.buffer,nm,f.data);
+    const c=new DataView(new ArrayBuffer(46)); c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(12,T,true); c.setUint16(14,D,true); c.setUint32(16,crc,true); c.setUint32(20,sz,true); c.setUint32(24,sz,true); c.setUint16(28,nm.length,true); c.setUint32(42,off,true);
+    cen.push(c.buffer,nm); off+=30+nm.length+sz; });
+  const cs=cen.reduce((a,b)=>a+b.byteLength,0), e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,cs,true); e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,e.buffer],{type:"application/zip"});
+}
+async function phUnzip(buf){
+  const dv=new DataView(buf), u8=new Uint8Array(buf), dec=new TextDecoder(); let e=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-65557);i--){ if(dv.getUint32(i,true)===0x06054b50){ e=i; break; } }
+  if(e<0) throw new Error("zip");
+  const n=dv.getUint16(e+10,true), out=[]; let p=dv.getUint32(e+16,true);
+  for(let k=0;k<n;k++){ if(dv.getUint32(p,true)!==0x02014b50) throw new Error("zip");
+    const meth=dv.getUint16(p+10,true), csz=dv.getUint32(p+20,true), nl=dv.getUint16(p+28,true), xl=dv.getUint16(p+30,true), cl=dv.getUint16(p+32,true), lo=dv.getUint32(p+42,true);
+    const name=dec.decode(u8.subarray(p+46,p+46+nl)); p+=46+nl+xl+cl;
+    const ds=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true); let data=u8.slice(ds,ds+csz);
+    if(meth===8) data=new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()); // uudelleen pakattu tiedosto
+    else if(meth!==0) continue;
+    out.push({name,data}); }
+  return out;
+}
+async function phExport(){
+  if(!PH.loaded) await phLoad();
+  let all; try{ all=await phTx("readonly",st=>st.getAll()); }catch(_){ jAlert("Kuvia ei voitu lukea."); return; }
+  if(!all||!all.length){ jAlert("Tallennettavia kuvia ei ole."); return; }
+  const files=[], man=[];
+  for(const r of all.sort(phSort)){ const nm=`kuvat/${r.date}-${phSlug(phAngLbl(r.angle))}-${r.id}.jpg`; files.push({name:nm,data:new Uint8Array(await r.blob.arrayBuffer())}); man.push({...phMeta(r),file:nm}); }
+  files.unshift({name:"jarkale-kuvat.json",data:new TextEncoder().encode(JSON.stringify({app:"jarkale",kind:"photos",version:1,exported:new Date().toISOString(),photos:man},null,1))});
+  const name=`jarkale-kuvat-${today()}.zip`; phDownload(phZip(files),name);
+  try{ localStorage.setItem(PH_EXP,String(Date.now())); }catch(_){}
+  renderPhotos(); try{ renderPhotoBackupRow(); }catch(_){}
+  jAlert(`Kuvat tallennettiin tiedostoon ${name}.\nTiedosto on puhelimen latauksissa. Siirrä se talteen, esimerkiksi omaan Driveesi. Palautus: Asetukset → Varmuuskopio ja Drive → Palauta kuvat.`);
+}
+function phImportPick(){ const i=document.getElementById("ph-zip"); if(i){ i.value=""; i.click(); } }
+async function phImport(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const bad="Tiedosto ei ole Järkäleen kuvatiedosto.\nValitse tiedosto, jonka nimi alkaa jarkale-kuvat.";
+  let ents; try{ ents=await phUnzip(await f.arrayBuffer()); }catch(_){ jAlert(bad); return; }
+  const mf=ents.find(e=>/(^|\/)jarkale-kuvat\.json$/.test(e.name)); let man=null; try{ man=JSON.parse(new TextDecoder().decode(mf.data)); }catch(_){}
+  if(!man||man.kind!=="photos"||!Array.isArray(man.photos)){ jAlert(bad); return; }
+  if(!PH.loaded) await phLoad();
+  const have=new Set(PH.list.map(p=>p.id)), recs=[]; let skip=0, badN=0;
+  man.photos.forEach(m=>{ if(!m||!m.id||!/^\d{4}-\d{2}-\d{2}$/.test(m.date||"")){ badN++; return; } if(have.has(m.id)){ skip++; return; }
+    const e=ents.find(x=>x.name===m.file); if(!e||!e.data.length){ badN++; return; }
+    recs.push({id:m.id,date:m.date,angle:m.angle||"front",w:m.w,h:m.h,createdAt:m.createdAt||Date.now(),blob:new Blob([e.data],{type:"image/jpeg"})}); });
+  if(recs.length){ try{ await phTx("readwrite",st=>{ recs.forEach(r=>st.put(r)); }); }catch(_){ jAlert("Kuvia ei voitu palauttaa.\nPuhelimen tallennustila voi olla täynnä."); return; }
+    recs.forEach(r=>PH.list.push(phMeta(r))); PH.list.sort(phSort); }
+  renderPhotos(); try{ renderPhotoBackupRow(); }catch(_){}
+  jAlert(`Palautettiin ${recs.length}\u00a0${recs.length===1?"kuva":"kuvaa"}.`+(skip||badN?"\n":"")+(skip?`${skip}\u00a0${skip===1?"kuva oli":"kuvaa oli"} jo tässä puhelimessa. `:"")+(badN?`${badN} ohitettiin, koska ne olivat virheellisiä.`:""));
+}
+function renderPhotoBackupRow(){
+  const el=document.getElementById("photo-backup-row"); if(!el) return;
+  if(!photosAvail()||(!trk("photos")&&!PH.list.length)){ el.innerHTML=""; return; }
+  if(!PH.loaded){ phLoad().then(renderPhotoBackupRow); return; }
+  const n=PH.list.length; let last=0; try{ last=parseInt(localStorage.getItem(PH_EXP)||"0")||0; }catch(_){}
+  el.innerHTML=`<div class="ph-bk"><div class="lbl-small">Kehityskuvat</div>
+    <div class="ph-bt">${n?`${n}\u00a0${n===1?"kuva":"kuvaa"}. `:""}Kuvat eivät ole varmuuskopiossa eivätkä Drivessa, vaan ne tallennetaan omaan tiedostoonsa.${n?` Tallennettu viimeksi: ${last?fiDate(iso(new Date(last))):"ei vielä"}.`:""}</div>
+    <div class="ph-acts">${n?`<button class="ph-btn" onclick="phExport()">Tallenna kuvat</button>`:""}<button class="ph-btn" onclick="phImportPick()">Palauta kuvat</button></div></div>`;
+}
+
 function renderMeasurementsInner(){
   const all=[...HIST_MEAS,...(S.measurements||[])].sort((a,b)=>a.date.localeCompare(b.date));
   const el=document.getElementById("historia-content");
@@ -7902,6 +8187,7 @@ function renderAsetukset(){
   renderProfile();
   renderGenderSection();
   renderSettingsToggles();
+  try{ renderPhotoBackupRow(); }catch(_){}
   if(SETTINGS_TOGGLES.tracking){
     renderTrackingSection();
   }
@@ -12452,10 +12738,10 @@ function iosRiskStats(){
   const done=G.sessions.filter(x=>x.endedAt), sd=new Set(done.map(x=>x.date)), ent=Object.keys(S.entries||{}).filter(d=>!sd.has(d)); // treenipäivän kirjaus ei tuplana
   const dates=[...done.map(x=>x.date),...ent].filter(Boolean).sort();
   const days=dates.length?Math.max(0,Math.round((Date.parse(today())-Date.parse(dates[0]))/864e5)):0;
-  return {ses:done.length,ent:ent.length,days};
+  return {ses:done.length,ent:ent.length,days,ph:PH.list.length};
 }
 function iosRiskTxt(r){
-  const parts=[]; if(r.ses) parts.push(`${r.ses}\u00a0${r.ses===1?"treeni":"treeniä"}`); if(r.ent) parts.push(`${r.ent}\u00a0${r.ent===1?"kirjaus":"kirjausta"}`);
+  const parts=[]; if(r.ses) parts.push(`${r.ses}\u00a0${r.ses===1?"treeni":"treeniä"}`); if(r.ent) parts.push(`${r.ent}\u00a0${r.ent===1?"kirjaus":"kirjausta"}`); if(r.ph) parts.push(`${r.ph}\u00a0${r.ph===1?"kuva":"kuvaa"}`);
   const span=r.days>=14?` ${Math.floor(r.days/7)}\u00a0viikon ajalta`:r.days>=2?` ${r.days}\u00a0päivän ajalta`:"";
   return parts.length?parts.join(" ja ")+span:"Ohjelmasi";
 }
