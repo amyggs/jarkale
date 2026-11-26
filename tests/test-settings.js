@@ -137,6 +137,10 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const mh=await p.evaluate(()=>{ S.settings.medications=[{id:'x',name:'T',dose:'40 mg',days:[2,3,5,0]}]; S.settings.seasons=[{id:1,type:'bulk',startDate:'2026-06-01'}]; S.settings.seasonsEnabled=true; renderMedSettings(); renderSeasons();
     return {h:document.getElementById('meds-management').innerText.split('\n')[0].trim(),d:document.getElementById('seasons-section').innerText}; });
   ok(mh.h==='Lääkkeet'&&/1\.6\.2026/.test(mh.d)&&!/2026-06-01/.test(mh.d),'lääkekortissa otsikko, kauden alku 1.6.2026 ('+mh.h+')');
+  // v2.18.203: viikkoannos
+  const wk=await p.evaluate(()=>{ S.settings.medications=[{id:1,name:'T',dose:40,unit:'mg',days:[2,3,5,0]},{id:2,name:'D',dose:2.5,unit:'ml',days:[0,1,2,3,4,5,6]},{id:3,name:'Tarvittaessa',dose:400,unit:'mg',days:[]},{id:4,name:'Ilman annosta',dose:null,unit:'mg',days:[1]}]; renderMedSettings();
+    return document.getElementById('meds-management').innerText.replace(/\u00a0/g,' '); });
+  ok(/40 mg · Ti, Ke, Pe, Su · 160 mg\/vko/.test(wk)&&/2,5 ml · .* · 17,5 ml\/vko/.test(wk)&&(wk.match(/\/vko/g)||[]).length===2,'viikkoannos kerta-annoksesta × päivistä, ei ilman päiviä tai annosta');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);

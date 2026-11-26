@@ -2370,7 +2370,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.202</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.203</span>
       </div>
     </div>
   </div>
@@ -2435,6 +2435,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.203", d:"marraskuu 2026", items:[
+    "Asetusten lääkekortissa viikkoannos: kerta-annos × viikonpäivät (esim. 40 mg · Ti, Ke, Pe, Su · 160 mg/vko). Ei näytetä, jos viikonpäiviä tai annosta ei ole. Annokset desimaalipilkulla."
+  ]},
   {v:"2.18.202", d:"marraskuu 2026", items:[
     "Asetusten lääkekortissa otsikko Lääkkeet (kortti alkoi suoraan lääkelistalla). Kausien alku- ja loppupäivä suomalaisittain (1.6.2026, ei 2026-06-01)."
   ]},
@@ -7675,6 +7678,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"26.11.2026", items:[
+    "Asetusten lääkekortti näyttää kerta-annoksen lisäksi viikkoannoksen."
+  ]},
   {d:"25.11.2026", items:[
     "Mittaukset eivät enää katoa, jos sovellus sulkeutuu ennen tallennusta: keskeneräinen mittaus palautuu, kun avaat Järkäleen uudelleen. Sama koskee liitettävää ohjelmatekstiä.",
     "Jos mittaat ihopoimut pihdeillä, Mitat näyttää FFMI:n myös ihopoimuarvion mukaan Navy-arvon rinnalla."
@@ -9354,6 +9360,10 @@ function adjMedDose(mid,medId,delta){
   renderMedCards(ds,dow);
 }
 
+// v2.18.203: viikkoannos = kerta-annos × viikonpäivät (pelkkä laskutoimitus käyttäjän omista luvuista, Asetusten kortissa)
+const medNum=v=>{ const n=+String(v).replace(",","."); return isFinite(n)?String(+n.toFixed(2)).replace(".",","):String(v); };
+function medWeekTxt(med){ const n=+String(med.dose??"").replace(",","."); const d=(med.days||[]).length;
+  if(!(n>0)||!d) return ""; return ` · <b style="color:var(--text);font-weight:600">${medNum(n*d)}\u00a0${med.unit||"mg"}/vko</b>`; }
 function renderMedSettings(){
   const meds=S.settings.medications||[];
   // v2.18.202: otsikko kuten muissa korteissa (Akun havainto: kortti alkoi suoraan lääkelistalla)
@@ -9362,7 +9372,7 @@ function renderMedSettings(){
     h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bord)">
       <div style="flex:1">
         <div style="color:var(--text);font-size:13px;font-weight:600">${ico("pill",15)} ${esc(med.name)}</div>
-        <div style="color:var(--dim);font-size:11px;margin-top:2px">${med.dose!=null?`${med.dose} ${med.unit||"mg"} · `:""}${med.days.slice().sort((a,b)=>(a+6)%7-(b+6)%7).map(d=>DAY_LBL[d]).join(", ")}</div>
+        <div style="color:var(--dim);font-size:11px;margin-top:2px">${med.dose!=null&&med.dose!==""?`${medNum(med.dose)} ${med.unit||"mg"} · `:""}${med.days.slice().sort((a,b)=>(a+6)%7-(b+6)%7).map(d=>DAY_LBL[d]).join(", ")}${medWeekTxt(med)}</div>
       </div>
       <button onclick="startEditMed(${med.id})" style="background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:6px 8px" aria-label="Muokkaa">${ico("edit",17)}</button>
       <button onclick="deleteMed(${med.id})" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:0 4px">×</button>
