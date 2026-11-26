@@ -2313,6 +2313,14 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
         </div>
       </div>
       <!-- Treeni- ja kausiasetukset toggle -->
+      <!-- v2.18.205: Lääkkeet omana osionaan (ennen Treenit-osion sisällä, sieltä ei löytänyt) -->
+      <div id="stgl-meds" style="margin-bottom:8px"></div>
+      <div id="stgl-content-meds" style="display:none;margin-bottom:4px">
+        <div class="card">
+          <div id="meds-management"></div>
+        </div>
+      </div>
+
       <div id="stgl-training" style="margin-bottom:8px"></div>
       <div id="stgl-content-training" style="display:none;margin-bottom:4px">
         <div class="card"><div id="gym-settings"></div></div>
@@ -2331,9 +2339,6 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
         <div class="card">
           <div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Kaudet</div>
           <div id="seasons-section"></div>
-        </div>
-        <div class="card">
-          <div id="meds-management"></div>
         </div>
       </div>
 
@@ -2370,7 +2375,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.204</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.205</span>
       </div>
     </div>
   </div>
@@ -2435,6 +2440,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.205", d:"marraskuu 2026", items:[
+    "Lääkkeet omana osionaan Asetuksissa (ennen Treenit, cardio ja kaudet -osion sisällä). Osio näkyy, kun lääkkeitä seurataan tai niitä on lisätty, ja otsikossa lukee lääkkeiden määrä.",
+    "Kirjaa-näkymässä \"Lisää lääke\" -rivi, kun lääkeseuranta on päällä mutta yhtään lääkettä ei ole lisätty. Avaa suoraan uuden lääkkeen lomakkeen."
+  ]},
   {v:"2.18.204", d:"marraskuu 2026", items:[
     "Lääkkeelle valinnainen muistiinpano (esim. \"40 yks. ruiskussa\"), näkyy Asetusten kortissa ja Kirjaa-näkymän lääkerivillä. Järkäle ei laske ruiskun yksiköitä milligrammoista (pitoisuus käyttäjän tiedossa, virhe olisi väärä annos).",
     "Korjattu: lääkelomakkeessa viikonpäivän napautus hukkasi jo kirjoitetun nimen ja annoksen. Annoksen desimaalipilkku hyväksytään."
@@ -7319,7 +7328,7 @@ function renderTheme(){
 
 
 let CTYPE_FORM={show:false,editing:null,value:""};
-let SETTINGS_TOGGLES={training:false,technical:false,data:false,lisaseuranta:false,goals:false,tracking:false,changelog:false,appearance:false,profile:false};
+let SETTINGS_TOGGLES={meds:false,training:false,technical:false,data:false,lisaseuranta:false,goals:false,tracking:false,changelog:false,appearance:false,profile:false};
 
 function renderSettingsToggle(key, lbl, icon){
   const open = SETTINGS_TOGGLES[key];
@@ -7353,6 +7362,10 @@ function renderSettingsToggles(){
   const palName=(PALETTES.find(p=>p.id===curPalette())||{}).l;
   renderSettingsToggle("appearance","Ulkoasu"+(palName?" · "+palName:""),"palette");
   renderSettingsToggle("goals","Tavoitteet","target");
+  // v2.18.205: näkyy, kun lääkkeitä seurataan tai niitä on lisätty (lisätyt eivät katoa näkyvistä, vaikka seuranta olisi pois)
+  { const nm=(S.settings.medications||[]).length, show=trk("medications")||nm>0, el=document.getElementById("stgl-meds");
+    if(show){ if(el) el.style.display=""; renderSettingsToggle("meds","Lääkkeet"+(nm?` · ${nm} ${nm===1?"lääke":"lääkettä"}`:" · ei lisätty"),"pill"); }
+    else { if(el){ el.style.display="none"; el.innerHTML=""; } const c=document.getElementById("stgl-content-meds"); if(c) c.style.display="none"; } }
   renderSettingsToggle("training","Treenit, cardio ja kaudet","dumbbell");
   renderSettingsToggle("profile","Profiili","user");
   renderSettingsToggle("technical","Muut asetukset","sliders");
@@ -7683,6 +7696,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.11.2026", items:[
+    "Lääkkeet löytyvät nyt Asetuksista omana kohtanaan.",
     "Lääkkeelle voi lisätä muistiinpanon, esimerkiksi \"ruoan kanssa\". Se näkyy lääkkeen kohdalla, kun kirjaat päivän.",
     "Asetusten lääkekortti näyttää kerta-annoksen lisäksi viikkoannoksen."
   ]},
@@ -7899,8 +7913,8 @@ function renderAsetukset(){
     renderCardioTypes();
     renderCardioZoneSettings();
     renderSeasons();
-    renderMedSettings();
   }
+  if(SETTINGS_TOGGLES.meds) renderMedSettings(); // v2.18.205: oma osio
   if(SETTINGS_TOGGLES.appearance) renderTheme();
   if(SETTINGS_TOGGLES.technical){ renderApiKeySection(); }
 }
@@ -9271,7 +9285,10 @@ function renderMedCards(ds, dow){
   const meds=(S.settings.medications||[]).filter(m=>m.days.includes(dow));
   const container=document.getElementById("med-cards");
   if(!container) return;
-  if(!meds.length){container.innerHTML="";return;}
+  if(!meds.length){
+    // v2.18.205: seuranta päällä mutta yhtään lääkettä ei ole lisätty → suora reitti lisäämiseen
+    container.innerHTML=(trk("medications")&&!(S.settings.medications||[]).length)?`<button onclick="openMedSettings(true)" class="ttl-ico" style="width:100%;min-height:44px;margin-bottom:8px;padding:0 14px;border-radius:12px;border:1px dashed var(--bord);background:transparent;color:var(--dim);font-size:13px;text-align:left;cursor:pointer">${ico("pill",16)} Lisää lääke, niin se näkyy tässä →</button>`:"";
+    return;}
   const medData=S.entries[ds]?.meds||{};
   const rows=meds.map((med,idx)=>{
     const mid=String(med.id);
@@ -9430,6 +9447,8 @@ function buildMedFormHTML(){
   </div>`;
 }
 
+function openMedSettings(form){ setTab("asetukset"); SETTINGS_TOGGLES.meds=true; renderAsetukset(); if(form) showMedForm();
+  const c=document.getElementById("stgl-content-meds"); if(c){ c.style.display=""; setTimeout(()=>{ c.scrollIntoView({behavior:"smooth",block:"start"}); if(form) document.getElementById("mf-name")?.focus(); },250); } }
 function showMedForm(){MED_FORM={show:true,editing:null,name:"",dose:"",unit:"mg",days:[]};renderMedSettings();}
 function startEditMed(id){
   const med=(S.settings.medications||[]).find(m=>m.id===id);

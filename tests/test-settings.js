@@ -21,7 +21,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.locator('.su-choice',{hasText:'Kirjata treenejä'}).click(); await p.waitForTimeout(300);
   await p.evaluate(()=>setTab('asetukset')); await p.waitForTimeout(200);
   const order=await toggleOrder();
-  ok(JSON.stringify(order)===JSON.stringify(['tracking','data','appearance','goals','training','profile','technical','changelog']),'järjestys: seuranta, Drive, ulkoasu, tavoitteet, treenit, profiili, muut, uutta ('+order.join(',')+')');
+  ok(JSON.stringify(order)===JSON.stringify(['tracking','data','appearance','goals','meds','training','profile','technical','changelog']),'järjestys: seuranta, Drive, ulkoasu, tavoitteet, lääkkeet, treenit, profiili, muut, uutta ('+order.join(',')+')');
   ok(!(await vis('#prof-section')),'profiililomake ei ole auki Asetusten alussa');
   const first=await p.evaluate(()=>{ const v=document.getElementById('view-asetukset'); const c=[...v.children].find(e=>getComputedStyle(e).display!=='none'&&e.offsetHeight>0); return c&&c.id; });
   ok(first==='stgl-tracking','ensimmäinen näkyvä on Mitä seuraat ('+first+')');
@@ -148,6 +148,22 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     saveMedForm(); const m=S.settings.medications[0]; renderMedSettings(); return {kept,m:JSON.stringify({n:m.name,d:m.dose,note:m.note,days:m.days}),card:document.getElementById('meds-management').innerText.replace(/\u00a0/g,' ')}; });
   ok(mn.kept==='T|100|40 yks. ruiskussa','päivän napautus ei hukkaa kirjoitettua nimeä, annosta eikä muistiinpanoa');
   ok(/"note":"40 yks. ruiskussa"/.test(mn.m)&&/40 yks. ruiskussa/.test(mn.card)&&/200 mg\/vko/.test(mn.card),'muistiinpano tallessa ja kortissa ('+mn.m+')');
+  // v2.18.205: Lääkkeet omana osionaan, Kirjaa-oikotie
+  const mg=await p.evaluate(async()=>{ const r={}; const st=()=>{ const el=document.getElementById('stgl-meds'); return el.style.display!=='none'&&el.innerText.trim()?el.innerText.trim():'piilossa'; };
+    const inTraining=!!document.getElementById('stgl-content-training').querySelector('#meds-management'); r.inTraining=inTraining;
+    S.settings.medications=[]; S.settings.tracking={...S.settings.tracking,medications:false}; setTab('asetukset'); renderAsetukset(); r.off=st();
+    S.settings.tracking.medications=true; renderAsetukset(); r.on0=st();
+    setTab('log'); renderAll(); r.cta=document.getElementById('med-cards').innerText;
+    document.querySelector('#med-cards button').click(); await new Promise(x=>setTimeout(x,350));
+    r.formOpen=!!document.getElementById('mf-name')&&document.getElementById('view-asetukset').classList.contains('active')&&document.getElementById('stgl-content-meds').style.display!=='none';
+    S.settings.medications=[{id:1,name:'A',dose:5,unit:'mg',days:[1]},{id:2,name:'B',dose:null,unit:'mg',days:[2]}]; MED_FORM.show=false; renderAsetukset(); r.on2=st();
+    r.card=document.getElementById('meds-management').innerText; S.settings.tracking.medications=false; renderAsetukset(); r.off2=st(); return r; });
+  ok(/Lääkkeet[\s\S]*\bA\b[\s\S]*\bB\b/.test(mg.card),'osio avattuna näyttää lääkelistan ilman lomaketta');
+  ok(!mg.inTraining,'lääkkeet eivät ole enää Treenit-osiossa');
+  ok(mg.off==='piilossa','osio piilossa, kun lääkkeitä ei seurata eikä ole lisätty ('+mg.off+')');
+  ok(/Lääkkeet · ei lisätty/.test(mg.on0),'seuranta päällä, ei lääkkeitä ('+mg.on0+')');
+  ok(/Lisää lääke/.test(mg.cta)&&mg.formOpen,'Kirjaa-oikotie avaa uuden lääkkeen lomakkeen');
+  ok(/Lääkkeet · 2 lääkettä/.test(mg.on2)&&/Lääkkeet · 2 lääkettä/.test(mg.off2),'otsikossa määrä, lisätyt näkyvät myös seurannan ollessa pois ('+mg.off2+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
