@@ -141,6 +141,13 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   const wk=await p.evaluate(()=>{ S.settings.medications=[{id:1,name:'T',dose:40,unit:'mg',days:[2,3,5,0]},{id:2,name:'D',dose:2.5,unit:'ml',days:[0,1,2,3,4,5,6]},{id:3,name:'Tarvittaessa',dose:400,unit:'mg',days:[]},{id:4,name:'Ilman annosta',dose:null,unit:'mg',days:[1]}]; renderMedSettings();
     return document.getElementById('meds-management').innerText.replace(/\u00a0/g,' '); });
   ok(/40 mg · Ti, Ke, Pe, Su · 160 mg\/vko/.test(wk)&&/2,5 ml · .* · 17,5 ml\/vko/.test(wk)&&(wk.match(/\/vko/g)||[]).length===2,'viikkoannos kerta-annoksesta × päivistä, ei ilman päiviä tai annosta');
+  // v2.18.204: muistiinpano ja lomakkeen arvot säilyvät päivän napautuksessa
+  const mn=await p.evaluate(()=>{ S.settings.medications=[]; setTab('asetukset'); showMedForm();
+    document.getElementById('mf-name').value='T'; document.getElementById('mf-dose').value='100'; document.getElementById('mf-note').value='40 yks. ruiskussa';
+    toggleMedFormDay(2); toggleMedFormDay(0); const kept=document.getElementById('mf-name').value+'|'+document.getElementById('mf-dose').value+'|'+document.getElementById('mf-note').value;
+    saveMedForm(); const m=S.settings.medications[0]; renderMedSettings(); return {kept,m:JSON.stringify({n:m.name,d:m.dose,note:m.note,days:m.days}),card:document.getElementById('meds-management').innerText.replace(/\u00a0/g,' ')}; });
+  ok(mn.kept==='T|100|40 yks. ruiskussa','päivän napautus ei hukkaa kirjoitettua nimeä, annosta eikä muistiinpanoa');
+  ok(/"note":"40 yks. ruiskussa"/.test(mn.m)&&/40 yks. ruiskussa/.test(mn.card)&&/200 mg\/vko/.test(mn.card),'muistiinpano tallessa ja kortissa ('+mn.m+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
