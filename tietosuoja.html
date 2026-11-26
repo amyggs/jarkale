@@ -21,7 +21,7 @@ a{color:inherit}
 <body>
 <main>
 <h1>Järkäle – tietosuoja</h1>
-<p class="meta">Päivitetty 17.11.2026</p>
+<p class="meta">Päivitetty 26.11.2026</p>
 
 <h2>Lyhyesti</h2>
 <p>Järkäle on henkilökohtainen treeni- ja hyvinvointiseuranta, joka toimii selaimessa. Sovelluksella ei ole omaa palvelinta eikä käyttäjätiliä. Kirjaamasi tiedot tallentuvat laitteellesi (puhelin, tabletti tai tietokone) ja, jos otat synkronoinnin käyttöön, omaan Google Driveesi. Sovelluksen tekijä ei näe tietojasi.</p>
@@ -33,6 +33,7 @@ a{color:inherit}
 <li>paino, uni, askeleet, palautumisen tunne ja vire</li>
 <li>treenit, saliohjelmat, sarjat ja kuormat</li>
 <li>kivut, kehon mitat ja muut valitsemasi seurannat</li>
+<li>kehityskuvat, jos otat ne käyttöön (valokuvat, jotka itse lisäät)</li>
 <li>sovelluksen asetukset ja tavoitteet</li>
 </ul>
 <p>Osa tiedoista voi olla terveyteen liittyviä. Ne pysyvät sinun hallinnassasi kuvatulla tavalla.</p>
@@ -41,6 +42,7 @@ a{color:inherit}
 <ul>
 <li><b>Laitteellasi.</b> Tiedot tallentuvat selaimen omaan muistiin tällä laitteella. Jokaisella laitteella on oma muistinsa, eivätkä tiedot siirry laitteelta toiselle ilman Drive-synkronointia tai varmuuskopiota.</li>
 <li><b>Omassa Google Drivessasi, jos otat synkronoinnin käyttöön.</b> Sovellus tallentaa tiedot Driveesi piilotettuun sovelluskansioon. Kansio näkyy vain tälle sovellukselle, eikä sovellus pääse Driven muihin tiedostoihin.</li>
+<li><b>Kehityskuvat ovat vain laitteellasi.</b> Kuvat pienennetään ja tallennetaan selaimen muistiin tällä laitteella. Ne eivät ole tavallisessa varmuuskopiossa eivätkä siirry Driveen synkronoinnin mukana. Kuvista tulee kopio vain, kun itse tallennat ne kuvatiedostoon tai jaat ne.</li>
 <li><b>Näkyvä kopio, jos kytket sen erikseen päälle.</b> Sovellus voi tallentaa Driveesi tavallisen tiedoston, jota voit käyttää esimerkiksi omassa tekoälyavustajassasi. Sovellus pääsee käsiksi vain itse luomiinsa tiedostoihin.</li>
 </ul>
 <p>Tiedot eivät kulje sovelluksen tekijän tai minkään muun kolmannen osapuolen palvelimen kautta. Google Driven tietojen käsittelyyn sovelletaan Googlen omia ehtoja.</p>
@@ -48,7 +50,7 @@ a{color:inherit}
 <h2>Tuonti, vienti ja jakaminen</h2>
 <ul>
 <li><b>Tuonti</b> (esimerkiksi treenihistoria Strongista tai varmuuskopion palautus) käsitellään kokonaan laitteellasi. Tiedostoa ei lähetetä minnekään.</li>
-<li><b>Vienti ja jakaminen</b> (varmuuskopio, CSV-tiedosto, treenin jako tekstinä tai kuvana) tapahtuu vain, kun itse valitset sen. Tiedosto menee sinne, minne sen itse lähetät.</li>
+<li><b>Vienti ja jakaminen</b> (varmuuskopio, CSV-tiedosto, treenin jako tekstinä tai kuvana, kehityskuvien tallennus tiedostoon ja viikon kuvien jako) tapahtuu vain, kun itse valitset sen. Tiedosto menee sinne, minne sen itse lähetät.</li>
 <li><b>Siirto uuteen osoitteeseen</b> (marraskuu 2026): kun painat vanhassa osoitteessa Siirrä tiedot, tietosi pakataan linkin #-osaan ja selaimesi avaa uuden osoitteen. #-osa ei lähde selaimesta palvelimelle, ja uusi osoite poistaa sen osoiteriviltä heti. API-avain ei siirry.</li>
 </ul>
 
@@ -65,7 +67,7 @@ a{color:inherit}
 <p>Sovellus ei lue, muuta tai poista muita Drive-tiedostojasi. Sovellus ei käytä Googlen tietoja mainontaan, eikä se myy tai luovuta niitä kenellekään. Google-tietojen käyttö noudattaa <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a> -käytäntöä, myös sen Limited Use -vaatimuksia.</p>
 
 <h2>Tekoälyanalyysi (valinnainen)</h2>
-<p>Jos lisäät asetuksiin oman Anthropic API -avaimesi ja käytät analyysitoimintoa, analyysiin valitut tiedot lähetetään suoraan laitteeltasi Anthropicin rajapintaan, ja niiden käsittelyyn sovelletaan Anthropicin ehtoja. Lähetys tapahtuu vain, kun painat analyysinappia. API-avain tallentuu vain laitteellesi, eikä se siirry varmuuskopioon tai Driveen. Ilman API-avainta mitään ei lähetetä.</p>
+<p>Jos lisäät asetuksiin oman Anthropic API -avaimesi ja käytät analyysitoimintoa, analyysiin valitut tiedot lähetetään suoraan laitteeltasi Anthropicin rajapintaan, ja niiden käsittelyyn sovelletaan Anthropicin ehtoja. Lähetys tapahtuu vain, kun painat analyysinappia. API-avain tallentuu vain laitteellesi, eikä se siirry varmuuskopioon tai Driveen. Ilman API-avainta mitään ei lähetetä. Kehityskuvia ei lähetetä analyysiin.</p>
 
 <h2>Palaute</h2>
 <p>Jos lähetät palautetta sovelluksesta, viesti lähtee omasta sähköpostistasi osoitteeseen tuki@jarkale.com. Osoite välittää viestin kehittäjän sähköpostiin ImprovMX-välityspalvelun kautta. Viestissä on se, mitä itse kirjoitat, sekä valmiiksi lisätty tekninen tieto (versio, laite, selain ja teema), jonka voit poistaa ennen lähettämistä. Kirjauksiasi ei liitetä viestiin.</p>
@@ -77,7 +79,8 @@ a{color:inherit}
 <li>Voit lopettaa synkronoinnin sovelluksen asetuksista.</li>
 <li>Voit poistaa sovelluksen pääsyn Google-tiliisi osoitteessa <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
 <li>Piilotetun sovelluskansion tiedot voi poistaa Google Drivessa: Asetukset → Sovellusten hallinta → valitse Järkäle listasta → Poista piilotetut sovellustiedot.</li>
-<li>Laitteelle tallennetut tiedot poistuvat, kun poistat sovelluksen ja sen sivustotiedot selaimesta.</li>
+<li>Yksittäisen kehityskuvan voi poistaa sovelluksessa kuvan näkymästä.</li>
+<li>Laitteelle tallennetut tiedot, myös kehityskuvat, poistuvat, kun poistat sovelluksen ja sen sivustotiedot selaimesta.</li>
 </ul>
 
 <h2>Yhteystiedot</h2>

@@ -2429,7 +2429,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.207</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.208</span>
       </div>
     </div>
   </div>
@@ -2494,6 +2494,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.208", d:"marraskuu 2026", items:[
+    "Tietosuojaseloste päivitetty (26.11.2026): kehityskuvat ovat vain laitteella, eivät ole varmuuskopiossa eivätkä Drivessa, kopio vain itse tallennettaessa tai jaettaessa, ei tekoälyanalyysiin, poistaminen."
+  ]},
   {v:"2.18.207", d:"marraskuu 2026", items:[
     "Kehityskuvat, vaihe 1 (vain oma versio, ei vielä pilotissa): Mitä seuraat → Kehityskuvat. Mitat-välilehdellä kuvat viikoittain uusin ensin, viikon aamupainojen keskiarvo, vertailu kahden viikon välillä kulmittain, koko näytön katselu, kulman ja päivän muutos, poisto. Kulmat Edestä / Sivulta / Takaa + omat nimet (muistetaan), 1–6 kuvaa kerralla, päivä kuvista tai valittavissa.",
     "Kuvat tallennetaan IndexedDB:hen pienennettyinä (1200 px, JPEG). Ne eivät ole varmuuskopiossa eivätkä Drivessa: Asetukset → Varmuuskopio ja Drive → Tallenna kuvat (zip) / Palauta kuvat. Viikon kuvat voi jakaa jakovalikolla (esim. valmentajan kansioon).",
