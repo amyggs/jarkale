@@ -104,10 +104,11 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   const camTxt=await p.evaluate(()=>({cam:PH.draft.items[0].cam,t:document.querySelector('.ph-draft .ph-sub').innerText}));
   await p.evaluate(()=>phSave()); await p.waitForTimeout(900); p.off('download',cl);
   ok(camTxt.cam&&/pienennetyn kopion/.test(camTxt.t)&&/latauksiin/.test(camTxt.t)&&camDl.length===1&&/^jarkale-\d{4}-\d{2}-\d{2}-edesta\.jpg$/.test(camDl[0]),'kameralla otettu: alkuperäinen latauksiin ja siitä kerrotaan ('+camDl.join(',')+')');
-  // 11) pilotissa ei vielä näy
-  const pl=await p.evaluate(()=>{ document.documentElement.classList.add('pilot'); S.settings.tracking={weight:true,photos:true}; const keys=getTrackingGroups().flatMap(g=>g.items.map(i=>i.key)); renderPhotos(); renderPhotoBackupRow();
-    const r={k:keys.includes('photos'),sec:document.getElementById('photos-sec').innerHTML,bk:document.getElementById('photo-backup-row').innerHTML}; document.documentElement.classList.remove('pilot'); return r; });
-  ok(!pl.k&&pl.sec===''&&pl.bk==='','pilotissa kehityskuvat eivät vielä näy');
+  // 11) v2.18.210: pilotissa näkyy, uutiskortti ottaa käyttöön ja avaa Mitat-sivun
+  const pl=await p.evaluate(async()=>{ document.documentElement.classList.add('pilot'); S.settings.tracking={weight:true}; const k=getTrackingGroups().flatMap(g=>g.items.map(i=>i.key)).includes('photos');
+    const n=PILOT_NEWS.find(x=>x.id==='2026-11-kuvat'); const sk=n.skip(); newsGo('photos'); await new Promise(r=>setTimeout(r,200));
+    const r={k,sk,on:S.settings.tracking.photos===true,tab:S.tab,sec:/Kehityskuvat/.test(document.getElementById('photos-sec').innerText),skip2:n.skip()}; document.documentElement.classList.remove('pilot'); return r; });
+  ok(pl.k&&!pl.sk&&pl.on&&pl.tab==='historia'&&pl.sec&&pl.skip2,'pilotissa: valinta, uutiskortti ottaa käyttöön ja avaa Mitat-sivun');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();

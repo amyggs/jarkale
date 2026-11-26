@@ -2432,7 +2432,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.209</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.210</span>
       </div>
     </div>
   </div>
@@ -2497,6 +2497,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.210", d:"marraskuu 2026", items:[
+    "Kehityskuvat myös pilotissa (Akun päätös 26.11.: alkuperäiset jäävät puhelimeen, joten Järkäleen tietojen katoaminen ei vie kuvia; Drive-tuki myöhemmin). Uutiskortti, josta otetaan käyttöön suoraan.",
+    "Ohje laitteen mukaan: kuvat puhelimen kameralla ja valinta galleriasta / Kuvista. iPhone/iPad selaimessa: varoitus Safarin tietojen poistosta. iPhonessa Järkäleen kautta otettu kuva: ei latausta, vaan ohje kuvata kameralla."
+  ]},
   {v:"2.18.209", d:"marraskuu 2026", items:[
     "Kehityskuvat: kameralla juuri otettu kuva tallennetaan alkuperäisenä myös puhelimen latauksiin (Android ei yleensä jätä sitä galleriaan). Galleriasta valittuja ei tallenneta uudelleen.",
     "Kuvat 1600 px (ennen 1200), koska jaettu kuva menee valmentajalle. Lisäysnäkymässä kerrotaan, että Järkäle tallentaa pienennetyn kopion.",
@@ -6971,7 +6975,7 @@ function renderMeasurements(){
 const PH_DB="jarkale-photos", PH_EXP="jarkale-photos-export", PH_INFO="jarkale-photos-info";
 const PH_ANG={front:"Edestä",side:"Sivulta",back:"Takaa"};
 const PH={list:[],loaded:false,urls:{},draft:null,cmp:null,view:null,all:false};
-function photosAvail(){ return !document.documentElement.classList.contains("pilot"); }
+function photosAvail(){ return true; } // v2.18.210: myös pilotissa (alkuperäiset jäävät puhelimeen, ks. phInfoHTML)
 function photosOn(){ return photosAvail()&&trk("photos"); }
 function phDB(){ return new Promise((res,rej)=>{ if(!window.indexedDB) return rej(new Error("idb")); const r=indexedDB.open(PH_DB,1);
   r.onupgradeneeded=()=>{ const db=r.result; if(!db.objectStoreNames.contains("photos")) db.createObjectStore("photos",{keyPath:"id"}); };
@@ -7022,7 +7026,7 @@ function phDraftHTML(){ const d=PH.draft, cn=phCustomNames();
   const opts=a=>[["front","Edestä"],["side","Sivulta"],["back","Takaa"],...cn.map(c=>[c,phAngLbl(c)]),["__new","Oma nimi…"]]
     .map(([v,l])=>`<option value="${esc(v)}"${v===a?" selected":""}>${esc(l)}</option>`).join("");
   return `<div class="ph-draft"><div class="ph-dh"><b>Uudet kuvat</b><label class="g-dch">${ico("calendar",14)}<span>${d.date===today()?"tänään":gDay(d.date)}</span><input type="date" value="${d.date}" max="${today()}" aria-label="Kuvien päivä" onchange="phDraftDate(this.value)"></label></div>
-    <div class="ph-sub">${d.busy?"Käsitellään kuvia…":`Järkäle tallentaa kuvista pienennetyn kopion. Alkuperäiset jäävät puhelimeesi.${d.items.some(it=>it.cam)?" Kameralla otettu kuva tallennetaan myös puhelimen latauksiin.":""}`}</div>
+    <div class="ph-sub">${d.busy?"Käsitellään kuvia…":`Järkäle tallentaa kuvista pienennetyn kopion. Alkuperäiset jäävät ${isIOS()?"Kuviin":"puhelimeesi"}.${d.items.some(it=>it.cam)?(isIOS()?" <b>Järkäleen kautta otettu kuva ei jää Kuviin.</b> Ota kuvat mieluummin kameralla ja valitse ne Kuvista.":" Kameralla otettu kuva tallennetaan myös puhelimen latauksiin."):""}`}</div>
     <div class="ph-grid">${d.items.map((it,i)=>`<div class="ph-di"><div class="ph-im"><img src="${it.url}" alt=""><button class="ph-dx" onclick="phDraftDrop(${i})" aria-label="Jätä tämä kuva pois">✕</button></div>
       <select aria-label="Kuvakulma" onchange="phDraftAngle(${i},this.value)">${opts(it.angle)}</select>${it.angle==="__new"?`<input type="text" maxlength="30" placeholder="esim. Hauis" value="${esc(it.name||"")}" oninput="PH.draft.items[${i}].name=this.value">`:""}</div>`).join("")}</div>
     ${d.failed?`<div class="ph-sub">${d.failed} ${d.failed===1?"kuvaa":"kuvaa"} ei voitu lukea.</div>`:""}${d.extra?`<div class="ph-sub">Kerralla enintään 6 kuvaa, mukana ensimmäiset 6.</div>`:""}
@@ -7039,7 +7043,7 @@ async function phSave(){
   try{ await phTx("readwrite",st=>{ recs.forEach(r=>st.put(r)); }); }
   catch(_){ jAlert("Kuvia ei voitu tallentaa.\nPuhelimen tallennustila voi olla täynnä."); return; }
   // v2.18.209: kameralla juuri otettu kuva ei Androidilla yleensä jää galleriaan → alkuperäinen puhelimen latauksiin
-  d.items.filter(it=>it.cam&&it.orig).forEach((it,i)=>{ const a=recs[d.items.indexOf(it)].angle; setTimeout(()=>phDownload(it.orig,`jarkale-${d.date}-${phSlug(phAngLbl(a))}.jpg`),i*300); });
+  if(!isIOS()) d.items.filter(it=>it.cam&&it.orig).forEach((it,i)=>{ const a=recs[d.items.indexOf(it)].angle; setTimeout(()=>phDownload(it.orig,`jarkale-${d.date}-${phSlug(phAngLbl(a))}.jpg`),i*300); });
   d.items.forEach(it=>URL.revokeObjectURL(it.url)); PH.draft=null;
   recs.forEach(r=>PH.list.push(phMeta(r))); PH.list.sort(phSort); haptic(10); renderPhotos();
 }
@@ -7067,8 +7071,15 @@ function renderPhotos(){
   if(PH.view) phViewRender();
 }
 function phInfoSeen(){ try{ return localStorage.getItem(PH_INFO)==="1"; }catch(_){ return false; } }
+// v2.18.210: ohje laitteen mukaan. Suositeltu tapa: kuvat puhelimen kameralla ja valinta galleriasta → alkuperäiset jäävät puhelimeen.
 function phInfoHTML(){ if(phInfoSeen()) return "";
-  return `<div class="ph-info"><b>Näin kuvat tallentuvat</b><ul><li>Kuvat ovat vain tässä puhelimessa, Järkäleen omassa muistissa. Ne eivät näy galleriassa.</li><li>Ne eivät ole tavallisessa varmuuskopiossa eivätkä Drivessa.</li><li>Tallenna ne talteen kohdasta Tallenna kuvat (yksi tiedosto). Samasta tiedostosta ne palautetaan.</li></ul><button class="ph-btn" onclick="try{localStorage.setItem(PH_INFO,'1')}catch(_){};renderPhotos()">Selvä</button></div>`; }
+  const ios=isIOS(), gal=ios?"Kuvista":"galleriasta", dev=ios&&/iPad/.test(navigator.userAgent||"")||ios&&!/iPhone|iPod/.test(navigator.userAgent||"")?"laitteessa":"puhelimessa";
+  return `<div class="ph-info"><b>Näin kuvat tallentuvat</b><ul>
+    <li>Ota kuvat ${dev==="laitteessa"?"laitteen":"puhelimen"} kameralla ja valitse ne ${gal}. Alkuperäiset jäävät sinne, ja Järkäle tallentaa niistä pienennetyn kopion.</li>
+    <li>Järkäleen kopiot ovat vain tässä ${dev}. Ne eivät ole tavallisessa varmuuskopiossa eivätkä Drivessa.</li>
+    <li>Tallenna kopiot talteen kohdasta Tallenna kuvat (yksi tiedosto). Samasta tiedostosta ne palautetaan päivineen ja kulmineen.</li>
+    ${iosNeedsInstall()?`<li><b>Safari voi poistaa Järkäleen tiedot, jos et avaa Järkälettä viikkoon.</b> Lisää Järkäle Koti-valikkoon ja tallenna kuvat tiedostoon.</li>`:""}</ul>
+    <button class="ph-btn" onclick="try{localStorage.setItem(PH_INFO,'1')}catch(_){};renderPhotos()">Selvä</button></div>`; }
 // v2.18.209: muistutus, jos uusia kuvia ei ole tallennettu tiedostoon 30 päivään (tai koskaan). Ei estä mitään.
 function phSaveState(){ let last=0; try{ last=parseInt(localStorage.getItem(PH_EXP)||"0")||0; }catch(_){}
   const unsaved=PH.list.filter(p=>(p.createdAt||0)>last), oldest=unsaved.length?Math.min(...unsaved.map(p=>p.createdAt||Date.now())):0;
@@ -8009,6 +8020,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.11.2026", items:[
+    "Kehityskuvat: lisää kuvat galleriasta esimerkiksi kerran viikossa (edestä, sivulta, takaa tai omalla nimellä). Kuvat näkyvät Mitat-sivulla viikoittain aamupainon keskiarvon kanssa, ja kahta viikkoa voi verrata rinnakkain. Otetaan käyttöön kohdasta Asetukset → Mitä seuraat. Kuvat ovat vain puhelimessasi, ja ne tallennetaan talteen kohdasta Tallenna kuvat.",
     "Lääkkeet löytyvät nyt Asetuksista omana kohtanaan. Lomake näyttää, paljonko kerta-annos tekee viikossa.",
     "Lääkkeelle voi lisätä muistiinpanon, esimerkiksi \"ruoan kanssa\". Se näkyy lääkkeen kohdalla, kun kirjaat päivän.",
     "Asetusten lääkekortti näyttää kerta-annoksen lisäksi viikkoannoksen."
@@ -12592,6 +12604,8 @@ function renderSyncUI(){
 // v2.18.14: pilotin uutiskortti. Vain isot, käyttäjän kielellä kirjoitetut uutiset (ei jokaista versiota).
 // Näytetään kerran Kirjaa-näkymässä; ohitetaan uutinen, jonka ominaisuus on jo käytössä.
 const PILOT_NEWS=[
+  {id:"2026-11-kuvat",title:"Kehityskuvat",text:"Ota kuvat puhelimen kameralla esimerkiksi kerran viikossa ja lisää ne Järkäleeseen. Kuvat näkyvät viikoittain aamupainon keskiarvon kanssa, ja kahta viikkoa voi verrata rinnakkain. Kuvat ovat vain puhelimessasi.",
+   act:"Ota käyttöön",go:"photos",skip:()=>trk("photos")},
   {id:"2026-11-teksti",title:"Isompi teksti",text:"Jos teksti on pientä, valitse tekstin koko: Normaali, Iso tai Järkäle. Vain teksti kasvaa, joten kaikki mahtuu edelleen ruudulle. Valinta koskee tätä laitetta.",
    act:"Valitse koko",go:"theme",skip:()=>typeof TS_K!=="undefined"&&TS_K!==1},
   {id:"2026-10-hist",title:"Tuo treenihistoriasi Strongista tai Hevystä",text:"Vanhat treenit tulevat liikkeiden historiaan ja ennätyksiin, joten vertailu jatkuu siitä, mihin jäit. Myös Strongin Jaa treeni -tekstin voi liittää uudeksi ohjelmaksi.",
@@ -12714,6 +12728,7 @@ function surveySend(){
 }
 function newsGo(key){
   newsDismiss();
+  if(key==="photos"){ if(!S.settings.tracking) S.settings.tracking={}; S.settings.tracking.photos=true; saveAll(); try{ applyNavVisibility(); }catch(_){} setTab("historia"); setTimeout(()=>{ try{ document.getElementById("photos-sec").scrollIntoView({behavior:"smooth",block:"start"}); }catch(_){} },250); return; }
   if(key==="histimport"){ openGymSettings(); setTimeout(()=>{ const e=document.querySelector(".hi-file"); if(e) e.scrollIntoView({behavior:"smooth",block:"center"}); },250); return; }
   setTab("asetukset");
   if(key==="theme") key="appearance"; // v2.18.98: teemat omassa Ulkoasu-osiossa
