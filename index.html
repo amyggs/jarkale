@@ -2375,7 +2375,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.205</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.206</span>
       </div>
     </div>
   </div>
@@ -2440,6 +2440,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.206", d:"marraskuu 2026", items:[
+    "Lääkelomakkeen annoskenttä on nyt \"Kerta-annos\", ja sen alla näkyy heti laskelma (esim. 100 mg × 4 päivää = 400 mg/vko). Viikkoannoksen kirjoittaminen kerta-annokseksi näkyy ennen tallennusta."
+  ]},
   {v:"2.18.205", d:"marraskuu 2026", items:[
     "Lääkkeet omana osionaan Asetuksissa (ennen Treenit, cardio ja kaudet -osion sisällä). Osio näkyy, kun lääkkeitä seurataan tai niitä on lisätty, ja otsikossa lukee lääkkeiden määrä.",
     "Kirjaa-näkymässä \"Lisää lääke\" -rivi, kun lääkeseuranta on päällä mutta yhtään lääkettä ei ole lisätty. Avaa suoraan uuden lääkkeen lomakkeen."
@@ -7696,7 +7699,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"26.11.2026", items:[
-    "Lääkkeet löytyvät nyt Asetuksista omana kohtanaan.",
+    "Lääkkeet löytyvät nyt Asetuksista omana kohtanaan. Lomake näyttää, paljonko kerta-annos tekee viikossa.",
     "Lääkkeelle voi lisätä muistiinpanon, esimerkiksi \"ruoan kanssa\". Se näkyy lääkkeen kohdalla, kun kirjaat päivän.",
     "Asetusten lääkekortti näyttää kerta-annoksen lisäksi viikkoannoksen."
   ]},
@@ -9420,16 +9423,17 @@ function buildMedFormHTML(){
     </div>
     <div style="display:flex;gap:10px;margin-bottom:10px">
       <div style="flex:1">
-        <div class="lbl-small">Annos (tyhjä = vain kyllä/ei)</div>
-        <input type="number" id="mf-dose" value="${f.dose}" inputmode="decimal" placeholder="—" style="width:100%;height:40px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
+        <div class="lbl-small">Kerta-annos</div>
+        <input type="number" id="mf-dose" oninput="medFormWeek()" value="${f.dose}" inputmode="decimal" placeholder="—" style="width:100%;height:40px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:13px;padding:0 12px;outline:none;box-sizing:border-box">
       </div>
       <div style="width:82px">
         <div class="lbl-small">Yksikkö</div>
-        <select id="mf-unit" style="width:100%;height:40px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;outline:none">
+        <select id="mf-unit" onchange="medFormWeek()" style="width:100%;height:40px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;outline:none">
           ${["mg","ml","kpl","µg","IU","g"].map(u=>`<option value="${u}"${f.unit===u?" selected":""}>${u}</option>`).join("")}
         </select>
       </div>
     </div>
+    <div id="mf-week" style="margin:-4px 0 10px;font-size:12px;color:var(--dim);min-height:16px">${medFormWeekTxt(f.dose,f.unit,f.days.length)}</div>
     <div style="margin-bottom:10px">
       <div class="lbl-small">Muistiinpano (valinnainen)</div>
       <input type="text" id="mf-note" value="${esc(f.note||"")}" maxlength="60" placeholder="esim. 40 yks. ruiskussa, ruoan kanssa" style="width:100%;height:40px;background:var(--surf);border:1.5px solid var(--bord);border-radius:8px;color:var(--text);font-size:13px;padding:0 12px;outline:none">
@@ -9457,6 +9461,11 @@ function startEditMed(id){
   renderMedSettings();
 }
 function cancelMedForm(){MED_FORM={show:false,editing:null,name:"",dose:"",unit:"mg",days:[]};renderMedSettings();}
+// v2.18.206: kerta-annos × päivät näkyy lomakkeessa heti (Aku kirjoitti viikkoannoksen annoskenttään)
+function medFormWeekTxt(dose,unit,nd){ const n=+String(dose??"").replace(",","."); const u=unit||"mg";
+  if(!(n>0)) return "Ilman annosta kirjataan vain, otitko lääkkeen."; if(!nd) return `Valitse päivät, niin näet viikon määrän.`;
+  return `${medNum(n)}\u00a0${u} × ${nd}\u00a0${nd===1?"päivä":"päivää"} = <b style="color:var(--text);font-weight:600">${medNum(n*nd)}\u00a0${u}/vko</b>`; }
+function medFormWeek(){ const el=document.getElementById("mf-week"); if(el) el.innerHTML=medFormWeekTxt(document.getElementById("mf-dose")?.value,document.getElementById("mf-unit")?.value,MED_FORM.days.length); }
 function medFormGrab(){ const v=id=>document.getElementById(id)?.value; if(v("mf-name")!=null){ MED_FORM.name=v("mf-name"); MED_FORM.dose=v("mf-dose"); MED_FORM.unit=v("mf-unit")||MED_FORM.unit; MED_FORM.note=v("mf-note")||""; } }
 function toggleMedFormDay(d){
   medFormGrab(); // v2.18.204: päivän napautus piirtää lomakkeen uudelleen – kirjoitettu nimi, annos ja muistiinpano säilyvät

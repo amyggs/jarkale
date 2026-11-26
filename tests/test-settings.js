@@ -164,6 +164,12 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(/Lääkkeet · ei lisätty/.test(mg.on0),'seuranta päällä, ei lääkkeitä ('+mg.on0+')');
   ok(/Lisää lääke/.test(mg.cta)&&mg.formOpen,'Kirjaa-oikotie avaa uuden lääkkeen lomakkeen');
   ok(/Lääkkeet · 2 lääkettä/.test(mg.on2)&&/Lääkkeet · 2 lääkettä/.test(mg.off2),'otsikossa määrä, lisätyt näkyvät myös seurannan ollessa pois ('+mg.off2+')');
+  // v2.18.206: kerta-annos × päivät lomakkeessa
+  const wkf=await p.evaluate(()=>{ setTab('asetukset'); showMedForm(); const w=()=>document.getElementById('mf-week').innerText.replace(/\u00a0/g,' ');
+    const d=document.getElementById('mf-dose'); d.value='100'; d.dispatchEvent(new Event('input')); const a=w();
+    toggleMedFormDay(2);toggleMedFormDay(3);toggleMedFormDay(5);toggleMedFormDay(0); const b=w();
+    const d2=document.getElementById('mf-dose'); d2.value='400'; d2.dispatchEvent(new Event('input')); const c=w(); const lbl=document.querySelector('#mf-dose').previousElementSibling.innerText; cancelMedForm(); return {a,b,c,lbl}; });
+  ok(/Kerta-annos/.test(wkf.lbl)&&/Valitse päivät/.test(wkf.a)&&wkf.b==='100 mg × 4 päivää = 400 mg/vko'&&/= 1600 mg\/vko/.test(wkf.c),'lomake näyttää kerta-annos × päivät ('+wkf.b+' | '+wkf.c+')');
   ok(errs.length===0,'ei sivuvirheitä '+(errs.join(' | ')||''));
   await b.close();
   console.log(`\n${pass}/${pass+fail} läpi`);
