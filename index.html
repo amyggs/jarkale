@@ -1961,21 +1961,31 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   /* luvun tasaus kuten painossa: vasemmalle kevyissä teemoissa, keskelle näyttöteemoissa */
   :is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.row3>#track-steps-wrap .stepper-row>input{text-align:center;}
 }
-/* v2.18.219: puhelimessa paino, uni ja askeleet samalle riville, kun pisimmätkin luvut mahtuvat (logFit). Muuten askeleet yhtenä tiiviinä rivinä: luku vasemmalla, − ja + yhdessä oikealla. */
-#view-log.r3p.active{grid-template-columns:repeat(6,minmax(0,1fr));}
-#view-log.r3p>:is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap){grid-column:span 2;}
-#view-log.r3p>:is(#track-recovery-wrap,#track-motivation-wrap){grid-column:span 3;}
-#view-log.r3p>#track-steps-wrap{display:flex;flex-direction:column;}
-#view-log.r3p>#track-steps-wrap>.stepper{flex:1 1 auto;display:flex!important;flex-direction:column;align-items:stretch!important;}
-#view-log.r3p>#track-steps-wrap .stepper-row{flex:none!important;width:100%;margin-top:auto!important;flex-wrap:wrap;gap:8px;}
-#view-log.r3p>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 100%!important;width:100%!important;min-width:0;text-align:left;font-size:28px!important;height:44px!important;}
-#view-log.r3p>#track-steps-wrap .stepper-row>.stepper-btn{flex:1 1 0!important;width:auto!important;}
-:is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.r3p>#track-steps-wrap .stepper-row>input{text-align:center;}
+/* v2.18.222: puhelimessa paino, uni ja askeleet riveinä: otsikko vasemmalla (yhteinen leveys --lw, logFit), luku samassa sarakkeessa, − ja + oikealla.
+   Kortti ei jää puolityhjäksi (Akun havainto Uni-kortista), ja asettelu on sama kaikilla leveyksillä ja tekstikoilla. Tabletti ennallaan (row3). */
 @media (max-width:699px){
-  #view-log:not(.r3p)>#track-steps-wrap .stepper{align-items:center;}
-  #view-log:not(.r3p)>#track-steps-wrap .stepper>.lbl-small{flex:none;white-space:nowrap;margin-right:10px;}
-  #view-log:not(.r3p)>#track-steps-wrap .stepper-row{flex:1 1 auto!important;gap:8px;min-width:0;}
-  #view-log:not(.r3p)>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 auto!important;width:auto!important;min-width:0;text-align:left!important;font-size:28px!important;padding-left:10px!important;}
+  #view-log>:is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap){grid-column:1 / -1!important;}
+  #view-log>:is(#track-weight-wrap,#track-sleep-wrap)>.stepper{flex-direction:row!important;align-items:center!important;gap:10px;}
+  #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper>div:first-child{flex:0 0 var(--lw,92px)!important;width:var(--lw,92px);min-width:0;min-height:0!important;justify-content:center;margin:0!important;}
+  #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper-row{display:flex!important;align-items:center;gap:8px;flex:1 1 auto!important;min-width:0;margin:0!important;}
+  #view-log :is(#track-weight-wrap,#track-sleep-wrap) .stepper-row>div{order:-1;flex:1 1 auto;min-width:0;}
+  #view-log :is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap) .stepper-row>.stepper-btn{flex:none!important;width:44px!important;}
+  #view-log>#track-steps-wrap .stepper{align-items:center;gap:10px;}
+  #view-log>#track-steps-wrap .stepper>.lbl-small{flex:0 0 var(--lw,92px);width:var(--lw,92px);white-space:nowrap;margin:0!important;}
+  #view-log>#track-steps-wrap .stepper-row{flex:1 1 auto!important;gap:8px;min-width:0;}
+  #view-log>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 auto!important;width:auto!important;min-width:0;text-align:left!important;font-size:28px!important;}
+  #view-log #track-weight-wrap .stepper input{text-align:left!important;}
+  #view-log #track-sleep-wrap .sleep-hm{top:50%!important;transform:translateY(-50%);height:auto!important;padding-top:0!important;left:4px!important;right:auto!important;justify-content:flex-start!important;}
+  #view-log #track-weight-wrap .stepper input{padding-left:4px!important;}
+  #view-log #track-sleep-wrap .stepper input{text-align:left!important;padding-left:4px!important;}
+  #view-log #track-sleep-wrap .stepper-row>div:not(.editing) input{color:transparent!important;text-shadow:none!important;}
+  #view-log>#track-steps-wrap .stepper-row>input{padding-left:4px!important;}
+  /* otsikko luvun yläpuolelle (.lstack), kun vierekkäin luku pienenisi liikaa (iso tekstikoko, kapea näyttö) ja aina Teksti-TV:ssä (otsikkopalkki) */
+  #view-log.lstack>:is(#track-weight-wrap,#track-sleep-wrap)>.stepper{flex-wrap:wrap!important;row-gap:4px;}
+  #view-log.lstack :is(#track-weight-wrap,#track-sleep-wrap) .stepper>div:first-child{min-height:0!important;flex:0 0 100%!important;width:100%!important;flex-direction:row!important;flex-wrap:wrap;justify-content:space-between!important;align-items:baseline!important;column-gap:8px;}
+  #view-log.lstack>#track-steps-wrap .stepper{display:flex!important;flex-wrap:wrap!important;row-gap:4px;}
+  #view-log.lstack>#track-steps-wrap .stepper>.lbl-small{flex:0 0 100%!important;width:100%!important;}
+  [data-palette="tekstitv"] #view-log.lstack :is(#track-weight-wrap,#track-sleep-wrap) .stepper>div:first-child,[data-palette="tekstitv"] #view-log.lstack>#track-steps-wrap .stepper>.lbl-small{flex-basis:calc(100% + 20px)!important;width:calc(100% + 20px)!important;}
 }
 @media (min-width:1100px){
   :root{--appw:760px;--railw:88px;}
@@ -2472,7 +2482,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.221</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.222</span>
       </div>
     </div>
   </div>
@@ -2524,7 +2534,7 @@ function tsInline(root){
   if(root.nodeType===1&&root.matches('[style*="font"]')) one(root);
   root.querySelectorAll('[style*="font"]').forEach(one);
 }
-function tsApply(){ tsSheets(); tsInline(document.body||document.documentElement); const de=document.documentElement; de.dataset.ts=TS_K; de.style.fontSize=TS_K===1?"":(100*TS_K)+"%"; /* periytyvä oletuskoko */ if(typeof fitText==="function") fitText(); }
+function tsApply(){ tsSheets(); tsInline(document.body||document.documentElement); const de=document.documentElement; de.dataset.ts=TS_K; de.style.fontSize=TS_K===1?"":(100*TS_K)+"%"; /* periytyvä oletuskoko */ try{ LOGFIT_K=""; }catch(_){} if(typeof fitText==="function") fitText(); }
 function tsSet(k){ TS_K=k; try{ localStorage.setItem(TS_KEY,String(k)); }catch(_){} tsApply(); tsRender(); if(typeof haptic==="function") haptic(10); }
 function tsRender(){ const el=document.getElementById("textsize-card"); if(!el) return;
   el.innerHTML=`<div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:14px">Tekstin koko</div>
@@ -2537,6 +2547,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.222", d:"marraskuu 2026", items:[
+    "Kirjaa-näkymä puhelimessa: paino, uni ja askeleet riveinä (Akun palaute: Uni-kortti puolityhjä; malli Google Healthista, mutta − ja + säilyvät). Otsikko vasemmalla yhteisellä leveydellä (--lw), luvut samassa sarakkeessa, napit oikealla. Isolla tekstillä tai kapealla näytöllä otsikko siirtyy luvun yläpuolelle (.lstack), ettei luku pienene; Teksti-TV:ssä aina (otsikkopalkki). Puhelimen kolmen kortin asettelu (v2.18.219, r3p) poistettu, tabletti ennallaan.",
+    "Uni Kirjaa-näkymässä aina minuuttien kanssa (\"7 h 00 min\"), ettei luvun leveys hypi napautettaessa. \"himmeä = eilen\" → \"eilen\" (selitys title-tekstissä). Painon päivämuutos desimaalipilkulla.",
+    "logFit: mittaa uudelleen fontin latauduttua ja tekstikoon vaihtuessa; itsekorjaus, jos luku ylittää alueensa (enintään 3 uusintaa samoilla asetuksilla). Soittimen unen piilokentän teksti ei enää näy luvun takana. test-logfit uusittu."
+  ]},
   {v:"2.18.221", d:"marraskuu 2026", items:[
     "Korjattu: lopetusnäkymän Heikommin / Normaalisti / Paremmin -napit eivät enää leikkaudu kapealla puhelimella ja suurella tekstikoolla (napit eivät veny sisältönsä mittaisiksi; teksti pienenee tarvittaessa samankokoisena kaikissa kolmessa). test-finish: kaikki teemat, 360 px / 130 % ja 412 px / 115 %."
   ]},
@@ -4665,8 +4680,9 @@ function fmtSleepText(h){
   const t=fmtSleepHM(h).split(":"); const hh=+t[0], mm=+t[1];
   return mm?`${hh} h ${mm} min`:`${hh} h`;
 }
-function sleepHMHtml(h){
+function sleepHMHtml(h,pad){
   const t=fmtSleepHM(h).split(":"); const hh=+t[0], mm=+t[1];
+  if(pad) return `<b>${hh}</b><small>h</small><b>${String(mm).padStart(2,"0")}</b><small>min</small>`; // v2.18.222 Kirjaa: minuutit aina, luvun leveys ei hypi
   return `<b>${hh}</b><small>h</small>${mm?`<b>${mm}</b><small>min</small>`:""}`;
 }
 function fmtSleepHM(h){
@@ -5478,10 +5494,10 @@ function renderSteppers() {
       el.placeholder=k?(field==="sleep"?fmtSleepHM(k.v):(+k.v).toFixed(1).replace(".",",")):"—";
       // harmaa arvo on vain säätimen lähtökohta: kerrotaan, mistä se tulee (ei tallennu ennen muutosta)
       const gh=document.getElementById(field==="sleep"?"sleep-ghost-hint":"weight-ghost-hint");
-      if(gh){ const show=val==null&&!!k; gh.style.display=show?"inline":"none"; gh.textContent=show?`himmeä = ${relDay(k.d)}`:""; }
+      if(gh){ const show=val==null&&!!k; gh.style.display=show?"inline":"none"; gh.textContent=show?relDay(k.d):""; gh.title=show?`Himmeä luku on viimeisin kirjaus (${relDay(k.d)}). Napauta − tai +, niin se tallentuu tälle päivälle.`:""; }
       if(field==="sleep"){
         const ov=document.getElementById("sleep-hm");
-        if(ov){ const v=val!=null?val:(k?k.v:null); ov.innerHTML=v!=null?sleepHMHtml(v):"<b>—</b>"; ov.classList.toggle("ghost",val==null); }
+        if(ov){ const v=val!=null?val:(k?k.v:null); ov.innerHTML=v!=null?sleepHMHtml(v,true):"<b>—</b>"; ov.classList.toggle("ghost",val==null); }
       }
     }
   });
@@ -5497,7 +5513,7 @@ function renderSteppers() {
       const dayCol=Math.abs(dayDiff)<0.3?"var(--dim)":"var(--text)"; // v2.18.150: ei arvottavaa väriä
       maEl.style.display="inline";
       const arrow=Math.abs(dayDiff)<0.1?"→":dayDiff>0?"↑ +":"↓ ";
-      maEl.innerHTML=arrow+`<span style="color:${dayCol};font-weight:600">${Math.abs(dayDiff)===0?"sama":Math.abs(dayDiff)+" kg eilisestä"}</span><span style="color:var(--dim)">${maStr}</span>`;
+      maEl.innerHTML=arrow+`<span style="color:${dayCol};font-weight:600">${Math.abs(dayDiff)===0?"sama":String(Math.abs(dayDiff)).replace(".",",")+" kg eilisestä"}</span><span style="color:var(--dim)">${maStr}</span>`;
     } else if(ma!==null&&S.weight!=null){ // pelkkä ka ilman päivän arvoa näkyy jo viikkokortissa
       const diff=S.weight!=null?+(S.weight-ma).toFixed(1):null;
       const arrow=diff===null?"":diff>0.3?" ↑":diff<-0.3?" ↓":" →";
@@ -8185,10 +8201,10 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Kirjaa-näkymässä paino, uni ja askeleet ovat nyt matalina riveinä: luvut samassa linjassa ja − ja + oikealla. Tyhjää tilaa jää vähemmän, ja uni näkyy aina minuutteineen (esim. 7 h 00 min).",
     "Treenin lopussa on nyt yksi selvä nappi: Lopeta ja tallenna. Yläreunan Lopeta-nappi piiloutuu, kun lopetusnäkymä on auki.",
     "Kun vaihdat liikkeen kesken treenin, lopussa näkyy, mitä ohjelmaan muuttuu (esim. Dippi → JM press), jos valitset päivityksen.",
     "Liikkeen tavoitetta voi muuttaa kesken treenin: napauta tavoiteriviä tai valitse ⋯ → Tavoite ja kirjoita esim. 3x8-10.",
-    "Kirjaa-näkymässä paino, uni ja askeleet mahtuvat nyt samalle riville, kun puhelimen leveys ja tekstikoko sen sallivat. Muuten askeleet näkyvät matalana rivinä, jossa luku on vasemmalla ja − ja + vierekkäin oikealla.",
     "Mitat-sivulla rasvaprosentin ja FFMI:n vieressä ei enää ole luokkaa (esim. Keskitaso). Arviot heittävät useita prosenttiyksiköitä, joten oleellisinta on oma suunta. Yleiset viiterajat löytyvät kohdasta Mistä luvut tulevat?",
     "Trendien salitreeneissä näkyvät jakson uudet ennätykset ja aiempi paras. Liikkeitä ei enää jaeta nousseisiin ja laskeneisiin, koska kunnon mukaan treenatessa vaihtelu on tavallista.",
     "Trendit on selkeämpi. Ylimpänä näkyy, mikä muuttui edelliseen jaksoon verrattuna, ja jokaisella seurattavalla asialla on oma korttinsa, jossa keskiarvo, käyrä ja kirjausmäärä ovat yhdessä. Samoja lukuja ei enää toisteta useassa kohdassa.",
@@ -13111,17 +13127,24 @@ function fitText(){ try{
   FIT_GROUPS.forEach(([sel,root])=>document.querySelectorAll(root).forEach(r=>{ const els=[...r.querySelectorAll(sel)].filter(e=>e.clientWidth); const fitted=els.filter(e=>e.dataset.fitPx); if(!fitted.length) return;
     const min=Math.min(...fitted.map(e=>parseFloat(e.style.fontSize))); els.forEach(e=>{ e.dataset.fitPx="1"; e.style.setProperty("font-size",min.toFixed(2)+"px","important"); }); }));
 }catch(_){} }
-// v2.18.219: Kirjaa-näkymän kolme korttia rinnakkain puhelimessa, jos pisimmät luvut (188,8 kg, 10 h 55 min, 18 888) mahtuvat.
+// v2.18.222: Kirjaa-näkymän paino, uni ja askeleet riveinä puhelimessa. Otsikkosarakkeen leveys (--lw) = pisin näkyvä otsikko, enintään 38 % rivistä,
+// jotta luvut alkavat samasta kohdasta. Pisimmät luvut (188,8 kg, 10 h 55 min, 18 888) mahtuvat: tarvittaessa kaikki kolme pienenevät samassa suhteessa.
 // Koot kirjoitetaan pt-yksikössä (1 px = 0,75 pt), koska tekstikoon skaalaus (tsSheets) kertoo kaikki px-koot: mitattu koko on jo lopullinen. Tunnisteet kahdesti, jotta sääntö voittaa teemojen !important-koot.
-// Tarvittaessa luvut pienenevät enintään 20 %; muuten kaksi korttia ja askeleet omana tiiviinä rivinään. Mitataan kerran per leveys, tekstikoko ja teema.
-let LOGFIT_K="";
+// Mitataan kerran per leveys, seurannat, tekstikoko ja teema.
+let LOGFIT_K="", LOGFIT_N=0;
+// itsekorjaus: jos näkyvä luku ylittää alueensa (esim. mitattiin ennen tekstikoon tai fontin latautumista), mitataan uudelleen
+function logOverflow(){ try{ if(innerWidth>=700) return false; const hm=document.getElementById("sleep-hm");
+  if(hm&&hm.offsetParent&&hm.textContent.length>2){ const rg=document.createRange(); rg.selectNodeContents(hm); if(rg.getBoundingClientRect().right>hm.parentNode.getBoundingClientRect().right+1) return true; }
+  for(const id of ["inp-weight","inp-steps"]){ const e=document.getElementById(id); if(e&&e.offsetParent&&e.value&&e.scrollWidth>e.clientWidth+1) return true; }
+  return false; }catch(_){ return false; } }
+try{ document.fonts&&document.fonts.addEventListener&&document.fonts.addEventListener("loadingdone",()=>{ LOGFIT_K=""; if(typeof fitSoon==="function") fitSoon(); }); }catch(_){} // fontti latautui mittauksen jälkeen → mitataan uudelleen
 function logFit(){ try{
   const vl=document.getElementById("view-log"); if(!vl||!vl.classList.contains("active")) return;
-  const de=document.documentElement, all=trk("weight")&&trk("sleep")&&trk("steps"), phone=innerWidth<700;
-  const k=[innerWidth,all,TS_K,de.dataset.palette,de.dataset.theme,document.fonts?document.fonts.status:""].join("|");
-  if(k===LOGFIT_K) return; LOGFIT_K=k;
+  const de=document.documentElement, phone=innerWidth<700;
+  const k=[innerWidth,trk("weight"),trk("sleep"),trk("steps"),TS_K,de.dataset.palette,de.dataset.theme,document.fonts?document.fonts.status:""].join("|");
+  if(k===LOGFIT_K){ if(LOGFIT_N>=3||!logOverflow()) return; LOGFIT_N++; } else LOGFIT_N=0; LOGFIT_K=k;
   let st=document.getElementById("r3fs"); if(!st){ st=document.createElement("style"); st.id="r3fs"; document.head.appendChild(st); } st.textContent="";
-  vl.classList.toggle("r3p",phone&&all);
+  vl.classList.remove("r3p","lstack"); vl.style.removeProperty("--lw");
   if(!phone) return;
   const iw=document.getElementById("inp-weight"), is=document.getElementById("inp-steps"), hm=document.getElementById("sleep-hm");
   // suhde: paljonko pisin luku saa tilaa / paljonko se vie (≥ 1 = mahtuu). Näkymättömät (ei seurannassa) = 1.
@@ -13129,10 +13152,10 @@ function logFit(){ try{
   const vis=el=>el&&el.offsetParent;
   const ratios=()=>{ const o={w:1,s:1,h:1};
     if(vis(iw)){ const t=tw(iw,"188,8"), kg=iw.parentNode.querySelector("span"), kw=kg?kg.getBoundingClientRect().width:0, W=iw.clientWidth, pl=parseFloat(t.cs.paddingLeft)||0;
-      const avail=t.cs.textAlign==="center"?W-20-2*kw-4:W-pl-10-kw-4; o.w=avail/t.w; }
+      const pr=parseFloat(t.cs.paddingRight)||0, avail=t.cs.textAlign==="center"?W-20-2*kw-4:Math.min(W-pl-10-kw-4,W-pl-pr-2); o.w=avail/t.w; }
     if(vis(is)){ const t=tw(is,"18 888"); o.s=(is.clientWidth-(parseFloat(t.cs.paddingLeft)||0)-(parseFloat(t.cs.paddingRight)||0)-2)/t.w; }
-    if(vis(hm)){ const c=hm.cloneNode(false); c.removeAttribute("id"); c.classList.remove("ghost"); c.innerHTML=sleepHMHtml(10+55/60); c.style.visibility="hidden"; hm.parentNode.appendChild(c);
-      const rg=document.createRange(); rg.selectNodeContents(c); o.h=(hm.parentNode.clientWidth-2)/rg.getBoundingClientRect().width; c.remove(); }
+    if(vis(hm)){ const c=hm.cloneNode(false); c.removeAttribute("id"); c.classList.remove("ghost"); c.innerHTML=sleepHMHtml(10+55/60,true); c.style.visibility="hidden"; hm.parentNode.appendChild(c);
+      const rg=document.createRange(); rg.selectNodeContents(c); const cr=rg.getBoundingClientRect(), bh=c.querySelector("b").getBoundingClientRect().height; o.h=Math.min((hm.parentNode.clientWidth-(parseFloat(getComputedStyle(hm).left)||0)-3)/cr.width,(hm.parentNode.clientHeight+2)/bh); c.remove(); }
     return o; };
   const base={w:vis(iw)?parseFloat(getComputedStyle(iw).fontSize):0,s:vis(is)?parseFloat(getComputedStyle(is).fontSize):0};
   { const b=hm&&hm.querySelector("b"), sm=hm&&hm.querySelector("small"); base.hb=b?parseFloat(getComputedStyle(b).fontSize):0;
@@ -13144,15 +13167,20 @@ function logFit(){ try{
     if(f.s<1) r.push(`${pre} #inp-steps#inp-steps{font-size:${px(base.s*f.s)}}`);
     if(f.h<1) r.push(`${pre} #track-sleep-wrap#track-sleep-wrap .sleep-hm b{font-size:${px(base.hb*f.h)}}${pre} #track-sleep-wrap#track-sleep-wrap .sleep-hm small{font-size:${px(base.hs*f.h)}}`);
     return r.join(""); };
-  const settle=(f,pre,uniform)=>{ for(let i=0;i<8;i++){ st.textContent=css(f,pre); void vl.offsetWidth; const r=ratios(); const keys=Object.keys(r).filter(x=>r[x]<1);
+  const settle=(f,pre,uniform)=>{ for(let i=0;i<8;i++){ st.textContent=lcss+css(f,pre); void vl.offsetWidth; const r=ratios(); const keys=Object.keys(r).filter(x=>r[x]<1);
       if(!keys.length) return true; if(uniform){ const m=Math.min(...keys.map(x=>r[x])); f.w=f.s=f.h=Math.floor(Math.min(f.w,f.s,f.h)*m*0.99*100)/100; } else keys.forEach(x=>{ f[x]=Math.floor(f[x]*r[x]*0.99*100)/100; }); } return false; };
-  if(vl.classList.contains("r3p")){ void vl.offsetWidth; const r=ratios(), m=Math.min(r.w,r.s,r.h);
-    if(m>=1) return;
-    if(m>=0.8&&settle({w:Math.min(1,m),s:Math.min(1,m),h:Math.min(1,m)},"#view-log#view-log.r3p",true)&&Math.min(...Object.values(ratios()))>=1) return;
-    st.textContent=""; vl.classList.remove("r3p"); }
-  // kaksi korttia ja tiivis askelrivi: kukin luku pienenee vain tarvittaessa
-  void vl.offsetWidth; const r=ratios();
-  if(r.w<1||r.s<1||r.h<1) settle({w:Math.min(1,r.w),s:Math.min(1,r.s),h:Math.min(1,r.h)},"#view-log#view-log:not(.r3p)",false);
+  let lcss="";
+  // otsikkosarake: pisin näkyvä otsikko
+  const labs=["track-weight-wrap","track-sleep-wrap","track-steps-wrap"].map(id=>document.getElementById(id)).filter(vis).map(w=>w.querySelector(".lbl-small")).filter(Boolean);
+  // Otsikko saa viedä enintään 30 % rivistä; pidempi otsikko pienenee (luvut ovat tärkeämpiä kuin otsikot). Teksti-TV: otsikko palkkina rivin yläpuolella.
+  const ttv=de.dataset.palette==="tekstitv"; vl.classList.toggle("lstack",ttv);
+  if(labs.length&&!ttv){ const cap=Math.round(vl.clientWidth*0.30), nat=Math.max(...labs.map(l=>tw(l,l.textContent).w));
+    if(nat>cap){ const f=cap/nat; lcss=labs.map(l=>`#view-log#view-log #${l.closest("[id^=track-]").id} .lbl-small{font-size:${(0.75*parseFloat(getComputedStyle(l).fontSize)*f*0.98).toFixed(2)}pt!important;}`).join(""); }
+    vl.style.setProperty("--lw",(Math.ceil(Math.min(nat,cap))+2)+"px"); }
+  st.textContent=lcss; void vl.offsetWidth;
+  let r=ratios(), m=Math.min(r.w,r.s,r.h);
+  if(m<0.85&&!ttv){ lcss=""; vl.classList.add("lstack"); st.textContent=""; void vl.offsetWidth; r=ratios(); m=Math.min(r.w,r.s,r.h); }
+  if(m<1) settle({w:m,s:m,h:m},"#view-log#view-log",true);
 }catch(_){ } }
 let FIT_RAF=0; function fitSoon(){ if(FIT_RAF) return; FIT_RAF=requestAnimationFrame(()=>{ FIT_RAF=0; fitText(); }); }
 let FIT_RO=null; function fitWatch(el){ try{ if(!FIT_RO) FIT_RO=new ResizeObserver(fitSoon); if(el&&!el._fitRO){ el._fitRO=1; FIT_RO.observe(el); } }catch(_){} }

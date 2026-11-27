@@ -604,7 +604,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     const u=await p.evaluate(()=>({ph:document.getElementById('inp-sleep').placeholder,gh:document.getElementById('sleep-ghost-hint').textContent,
       wgh:document.getElementById('weight-ghost-hint').textContent,
       a:parseSleep('6:12'),b:parseSleep('6,5'),c:parseSleep('6h 30min'),d:parseSleep('6:75'),e:fmtSleepHM(6.2),f:fmtSleepHM(7.999),g:fmtSleepHM(parseSleep('6.55')),h:fmtSleepHM(parseSleep('6,55')),i:fmtSleepHM(parseSleep('655')),j:fmtSleepHM(parseSleep('6.75')),k:fmtSleepHM(parseSleep('6:59')),l:parseSleep('7')}));
-    ok(u.ph==='7:00'&&/himmeä = eilen/.test(u.gh)&&/eilen/.test(u.wgh),'tyhjänä päivänä harmaana edellinen uni ja paino, lähde kerrotaan ('+u.ph+' / '+u.gh+')');
+    ok(u.ph==='7:00'&&u.gh==='eilen'&&u.wgh==='eilen','tyhjänä päivänä harmaana edellinen uni ja paino, lähde kerrotaan ('+u.ph+' / '+u.gh+')');
     { const f=await p.evaluate(()=>{const e=document.getElementById('inp-weight');e.focus();e.value='108,5';S.weight=null;renderSteppers();const r={v:e.value,c:getComputedStyle(e,'::placeholder').color};e.blur();return r;});
       ok(f.v===''&&/0\.28\)$|28%/.test(f.c),'tyhjä paino tyhjentää kentän myös aktiivisena, eilinen arvo haalea ('+f.c+')'); }
     ok(u.a===6.2&&u.b===6.5&&u.c===6.5&&u.d===null&&u.e==='6:12'&&u.f==='8:00','unen syöte ja esitys h:mm');
@@ -616,7 +616,7 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     await p.evaluate(()=>{setStars('recovery',2);setStars('motivation',3);});
     ok((await p.locator('#scale-lbl-recovery').innerText()).trim()==='melko kuormittunut','valitun asteikkoarvon merkitys näkyy');
     ok(await p.evaluate(()=>document.getElementById('inp-sleep').value)==='7:05','uni näytetään h:mm');
-    ok((await p.locator('#sleep-hm').innerText()).replace(/\s+/g,' ').trim()==='7 h 5 min','uni näkyy muodossa 7 h 5 min');
+    ok((await p.locator('#sleep-hm').innerText()).replace(/\s+/g,' ').trim()==='7 h 05 min','uni näkyy Kirjaa-näkymässä minuutteineen: 7 h 05 min (v2.18.222)');
     { const c=await p.evaluate(()=>{DS_OPEN=false;renderReadiness();const el=document.getElementById('readiness-card');const r={txt:el.innerText.replace(/\s+/g,' ').trim(),tbl:!!el.querySelector('.ds-tbl')};
         el.querySelector('.ds-row').click();r.open=!!el.querySelector('.ds-tbl')&&localStorage.getItem('jarkale-ds-open')==='1';return r;});
       ok(!c.tbl&&/^Päivän tila/i.test(c.txt)&&c.txt.length<80,'Päivän tila kiinni: yksi rivi ('+c.txt+')');
@@ -626,8 +626,8 @@ const stored=(p,ds)=>p.evaluate(ds=>(JSON.parse(localStorage.getItem('seuranta-e
     ok(/oma taso/.test(ds)&&/Palautuminen\s*2\s*3,0/.test(ds)&&/Uni\s*7 h 5 min\s*7 h/.test(ds)&&!/Yleinen vire/.test(ds),'Päivän tila: tänään ja oma taso rinnakkain ('+ds.replace(/\s+/g,' ').slice(0,120)+')');
     ok(await p.evaluate(()=>!document.querySelector('#training-section')?.innerText.includes('oma ka')),'kuormitusvertailu ei näy Kirjaa-näkymän treeniosiossa');
     // v2.14.0: ruudukko vain Kirjaa-näkymässä; muut näkymät eivät vuoda
-    const g=await p.evaluate(()=>{const w=document.getElementById('track-weight-wrap').getBoundingClientRect(),s=document.getElementById('track-sleep-wrap').getBoundingClientRect();return {same:Math.abs(w.top-s.top)<2&&s.left>w.right};});
-    ok(g.same,'paino ja uni vierekkäin');
+    const g=await p.evaluate(()=>{const w=document.getElementById('track-weight-wrap').getBoundingClientRect(),s=document.getElementById('track-sleep-wrap').getBoundingClientRect();return {same:s.top>=w.bottom-1&&Math.abs(s.left-w.left)<1&&Math.abs(s.width-w.width)<1};});
+    ok(g.same,'paino ja uni riveinä allekkain (puhelin, v2.18.222)');
     await p.evaluate(()=>setTab('asetukset')); await p.waitForTimeout(300);
     ok(await p.evaluate(()=>getComputedStyle(document.getElementById('view-log')).display)==='none','Kirjaa-näkymä piilossa muilla välilehdillä');
     await p.evaluate(()=>setTab('log')); await p.waitForTimeout(300);
