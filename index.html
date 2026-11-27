@@ -1958,6 +1958,22 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   /* luvun tasaus kuten painossa: vasemmalle kevyissä teemoissa, keskelle näyttöteemoissa */
   :is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.row3>#track-steps-wrap .stepper-row>input{text-align:center;}
 }
+/* v2.18.219: puhelimessa paino, uni ja askeleet samalle riville, kun pisimmätkin luvut mahtuvat (logFit). Muuten askeleet yhtenä tiiviinä rivinä: luku vasemmalla, − ja + yhdessä oikealla. */
+#view-log.r3p.active{grid-template-columns:repeat(6,minmax(0,1fr));}
+#view-log.r3p>:is(#track-weight-wrap,#track-sleep-wrap,#track-steps-wrap){grid-column:span 2;}
+#view-log.r3p>:is(#track-recovery-wrap,#track-motivation-wrap){grid-column:span 3;}
+#view-log.r3p>#track-steps-wrap{display:flex;flex-direction:column;}
+#view-log.r3p>#track-steps-wrap>.stepper{flex:1 1 auto;display:flex!important;flex-direction:column;align-items:stretch!important;}
+#view-log.r3p>#track-steps-wrap .stepper-row{flex:none!important;width:100%;margin-top:auto!important;flex-wrap:wrap;gap:8px;}
+#view-log.r3p>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 100%!important;width:100%!important;min-width:0;text-align:left;font-size:28px!important;height:44px!important;}
+#view-log.r3p>#track-steps-wrap .stepper-row>.stepper-btn{flex:1 1 0!important;width:auto!important;}
+:is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.r3p>#track-steps-wrap .stepper-row>input{text-align:center;}
+@media (max-width:699px){
+  #view-log:not(.r3p)>#track-steps-wrap .stepper{align-items:center;}
+  #view-log:not(.r3p)>#track-steps-wrap .stepper>.lbl-small{flex:none;white-space:nowrap;margin-right:10px;}
+  #view-log:not(.r3p)>#track-steps-wrap .stepper-row{flex:1 1 auto!important;gap:8px;min-width:0;}
+  #view-log:not(.r3p)>#track-steps-wrap .stepper-row>input{order:-1;flex:1 1 auto!important;width:auto!important;min-width:0;text-align:left!important;font-size:28px!important;padding-left:10px!important;}
+}
 @media (min-width:1100px){
   :root{--appw:760px;--railw:88px;}
   #header{border-left:none;}
@@ -2453,7 +2469,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.218</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.219</span>
       </div>
     </div>
   </div>
@@ -2518,6 +2534,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.219", d:"marraskuu 2026", items:[
+    "Kirjaa-näkymä puhelimessa: paino, uni ja askeleet samalla rivillä, kun pisimmätkin luvut (188,8 kg, 10 h 55 min, 18 888) mahtuvat kortteihin (logFit mittaa teeman, tekstikoon ja leveyden mukaan; luvut voivat pienentyä enintään 20 %). Muuten paino ja uni rinnakkain ja askeleet tiiviinä rivinä: luku vasemmalla, − ja + yhdessä oikealla (ennen − ja + leveän rivin eri reunoissa ja keskellä tyhjää).",
+    "Korjattu: isolla tekstikoolla ja kapealla näytöllä paino tai uni saattoi mennä yksikön päälle tai leikkautua (Soitin, Teksti-TV, Manageri). Luku pienenee nyt juuri sen verran, että mahtuu. test-logfit (18 teemaa × 3 tekstikokoa × 360/412 px)."
+  ]},
   {v:"2.18.218", d:"marraskuu 2026", items:[
     "Mitat: rasvaprosentin ja FFMI:n vierestä poistettu luokkamerkki (Keskitaso, Korkea…). Arvio voi heittää 3–4 prosenttiyksikköä, ja luokka luvun vieressä näytti varmalta tiedolta; FFMI:lle ei ole tutkimukseen perustuvia luokkia. Rasvaprosentin yleiset viiterajat \"Mistä luvut tulevat?\" -selityksessä. Verenpaineen viitearvot (120/80) jäävät käyrään: vakiintunut lääketieteellinen viite, ei käyttäjän luokittelu."
   ]},
@@ -8154,6 +8174,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Kirjaa-näkymässä paino, uni ja askeleet mahtuvat nyt samalle riville, kun puhelimen leveys ja tekstikoko sen sallivat. Muuten askeleet näkyvät matalana rivinä, jossa luku on vasemmalla ja − ja + vierekkäin oikealla.",
     "Mitat-sivulla rasvaprosentin ja FFMI:n vieressä ei enää ole luokkaa (esim. Keskitaso). Arviot heittävät useita prosenttiyksiköitä, joten oleellisinta on oma suunta. Yleiset viiterajat löytyvät kohdasta Mistä luvut tulevat?",
     "Trendien salitreeneissä näkyvät jakson uudet ennätykset ja aiempi paras. Liikkeitä ei enää jaeta nousseisiin ja laskeneisiin, koska kunnon mukaan treenatessa vaihtelu on tavallista.",
     "Trendit on selkeämpi. Ylimpänä näkyy, mikä muuttui edelliseen jaksoon verrattuna, ja jokaisella seurattavalla asialla on oma korttinsa, jossa keskiarvo, käyrä ja kirjausmäärä ovat yhdessä. Samoja lukuja ei enää toisteta useassa kohdassa.",
@@ -13049,10 +13070,54 @@ function fitEl(el,word){
 // Saman rivin tekstit samaan kokoon (alapalkki, taukonapit, tunnuslukulaatikot): pienin sovitettu koko kaikille.
 const FIT_GROUPS=[["#nav button span.lbl","#nav"],[".gt .gt-q",".gt"],[".g-stats b",".g-stats"],[".g-stats span",".g-stats"],[".g-stats small",".g-stats"]];
 function fitText(){ try{
+  logFit();
   document.querySelectorAll(FIT_ONE).forEach(el=>fitEl(el,false)); document.querySelectorAll(FIT_WORD).forEach(el=>fitEl(el,true));
   FIT_GROUPS.forEach(([sel,root])=>document.querySelectorAll(root).forEach(r=>{ const els=[...r.querySelectorAll(sel)].filter(e=>e.clientWidth); const fitted=els.filter(e=>e.dataset.fitPx); if(!fitted.length) return;
     const min=Math.min(...fitted.map(e=>parseFloat(e.style.fontSize))); els.forEach(e=>{ e.dataset.fitPx="1"; e.style.setProperty("font-size",min.toFixed(2)+"px","important"); }); }));
 }catch(_){} }
+// v2.18.219: Kirjaa-näkymän kolme korttia rinnakkain puhelimessa, jos pisimmät luvut (188,8 kg, 10 h 55 min, 18 888) mahtuvat.
+// Koot kirjoitetaan pt-yksikössä (1 px = 0,75 pt), koska tekstikoon skaalaus (tsSheets) kertoo kaikki px-koot: mitattu koko on jo lopullinen. Tunnisteet kahdesti, jotta sääntö voittaa teemojen !important-koot.
+// Tarvittaessa luvut pienenevät enintään 20 %; muuten kaksi korttia ja askeleet omana tiiviinä rivinään. Mitataan kerran per leveys, tekstikoko ja teema.
+let LOGFIT_K="";
+function logFit(){ try{
+  const vl=document.getElementById("view-log"); if(!vl||!vl.classList.contains("active")) return;
+  const de=document.documentElement, all=trk("weight")&&trk("sleep")&&trk("steps"), phone=innerWidth<700;
+  const k=[innerWidth,all,TS_K,de.dataset.palette,de.dataset.theme,document.fonts?document.fonts.status:""].join("|");
+  if(k===LOGFIT_K) return; LOGFIT_K=k;
+  let st=document.getElementById("r3fs"); if(!st){ st=document.createElement("style"); st.id="r3fs"; document.head.appendChild(st); } st.textContent="";
+  vl.classList.toggle("r3p",phone&&all);
+  if(!phone) return;
+  const iw=document.getElementById("inp-weight"), is=document.getElementById("inp-steps"), hm=document.getElementById("sleep-hm");
+  // suhde: paljonko pisin luku saa tilaa / paljonko se vie (≥ 1 = mahtuu). Näkymättömät (ei seurannassa) = 1.
+  const tw=(el,txt)=>{ const cs=getComputedStyle(el), sp=document.createElement("span"); sp.textContent=txt; sp.style.cssText=`position:absolute;visibility:hidden;white-space:nowrap;font:${cs.font};letter-spacing:${cs.letterSpacing}`; document.body.appendChild(sp); const w=sp.getBoundingClientRect().width; sp.remove(); return {w,cs}; };
+  const vis=el=>el&&el.offsetParent;
+  const ratios=()=>{ const o={w:1,s:1,h:1};
+    if(vis(iw)){ const t=tw(iw,"188,8"), kg=iw.parentNode.querySelector("span"), kw=kg?kg.getBoundingClientRect().width:0, W=iw.clientWidth, pl=parseFloat(t.cs.paddingLeft)||0;
+      const avail=t.cs.textAlign==="center"?W-20-2*kw-4:W-pl-10-kw-4; o.w=avail/t.w; }
+    if(vis(is)){ const t=tw(is,"18 888"); o.s=(is.clientWidth-(parseFloat(t.cs.paddingLeft)||0)-(parseFloat(t.cs.paddingRight)||0)-2)/t.w; }
+    if(vis(hm)){ const c=hm.cloneNode(false); c.removeAttribute("id"); c.classList.remove("ghost"); c.innerHTML=sleepHMHtml(10+55/60); c.style.visibility="hidden"; hm.parentNode.appendChild(c);
+      const rg=document.createRange(); rg.selectNodeContents(c); o.h=(hm.parentNode.clientWidth-2)/rg.getBoundingClientRect().width; c.remove(); }
+    return o; };
+  const base={w:vis(iw)?parseFloat(getComputedStyle(iw).fontSize):0,s:vis(is)?parseFloat(getComputedStyle(is).fontSize):0};
+  { const b=hm&&hm.querySelector("b"), sm=hm&&hm.querySelector("small"); base.hb=b?parseFloat(getComputedStyle(b).fontSize):0;
+    if(!sm&&hm){ const c=hm.cloneNode(false); c.innerHTML=sleepHMHtml(7.5); c.removeAttribute("id"); c.style.visibility="hidden"; hm.parentNode.appendChild(c); const x=c.querySelector("small"); base.hs=x?parseFloat(getComputedStyle(x).fontSize):13; if(!base.hb){ const y=c.querySelector("b"); base.hb=y?parseFloat(getComputedStyle(y).fontSize):28; } c.remove(); }
+    else base.hs=sm?parseFloat(getComputedStyle(sm).fontSize):13; }
+  // pt-yksikkö: tekstikoon skaalaus (tsSheets) kertoo px-koot, mutta tämä koko on jo mitattu lopulliseksi. Tunnisteet kahdesti, jotta sääntö voittaa teemojen !important-koot.
+  const css=(f,pre)=>{ const r=[]; const px=v=>(0.75*v).toFixed(2)+"pt!important";
+    if(f.w<1) r.push(`${pre} #inp-weight#inp-weight{font-size:${px(base.w*f.w)}}`);
+    if(f.s<1) r.push(`${pre} #inp-steps#inp-steps{font-size:${px(base.s*f.s)}}`);
+    if(f.h<1) r.push(`${pre} #track-sleep-wrap#track-sleep-wrap .sleep-hm b{font-size:${px(base.hb*f.h)}}${pre} #track-sleep-wrap#track-sleep-wrap .sleep-hm small{font-size:${px(base.hs*f.h)}}`);
+    return r.join(""); };
+  const settle=(f,pre,uniform)=>{ for(let i=0;i<8;i++){ st.textContent=css(f,pre); void vl.offsetWidth; const r=ratios(); const keys=Object.keys(r).filter(x=>r[x]<1);
+      if(!keys.length) return true; if(uniform){ const m=Math.min(...keys.map(x=>r[x])); f.w=f.s=f.h=Math.floor(Math.min(f.w,f.s,f.h)*m*0.99*100)/100; } else keys.forEach(x=>{ f[x]=Math.floor(f[x]*r[x]*0.99*100)/100; }); } return false; };
+  if(vl.classList.contains("r3p")){ void vl.offsetWidth; const r=ratios(), m=Math.min(r.w,r.s,r.h);
+    if(m>=1) return;
+    if(m>=0.8&&settle({w:Math.min(1,m),s:Math.min(1,m),h:Math.min(1,m)},"#view-log#view-log.r3p",true)&&Math.min(...Object.values(ratios()))>=1) return;
+    st.textContent=""; vl.classList.remove("r3p"); }
+  // kaksi korttia ja tiivis askelrivi: kukin luku pienenee vain tarvittaessa
+  void vl.offsetWidth; const r=ratios();
+  if(r.w<1||r.s<1||r.h<1) settle({w:Math.min(1,r.w),s:Math.min(1,r.s),h:Math.min(1,r.h)},"#view-log#view-log:not(.r3p)",false);
+}catch(_){ } }
 let FIT_RAF=0; function fitSoon(){ if(FIT_RAF) return; FIT_RAF=requestAnimationFrame(()=>{ FIT_RAF=0; fitText(); }); }
 let FIT_RO=null; function fitWatch(el){ try{ if(!FIT_RO) FIT_RO=new ResizeObserver(fitSoon); if(el&&!el._fitRO){ el._fitRO=1; FIT_RO.observe(el); } }catch(_){} }
 try{ new MutationObserver(()=>{ fitWatch(document.getElementById("gym-timer")); fitSoon(); }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]}); fitWatch(document.getElementById("nav"));

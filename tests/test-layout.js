@@ -24,7 +24,7 @@ const r3=await tb.evaluate(()=>{ const t=id=>document.getElementById(id).getBoun
   return {row:Math.abs(w.top-sl.top)<2&&Math.abs(w.top-st.top)<2&&st.left>sl.left, pair:Math.abs(rc.top-m.top)<2&&rc.top>w.bottom}; });
 ok(r3.row&&r3.pair,'tabletti: paino, uni ja askeleet samalla rivillä, palautuminen ja vire alla rinnakkain');
 const r4=await ph.evaluate(()=>{ const s=JSON.parse(localStorage.getItem('seuranta-settings')); s.tracking.steps=true; localStorage.setItem('seuranta-settings',JSON.stringify(s)); return true; }); await ph.reload(); await ph.waitForTimeout(500);
-ok(await ph.evaluate(()=>{ const w=document.getElementById('track-weight-wrap').getBoundingClientRect(), st=document.getElementById('track-steps-wrap').getBoundingClientRect(); return st.top>w.bottom-2&&Math.abs(st.width-innerWidth+32)<20; }),'puhelin: askeleet ennallaan omalla rivillään');
+ok(await ph.evaluate(()=>{ const w=document.getElementById('track-weight-wrap').getBoundingClientRect(), st=document.getElementById('track-steps-wrap').getBoundingClientRect(); const vl=document.getElementById('view-log'); if(vl.classList.contains('r3p')) return Math.abs(st.top-w.top)<2&&st.left>w.right; return st.top>w.bottom-2&&Math.abs(st.width-innerWidth+32)<20; }),'puhelin: askeleet samalla rivillä, kun luvut mahtuvat (v2.18.219), muuten omalla rivillään');
 ok(r2.cw>500,'tabletti: kaavio sisältöalueen levyinen ('+r2.cw+')');
 // tietokone, kaikki teemat
 const dk=await (await b.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'})).newPage(); dk.on('pageerror',e=>errs.push(e.message));
