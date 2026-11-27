@@ -2432,7 +2432,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.211</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.212</span>
       </div>
     </div>
   </div>
@@ -2497,6 +2497,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.212", d:"marraskuu 2026", items:[
+    "Trendit, korjauksia: viikon unen keskiarvo oli pyöristetty 0,1 tuntiin, joten sama viikko näytti 7 h 36 min ja havainnoissa 7 h 34 min. Viikon päivälistassa uni muodossa \"6 h 56 min\" (ennen \"6,94 h\") ja \"Verenpaine\" (ennen \"RR\"). Verenpaineen käyrä aika-akselilla: väliin jäänyt mittausviikko näkyy välinä."
+  ]},
   {v:"2.18.211", d:"marraskuu 2026", items:[
     "Trendit: verenpaineen käyrä näyttää jakson mittaukset, mutta vähintään 8 viimeisintä enintään 90 päivän ajalta (otsikossa \"viimeiset N mittausta\"). Ennen kerran viikossa mittaavalle ei näkynyt käyrää 7 pv:n näkymässä lainkaan (Akun havainto).",
     "Trendit: verensokerille oma käyrä samalla periaatteella, migreenipäivät viikoittaisina pylväinä 8 viikon ajalta. Viikkonäkymässä (jossa ei ennen ollut käyriä) nämä avattavassa Graafit-osiossa."
@@ -5018,7 +5021,8 @@ function buildBPChart(data, h=150) {
   const allV=[...data.map(d=>d.sys),...data.map(d=>d.dia)].filter(v=>v!=null);
   let minV=Math.max(40,Math.floor(Math.min(...allV)-5)), maxV=Math.ceil(Math.max(...allV)+5);
   if(maxV<=minV){maxV=minV+5;minV=Math.max(40,minV-5);}
-  const xs=i=>(i/(data.length-1))*cw, ys=v=>ch-((v-minV)/(maxV-minV))*ch;
+  const tsD=d=>new Date(d.date+"T00:00:00").getTime(), byT=data.every(d=>d.date), t0=byT?tsD(data[0]):0, tSpan=byT?Math.max(1,tsD(data[data.length-1])-t0):1;
+  const xs=i=>byT?((tsD(data[i])-t0)/tSpan)*cw:(i/(data.length-1))*cw, ys=v=>ch-((v-minV)/(maxV-minV))*ch; // v2.18.212: aika-akseli, väli näkyy
   const yTicks=[minV,Math.round((minV+maxV)/2),maxV];
   const pl=k=>data.map((d,i)=>`${xs(i).toFixed(1)},${ys(d[k]).toFixed(1)}`).join(" ");
   const ref=v=>ys(v)>=0&&ys(v)<=ch?`<line x1="0" y1="${ys(v).toFixed(1)}" x2="${cw}" y2="${ys(v).toFixed(1)}" stroke="var(--dim)" stroke-dasharray="4,4" opacity=".6"/>`:"";
@@ -5537,7 +5541,8 @@ function buildWeekRecap(weekStart){
   }
   if(trk("sleep")){
     const s=ents.map(e=>e.sleep).filter(v=>v!=null), goal=g.sleepHours||7;
-    R.sleep={avg:s.length>=3?r1(avg(s)):null, n:s.length, goal, below:s.filter(v=>v<goal).length};
+    R.sleep={avg:s.length>=3?avg(s):null, // v2.18.212: ei pyöristystä 0,1 h:iin (7 h 36 min vs. havaintojen 7 h 34 min samalle viikolle)
+      n:s.length, goal, below:s.filter(v=>v<goal).length};
   }
   if(trk("recovery")){
     const r=ents.map(e=>e.recovery).filter(v=>v!=null);
@@ -6906,11 +6911,11 @@ function buildWeekView(start, fullEnd) {
         </div>
         ${e?`<div style="display:flex;gap:12px;flex-wrap:wrap">
           ${e.weight!=null?`<span class="wv-it"><i>Paino</i> ${e.weight} kg</span>`:""}
-          ${e.sleep!=null?`<span class="wv-it"><i>Uni</i> ${e.sleep} h</span>`:""}
+          ${e.sleep!=null?`<span class="wv-it"><i>Uni</i> ${fmtSleepText(e.sleep)}</span>`:""}
           ${e.steps!=null?`<span class="wv-it"><i>Askeleet</i> ${e.steps.toLocaleString("fi")}</span>`:""}
           ${e.recovery!=null?`<span class="wv-it"><i>Palautuminen</i> ${e.recovery}/5</span>`:""}
           ${e.motivation!=null?`<span class="wv-it"><i>Vire</i> ${e.motivation}/5</span>`:""}
-          ${e.bp_sys!=null?`<span class="wv-it"><i>RR</i> ${e.bp_sys}/${e.bp_dia}</span>`:""}
+          ${e.bp_sys!=null?`<span class="wv-it"><i>Verenpaine</i> ${e.bp_sys}/${e.bp_dia}</span>`:""}
           ${e.notes?`<span style="color:var(--dim);font-size:13px;font-style:italic;width:100%">${esc(e.notes)}</span>`:""}
         </div>`:""}
       </div>`;
