@@ -2057,6 +2057,16 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 .ph-warn{color:var(--text);font-weight:600;}
 .ph-bk{margin-top:14px;padding-top:14px;border-top:1px solid var(--bord);}
 .ph-bt{font-size:12px;color:var(--dim);line-height:1.5;margin:4px 0 8px;}
+/* v2.18.214 Trendien aihekortit */
+.tcard{margin-bottom:12px;}
+.tc-h{display:flex;align-items:center;gap:8px;color:var(--text);font-size:15px;}
+.tc-h b{flex:1;font-weight:700;} .tc-h span{font-size:12px;color:var(--dim);}
+.tc-v{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:8px 0 6px;color:var(--text);}
+.tc-v>span{font-size:24px;font-weight:800;line-height:1.15;} .tc-v>span small{font-size:12px;font-weight:600;color:var(--dim);}
+.tc-v>small{font-size:13px;color:var(--dim);font-weight:600;}
+.tc-f{font-size:12px;color:var(--dim);line-height:1.5;margin-top:8px;}
+.tc-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bord);font-size:13px;color:var(--dim);} .tc-row:last-child{border-bottom:none;} .tc-row b{color:var(--text);}
+.tcard .ch-legend{margin-top:2px;}
 </style>
 </head>
 <body>
@@ -2432,7 +2442,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.213</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.214</span>
       </div>
     </div>
   </div>
@@ -2497,6 +2507,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.214", d:"marraskuu 2026", items:[
+    "Trendit uudelleen (Akun havainto: paljon dataa, mutta ei tartu mihinkään). Yksi kortti per seurattava asia: luku, muutos, käyrä ja kattavuus samassa kortissa. Järjestys kiinteä: Mikä muuttui, Salitreenit/Treeni, Paino, Uni, Palautuminen ja vire, Askeleet, Lääkkeet, Verenpaine, Verensokeri, Migreeni, Kivut.",
+    "Mikä muuttui -kortti ylimpänä: muutokset edelliseen jaksoon vain kohinarajan yli (uni 15 min, 1–5-asteikot 0,3, askeleet 10 %, liikkeiden parhaat sarjat) sekä aiemmat havainnot. Viikkonäkymässä sama kortti viikkoyhteenvedon alla.",
+    "Poistettu tuplat: Yhteenveto-osio (samat luvut kuin korteissa), erillinen Graafit-osio, Datan kattavuus -osio, viikkonäkymän Viikon seuranta ja erillinen Yhteenveto-avattava. BMI pois Trendeistä (näkyy Asetukset → Profiili). Analyysi ja koosteet -osio näkyy vain tekoälyavaimen kanssa (muuten se oli tyhjä). Painokäyrän asteikko tasavälein."
+  ]},
   {v:"2.18.213", d:"marraskuu 2026", items:[
     "Trendit, luotettavuus: muutos edelliseen jaksoon näytetään vain, jos se ylittää kohinarajan (1–5-asteikot 0,3, askeleet 10 %), muuten \"ennallaan\". Muutosnuolet eivät enää ole vihreitä tai punaisia (Järkäle ei arvota).",
     "Salitreenit Trendeissä: liikkeen kehitys = jakson paras sarja verrattuna edellisen yhtä pitkän jakson parhaaseen. Ennen verrattiin jakson ensimmäistä ja viimeistä kertaa, jolloin yksi huono päivä tai kevennysviikko käänsi suunnan.",
@@ -4957,7 +4972,7 @@ function buildWeightChart(maPts, rawPts, height=185, seasons=null) {
   const n=maPts.length;
   const xs=i=>(maPts[i]&&maPts[i].date&&span>0)?xForDate(maPts[i].date):(i/(Math.max(n-1,1)))*cw;
   const ys=v=>ch-((v-minV)/(maxV-minV))*ch;
-  const yTicks=[minV,Math.round((minV+maxV)/2),maxV];
+  const yTicks=[minV,(minV+maxV)/2,maxV];
   const gid="gw"+Math.random().toString(36).slice(2,6);
   const sortedSeasons=(seasons||[]).filter(s=>s.startDate).sort((a,b)=>a.startDate.localeCompare(b.startDate));
   const bandsSVG=sortedSeasons.map((s,i)=>{
@@ -6469,10 +6484,10 @@ function buildInjurySummaryHTML(start, effEnd){
   </div>`;
 }
 
-function buildInsightsHTML(start, effEnd, curr) {
+function buildInsightsHTML(start, effEnd, curr, opts={}) {
   const g=getActiveGoals(effEnd);
   const ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=effEnd);
-  if(ue.length<3) return "";
+  if(ue.length<3&&!(opts.extra||[]).length) return "";
   const insights=[];
 
   // 0. v2.18.110: oma taso – viimeiset 7 pv vs. edeltävät 28 pv, vain kun jakso päättyy tähän päivään
@@ -6490,6 +6505,7 @@ function buildInsightsHTML(start, effEnd, curr) {
     else if(curr.weightRate>0.05)  insights.push(`Paino on noussut keskimäärin ${abs} kg viikossa.`);
     else                           insights.push(`Paino on pysynyt vakaana (${curr.weightRate>=0?"+":"−"}${Math.abs(curr.weightRate).toFixed(2)} kg viikossa).`);
   }
+  const afterW=insights.length; // v2.18.214: muutokset edelliseen jaksoon (opts.extra) painon jälkeen
 
   // 2. Uni vs tavoite
   if(curr.avgSleep!=null){
@@ -6543,21 +6559,101 @@ function buildInsightsHTML(start, effEnd, curr) {
   const expDays=lastExp?Math.floor((Date.now()-lastExp)/864e5):null;
   const backupInsight=expDays===null?"Varmuuskopiota ei ole tehty.":(expDays>=14?`Varmuuskopiosta on ${expDays} päivää.`:null);
 
-  if(!insights.length&&!backupInsight) return "";
+  const extra=opts.extra||[]; insights.splice(afterW,0,...extra);
+  if(!insights.length&&!backupInsight){ return opts.empty?`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div class="section-head" style="margin:0">${opts.title||"Havainnot"}</div>${opts.sub?`<span style="color:var(--dim);font-size:12px">${opts.sub}</span>`:""}</div><div style="color:var(--dim);font-size:13px;margin-top:8px">${opts.empty}</div></div>`:""; }
 
-  // Datamäärään perustuva rajoitus
-  const maxInsights=ue.length<=4?1:ue.length<=6?2:3;
+  // Datamäärään perustuva rajoitus (muutokset edelliseen jaksoon lisäksi, enintään 5 riviä)
+  const maxInsights=Math.min(5,(ue.length<=4?1:ue.length<=6?2:3)+extra.length);
   const shown=insights.slice(0,maxInsights);
   // Varmuuskopio vain jos tilaa ja muita havaintoja on vähemmän kuin max
   if(shown.length<maxInsights&&backupInsight) shown.push(backupInsight);
-  return `<div class="card" style="margin-bottom:16px">
-    <div class="section-head">Havainnot</div>
+  return `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div class="section-head" style="margin:0 0 4px">${opts.title||"Havainnot"}</div>${opts.sub?`<span style="color:var(--dim);font-size:12px">${opts.sub}</span>`:""}</div>
     ${shown.map(txt=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bord)">
       <span style="color:var(--orange);font-size:13px;line-height:1.3;flex-shrink:0">›</span>
       <span style="color:var(--text);font-size:13px;line-height:1.5">${txt}</span>
     </div>`).join("")}
   </div>`;
 }
+
+// ═══ TRENDIT: AIHEKORTIT (v2.18.214) ═══
+// Yksi kortti per seurattava asia: luku, muutos, käyrä ja kattavuus samassa paikassa. Ennen samat luvut olivat
+// yhteenvedossa, havainnoissa, graafeissa ja kattavuusosiossa erikseen. Järjestys kiinteä (ei asetusta).
+const fiN=(v,d=1)=>(+v).toFixed(d).replace(".",",");
+function tcard(o){
+  return `<div class="card tcard"${o.id?` id="${o.id}"`:""}><div class="tc-h">${o.icon?ico(o.icon,17):""}<b>${o.title}</b>${o.meta?`<span>${o.meta}</span>`:""}</div>
+    ${o.value!=null?`<div class="tc-v"><span>${o.value}</span>${o.sub?`<small>${o.sub}</small>`:""}</div>`:""}
+    ${o.body||""}${o.foot?`<div class="tc-f">${o.foot}</div>`:""}</div>`;
+}
+// Mikä muuttui: muutokset edelliseen jaksoon vain kohinarajan yli (uni 15 min, 1–5-asteikot 0,3, askeleet 10 %)
+function trendChangeLines(curr,prev,gc,pl="edellisellä jaksolla"){
+  const L=[]; if(!prev) return L;
+  if(gc&&(gc.up.length||gc.down.length)) L.push(`Liikkeistä ${gc.up.length} nousi${gc.down.length?`, ${gc.down.length} laski`:""}${gc.same.length?` ja ${gc.same.length} pysyi ennallaan`:""} ${pl==="edellisellä viikolla"?"edelliseen viikkoon":"edelliseen jaksoon"} verrattuna.`);
+  if(curr.avgSleep!=null&&prev.avgSleep!=null){ const d=Math.round((curr.avgSleep-prev.avgSleep)*60);
+    if(Math.abs(d)>=15) L.push(`Uni ${Math.abs(d)} min ${d>0?"pidempi":"lyhyempi"} kuin ${pl} (${fmtSleepText(curr.avgSleep)}).`); }
+  [["avgRecovery","Palautuminen","recovery"],["avgMotivation","Yleinen vire","motivation"]].forEach(([k,l,t])=>{
+    if(!trk(t)||curr[k]==null||prev[k]==null) return; const d=curr[k]-prev[k];
+    if(Math.abs(d)>=0.3) L.push(`${l} ${fiN(curr[k])}/5, ${pl} ${fiN(prev[k])}/5.`); });
+  if(curr.avgSteps!=null&&prev.avgSteps){ const d=curr.avgSteps-prev.avgSteps;
+    if(Math.abs(d)>=Math.max(500,prev.avgSteps*0.1)) L.push(`Askeleita ${Math.round(curr.avgSteps).toLocaleString("fi")} päivässä, ${pl} ${Math.round(prev.avgSteps).toLocaleString("fi")}.`); }
+  return L;
+}
+function trendCardsHTML(start,end,curr,prev,rangeShortLabel,D){
+  let h=""; const g=getActiveGoals(end), ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end);
+  const gc=gymOn()?gymCompare(start,end):null;
+  // 1. Mikä muuttui
+  h+=buildInsightsHTML(start,end,curr,{title:"Mikä muuttui",sub:prev?`vs. edellinen ${rangeShortLabel}`:"",extra:trendChangeLines(curr,prev,gc),empty:prev?"Ei selviä muutoksia edelliseen jaksoon.":""});
+  // 2. Treeni
+  const load=curr.avgLoad!=null?`rasitus ka ${fiN(curr.avgLoad)}/5`:"", cardio=curr.cardioDays>0?`cardio ${curr.cardioDays} pv`:"";
+  const gt=gc?gymTrendHTML(start,end,[load,cardio].filter(Boolean).join(" · ")):"";
+  if(gt) h+=gt;
+  else if(curr.trainingDays>0||curr.cardioDays>0) h+=tcard({icon:"dumbbell",title:"Treeni",value:`${curr.trainingDays} ${curr.trainingDays===1?"treenipäivä":"treenipäivää"}`,sub:curr.totalDays?`/ ${curr.totalDays} pv`:"",foot:[load,cardio].filter(Boolean).join(" · ")});
+  // 3. Paino
+  if(curr.avgWeight!=null){
+    const rel=isWeightTrendReliable(curr.weightPts,curr.weightRate), r=curr.weightRate;
+    const sub=r==null?"":rel?`${r>0.005?"↑ +":r<-0.005?"↓ −":"→ "}${fiN(Math.abs(r),2)} kg/vko`:`${r>0.05?"nouseva":r<-0.05?"laskeva":"tasainen"} · vähän dataa`;
+    const tw=getActiveTargetWeight(end), last=(curr.weightPts||[]).at(-1)?.weight??curr.avgWeight;
+    const goalTxt=tw!=null&&last!=null?(Math.abs(tw-last)<=0.5?"tavoitepaino saavutettu":`tavoitteeseen ${fiN(Math.abs(tw-last))} kg`):"";
+    const nW=ue.filter(e=>e.weight).length, allW=[...D.wPts.map(p=>p.weight),...D.wRaw.map(p=>p.weight)];
+    const chart=D.wPts.length?buildWeightChart(D.wPts,D.wRaw,150,S.settings.seasonsEnabled?(S.settings.seasons||[]):[])+`<div class="ch-legend"><span><i class="ln acc"></i>7 pv liukuva ka</span>${D.wRaw.length?`<span><i class="dot acc"></i>Päiväpaino</span>`:""}</div>`:"";
+    h+=tcard({icon:"scale",title:"Paino",meta:"ka",value:`${fiN(curr.avgWeight)} kg`,sub,body:chart,
+      foot:[`punnittu ${nW}/${curr.totalDays} pv`,curr.minWeight!=null&&curr.maxWeight!=null&&curr.maxWeight>curr.minWeight?`${fiN(curr.minWeight)}–${fiN(curr.maxWeight)} kg`:"",goalTxt].filter(Boolean).join(" · ")});
+  }
+  // 4. Uni
+  if(curr.avgSleep!=null){
+    const goal=g.sleepHours||7, sl=ue.filter(e=>e.sleep!=null), below=sl.filter(e=>e.sleep<goal).length;
+    const chart=D.slPts.length>=2?buildChart(D.slPts,"sleep","var(--text)",130,goal,null,{aria:"Uni"})+`<div class="ch-legend"><span><i class="ln"></i>7 pv liukuva ka</span><span><i class="dot"></i>Yö</span><span><i class="ln ref"></i>tavoite</span></div>`:"";
+    h+=tcard({icon:"moon",title:"Uni",meta:"ka",value:fmtSleepText(curr.avgSleep),sub:`tavoite ${fmtSleepText(goal)}`,body:chart,
+      foot:`${below}/${sl.length} yötä alle tavoitteen · kirjattu ${sl.length}/${curr.totalDays} yötä`});
+  }
+  // 5. Palautuminen ja vire
+  if(curr.avgRecovery!=null||curr.avgMotivation!=null){
+    const low=ue.filter(e=>e.recovery!=null&&e.recovery<=2).length, n=ue.filter(e=>e.recovery!=null||e.motivation!=null).length;
+    const v=[curr.avgRecovery!=null?`${fiN(curr.avgRecovery)}<small> palautuminen</small>`:"",curr.avgMotivation!=null?`${fiN(curr.avgMotivation)}<small> vire</small>`:""].filter(Boolean).join(" · ");
+    h+=tcard({icon:"battery",title:"Palautuminen ja vire",meta:"ka /5",value:v,body:D.rcPts.length>=2?buildDualChart(D.rcPts,"recovery","motivation","var(--text)","var(--dim)","Palautuminen","Yleinen vire",120):"",
+      foot:[curr.avgRecovery!=null?`palautuminen matala (1–2/5) ${low} pv`:"",`kirjattu ${n}/${curr.totalDays} pv`].filter(Boolean).join(" · ")});
+  }
+  // 6. Askeleet
+  if(curr.avgSteps!=null){ const n=ue.filter(e=>e.steps!=null).length;
+    h+=tcard({icon:"steps",title:"Askeleet",meta:"ka",value:`${Math.round(curr.avgSteps).toLocaleString("fi")}<small> / pv</small>`,sub:g.steps?`tavoite ${(+g.steps).toLocaleString("fi")}`:"",foot:`kirjattu ${n}/${curr.totalDays} pv`}); }
+  // 7. Lääkkeet
+  if((curr.medAdherence||[]).length) h+=tcard({icon:"pill",title:"Lääkkeet",meta:"otettu / suunniteltu",body:curr.medAdherence.map(m=>`<div class="tc-row"><span>${esc(m.name)}</span><b>${m.taken}/${m.scheduled}</b></div>`).join("")});
+  // 8. Terveysseurannat (harvat mittaukset: 8 viimeisintä, 90 pv)
+  const bp=sparseBP(start,end); if(bp) h+=tcard({icon:"heart",title:"Verenpaine",meta:curr.bpCount?"ka tällä jaksolla":"",value:curr.bpCount?`${Math.round(curr.avgBpSys)}/${Math.round(curr.avgBpDia)}`:null,sub:curr.bpCount?`${curr.bpCount} ${curr.bpCount===1?"mittaus":"mittausta"}`:"",body:bp.chart,foot:bp.foot});
+  const bs=sparseBS(start,end); if(bs) h+=tcard({icon:"drop",title:"Verensokeri",meta:curr.bsCount?"ka tällä jaksolla":"",value:curr.bsCount?`${fiN(curr.avgBloodSugar)}<small> mmol/l</small>`:null,sub:curr.bsCount>1?`${fiN(curr.minBs)}–${fiN(curr.maxBs)}`:"",body:bs.chart,foot:bs.foot});
+  const mg=sparseMig(end); if(mg) h+=tcard({icon:"head",title:"Migreeni",value:`${curr.migraineDays} pv`,sub:curr.avgMigraineSev!=null?`voimakkuus ka ${fiN(curr.avgMigraineSev)}/5`:"tällä jaksolla",body:mg.chart,foot:mg.foot});
+  // 9. Kivut
+  h+=buildInjurySummaryHTML(start,end);
+  return h;
+}
+function sparseBP(start,end){ const sp=sparsePts(e=>e.bp_sys!=null&&e.bp_dia!=null,start,end); if(sp.pts.length<2) return null;
+  return {chart:buildBPChart(sp.pts.map(e=>({label:shortD(new Date(e.date+"T00:00:00")),sys:e.bp_sys,dia:e.bp_dia,date:e.date})),130),foot:sp.ext?`käyrässä viimeiset ${sp.pts.length} mittausta`:""}; }
+function sparseBS(start,end){ const sp=sparsePts(e=>e.blood_sugar!=null&&isFinite(+e.blood_sugar),start,end); if(sp.pts.length<2) return null;
+  return {chart:buildChart(sp.pts.map(e=>({date:e.date,bs:+e.blood_sugar})),"bs","var(--text)",120,null,null,{aria:"Verensokeri",noMA:true}),foot:sp.ext?`käyrässä viimeiset ${sp.pts.length} mittausta`:""}; }
+function sparseMig(end){ if(!trk("migraine")) return null; const m=new Date(end+"T00:00:00"); m.setDate(m.getDate()-(m.getDay()+6)%7); const wk=[];
+  for(let k=7;k>=0;k--){ const a=new Date(m); a.setDate(m.getDate()-7*k); let n=0; for(let d=0;d<7;d++){ const x=new Date(a); x.setDate(a.getDate()+d); const ds=iso(x); if(ds<=end&&S.entries[ds]?.migraine) n++; }
+    wk.push({label:`${a.getDate()}.${a.getMonth()+1}.`,n}); }
+  return wk.some(w=>w.n)?{chart:buildWeekBars(wk,100),foot:"migreenipäivät viikoittain, 8 viikkoa"}:null; }
 
 const TREND_MIN=7;
 function renderTrendit() {
@@ -6609,15 +6705,11 @@ function renderTrendit() {
   const {start:pS,end:pE}=getPrevPeriod(start,end);
   const prev=(S.rangeId==="all")?null:computeSummary(pS,pE);
   const rangeShortLabel={d28:"28 pv",vko:"viikko",kk:"kuukausi",q:"90 pv",vuosi:"vuosi",free:"jakso",all:""}[S.rangeId]||"";
-  const summaryHTML=buildSummaryHTML(curr,prev,rangeShortLabel,end);
-
   if(S.rangeId==="vko"){
-    const summOpen=S.trendToggles?.summary;
-    const summTgl=`<button onclick="S.trendToggles=S.trendToggles||{};S.trendToggles.summary=!S.trendToggles.summary;renderTrendit()" style="width:100%;height:40px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;cursor:pointer;margin-bottom:${summOpen?"0":"8px"}">
-      <span>Yhteenveto</span><span>${summOpen?"▴":"▾"}</span>
-    </button>
-    ${summOpen?summaryHTML:""}`;
-    contentEl.innerHTML=buildWeekView(start,range.end)+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+gymTrendHTML(start,end)+summTgl;
+    // v2.18.214: viikkoyhteenveto (aiheittain) → Mikä muuttui → sali → kivut → avattavat. Erillinen Yhteenveto-osio (samat luvut toiseen kertaan) poistettu.
+    const gcW=gymOn()?gymCompare(start,end):null;
+    const mid=buildInsightsHTML(start,end,curr,{title:"Mikä muuttui",sub:prev?"vs. edellinen viikko":"",extra:trendChangeLines(curr,prev,gcW,"edellisellä viikolla")})+gymTrendHTML(start,end)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end);
+    contentEl.innerHTML=buildWeekView(start,range.end,mid);
     requestAnimationFrame(()=>{
       runCountUp();
       if(S.trendToggles?.analysis) initPeriodSummaryCard(start,end,"viikko",null);
@@ -6650,45 +6742,17 @@ function renderTrendit() {
     slPts.push({label:shortD(new Date(e.date+"T00:00:00")),sleep:e.sleep,date:e.date});
   });
 
-  const chartsOpen=S.trendToggles?.charts ?? true;
-  const chartsTgl=`<button onclick="S.trendToggles=S.trendToggles||{};S.trendToggles.charts=!S.trendToggles.charts;renderTrendit()" style="width:100%;height:40px;border-radius:12px;border:1.5px solid var(--bord);background:transparent;color:var(--dim);font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;cursor:pointer;margin-bottom:8px">
-    <span>Graafit</span><span>${chartsOpen?"▴":"▾"}</span>
-  </button>`;
-
-  let html=summaryHTML+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+`<div id="period-summary-card" style="margin-bottom:12px"></div>`+chartsTgl;
-
-  // Build chart data (aina lasketaan, näytetään vain jos chartsOpen)
-
   const rcPts=Object.values(S.entries).filter(e=>(e.recovery||e.motivation)&&e.date>=start&&e.date<=end).sort((a,b)=>a.date.localeCompare(b.date)).map(e=>({label:shortD(new Date(e.date+"T00:00:00")),date:e.date,recovery:e.recovery??null,motivation:e.motivation??null}));
 
-  let spMain="";
-  if(chartsOpen){
-    if(wPts.length){
-      const allW=[...wPts.map(p=>p.weight),...wRaw.map(p=>p.weight)];
-      html+=`<div class="section-head">Paino — 7 pv liukuva keskiarvo</div>`;
-      html+=buildWeightChart(wPts,wRaw,185,S.settings.seasonsEnabled?(S.settings.seasons||[]):[]);
-      html+=`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln acc"></i>7 pv liukuva ka</span>${wRaw.length?`<span><i class="dot acc"></i>Päiväpaino</span>`:""}<span style="margin-left:auto">${Math.min(...allW).toFixed(1)}–${Math.max(...allW).toFixed(1)} kg</span></div>`;
-    }
-    if(slPts.length){
-      html+=`<div class="section-head" style="margin-top:4px">Uni</div>`;
-      html+=buildChart(slPts,"sleep","var(--text)",155,getActiveGoals(end).sleepHours||7,null,{aria:"Uni"});
-      html+=`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln"></i>7 pv liukuva ka</span><span><i class="dot"></i>Yö</span><span><i class="ln ref"></i>tavoite ${fmtSleepText(getActiveGoals(end).sleepHours||7)}</span></div>`;
-    }
-    spMain=sparseChartsHTML(start,end); html+=spMain;
-    if(rcPts.length>=2){
-      html+=`<div class="section-head" style="margin-top:4px">Palautuminen ja yleinen vire · 7 pv ka</div>`;
-      html+=buildDualChart(rcPts,"recovery","motivation","var(--text)","var(--dim)","Palautuminen","Yleinen vire",140);
-      html+=`<div style="margin-bottom:16px"></div>`;
-    }
-  }
-
-  if(!wPts.length&&!slPts.length&&!spMain&&!rcPts.length) html+=`<div style="text-align:center;padding:40px 0">
+  // v2.18.214: aihekortit (luku, muutos, käyrä ja kattavuus samassa kortissa). Poistettu: BMI (Asetukset → Profiili),
+  // erillinen Graafit-osio, Datan kattavuus -osio ja muutosnuolet (muutokset Mikä muuttui -kortissa kohinarajan yli).
+  let html=trendCardsHTML(start,end,curr,prev,rangeShortLabel,{wPts,wRaw,slPts,rcPts});
+  html+=buildConnectionsHTML(start,end)+`<div id="period-summary-card" style="margin-bottom:12px"></div>`;
+  if(!/class="card tcard"|Salitreenit/.test(html)) html+=`<div style="text-align:center;padding:40px 0">
     <div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:6px">Ei dataa valitulla aikavälillä</div>
     <div style="color:var(--dim);font-size:13px">Kirjaa muutama päivä niin suunta alkaa näkyä.</div>
   </div>`;
   html+=buildAnalysisSectionHTML(nonWeekEntries||[], null, S.rangeId, nonWeekEntries?.length||0, start, end);
-  html+=gymTrendHTML(start,end);
-  html+=buildCoverageHTML(start,end);
   contentEl.innerHTML=html;
   requestAnimationFrame(runCountUp);
   initPeriodSummaryCard(start,end,rangeShortLabel,curr);
@@ -6870,7 +6934,7 @@ function buildWeekScoreHTML(days, wEntries){
   </div>`;
 }
 
-function buildWeekView(start, fullEnd) {
+function buildWeekView(start, fullEnd, mid="") {
   // Always show all 7 days Mon–Sun regardless of today
   const days=[];
   const mon=new Date(start+"T00:00:00");
@@ -6884,7 +6948,7 @@ function buildWeekView(start, fullEnd) {
   const weekCurr=computeSummary(start,weekEnd);
   const goals=getActiveGoals(weekEnd);
   // Pikakatsaus — aina näkyvissä
-  let h=weekRecapHTML(buildWeekRecap(start)); // v2.11: viikkoyhteenveto korvaa Pikakatsauksen
+  let h=weekRecapHTML(buildWeekRecap(start))+mid; // v2.11: viikkoyhteenveto korvaa Pikakatsauksen; v2.18.214: Mikä muuttui, sali ja kivut heti perään
 
   // Toggle-napit
   const tgl=(key,lbl,icon)=>{
@@ -6934,9 +6998,9 @@ function buildWeekView(start, fullEnd) {
   const spH=sparseChartsHTML(start,days.filter(dt=>dt<=t).at(-1)||t);
   if(spH){ h+=tgl("charts","Graafit",""); if(S.trendToggles?.charts) h+=`<div style="margin-bottom:8px">${spH}</div>`; }
   // Analyysi ja koosteet
-  h+=tgl("analysis","Analyysi ja koosteet","");
-  if(S.trendToggles?.analysis){
-    h+=buildWeekScoreHTML(days,wEntries);
+  if(getApiKey()) h+=tgl("analysis","Analyysi ja koosteet",""); // v2.18.214: ilman avainta osio olisi tyhjä
+  if(S.trendToggles?.analysis&&getApiKey()){
+    // v2.18.214: Viikon seuranta (kirjaukset, uni) poistettu – sama tieto on viikkoyhteenvedossa
     h+=buildAnalysisSectionHTML(wEntries,start,"vko",wEntries.length,start,days.filter(dt=>dt<=t).at(-1)||t);
     h+=`<div id="period-summary-card" style="margin-bottom:12px"></div>`;
   } else {
@@ -8067,6 +8131,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Trendit on selkeämpi. Ylimpänä näkyy, mikä muuttui edelliseen jaksoon verrattuna, ja jokaisella seurattavalla asialla on oma korttinsa, jossa keskiarvo, käyrä ja kirjausmäärä ovat yhdessä. Samoja lukuja ei enää toisteta useassa kohdassa.",
     "Trendit kertoo muutoksen vain, kun se on selvä. Pienet heilahdukset näkyvät sanalla \"ennallaan\". Liikkeiden kehitys verrataan nyt parhaaseen sarjaan edelliseen jaksoon nähden, joten yksi kevyt treeni ei käännä suuntaa.",
     "Trendeissä verenpaineen käyrä näkyy nyt, vaikka mittaisit vain kerran viikossa: käyrä näyttää viimeiset mittaukset. Verensokerille on oma käyrä ja migreenipäiville viikoittainen kaavio."
   ]},
@@ -12312,10 +12377,10 @@ function gymExerciseHTML(key){
 }
 
 // ── Trendit: jakson liikekehitys (vain kun ominaisuus on päällä ja dataa on)
-function gymTrendHTML(start,end){
-  if(!gymOn()) return "";
+function gymCompare(start,end){
+  if(!gymOn()) return null;
   const ss=G.sessions.filter(s=>s.endedAt&&s.date>=start&&s.date<=end);
-  if(!ss.length) return "";
+  if(!ss.length) return null;
   // v2.18.213: vertailu = jakson paras sarja vs. edellisen yhtä pitkän jakson paras sarja (e1RM).
   // Ennen jakson ensimmäinen ja viimeinen yksittäinen kerta → yksi huono päivä tai kevennysviikko käänsi suunnan.
   const {start:pS,end:pE}=getPrevPeriod(start,end);
@@ -12326,6 +12391,11 @@ function gymTrendHTML(start,end){
   Object.keys(cur).forEach(k=>{ const a=prev[k], b=cur[k]; if(!a){ fresh++; return; } if(!a.v||!b.v) return;
     const lab=`${esc(b.name)}: ${a.set.kg!=null?kgX(a.set.kg):""}${a.set.reps} → ${b.set.kg!=null?kgX(b.set.kg):""}${b.set.reps}`;
     const dr=setDir(a.set,b.set,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab); });
+  return {ss,up,same,down,fresh};
+}
+function gymTrendHTML(start,end,foot){
+  const c=gymCompare(start,end); if(!c) return "";
+  const {ss,up,same,down,fresh}=c;
   const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0), any=up.length||same.length||down.length;
   let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
     <div style="font-size:13px;color:var(--dim);margin-bottom:${any?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
@@ -12333,6 +12403,7 @@ function gymTrendHTML(start,end){
   h+=grp("Nousi",up)+grp("Ennallaan",same)+grp("Laski",down);
   if(any) h+=`<div style="font-size:11px;color:var(--dim);margin-top:8px">Paras sarja tällä jaksolla verrattuna edelliseen yhtä pitkään jaksoon.${fresh?` ${fresh}\u00a0${fresh===1?"liike on":"liikettä on"} uusia tällä jaksolla.`:""}</div>`;
   else h+=`<div style="font-size:13px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty myös edellisellä jaksolla.</div>`;
+  if(foot) h+=`<div class="tc-f">${foot}</div>`;
   return h+`</div>`;
 }
 // ═══ GOOGLE DRIVE -SYNKRONOINTI (v2.18.0) ═══════════════════════════

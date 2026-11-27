@@ -18,16 +18,26 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
     runCountUp&&0; const c=document.getElementById('content'), txt=c.innerText.replace(/ /g,' ');
     const colored=[...c.querySelectorAll('span')].filter(x=>/^[↑↓]/.test(x.textContent.trim())&&/green|red/.test(x.getAttribute('style')||'')).length;
     return {txt,colored}; });
-  ok(/Palautuminen[\s\S]{0,20}3,1\/5\s*ennallaan/.test(r.txt),'pieni muutos (+0,1) näkyy "ennallaan" ('+(r.txt.match(/Palautuminen[^\n]*\n?[^\n]*/)||[''])[0].replace(/\n/g,' ')+')');
-  ok(/Yleinen vire[\s\S]{0,20}3,8\/5\s*↑ \+0,8/.test(r.txt),'kohinarajan ylittävä muutos näkyy');
-  ok(/Askeleet ka[\s\S]{0,30}ennallaan/.test(r.txt),'askeleiden alle 10 % muutos: ennallaan');
+  const mm=(r.txt.match(/Mikä muuttui[\s\S]*?(?=\n(Salitreenit|Treeni|Paino)\n)/)||[''])[0];
+  ok(!/Palautuminen/.test(mm),'pieni muutos (palautuminen +0,1) ei nouse Mikä muuttui -korttiin');
+  ok(/Yleinen vire 3,8\/5, edellisellä jaksolla 3,0\/5\./.test(mm),'kohinarajan ylittävä muutos näkyy ('+mm.replace(/\n/g,' ').slice(0,200)+')');
+  ok(!/Askeleita/.test(mm)&&/Askeleet[\s\S]{0,10}ka[\s\S]{0,5}8 300/.test(r.txt),'askeleiden alle 10 % muutos ei nouse korttiin; Askeleet-kortti näyttää keskiarvon');
   ok(r.colored===0,'muutosnuolet eivät ole vihreitä tai punaisia');
-  ok(/Nousi \(1\)[\s\S]*Penkkipunnerrus: 100 kg × 5 → 105 kg × 5/.test(r.txt)&&!/Laski/.test(r.txt),'kevennyskerta ei käännä suuntaa: paras sarja vs. edellinen jakso');
+  ok(/Nousi \(1\)[\s\S]*Penkkipunnerrus: 100 kg × 5 → 105 kg × 5/.test(r.txt)&&!/Laski \(/.test(r.txt)&&/Liikkeistä 1 nousi edelliseen jaksoon verrattuna/.test(mm),'kevennyskerta ei käännä suuntaa: paras sarja vs. edellinen jakso');
   ok(/Paras sarja tällä jaksolla verrattuna edelliseen/.test(r.txt),'vertailun peruste kerrotaan');
-  await p.waitForTimeout(900); const st=await p.evaluate(()=>{ const t=document.getElementById('content').innerText.replace(/\u00a0/g,' '); return (t.match(/Askeleet ka[^\n]*\n?[^\n]*/)||[''])[0]; });
-  ok(/ennallaan/.test(st)&&/8 300/.test(st),'askelten muutosmerkintä säilyy lukuanimaation jälkeen ('+st.replace(/\n/g,' ')+')');
   const c2=await p.evaluate(()=>{ const html=buildConnectionsHTML(iso(new Date(Date.now()-20*864e5)),today()); return html; });
   ok(c2==='','alustavaa yhteyttä (pieni otos) ei näytetä');
+  // v2.18.214: aihekortit
+  const st=await p.evaluate(()=>{ S.settings.tracking={...S.settings.tracking,sleep:true,bp:true}; const t=new Date(today()+'T00:00:00');
+    for(let o=0;o<28;o++){ const d=new Date(t); d.setDate(t.getDate()-o); const e=S.entries[iso(d)]; e.sleep=7; if(o%7===0){ e.bp_sys=130; e.bp_dia=84; } }
+    S.settings.profile={height:190}; saveAll(); S.rangeId='d28'; renderTrendit(); const c=document.getElementById('content');
+    const order=[...c.querySelectorAll('.tc-h b, .card > .ttl-ico, .card .section-head')].map(x=>x.innerText.trim()).filter(Boolean);
+    const t28=c.innerText; S.rangeId='vko'; S.trendToggles={}; renderTrendit(); const tv=c.innerText;
+    return {order:order.join(' > '),t28,tv}; });
+  ok(/^Mikä muuttui > Salitreenit > Paino > Uni > Palautuminen ja vire > Askeleet > Verenpaine/.test(st.order),'korttien järjestys ('+st.order+')');
+  ok(!/BMI|Datan kattavuus|Vaihteluväli|Graafit/.test(st.t28),'28 pv: ei BMI:tä, kattavuusosiota eikä erillistä Graafit-osiota');
+  ok(/punnittu \d+\/28 pv/.test(st.t28)&&/kirjattu \d+\/28 yötä/.test(st.t28),'kattavuus kortin alarivillä');
+  ok(/Mikä muuttui/.test(st.tv)&&/vs\. edellinen viikko/.test(st.tv)&&!/\nYhteenveto\n/.test(st.tv)&&!/Viikon seuranta|VIIKON SEURANTA|Analyysi ja koosteet/.test(st.tv),'viikkonäkymä: Mikä muuttui, ei tuplayhteenvetoa, ei tyhjää Analyysi-osiota ilman avainta');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();

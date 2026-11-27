@@ -23,8 +23,8 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(r.spN===8&&r.spExt,'harvat mittaukset: 8 viimeisintä, jakso laajenee taaksepäin');
   ok(r.bs&&r.bsCircles===8&&/Verensokeri · viimeiset 8 mittausta/.test(r.heads),'verensokerin käyrä (8 mittausta)');
   ok(r.mig&&r.migTxt.split(',').reduce((a,b)=>a+(+b),0)===4&&/Migreenipäivät/.test(r.heads),'migreenipäivät viikoittain ('+r.migTxt+')');
-  const r28=await p.evaluate(()=>{ S.rangeId='d28'; renderTrendit(); const h=[...document.querySelectorAll('.section-head')].map(x=>x.innerText.replace(/\u00a0/g,' ')).join('|'); return {bp:!!document.querySelector('svg[aria-label="Verenpaine"]'),h}; });
-  ok(r28.bp&&/Verenpaine · viimeiset 8 mittausta/.test(r28.h),'28 pv: 4 mittausta jaksolla → käyrä täydennetään 8 viimeiseen');
+  const r28=await p.evaluate(()=>{ S.rangeId='d28'; renderTrendit(); const c=[...document.querySelectorAll('.tcard')].find(x=>/Verenpaine/.test(x.querySelector('.tc-h').innerText)); return {bp:!!c&&!!c.querySelector('svg[aria-label="Verenpaine"]'),t:c?c.innerText.replace(/\u00a0/g,' '):''}; });
+  ok(r28.bp&&/käyrässä viimeiset 8 mittausta/.test(r28.t)&&/4 mittausta/.test(r28.t),'28 pv: Verenpaine-kortti, jakson ka 4 mittauksesta, käyrä täydennetty 8 viimeiseen');
   // 90 päivän raja ja tiheä mittaus: jakson omat riittävät
   const r2=await p.evaluate(()=>{ const t=new Date(today()+'T00:00:00'); const f=d=>iso(d);
     const old=new Date(t); old.setDate(t.getDate()-100); S.entries={}; S.entries[f(old)]={date:f(old),bp_sys:150,bp_dia:95}; S.entries[today()]={date:today(),bp_sys:118,bp_dia:76};
