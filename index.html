@@ -2432,7 +2432,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.210</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.211</span>
       </div>
     </div>
   </div>
@@ -2497,6 +2497,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.211", d:"marraskuu 2026", items:[
+    "Trendit: verenpaineen käyrä näyttää jakson mittaukset, mutta vähintään 8 viimeisintä enintään 90 päivän ajalta (otsikossa \"viimeiset N mittausta\"). Ennen kerran viikossa mittaavalle ei näkynyt käyrää 7 pv:n näkymässä lainkaan (Akun havainto).",
+    "Trendit: verensokerille oma käyrä samalla periaatteella, migreenipäivät viikoittaisina pylväinä 8 viikon ajalta. Viikkonäkymässä (jossa ei ennen ollut käyriä) nämä avattavassa Graafit-osiossa."
+  ]},
   {v:"2.18.210", d:"marraskuu 2026", items:[
     "Kehityskuvat myös pilotissa (Akun päätös 26.11.: alkuperäiset jäävät puhelimeen, joten Järkäleen tietojen katoaminen ei vie kuvia; Drive-tuki myöhemmin). Uutiskortti, josta otetaan käyttöön suoraan.",
     "Ohje laitteen mukaan: kuvat puhelimen kameralla ja valinta galleriasta / Kuvista. iPhone/iPad selaimessa: varoitus Safarin tietojen poistosta. iPhonessa Järkäleen kautta otettu kuva: ei latausta, vaan ohje kuvata kameralla."
@@ -4905,7 +4909,7 @@ function chartH(h,W){ return W<=340?h:Math.round(h*Math.min(1.45,1+(W/340-1)*.4)
 function buildChart(data, key, color, height=160, refLine=null, seasons=null, opts={}) {
   const raw=(data||[]).filter(d=>d[key]!=null&&d.date).sort((a,b)=>a.date.localeCompare(b.date));
   if(raw.length<2) return `<div style="color:var(--dim);text-align:center;padding:20px 0;font-size:13px">Graafi ilmestyy kun jaksolta löytyy vähintään 2 mittausta.</div>`;
-  const ma=movingAvg7(raw,key);
+  const ma=opts.noMA?[]:movingAvg7(raw,key);
   const vals=[...raw.map(d=>d[key]),...(refLine!=null?[refLine]:[])];
   const W=chartW(),H=chartH(height,W),pad={t:12,r:8,b:22,l:32};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
@@ -4973,6 +4977,40 @@ function buildWeightChart(maPts, rawPts, height=185, seasons=null) {
   </svg>`;
 }
 
+// v2.18.211: harvoin mitattavat (verenpaine, verensokeri; esim. kerran viikossa): käyrä näyttää jakson mittaukset,
+// mutta vähintään 8 viimeisintä enintään 90 päivän ajalta. Muuten 7 pv:n näkymässä ei koskaan ole käyrää.
+function sparsePts(has,start,end,min=8,days=90){
+  const from=new Date(end+"T00:00:00"); from.setDate(from.getDate()-days+1); const f=iso(from);
+  const all=Object.values(S.entries).filter(e=>e.date&&e.date<=end&&e.date>=f&&has(e)).sort((a,b)=>a.date.localeCompare(b.date));
+  const inP=all.filter(e=>e.date>=start); const pts=inP.length>=min?inP:all.slice(-min);
+  return {pts,ext:pts.some(e=>e.date<start)}; }
+function sparseHead(lbl,sp){ return `<div class="section-head" style="margin-top:4px">${lbl}${sp.ext?` <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--dim)">· viimeiset ${sp.pts.length}\u00a0mittausta</span>`:""}</div>`; }
+// Migreenipäivät viikoittain (8 viikkoa jakson loppuun asti): päiviä, ei lukuarvoa → pylväät
+function buildWeekBars(weeks,h=110){
+  const W=chartW(),H=chartH(h,W),pad={t:14,r:8,b:22,l:24}, cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  const mx=Math.max(1,...weeks.map(w=>w.n)), bw=cw/weeks.length;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block" role="img" aria-label="Migreenipäivät viikoittain">
+    <g transform="translate(${pad.l},${pad.t})">
+      <line x1="0" y1="${ch}" x2="${cw}" y2="${ch}" stroke="var(--bord)"/>
+      ${weeks.map((w,i)=>{ const bh=w.n?Math.max(3,(w.n/mx)*ch):0, x=i*bw+bw*.2;
+        return `${bh?`<rect x="${x.toFixed(1)}" y="${(ch-bh).toFixed(1)}" width="${(bw*.6).toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="var(--text)" opacity=".8"/>`:""}
+        <text x="${(x+bw*.3).toFixed(1)}" y="${(ch-bh-4).toFixed(1)}" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="600">${w.n||""}</text>
+        <text x="${(x+bw*.3).toFixed(1)}" y="${ch+14}" text-anchor="middle" fill="var(--dim)" font-size="9">${w.label}</text>`; }).join("")}
+    </g></svg>`; }
+function sparseChartsHTML(start,end){
+  let h="";
+  const bpSp=sparsePts(e=>e.bp_sys!=null&&e.bp_dia!=null,start,end);
+  const bpPts=bpSp.pts.map(e=>({label:shortD(new Date(e.date+"T00:00:00")),sys:e.bp_sys,dia:e.bp_dia,date:e.date}));
+  if(bpPts.length>=2) h+=sparseHead("Verenpaine",bpSp)+buildBPChart(bpPts,155)+`<div style="margin-bottom:20px"></div>`;
+  const bsSp=sparsePts(e=>e.blood_sugar!=null&&isFinite(+e.blood_sugar),start,end);
+  const bsPts=bsSp.pts.map(e=>({date:e.date,bs:+e.blood_sugar}));
+  if(bsPts.length>=2) h+=sparseHead("Verensokeri",bsSp)+buildChart(bsPts,"bs","var(--text)",140,null,null,{aria:"Verensokeri",noMA:true})+`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln"></i>Mittaus (mmol/l)</span></div>`;
+  if(trk("migraine")){ const m=new Date(end+"T00:00:00"); m.setDate(m.getDate()-(m.getDay()+6)%7); const wk=[];
+    for(let k=7;k>=0;k--){ const a=new Date(m); a.setDate(m.getDate()-7*k); let n=0; for(let d=0;d<7;d++){ const x=new Date(a); x.setDate(a.getDate()+d); const ds=iso(x); if(ds<=end&&S.entries[ds]?.migraine) n++; }
+      wk.push({label:`${a.getDate()}.${a.getMonth()+1}.`,n}); }
+    if(wk.some(w=>w.n)) h+=`<div class="section-head" style="margin-top:4px">Migreenipäivät <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--dim)">· viikoittain, 8 viikkoa</span></div>`+buildWeekBars(wk)+`<div style="margin-bottom:20px"></div>`; }
+  return h;
+}
 function buildBPChart(data, h=150) {
   if(!data||data.length<2) return `<div style="color:var(--dim);text-align:center;padding:20px 0;font-size:13px">Graafi ilmestyy kun jaksolta löytyy vähintään 2 mittausta.</div>`;
   const W=chartW(),H=chartH(h,W),pad={t:8,r:8,b:22,l:32};
@@ -4992,7 +5030,7 @@ function buildBPChart(data, h=150) {
       ${ref(120)}${ref(80)}
       <polyline points="${pl("sys")}" fill="none" stroke="var(--text)" stroke-width="2.2" stroke-linejoin="round"/>
       <polyline points="${pl("dia")}" fill="none" stroke="var(--dim)" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round"/>
-      ${data.map((d,i)=>i===0||i===data.length-1||(i%step===0&&i<data.length-step/2)?`<text x="${xs(i).toFixed(1)}" y="${ch+16}" text-anchor="${i===0?"start":i===data.length-1?"end":"middle"}" fill="var(--dim)" font-size="9">${d.label}</text>`:"").join("")}
+      ${data.map((d,i)=>i===0||i===data.length-1||(i%step===0&&i<=data.length-1-step)?`<text x="${xs(i).toFixed(1)}" y="${ch+16}" text-anchor="${i===0?"start":i===data.length-1?"end":"middle"}" fill="var(--dim)" font-size="9">${d.label}</text>`:"").join("")}
     </g>
   </svg>
   <div class="ch-legend"><span><i class="ln"></i>Yläpaine</span><span><i class="ln dash"></i>Alapaine</span><span><i class="ln ref"></i>120/80</span></div>`;
@@ -6607,13 +6645,10 @@ function renderTrendit() {
   let html=summaryHTML+buildInsightsHTML(start,end,curr)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end)+`<div id="period-summary-card" style="margin-bottom:12px"></div>`+chartsTgl;
 
   // Build chart data (aina lasketaan, näytetään vain jos chartsOpen)
-  const bpPts=[];
-  HIST_BP.forEach((bp,i)=>{const ds=iso(wkStart(i));if(ds>=start&&ds<=end)bpPts.push({label:shortD(wkStart(i)),sys:bp[0],dia:bp[1]});});
-  Object.values(S.entries).filter(e=>e.bp_sys!=null&&e.bp_dia!=null&&e.date>=start&&e.date<=end).sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
-    bpPts.push({label:shortD(new Date(e.date+"T00:00:00")),sys:e.bp_sys,dia:e.bp_dia});
-  });
+
   const rcPts=Object.values(S.entries).filter(e=>(e.recovery||e.motivation)&&e.date>=start&&e.date<=end).sort((a,b)=>a.date.localeCompare(b.date)).map(e=>({label:shortD(new Date(e.date+"T00:00:00")),date:e.date,recovery:e.recovery??null,motivation:e.motivation??null}));
 
+  let spMain="";
   if(chartsOpen){
     if(wPts.length){
       const allW=[...wPts.map(p=>p.weight),...wRaw.map(p=>p.weight)];
@@ -6626,11 +6661,7 @@ function renderTrendit() {
       html+=buildChart(slPts,"sleep","var(--text)",155,getActiveGoals(end).sleepHours||7,null,{aria:"Uni"});
       html+=`<div class="ch-legend" style="margin-bottom:20px"><span><i class="ln"></i>7 pv liukuva ka</span><span><i class="dot"></i>Yö</span><span><i class="ln ref"></i>tavoite ${fmtSleepText(getActiveGoals(end).sleepHours||7)}</span></div>`;
     }
-    if(bpPts.length>=2){
-      html+=`<div class="section-head" style="margin-top:4px">Verenpaine</div>`;
-      html+=buildBPChart(bpPts,155);
-      html+=`<div style="margin-bottom:20px"></div>`;
-    }
+    spMain=sparseChartsHTML(start,end); html+=spMain;
     if(rcPts.length>=2){
       html+=`<div class="section-head" style="margin-top:4px">Palautuminen ja yleinen vire · 7 pv ka</div>`;
       html+=buildDualChart(rcPts,"recovery","motivation","var(--text)","var(--dim)","Palautuminen","Yleinen vire",140);
@@ -6638,7 +6669,7 @@ function renderTrendit() {
     }
   }
 
-  if(!wPts.length&&!slPts.length&&!bpPts.length&&!rcPts.length) html+=`<div style="text-align:center;padding:40px 0">
+  if(!wPts.length&&!slPts.length&&!spMain&&!rcPts.length) html+=`<div style="text-align:center;padding:40px 0">
     <div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:6px">Ei dataa valitulla aikavälillä</div>
     <div style="color:var(--dim);font-size:13px">Kirjaa muutama päivä niin suunta alkaa näkyä.</div>
   </div>`;
@@ -6886,6 +6917,9 @@ function buildWeekView(start, fullEnd) {
     });
   }
 
+  // v2.18.211: harvoin mitattavat (verenpaine, verensokeri, migreeni) myös viikkonäkymään, pidemmältä ajalta
+  const spH=sparseChartsHTML(start,days.filter(dt=>dt<=t).at(-1)||t);
+  if(spH){ h+=tgl("charts","Graafit",""); if(S.trendToggles?.charts) h+=`<div style="margin-bottom:8px">${spH}</div>`; }
   // Analyysi ja koosteet
   h+=tgl("analysis","Analyysi ja koosteet","");
   if(S.trendToggles?.analysis){
@@ -8019,6 +8053,9 @@ function renderGenderSection(){
 // v2.18.111: pilotin Mitä uutta = vain käyttäjälle merkittävät muutokset päivittäin ryhmiteltynä (ei versioita, ei korjauslokia).
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
+  {d:"27.11.2026", items:[
+    "Trendeissä verenpaineen käyrä näkyy nyt, vaikka mittaisit vain kerran viikossa: käyrä näyttää viimeiset mittaukset. Verensokerille on oma käyrä ja migreenipäiville viikoittainen kaavio."
+  ]},
   {d:"26.11.2026", items:[
     "Kehityskuvat: lisää kuvat galleriasta esimerkiksi kerran viikossa (edestä, sivulta, takaa tai omalla nimellä). Kuvat näkyvät Mitat-sivulla viikoittain aamupainon keskiarvon kanssa, ja kahta viikkoa voi verrata rinnakkain. Otetaan käyttöön kohdasta Asetukset → Mitä seuraat. Kuvat ovat vain puhelimessasi, ja ne tallennetaan talteen kohdasta Tallenna kuvat.",
     "Lääkkeet löytyvät nyt Asetuksista omana kohtanaan. Lomake näyttää, paljonko kerta-annos tekee viikossa.",

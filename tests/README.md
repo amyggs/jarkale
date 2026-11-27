@@ -55,6 +55,7 @@ tests/run.sh test-gym.js
 | `test-freesession.js` | Treeni ilman ohjelmaa: aloitus yhdellä napautuksella, nimiehdotukset ja viime kerran luvut, uusi liike 1 sarja, päivän vaihto menneeseen (historia ja päiväkirja), Tallenna ohjelmaksi ilman painoja, kierto ennallaan, tyhjää ei tallenneta |
 | `test-measdraft.js` | Mittauslomakkeen ja ohjelmatuonnin tekstin luonnos säilyy, vaikka sovellus suljetaan ennen tallennusta; tallennus ja peruminen poistavat luonnoksen; FFMI ihopoimuista omana rivinään |
 | `test-photos.js` | Kehityskuvat (vaihe 1, ei pilotissa): lisäys kulmineen ja omine nimineen, pienennys, viikkoryhmittely ja painon keskiarvo, vertailu, katselu/muokkaus/poisto, pysyvyys, jako, zip-tallennus ja täsmällinen palautus, tuplien esto, Näytä kaikki |
+| `test-trendsparse.js` | Trendit: kerran viikossa mitattu verenpaine ja verensokeri käyränä viikkonäkymässäkin (8 viimeisintä, 90 pv), migreenipäivät viikoittain |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.
