@@ -983,7 +983,7 @@ button.ex-goal-btn{display:block;background:none;border:none;padding:0;text-alig
 .g-rate{margin-top:14px;}
 .g-rate .lbl{display:block;font:700 12px Manrope,system-ui,sans-serif;color:var(--dim);margin-bottom:6px;}
 .g-rate .row{display:flex;gap:6px;}
-.g-rate button{flex:1;min-height:42px;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 14px Manrope,system-ui,sans-serif;padding:0 4px;}
+.g-rate button{flex:1 1 0;min-width:0;white-space:nowrap;min-height:42px;border:1.5px solid var(--bord);border-radius:10px;background:transparent;color:var(--text);font:700 14px Manrope,system-ui,sans-serif;padding:0 4px;}
 .g-rate button.on{background:var(--seg-on);border-color:var(--seg-on);color:var(--on-accent);}
 .set .pr{position:absolute;right:56px;top:-3px;font:800 10px Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;background:var(--hi,var(--seg-on));color:var(--hi-ink,var(--on-accent));border-radius:4px;padding:1px 5px;}
 .set .pr.on-kg{right:calc(64px + (100% - 100px) / 2.4);}
@@ -2472,7 +2472,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.220</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.221</span>
       </div>
     </div>
   </div>
@@ -2537,6 +2537,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.221", d:"marraskuu 2026", items:[
+    "Korjattu: lopetusnäkymän Heikommin / Normaalisti / Paremmin -napit eivät enää leikkaudu kapealla puhelimella ja suurella tekstikoolla (napit eivät veny sisältönsä mittaisiksi; teksti pienenee tarvittaessa samankokoisena kaikissa kolmessa). test-finish: kaikki teemat, 360 px / 130 % ja 412 px / 115 %."
+  ]},
   {v:"2.18.220", d:"marraskuu 2026", items:[
     "Treenin lopetus selkeämmäksi (Akun havainto: Lopeta ja Tallenna treeni näkyivät yhtä aikaa päänappeina). Lopetusnäkymän ollessa auki yläreunan Lopeta on piilossa, päänappi on \"Lopeta ja tallenna\". Napautuksia edelleen kaksi.",
     "Ohjelmapohjan päivitys kertoo, mikä muuttuu: \"Päivitä ohjelmaan: Dippi → JM press\", \"+ Face pull\", \"pois Kulmasoutu\" tai \"liikkeiden järjestys\" (tplChangeTxt).",
@@ -13084,7 +13087,7 @@ function navUpdate(){
 
 // v2.18.193: tekstin sovitus isolla järjestelmän tekstikoolla. Yksirivinen teksti (alapalkki, taukonapit, liikkeen tunnusluvut)
 // ja pitkät liikkeiden nimet (ei katkea kesken sanan) pienenevät, kunnes ne mahtuvat (yksirivinen enintään ~35 %, nimet ~25 %). Normaalikoossa ei muutosta.
-const FIT_ONE="#nav button span.lbl,.gt .gt-q,.g-stats b,.g-stats span,.g-stats small,#date-display", FIT_WORD=".ex-n,.tr-h1";
+const FIT_ONE="#nav button span.lbl,.gt .gt-q,.g-stats b,.g-stats span,.g-stats small,#date-display,.g-rate .row button", FIT_WORD=".ex-n,.tr-h1";
 function fitEl(el,word){
   if(!el.clientWidth) return; // piilossa: jätetään ennalleen (mitataan, kun näkyy)
   const tr=el.style.transition; el.style.transition="none"; // napeissa siirtymä: fonttikoko muuttuisi viiveellä ja mittaus menisi ohi
@@ -13101,7 +13104,7 @@ function fitEl(el,word){
   void el.offsetWidth; el.style.transition=tr;
 }
 // Saman rivin tekstit samaan kokoon (alapalkki, taukonapit, tunnuslukulaatikot): pienin sovitettu koko kaikille.
-const FIT_GROUPS=[["#nav button span.lbl","#nav"],[".gt .gt-q",".gt"],[".g-stats b",".g-stats"],[".g-stats span",".g-stats"],[".g-stats small",".g-stats"]];
+const FIT_GROUPS=[["#nav button span.lbl","#nav"],[".gt .gt-q",".gt"],[".g-stats b",".g-stats"],[".g-stats span",".g-stats"],[".g-stats small",".g-stats"],[".g-rate .row button",".g-rate .row"]];
 function fitText(){ try{
   logFit();
   document.querySelectorAll(FIT_ONE).forEach(el=>fitEl(el,false)); document.querySelectorAll(FIT_WORD).forEach(el=>fitEl(el,true));

@@ -54,6 +54,25 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     const a=tplChangeTxt(s); s.exercises.reverse(); const b=tplChangeTxt(s); s.exercises.reverse(); s.exercises[1].skipped=true; const c=tplChangeTxt(s);
     s.exercises[1].skipped=false; s.exercises.push({...s.exercises[0],id:'z',key:exKey('Face pull'),name:'Face pull'}); const d=tplChangeTxt(s); return {a,b,c,d}; });
   ok(txt.b==='liikkeiden järjestys'&&txt.c==='pois Ojentajapunnerrus'&&txt.d==='+ Face pull','järjestys, ohitettu ja lisätty kerrotaan ('+JSON.stringify(txt)+')');
+  // lopetusnäkymän napit mahtuvat: kaikki teemat, 360 px ja suurin tekstikoko
+  for(const [W,ts] of [[360,'1.3'],[412,'1.15']]){
+    const c2=await b.newContext({...devices['Pixel 7'],viewport:{width:W,height:900},serviceWorkers:'block'}); await c2.addInitScript(()=>{ window.__jdlgAuto=true; });
+    const q=await c2.newPage(); await q.goto('http://localhost:8765/index.html'); const bad=[];
+    for(const pal of ['ampiainen','kaurapuuro','magnesium','lasi','soitin','fosfori','kuusnelonen','tekstitv','manageri']) for(const th of ['light','dark']){
+      await q.evaluate(([pal,th,ts])=>{ localStorage.clear(); localStorage.setItem('seuranta-setup-done','1'); localStorage.setItem('jarkale-news-seen','["x"]'); localStorage.setItem('jarkale-fb-later',String(Date.now())); localStorage.setItem('jarkale-textsize',ts);
+        localStorage.setItem('seuranta-settings',JSON.stringify({palette:pal,theme:th,tracking:{training:true},gym:{enabled:true}})); },[pal,th,ts]);
+      await q.reload(); await q.waitForFunction(()=>typeof gOpenFinish==='function');
+      await q.evaluate(()=>{ const pr=newProgram('T'); pr.days[0].exercises.push(newEx({name:'Dippi',sets:2,repsMin:8})); touchProg(pr); startSession(pr.id,pr.days[0].id); setTab('treeni');
+        gSession(G.activeId).exercises[0].sets.forEach(x=>{x.kg=40;x.reps=8;x.done=true;}); gOpenFinish(); });
+      await q.waitForTimeout(250);
+      const r=await q.evaluate(()=>{ const f=document.querySelector('.g-finish').getBoundingClientRect(); const out=[];
+        document.querySelectorAll('.g-finish .g-rate button, .g-finish .tr-go').forEach(e=>{ const rc=e.getBoundingClientRect(), rg=document.createRange(); rg.selectNodeContents(e); const t=rg.getBoundingClientRect();
+          if(rc.right>f.right+0.5||rc.left<f.left-0.5||t.width>rc.width-2+0.5) out.push(e.textContent.trim()); }); return out; });
+      if(r.length) bad.push(pal+'/'+th+': '+r.join(', '));
+    }
+    ok(!bad.length,`lopetusnäkymän napit mahtuvat kaikissa 18 teemassa (${W} px, tekstikoko ${ts})`+(bad.length?' '+bad.join(' | '):''));
+    await c2.close();
+  }
   ok(!errs.length,'ei JS-virheitä'+(errs.length?': '+errs.join(' | '):''));
   console.log(`\n${pass}/${pass+fail} läpi`); await b.close(); process.exit(fail?1:0);
 })();
