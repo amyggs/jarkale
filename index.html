@@ -942,6 +942,9 @@ button[onclick^="toggleFieldHint"]::after{content:"";position:absolute;inset:-10
 .ex-menu button{border:none;border-radius:10px;background:var(--surf2);color:var(--text);font:700 13px Manrope,system-ui,sans-serif;min-height:38px;padding:0 12px;}
 .ex-menu button:disabled{opacity:.35;}
 .ex-goal{font:600 13px Manrope,system-ui,sans-serif;color:var(--text);margin-top:3px;}
+button.ex-goal-btn{display:block;background:none;border:none;padding:0;text-align:left;cursor:pointer;color:var(--text);}
+.ex-goal-ed{display:flex;gap:8px;margin-top:6px;}.ex-goal-ed .g-in{flex:1;min-width:0;}.ex-goal-ed .tr-go{flex:none;padding:0 16px;}
+.ex-goal-hint{font-size:12px;color:var(--dim);margin-top:4px;}
 .ex-prev{font:500 13px/1.45 Manrope,system-ui,sans-serif;color:var(--dim);margin-top:2px;}
 .ex-prev-t{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .ex-ph-chev{display:inline-block;margin-left:6px;color:var(--orange);font-weight:700;}
@@ -2469,7 +2472,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.219</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.220</span>
       </div>
     </div>
   </div>
@@ -2534,6 +2537,11 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.220", d:"marraskuu 2026", items:[
+    "Treenin lopetus selkeämmäksi (Akun havainto: Lopeta ja Tallenna treeni näkyivät yhtä aikaa päänappeina). Lopetusnäkymän ollessa auki yläreunan Lopeta on piilossa, päänappi on \"Lopeta ja tallenna\". Napautuksia edelleen kaksi.",
+    "Ohjelmapohjan päivitys kertoo, mikä muuttuu: \"Päivitä ohjelmaan: Dippi → JM press\", \"+ Face pull\", \"pois Kulmasoutu\" tai \"liikkeiden järjestys\" (tplChangeTxt).",
+    "Tavoite muokattavissa kesken treenin: ⋯ → Tavoite tai tavoiterivin napautus (esim. 3x8-10). Koskee tätä treeniä; ohjelmaan siirtyy vain Päivitä ohjelmaan -valinnalla. Tarve: Vaihda liike poistaa vanhan toistotavoitteen, eikä uudelle ollut paikkaa. test-finish."
+  ]},
   {v:"2.18.219", d:"marraskuu 2026", items:[
     "Kirjaa-näkymä puhelimessa: paino, uni ja askeleet samalla rivillä, kun pisimmätkin luvut (188,8 kg, 10 h 55 min, 18 888) mahtuvat kortteihin (logFit mittaa teeman, tekstikoon ja leveyden mukaan; luvut voivat pienentyä enintään 20 %). Muuten paino ja uni rinnakkain ja askeleet tiiviinä rivinä: luku vasemmalla, − ja + yhdessä oikealla (ennen − ja + leveän rivin eri reunoissa ja keskellä tyhjää).",
     "Korjattu: isolla tekstikoolla ja kapealla näytöllä paino tai uni saattoi mennä yksikön päälle tai leikkautua (Soitin, Teksti-TV, Manageri). Luku pienenee nyt juuri sen verran, että mahtuu. test-logfit (18 teemaa × 3 tekstikokoa × 360/412 px)."
@@ -8174,6 +8182,9 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Treenin lopussa on nyt yksi selvä nappi: Lopeta ja tallenna. Yläreunan Lopeta-nappi piiloutuu, kun lopetusnäkymä on auki.",
+    "Kun vaihdat liikkeen kesken treenin, lopussa näkyy, mitä ohjelmaan muuttuu (esim. Dippi → JM press), jos valitset päivityksen.",
+    "Liikkeen tavoitetta voi muuttaa kesken treenin: napauta tavoiteriviä tai valitse ⋯ → Tavoite ja kirjoita esim. 3x8-10.",
     "Kirjaa-näkymässä paino, uni ja askeleet mahtuvat nyt samalle riville, kun puhelimen leveys ja tekstikoko sen sallivat. Muuten askeleet näkyvät matalana rivinä, jossa luku on vasemmalla ja − ja + vierekkäin oikealla.",
     "Mitat-sivulla rasvaprosentin ja FFMI:n vieressä ei enää ole luokkaa (esim. Keskitaso). Arviot heittävät useita prosenttiyksiköitä, joten oleellisinta on oma suunta. Yleiset viiterajat löytyvät kohdasta Mistä luvut tulevat?",
     "Trendien salitreeneissä näkyvät jakson uudet ennätykset ja aiempi paras. Liikkeitä ei enää jaeta nousseisiin ja laskeneisiin, koska kunnon mukaan treenatessa vaihtelu on tavallista.",
@@ -10194,7 +10205,7 @@ const GYM_KEY="jarkale-gym";
 let G={v:1,programs:[],sessions:[],activeId:null,curProgramId:null,exMeta:{},timer:{dur:120,endsAt:null,pausedLeft:null,notified:null}};
 let LOG_STALE=false; // v2.18.5: sali muutti Kirjaa-lomaketta toisessa välilehdessä → piirretään palatessa
 let G_FLASH=new Set(); // v2.18.5: renderöinnissä kerran animoitavat kohteet
-const GU={pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
+const GU={goalEdit:null,pinEdit:{},editPast:null,exAll:false,mode:"home",progId:null,sessionId:null,exKey:null,menu:null,rename:null,note:{},prevNote:{},expanded:{},finishing:false,updateTpl:false,openEx:null,showArchived:false,newOpen:false,prShown:{},prMsg:{},importText:null,importPreview:null,histN:8,exSearch:""};
 function gymOn(){ return !!(S.settings.gym&&S.settings.gym.enabled); }
 function gymCfg(){ return {enabled:false,wakeLock:true,sound:true,soundLevel:"normal",vibrate:true,autoRest:false,kgStep:1.25,effort:"",...(S.settings.gym||{})}; }
 function gymLoad(){
@@ -10931,6 +10942,13 @@ function gymApplyRating(s,load,outcome){
   clearAllAnalysisCaches();
 }
 function gNote(sid,ei,v){ const s=gSession(sid); s.exercises[ei].userNote=v; gymSave(); }
+function gGoalEdit(id){ GU.goalEdit=id; GU.menu=null; GU.rename=null; renderGym(); setTimeout(()=>{ const i=document.getElementById("g-goal-in"); if(i){ i.focus(); i.select(); } },0); }
+function gSessGoal(sid,ei,v){
+  const s=gSession(sid); const ex=s&&s.exercises[ei]; if(!ex) return;
+  const t=String(v||"").trim(), p=t?parseExLine("x "+t):null;
+  if(t&&!(p&&p.parsed)){ const hn=document.querySelector(".ex-goal-hint"); if(hn) hn.textContent="Tavoitetta ei tunnistettu. Kirjoita sarjat ja toistot, esim. 3x8-10."; return; }
+  ex.goal=t?goalFields(p):null; GU.goalEdit=null; gymSave(); renderGym();
+}
 function gSkip(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; ex.skipped=!ex.skipped; GU.menu=null; gymSave(); renderGym(); }
 async function gRemoveEx(sid,ei){ const s=gSession(sid); const ex=s.exercises[ei]; if(doneSets(ex).length&&!await jConfirm(`Poistetaanko ${ex.name} ja sen kirjatut sarjat tästä treenistä?`,{ok:"Poista",danger:true})) return; s.exercises.splice(ei,1); GU.menu=null; gymSave(); renderGym(); }
 function gMoveEx(sid,ei,d){ const s=gSession(sid); const a=s.exercises; const j=ei+d; if(j<0||j>=a.length) return; [a[ei],a[j]]=[a[j],a[ei]]; GU.menu=null; gymSave(); renderGym(); }
@@ -11025,6 +11043,19 @@ function sessionDiffersFromTemplate(s){
   const p=gProg(s.programId); const d=p&&p.days.find(x=>x.id===s.dayId); if(!d) return false;
   const a=s.exercises.filter(e=>!e.skipped).map(e=>e.key).join("|"), b=d.exercises.map(e=>e.key).join("|");
   return a!==b;
+}
+// v2.18.220: mitä ohjelmapohjan päivitys muuttaa, ihmisen luettavana ("Dippi → JM press", "+ Face pull · pois Kulmasoutu", "liikkeiden järjestys")
+function tplChangeTxt(s){
+  const p=gProg(s.programId); const d=p&&p.days.find(x=>x.id===s.dayId); if(!d) return "";
+  const now=s.exercises.filter(e=>!e.skipped), was=d.exercises, nk=new Set(now.map(e=>e.key)), wk=new Set(was.map(e=>e.key));
+  const add=now.filter(e=>!wk.has(e.key)), rem=was.filter(e=>!nk.has(e.key));
+  if(!add.length&&!rem.length) return "liikkeiden järjestys";
+  // vaihto: poistettu ja lisätty samassa kohdassa → "vanha → uusi"
+  const parts=[], usedA=new Set(), usedR=new Set();
+  rem.forEach(r=>{ const i=was.indexOf(r); const a=add.find(x=>!usedA.has(x)&&Math.abs(now.indexOf(x)-i)<=1); if(a){ usedA.add(a); usedR.add(r); parts.push(`${r.name} → ${a.name}`); } });
+  add.filter(x=>!usedA.has(x)).forEach(a=>parts.push(`+ ${a.name}`));
+  const gone=rem.filter(r=>!usedR.has(r)); if(gone.length) parts.push(`pois ${gone.map(r=>r.name).join(", ")}`);
+  return parts.join(" · ");
 }
 function updateTemplateFromSession(s){
   const p=gProg(s.programId); const d=p&&p.days.find(x=>x.id===s.dayId); if(!d) return;
@@ -12022,7 +12053,7 @@ function gymSessionHTML(s){
   const firstOpen=s.exercises.findIndex((e,i)=>!e.skipped&&!exMini(s,e,i)&&e.sets.some(r=>!r.done));
   let h=`<div class="view-hero">${gBackLink(live?"Treeni (jatkuu taustalla)":"Treeni")}<div class="tr-hero-row"><div style="min-width:0;flex:1"><div class="tr-h1">${esc(s.dayName)}</div>
     <div class="tr-h2">${live?`Aloitettu ${s.date===today()?"":gDay(s.date)+" "}<span data-raw>${hhmm(s.startedAt)}</span> · ${st.done}/${st.exN} liikettä`:`${gDay(s.date)} · ${st.done} liikettä · ${st.sets} sarjaa`}</div>${s.free&&(live||GU.editPast===s.id)?gSessDateHTML(s):""}</div>
-    ${live?`<button class="tr-pill dark" onclick="gOpenFinish()">Lopeta</button>`:""}</div>${live?gProgHTML(s):""}</div>`;
+    ${live&&!GU.finishing?`<button class="tr-pill dark" onclick="gOpenFinish()">Lopeta</button>`:""}</div>${live?gProgHTML(s):""}</div>`;
   if(!live&&GU.editPast!==s.id) h+=gymSummaryHTML(s,GU.justFinished===s.id);   // v2.18.135: muokatessa yhteenveto piiloon, sarjat heti näkyviin
   // v2.18.56: tallennettu treeni avautuu vain luettavaksi; muokkaus erikseen, ettei vanhaa treeniä muuteta vahingossa
   if(!live&&GU.editPast!==s.id&&s.free&&!s.savedProgramId&&s.exercises.some(e=>doneSets(e).length)) h+=`<button class="tr-row tr-btn g-saveprog" onclick="gSaveAsProgram('${s.id}')"><div class="t"><div class="n">Tallenna ohjelmaksi</div><div class="s">Tee tämän treenin liikkeistä ja sarjamääristä ohjelma</div></div><span class="ch">›</span></button>`;
@@ -12036,8 +12067,8 @@ function gymSessionHTML(s){
       <div class="s">${st.done}/${st.exN} liikettä · ${st.sets} sarjaa · ${durTxt(Date.now()-s.startedAt)}${st.done<st.exN?`<br>Tekemättömiä sarjoja ei tallenneta.`:""}</div>
       ${trk("training")&&st.sets?`<div class="g-rate"><span class="lbl">${dayTwo?"Päivän rasitus, molemmat treenit (valinnainen)":"Rasitus (valinnainen)"}</span><div class="row">${[1,2,3,4,5].map(n=>`<button class="${GU.finLoad===n?"on":""}${G_FLASH.has("finLoad-"+n)?" pop":""}" aria-pressed="${GU.finLoad===n}" onclick="gFinRate('finLoad',${n})">${n}</button>`).join("")}</div></div>
       <div class="g-rate"><span class="lbl">${dayTwo?"Päivän treenien kulku omaan normaaliin nähden (valinnainen)":"Treenin kulku omaan normaaliin nähden (valinnainen)"}</span>${dayTwo?`<div class="g-rate-note">Päivälle on jo tallennettu treeni. Arvio korvaa päivän aiemman arvion.</div>`:""}<div class="row">${TRAINING_OUTCOMES.map(o=>`<button class="${GU.finOutcome===o.id?"on":""}${G_FLASH.has("finOutcome-"+o.id)?" pop":""}" aria-pressed="${GU.finOutcome===o.id}" onclick="gFinRate('finOutcome','${o.id}')">${o.short}</button>`).join("")}</div></div>`:""}
-      ${diff?`<label class="g-check"><input type="checkbox" ${GU.updateTpl?"checked":""} onchange="GU.updateTpl=this.checked"> Päivitä ohjelmapohja tämän treenin liikkeillä</label>`:""}
-      <div style="display:flex;gap:8px;margin-top:12px"><button class="tr-go" style="flex:1;height:46px" data-synctap onclick="finishSession()">Tallenna treeni</button><button class="tr-go ghost" style="flex:1;height:46px" onclick="GU.finishing=false;renderGym()">Jatka treeniä</button></div>
+      ${diff?`<label class="g-check"><input type="checkbox" ${GU.updateTpl?"checked":""} onchange="GU.updateTpl=this.checked"> <span>Päivitä ohjelmaan: ${esc(tplChangeTxt(s))}</span></label>`:""}
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="tr-go" style="flex:1.4;min-height:46px;height:auto;line-height:1.15;padding:6px 10px" data-synctap onclick="finishSession()">Lopeta ja tallenna</button><button class="tr-go ghost" style="flex:1;min-height:46px;height:auto;line-height:1.15;padding:6px 10px" onclick="GU.finishing=false;renderGym()">Jatka treeniä</button></div>
       <button class="g-link danger" onclick="discardSession('${s.id}')">Hylkää treeni</button></div>`;
   }
   s.exercises.forEach((ex,ei)=>{
@@ -12056,10 +12087,12 @@ function gymSessionHTML(s){
     if(GU.menu===ex.id&&GU.rename!==ex.id){
       h+=`<div class="ex-menu"><button onclick="GU.rename='${ex.id}';renderGym();setTimeout(()=>document.getElementById('g-rename')?.select(),0)">Vaihda liike</button><button onclick="gSkip('${sid}',${ei})">${ex.skipped?"Palauta":"Ohita"}</button>
         <button onclick="gMoveEx('${sid}',${ei},-1)" ${ei?"":"disabled"}>↑</button><button onclick="gMoveEx('${sid}',${ei},1)" ${ei<s.exercises.length-1?"":"disabled"}>↓</button><button class="danger" onclick="gRemoveEx('${sid}',${ei})">Poista</button>
-        <button onclick="gAddKind('${sid}',${ei},'rp')">+ R/P-sarja</button><button onclick="gAddKind('${sid}',${ei},'ds')">+ Pudotussarja (DS)</button></div>`;
+        <button onclick="gGoalEdit('${ex.id}')">Tavoite</button><button onclick="gAddKind('${sid}',${ei},'rp')">+ R/P-sarja</button><button onclick="gAddKind('${sid}',${ei},'ds')">+ Pudotussarja (DS)</button></div>`;
     }
     const gt=goalTxt(ex.goal);
-    if(gt) h+=`<div class="ex-goal">Tavoite ${gt}</div>`;
+    // v2.18.220: tavoite muokattavissa kesken treenin (esim. liikkeen vaihdon jälkeen); koskee tätä treeniä ja siirtyy ohjelmaan vain "Päivitä ohjelmaan" -valinnalla
+    if(live&&GU.goalEdit===ex.id) h+=`<div class="ex-goal-ed"><input class="g-in" id="g-goal-in" value="${esc(ex.goal&&ex.goal.sets?(ex.goal.repsMin==null&&!ex.goal.max&&!(ex.goal.groups&&ex.goal.groups.length>1)?ex.goal.sets+"x":goalInputTxt(ex.goal)):"")}" aria-label="Tavoite" placeholder="Tavoite, esim. 3x8-10" onkeydown="if(event.key==='Enter')gSessGoal('${sid}',${ei},this.value)"><button class="tr-go" onclick="gSessGoal('${sid}',${ei},document.getElementById('g-goal-in').value)">OK</button></div><div class="ex-goal-hint">Koskee tätä treeniä. Esim. 3x8-10 tai 3x10 60.</div>`;
+    else if(gt) h+=live?`<button class="ex-goal ex-goal-btn" onclick="gGoalEdit('${ex.id}')" aria-label="Muuta tavoitetta">Tavoite ${gt}</button>`:`<div class="ex-goal">Tavoite ${gt}</div>`;
     h+=gPinHTML(ex.key);
     // v2.18.25: supersarja näkyvänä merkkinä, ei pienenä huomiotekstinä
     if(ex.note){ const m=/^Supersarja:\s*(.+)$/i.exec(ex.note); h+=m?`<div class="ex-ss">⇄ Supersarja: ${esc(m[1])}</div>`:`<div class="ex-prev">${esc(ex.note)}</div>`; }
@@ -13010,7 +13043,7 @@ function gBackupNudgeHTML(){
     <button onclick="event.stopPropagation();GU.bkHide=true;renderGym()" aria-label="Sulje muistutus">×</button></div>`;
 }
 function syncOnStart(){ renderSyncUI(); try{ renderNewsCard(); }catch(_){} if(SYNC_AVAILABLE&&syncState().enabled){ loadGis().catch(()=>{}); if(syncTokenValid()) syncNow({silent:true}); } }
-// v2.18.8: vanhentunut kirjautuminen uusitaan vain Tallenna treeni -painalluksesta (data-synctap).
+// v2.18.8: vanhentunut kirjautuminen uusitaan vain Lopeta ja tallenna -painalluksesta (data-synctap).
 // v2.18.7 uusi myös Kirjaa-napeista, mutta Googlen ikkunan välähdys keskellä kirjaamista näytti virheeltä.
 // Tallennuksessa jotain odotetaankin tapahtuvan, ja onnistuminen kuitataan ilmoituksella.
 // Epäonnistuneen yrityksen jälkeen 10 min tauko.

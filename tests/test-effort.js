@@ -86,7 +86,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>setGymOpt('effort','rir'));
   await p.evaluate(()=>{ setTab('treeni'); renderGym(); }); await p.waitForTimeout(100);
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
-  await p.getByRole('button',{name:'Tallenna treeni'}).click(); await p.waitForTimeout(200);
+  await p.getByRole('button',{name:'Lopeta ja tallenna'}).click(); await p.waitForTimeout(200);
   ok(/RIR 2/.test(await p.locator('.g-sum').innerText()),'yhteenvedossa RIR 2');
   ok(await p.evaluate(()=>/Penkki: .*RIR 2/.test(sessionShareText(G.sessions.filter(x=>x.endedAt).at(-1)))),'jaettavassa tekstissä RIR 2');
   await p.evaluate(()=>setGymOpt('effort',''));

@@ -46,7 +46,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ const pr=G.programs[0]; GU.mode='home'; startSession(pr.id,pr.days[0].id); });
   await p.fill('[data-set="0-0"] input[data-f="kg"]','20'); await p.fill('[data-set="0-0"] input[data-f="reps"]','8'); await p.locator('[data-set="0-0"] .ck').click();
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
-  await p.getByRole('button',{name:'Tallenna treeni'}).click(); await p.waitForTimeout(200);
+  await p.getByRole('button',{name:'Lopeta ja tallenna'}).click(); await p.waitForTimeout(200);
   let sum=await p.locator('.g-sum').innerText();
   ok(/Ensimmäinen treeni tallennettu/.test(sum)&&!/Ei ennätyksiä/.test(sum),'ensimmäinen yhteenveto ei väitä ennätysten puuttuvan');
   ok(/alkavat näkyä/.test(sum)&&!/Nuoli:/.test(sum),'selite kertoo vertailun alkavan toisesta kerrasta');
@@ -56,7 +56,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   await p.evaluate(()=>{ setTab('treeni'); const pr=G.programs[0]; GU.mode='home'; startSession(pr.id,pr.days[0].id); });
   await p.fill('[data-set="0-0"] input[data-f="kg"]','20'); await p.fill('[data-set="0-0"] input[data-f="reps"]','8'); await p.locator('[data-set="0-0"] .ck').click();
   await p.getByRole('button',{name:'Lopeta',exact:true}).click();
-  await p.getByRole('button',{name:'Tallenna treeni'}).click(); await p.waitForTimeout(200);
+  await p.getByRole('button',{name:'Lopeta ja tallenna'}).click(); await p.waitForTimeout(200);
   sum=await p.locator('.g-sum').innerText();
   ok(!/Ensimmäinen treeni tallennettu/.test(sum)&&/Liikkeet/.test(sum)&&/Nuoli:/.test(sum),'toisen treenin yhteenveto on tavallinen');
 

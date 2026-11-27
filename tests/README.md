@@ -58,6 +58,7 @@ tests/run.sh test-gym.js
 | `test-trendsparse.js` | Trendit: kerran viikossa mitattu verenpaine ja verensokeri käyränä viikkonäkymässäkin (8 viimeisintä, 90 pv), migreenipäivät viikoittain |
 | `test-trendreliab.js` | Trendien luotettavuus: muutos vain kohinarajan yli, ei arvottavia värejä, salivertailu parhaalla sarjalla vs. edellinen jakso, alustava yhteys piilossa |
 | `test-logfit.js` | Kirjaa-näkymä puhelimessa: paino, uni ja askeleet rinnakkain, kun luvut mahtuvat, muuten askeleet tiiviinä rivinä; 18 teemaa × 3 tekstikokoa × 360/412 px, luvut eivät leikkaudu eivätkä mene yksikön päälle; tabletti ennallaan |
+| `test-finish.js` | Treenin lopetus: yläreunan Lopeta piiloon lopetusnäkymässä, päänappi Lopeta ja tallenna, ohjelmapohjan muutos kuvattuna (vaihto, lisätty, pois, järjestys); tavoitteen muokkaus kesken treenin (⋯ → Tavoite, tavoiterivi, virheellinen syöte) ja siirto ohjelmaan |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

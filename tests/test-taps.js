@@ -45,7 +45,7 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
   ok(taps-t0===6&&await p.evaluate(()=>activeSession().exercises.slice(1).every(e=>e.sets.every(r=>r.done&&r.reps===8))),'kaksi liikettä × 3 sarjaa kuten viimeksi: 6 napautusta');
 
   console.log('\nLopetus');
-  t0=taps; await tap(p.getByRole('button',{name:'Lopeta',exact:true})); await tap(p.getByRole('button',{name:'Tallenna treeni'}));
+  t0=taps; await tap(p.getByRole('button',{name:'Lopeta',exact:true})); await tap(p.getByRole('button',{name:'Lopeta ja tallenna'}));
   ok(taps-t0===2&&await p.evaluate(()=>!G.activeId&&G.sessions.filter(s=>s.endedAt).length===2),'lopetus ja tallennus: 2 napautusta');
   const total=taps;
   ok(total===17,`koko treeni (3 liikettä × 3 sarjaa, yksi painonnosto, yksi toistonlisäys, yksi korjaus): ${total} napautusta`);

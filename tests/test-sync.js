@@ -157,10 +157,10 @@ const drive=()=>JSON.parse((byName('jarkale-data.json')||{}).content||'{}');
     localStorage.removeItem('jarkale-sync-token'); fake.click(); await wait(100); out.cool=window.__gisCalls;
     fake.remove(); return out; });
   ok(rn.kirjaa===0,'Kirjaa-napit eivät avaa Googlen ikkunaa');
-  ok(rn.first===1,'Tallenna treeni uusii vanhentuneen kirjautumisen');
+  ok(rn.first===1,'Lopeta ja tallenna uusii vanhentuneen kirjautumisen');
   ok(rn.valid&&rn.synced,'uusimisen jälkeen synkronoidaan heti');
   ok(rn.cool===1,'10 min tauko: ei uutta yritystä joka napautuksesta');
-  ok(await A.evaluate(()=>!!document.querySelector('[data-synctap]')||finishSession.toString().length>0),'Tallenna treeni -napissa merkintä');
+  ok(await A.evaluate(()=>!!document.querySelector('[data-synctap]')||finishSession.toString().length>0),'Lopeta ja tallenna -napissa merkintä');
 
   console.log('\nUusinta ei kysy tiliä eikä lupaa uudelleen (v2.18.18)');
   const rr=await A.evaluate(async()=>{ const wait=ms=>new Promise(r=>setTimeout(r,ms));
