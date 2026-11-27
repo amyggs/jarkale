@@ -2442,7 +2442,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.214</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.215</span>
       </div>
     </div>
   </div>
@@ -2507,6 +2507,10 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.215", d:"marraskuu 2026", items:[
+    "Trendien salitreenit: \"Nousi / Ennallaan / Laski\" -listat korvattu jakson uusilla ennätyksillä (sama sääntö kuin treenin aikana, verrattuna kaikkeen ennen jaksoa) ja aiemmalla parhaalla. Syy (Aku): kunnon mukaan treenatuissa liikkeissä \"laski\" on tavallista vaihtelua, ja kuukausivertailu eri toistoalueilla oli harhaanjohtava. Mikä muuttui -kortissa ennätysliikkeet nimeltä (\"Uusia ennätyksiä 4: RDL, Hack kyykky, Reiden ojennukset ja 1 muu\").",
+    "Korjattu: \"Treenipäiviä 3,3 viikossa, tavoitteen (4) mukaisesti\" – nyt \"Treenipäiviä 3,3 viikossa, tavoite 4\" ilman tulkintaa."
+  ]},
   {v:"2.18.214", d:"marraskuu 2026", items:[
     "Trendit uudelleen (Akun havainto: paljon dataa, mutta ei tartu mihinkään). Yksi kortti per seurattava asia: luku, muutos, käyrä ja kattavuus samassa kortissa. Järjestys kiinteä: Mikä muuttui, Salitreenit/Treeni, Paino, Uni, Palautuminen ja vire, Askeleet, Lääkkeet, Verenpaine, Verensokeri, Migreeni, Kivut.",
     "Mikä muuttui -kortti ylimpänä: muutokset edelliseen jaksoon vain kohinarajan yli (uni 15 min, 1–5-asteikot 0,3, askeleet 10 %, liikkeiden parhaat sarjat) sekä aiemmat havainnot. Viikkonäkymässä sama kortti viikkoyhteenvedon alla.",
@@ -6529,10 +6533,7 @@ function buildInsightsHTML(start, effEnd, curr, opts={}) {
     const weeks=Math.max(1,Math.round(curr.totalDays/7));
     const pw=curr.trainingDays/weeks, avg=Number.isInteger(pw)?String(pw):pw.toFixed(1);
     const target=g.workoutsPerWeek;
-    if(pw<target*0.75)
-      insights.push(`Treenipäiviä ${avg} viikossa, tavoite ${target}.`);
-    else
-      insights.push(`Treenipäiviä ${avg} viikossa, tavoitteen (${target}) mukaisesti.`);
+    insights.push(`Treenipäiviä ${avg.replace(".",",")} viikossa, tavoite ${target}.`); // v2.18.215: ei tulkintaa (3,3 ≠ "tavoitteen mukaisesti" 4:stä)
   }
 
   // 5. Cardio vs tavoite
@@ -6586,9 +6587,9 @@ function tcard(o){
     ${o.body||""}${o.foot?`<div class="tc-f">${o.foot}</div>`:""}</div>`;
 }
 // Mikä muuttui: muutokset edelliseen jaksoon vain kohinarajan yli (uni 15 min, 1–5-asteikot 0,3, askeleet 10 %)
-function trendChangeLines(curr,prev,gc,pl="edellisellä jaksolla"){
-  const L=[]; if(!prev) return L;
-  if(gc&&(gc.up.length||gc.down.length)) L.push(`Liikkeistä ${gc.up.length} nousi${gc.down.length?`, ${gc.down.length} laski`:""}${gc.same.length?` ja ${gc.same.length} pysyi ennallaan`:""} ${pl==="edellisellä viikolla"?"edelliseen viikkoon":"edelliseen jaksoon"} verrattuna.`);
+function trendChangeLines(curr,prev,gp,pl="edellisellä jaksolla"){
+  const L=[]; const pr=gymPRLine(gp); if(pr) L.push(pr);
+  if(!prev) return L;
   if(curr.avgSleep!=null&&prev.avgSleep!=null){ const d=Math.round((curr.avgSleep-prev.avgSleep)*60);
     if(Math.abs(d)>=15) L.push(`Uni ${Math.abs(d)} min ${d>0?"pidempi":"lyhyempi"} kuin ${pl} (${fmtSleepText(curr.avgSleep)}).`); }
   [["avgRecovery","Palautuminen","recovery"],["avgMotivation","Yleinen vire","motivation"]].forEach(([k,l,t])=>{
@@ -6600,7 +6601,7 @@ function trendChangeLines(curr,prev,gc,pl="edellisellä jaksolla"){
 }
 function trendCardsHTML(start,end,curr,prev,rangeShortLabel,D){
   let h=""; const g=getActiveGoals(end), ue=Object.values(S.entries).filter(e=>e.date>=start&&e.date<=end);
-  const gc=gymOn()?gymCompare(start,end):null;
+  const gc=gymPRs(start,end);
   // 1. Mikä muuttui
   h+=buildInsightsHTML(start,end,curr,{title:"Mikä muuttui",sub:prev?`vs. edellinen ${rangeShortLabel}`:"",extra:trendChangeLines(curr,prev,gc),empty:prev?"Ei selviä muutoksia edelliseen jaksoon.":""});
   // 2. Treeni
@@ -6707,7 +6708,7 @@ function renderTrendit() {
   const rangeShortLabel={d28:"28 pv",vko:"viikko",kk:"kuukausi",q:"90 pv",vuosi:"vuosi",free:"jakso",all:""}[S.rangeId]||"";
   if(S.rangeId==="vko"){
     // v2.18.214: viikkoyhteenveto (aiheittain) → Mikä muuttui → sali → kivut → avattavat. Erillinen Yhteenveto-osio (samat luvut toiseen kertaan) poistettu.
-    const gcW=gymOn()?gymCompare(start,end):null;
+    const gcW=gymPRs(start,end);
     const mid=buildInsightsHTML(start,end,curr,{title:"Mikä muuttui",sub:prev?"vs. edellinen viikko":"",extra:trendChangeLines(curr,prev,gcW,"edellisellä viikolla")})+gymTrendHTML(start,end)+buildInjurySummaryHTML(start,end)+buildConnectionsHTML(start,end);
     contentEl.innerHTML=buildWeekView(start,range.end,mid);
     requestAnimationFrame(()=>{
@@ -8131,6 +8132,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Trendien salitreeneissä näkyvät jakson uudet ennätykset ja aiempi paras. Liikkeitä ei enää jaeta nousseisiin ja laskeneisiin, koska kunnon mukaan treenatessa vaihtelu on tavallista.",
     "Trendit on selkeämpi. Ylimpänä näkyy, mikä muuttui edelliseen jaksoon verrattuna, ja jokaisella seurattavalla asialla on oma korttinsa, jossa keskiarvo, käyrä ja kirjausmäärä ovat yhdessä. Samoja lukuja ei enää toisteta useassa kohdassa.",
     "Trendit kertoo muutoksen vain, kun se on selvä. Pienet heilahdukset näkyvät sanalla \"ennallaan\". Liikkeiden kehitys verrataan nyt parhaaseen sarjaan edelliseen jaksoon nähden, joten yksi kevyt treeni ei käännä suuntaa.",
     "Trendeissä verenpaineen käyrä näkyy nyt, vaikka mittaisit vain kerran viikossa: käyrä näyttää viimeiset mittaukset. Verensokerille on oma käyrä ja migreenipäiville viikoittainen kaavio."
@@ -12377,33 +12379,37 @@ function gymExerciseHTML(key){
 }
 
 // ── Trendit: jakson liikekehitys (vain kun ominaisuus on päällä ja dataa on)
-function gymCompare(start,end){
+// v2.18.215: Trendien sali = uudet ennätykset tällä jaksolla (sama sääntö kuin treenin aikana, isPR), verrattuna
+// kaikkeen ennen jaksoa. Ennen: jakson paras vs. edellisen jakson paras → "Nousi/Laski"-listat, jotka eivät sovi
+// kunnon mukaan treenattaviin liikkeisiin (lasku = tavallista vaihtelua). Laskuja ei listata, uudet liikkeet eivät ole ennätyksiä.
+function gymPRs(start,end){
   if(!gymOn()) return null;
-  const ss=G.sessions.filter(s=>s.endedAt&&s.date>=start&&s.date<=end);
-  if(!ss.length) return null;
-  // v2.18.213: vertailu = jakson paras sarja vs. edellisen yhtä pitkän jakson paras sarja (e1RM).
-  // Ennen jakson ensimmäinen ja viimeinen yksittäinen kerta → yksi huono päivä tai kevennysviikko käänsi suunnan.
-  const {start:pS,end:pE}=getPrevPeriod(start,end);
-  const best=list=>{ const map={}; list.forEach(s=>s.exercises.forEach(e=>{ const d=doneSets(e); if(!d.length) return; const b=bestSet(d); const v=e1c(b.kg,b.reps);
-    if(!map[e.key]||v>map[e.key].v) map[e.key]={v,set:b,name:e.name}; })); return map; };
-  const cur=best(ss), prev=best(G.sessions.filter(s=>s.endedAt&&s.date>=pS&&s.date<=pE));
-  const up=[], same=[], down=[]; let fresh=0;
-  Object.keys(cur).forEach(k=>{ const a=prev[k], b=cur[k]; if(!a){ fresh++; return; } if(!a.v||!b.v) return;
-    const lab=`${esc(b.name)}: ${a.set.kg!=null?kgX(a.set.kg):""}${a.set.reps} → ${b.set.kg!=null?kgX(b.set.kg):""}${b.set.reps}`;
-    const dr=setDir(a.set,b.set,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab); });
-  return {ss,up,same,down,fresh};
+  const all=G.sessions.filter(s=>s.endedAt).sort((a,b)=>a.date.localeCompare(b.date)||(a.startedAt||0)-(b.startedAt||0));
+  const ss=all.filter(s=>s.date>=start&&s.date<=end); if(!ss.length) return null;
+  const before={}; all.filter(s=>s.date<start).forEach(s=>s.exercises.forEach(e=>{ (before[e.key]=before[e.key]||[]).push(...doneSets(e)); }));
+  const prs={};
+  ss.forEach(s=>s.exercises.forEach(e=>{ const prev=before[e.key]||[]; if(!prev.length) return;
+    doneSets(e).forEach(r=>{ if(!isPR(r,prev)) return; const cur=prs[e.key];
+      const better=!cur||(r.kg!=null&&cur.set.kg!=null?(r.kg>cur.set.kg||e1c(r.kg,r.reps)>e1c(cur.set.kg,cur.set.reps)):r.reps>cur.set.reps);
+      if(better) prs[e.key]={name:e.name,set:r,prev}; }); }));
+  const list=Object.values(prs).map(x=>{ const w=x.prev.filter(p=>p.kg!=null&&p.reps), bw=x.prev.filter(p=>p.kg==null);
+    const st=(kg,reps)=>kg!=null?`${kgX(kg)}${reps}`:`${reps}\u00a0toistoa`;
+    const pb=x.set.kg==null?(bw.length?`${Math.max(...bw.map(p=>p.reps))}\u00a0toistoa`:""):(w.length?(x.set.kg>Math.max(...w.map(p=>p.kg))?st(...(t=>[t.kg,t.reps])(w.reduce((a,p)=>p.kg>a.kg||(p.kg===a.kg&&p.reps>a.reps)?p:a))):st(bestSet(w).kg,bestSet(w).reps)):"");
+    return {name:x.name,txt:`${esc(x.name)} ${st(x.set.kg,x.set.reps)}${pb?`<span style="color:var(--dim)"> · aiempi paras ${pb}</span>`:""}`}; });
+  return {ss,list};
 }
+function gymPRLine(gp){ if(!gp||!gp.list.length) return ""; const n=gp.list.map(x=>x.name), k=n.length;
+  const names=k<=3?n.join(k===3?", ":" ja ").replace(/, ([^,]*)$/," ja $1"):`${n.slice(0,3).join(", ")} ja ${k-3} ${k-3===1?"muu":"muuta"}`;
+  return `${k===1?"Uusi ennätys":`Uusia ennätyksiä ${k}`}: ${names}.`; }
 function gymTrendHTML(start,end,foot){
-  const c=gymCompare(start,end); if(!c) return "";
-  const {ss,up,same,down,fresh}=c;
-  const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0), any=up.length||same.length||down.length;
+  const gp=gymPRs(start,end); if(!gp) return "";
+  const {ss,list}=gp, sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0);
   let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
-    <div style="font-size:13px;color:var(--dim);margin-bottom:${any?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
-  const grp=(t,a)=>a.length?`<div class="lbl-small" style="margin-top:8px">${t} (${a.length})</div>${a.slice(0,5).map(x=>`<div style="font-size:14px;color:var(--text);padding:3px 0">${x}</div>`).join("")}${a.length>5?`<div style="font-size:13px;color:var(--dim);padding:3px 0">+ ${a.length-5} muuta. Kaikki liikkeet: Treeni → Liikkeiden kehitys</div>`:""}`:"";
-  h+=grp("Nousi",up)+grp("Ennallaan",same)+grp("Laski",down);
-  if(any) h+=`<div style="font-size:11px;color:var(--dim);margin-top:8px">Paras sarja tällä jaksolla verrattuna edelliseen yhtä pitkään jaksoon.${fresh?` ${fresh}\u00a0${fresh===1?"liike on":"liikettä on"} uusia tällä jaksolla.`:""}</div>`;
-  else h+=`<div style="font-size:13px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty myös edellisellä jaksolla.</div>`;
-  if(foot) h+=`<div class="tc-f">${foot}</div>`;
+    <div style="font-size:13px;color:var(--dim);margin-bottom:10px">${ss.length} treeniä · ${sets} sarjaa</div>`;
+  if(list.length) h+=`<div class="lbl-small" style="margin-top:8px">Ennätykset tällä jaksolla (${list.length})</div>`+list.slice(0,6).map(x=>`<div style="font-size:14px;color:var(--text);padding:3px 0">${x.txt}</div>`).join("")
+    +(list.length>6?`<div style="font-size:13px;color:var(--dim);padding:3px 0">+ ${list.length-6} muuta</div>`:"");
+  else h+=`<div style="font-size:13px;color:var(--dim)">Ei uusia ennätyksiä tällä jaksolla.</div>`;
+  h+=`<div class="tc-f">Ennätys = liikkeen raskain paino tai paras laskettu suoritus. Kaikkien liikkeiden kehitys: Treeni → liike.${foot?`<br>${foot}`:""}</div>`;
   return h+`</div>`;
 }
 // ═══ GOOGLE DRIVE -SYNKRONOINTI (v2.18.0) ═══════════════════════════

@@ -23,8 +23,9 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(/Yleinen vire 3,8\/5, edellisellä jaksolla 3,0\/5\./.test(mm),'kohinarajan ylittävä muutos näkyy ('+mm.replace(/\n/g,' ').slice(0,200)+')');
   ok(!/Askeleita/.test(mm)&&/Askeleet[\s\S]{0,10}ka[\s\S]{0,5}8 300/.test(r.txt),'askeleiden alle 10 % muutos ei nouse korttiin; Askeleet-kortti näyttää keskiarvon');
   ok(r.colored===0,'muutosnuolet eivät ole vihreitä tai punaisia');
-  ok(/Nousi \(1\)[\s\S]*Penkkipunnerrus: 100 kg × 5 → 105 kg × 5/.test(r.txt)&&!/Laski \(/.test(r.txt)&&/Liikkeistä 1 nousi edelliseen jaksoon verrattuna/.test(mm),'kevennyskerta ei käännä suuntaa: paras sarja vs. edellinen jakso');
-  ok(/Paras sarja tällä jaksolla verrattuna edelliseen/.test(r.txt),'vertailun peruste kerrotaan');
+  ok(/Ennätykset tällä jaksolla \(1\)\s*Penkkipunnerrus 105 kg × 5 · aiempi paras 100 kg × 5/.test(r.txt)&&!/Laski|Nousi/.test(r.txt),'sali: jakson uusi ennätys ja aiempi paras, ei nousi/laski-listoja; kevennyskerta ei näy');
+  ok(/Uusi ennätys: Penkkipunnerrus\./.test(mm),'Mikä muuttui nimeää ennätysliikkeen ('+mm.replace(/\n/g,' ').slice(0,160)+')');
+  ok(/Ennätys = liikkeen raskain paino/.test(r.txt),'ennätyksen peruste kerrotaan');
   const c2=await p.evaluate(()=>{ const html=buildConnectionsHTML(iso(new Date(Date.now()-20*864e5)),today()); return html; });
   ok(c2==='','alustavaa yhteyttä (pieni otos) ei näytetä');
   // v2.18.214: aihekortit
@@ -38,6 +39,15 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(!/BMI|Datan kattavuus|Vaihteluväli|Graafit/.test(st.t28),'28 pv: ei BMI:tä, kattavuusosiota eikä erillistä Graafit-osiota');
   ok(/punnittu \d+\/28 pv/.test(st.t28)&&/kirjattu \d+\/28 yötä/.test(st.t28),'kattavuus kortin alarivillä');
   ok(/Mikä muuttui/.test(st.tv)&&/vs\. edellinen viikko/.test(st.tv)&&!/\nYhteenveto\n/.test(st.tv)&&!/Viikon seuranta|VIIKON SEURANTA|Analyysi ja koosteet/.test(st.tv),'viikkonäkymä: Mikä muuttui, ei tuplayhteenvetoa, ei tyhjää Analyysi-osiota ilman avainta');
+  const pr2=await p.evaluate(()=>{ const t=new Date(today()+'T00:00:00'); const D=o=>{ const d=new Date(t); d.setDate(t.getDate()-o); return iso(d); };
+    const ses=(o,ex)=>({id:'q'+o,date:D(o),startedAt:Date.parse(D(o)+'T17:00:00'),endedAt:Date.parse(D(o)+'T18:00:00'),exercises:ex});
+    const E=(key,name,kg,reps)=>({key,name,sets:[{kg,reps,done:true}]});
+    G.sessions=[ses(40,[E('a','RDL',150,12),E('b','Hack kyykky',60,10),E('c','Jalkaprässi',165,12),E('d','Reiden ojennukset',105,12),E('e','Pohkeet',65,12)]),
+      ses(5,[E('a','RDL',170,12),E('b','Hack kyykky',70,10),E('c','Jalkaprässi',157.5,30),E('d','Reiden ojennukset',105,14),E('e','Pohkeet',60,12),E('f','Uusi liike',50,10)])];
+    S.settings.goals={workoutsPerWeek:4}; for(let o=0;o<28;o++) if(o%2===0) S.entries[D(o)]={...S.entries[D(o)],training_done:true};
+    S.rangeId='d28'; renderTrendit(); return document.getElementById('content').innerText.replace(/\u00a0/g,' '); });
+  ok(/Uusia ennätyksiä 3: RDL, Hack kyykky ja Reiden ojennukset\./.test(pr2),'ennätysliikkeet nimeltä; kevyempi paino isoilla toistoilla, lasku ja uusi liike eivät ole ennätyksiä');
+  ok(/Treenipäiviä \d+(,\d)? viikossa, tavoite 4\./.test(pr2)&&!/mukaisesti/.test(pr2),'treenipäivät ilman tulkintaa');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();
