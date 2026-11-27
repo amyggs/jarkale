@@ -97,7 +97,7 @@ SITE="$ROOT/../jarkale-site"
 if [ -d "$SITE/.git" ]; then
   # jarkale.com: linkit uuteen osoitteeseen, ei pilottimerkintää (pilotin oma esittely pitää vanhat linkit siirtoon asti)
   sed -e 's#https://amyggs.github.io/jarkale-pilotti/#https://app.jarkale.com/#g' -e 's#nimenä näkyy amyggs.github.io#nimenä näkyy app.jarkale.com#' \
-      -e 's#<span>Pilotti 2.18 · 2026</span>#<span>Treenipäiväkirja · 2026</span>#' "$PILOT/esittely.html" > "$SITE/index.html"
+      -e 's#<span>Treenipäiväkirja ja kehon seuranta · pilotti</span>#<span>Treenipäiväkirja ja kehon seuranta</span>#' "$PILOT/esittely.html" > "$SITE/index.html"
   ! grep -q "amyggs.github.io\|Pilotti 2" "$SITE/index.html" || die "jarkale.com: vanha osoite tai pilottimerkintä jäi esittelyyn"
   for f in tietosuoja.html icon-192.png icon-512.png apple-touch-icon.png; do cp "$ROOT/$f" "$SITE/$f"; done
   rm -rf "$SITE/kuvat"; cp -r "$PILOT/kuvat" "$SITE/kuvat"
