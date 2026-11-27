@@ -56,6 +56,7 @@ tests/run.sh test-gym.js
 | `test-measdraft.js` | Mittauslomakkeen ja ohjelmatuonnin tekstin luonnos säilyy, vaikka sovellus suljetaan ennen tallennusta; tallennus ja peruminen poistavat luonnoksen; FFMI ihopoimuista omana rivinään |
 | `test-photos.js` | Kehityskuvat (vaihe 1, ei pilotissa): lisäys kulmineen ja omine nimineen, pienennys, viikkoryhmittely ja painon keskiarvo, vertailu, katselu/muokkaus/poisto, pysyvyys, jako, zip-tallennus ja täsmällinen palautus, tuplien esto, Näytä kaikki |
 | `test-trendsparse.js` | Trendit: kerran viikossa mitattu verenpaine ja verensokeri käyränä viikkonäkymässäkin (8 viimeisintä, 90 pv), migreenipäivät viikoittain |
+| `test-trendreliab.js` | Trendien luotettavuus: muutos vain kohinarajan yli, ei arvottavia värejä, salivertailu parhaalla sarjalla vs. edellinen jakso, alustava yhteys piilossa |
 
 - `run.sh` käynnistää kaksi paikallista palvelinta: 8765 (nykyinen versio) ja 8766 (vertailuversio).
 - `fixtures/ohjelma-esimerkki.md` on keksitty ohjelma, jonka rakenne vastaa valmentajan tekstiohjelmaa. Oikeaa ohjelmaa ei tallenneta julkiseen repoon.

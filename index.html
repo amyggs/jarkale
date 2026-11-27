@@ -2432,7 +2432,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.212</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.213</span>
       </div>
     </div>
   </div>
@@ -2497,6 +2497,12 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.213", d:"marraskuu 2026", items:[
+    "Trendit, luotettavuus: muutos edelliseen jaksoon näytetään vain, jos se ylittää kohinarajan (1–5-asteikot 0,3, askeleet 10 %), muuten \"ennallaan\". Muutosnuolet eivät enää ole vihreitä tai punaisia (Järkäle ei arvota).",
+    "Salitreenit Trendeissä: liikkeen kehitys = jakson paras sarja verrattuna edellisen yhtä pitkän jakson parhaaseen. Ennen verrattiin jakson ensimmäistä ja viimeistä kertaa, jolloin yksi huono päivä tai kevennysviikko käänsi suunnan.",
+    "\"Yhteys datastasi (alustava)\" ei enää näy: pieni otos näytti löydöltä, vaikka ero voi olla sattumaa.",
+    "Trendeissä ei enää arvottavia värejä: lääkkeiden ottoprosentti, kivun suunta ja taso sekä tavoitepaino neutraalein värein. Yhteenvedossa desimaalipilkku (ennen \"3.1/5\"). Korjattu: askelten muutosmerkintä katosi lukuanimaation jälkeen."
+  ]},
   {v:"2.18.212", d:"marraskuu 2026", items:[
     "Trendit, korjauksia: viikon unen keskiarvo oli pyöristetty 0,1 tuntiin, joten sama viikko näytti 7 h 36 min ja havainnoissa 7 h 34 min. Viikon päivälistassa uni muodossa \"6 h 56 min\" (ennen \"6,94 h\") ja \"Verenpaine\" (ennen \"RR\"). Verenpaineen käyrä aika-akselilla: väliin jäänyt mittausviikko näkyy välinä."
   ]},
@@ -4785,21 +4791,22 @@ function buildSummaryHTML(curr,prev,rangeLabel,asOfDate){
   const movingTowardGoal=curr.weightRate!=null&&desiredDirection!==0&&Math.sign(curr.weightRate)===desiredDirection;
   const weeksToGoal=(trendReliable&&movingTowardGoal&&distanceToGoal>0.5)?Math.ceil(distanceToGoal/Math.abs(curr.weightRate)):null;
   const p=prev;
-  const chg=(c,pp,inv=false)=>{
+  // v2.18.213: muutos näytetään vain, jos se ylittää kohinarajan (thr); muuten "ennallaan". Ei arvottavia värejä (periaate 3).
+  const chg=(c,pp,inv=false,thr=0)=>{
     if(c==null||pp==null) return "";
-    const d=+(c-pp).toFixed(1);
-    if(d===0) return `<span style="color:var(--dim);font-size:11px;margin-left:6px">±0</span>`;
-    const good=inv?d<0:d>0;
-    return `<span style="color:${good?"var(--green)":"var(--red)"};font-size:11px;margin-left:6px;font-weight:600">${d>0?"↑ +":"↓ "}${Math.abs(d)}</span>`;
+    const d=(+c)-(+pp);
+    if(Math.abs(d)<thr||Math.abs(d)<0.05) return `<span style="color:var(--dim);font-size:11px;margin-left:6px;font-weight:500">ennallaan</span>`;
+    const dd=Math.abs(d)>=10?Math.round(Math.abs(d)).toLocaleString("fi"):String(+Math.abs(d).toFixed(1)).replace(".",",");
+    return `<span style="color:var(--text);font-size:11px;margin-left:6px;font-weight:600">${d>0?"↑ +":"↓ −"}${dd}</span>`;
   };
-  const row=(lbl,val,unit,prevVal,inv=false,accent="var(--text)")=>{
+  const row=(lbl,val,unit,prevVal,inv=false,accent="var(--text)",thr=0)=>{
     if(val==null) return "";
     const isNum=typeof val==="number";
-    const display=isNum?(Number.isInteger(val)?val.toLocaleString("fi"):val.toFixed(1)):val;
+    const display=isNum?(Number.isInteger(val)?val.toLocaleString("fi"):val.toFixed(1).replace(".",",")):(/^-?\d+\.\d+$/.test(String(val))?String(val).replace(".",","):val); // v2.18.213: desimaalipilkku
     const ca=isNum?`data-count="${isNum?val:''}" data-suffix="${unit}"`:"";
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bord)">
       <span style="color:var(--dim);font-size:13px">${lbl}</span>
-      <span ${ca} style="font-size:15px;font-weight:700;color:${accent}">${display}${unit}${p?chg(val,prevVal,inv):""}</span>
+      <span style="font-size:15px;font-weight:700;color:${accent}"><span ${ca}>${display}${unit}</span>${p?chg(val,prevVal,inv,thr):""}</span>
     </div>`;
   };
   const sleepGoalS=activeGoals.sleepHours||7;
@@ -4838,18 +4845,18 @@ function buildSummaryHTML(curr,prev,rangeLabel,asOfDate){
         </div>
       </div>`;
     })()}
-    ${goalReached?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bord)"><span style="color:var(--dim);font-size:13px">Tavoitepaino</span><span style="color:var(--green);font-size:13px;font-weight:700">✓ Saavutettu</span></div>`:""}
+    ${goalReached?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bord)"><span style="color:var(--dim);font-size:13px">Tavoitepaino</span><span style="color:var(--text);font-size:13px;font-weight:700">✓ Saavutettu</span></div>`:""}
     ${curr.minWeight!=null&&curr.maxWeight!=null?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bord)"><span style="color:var(--dim);font-size:13px">Vaihteluväli</span><span style="color:var(--text);font-size:13px;font-weight:600">${curr.minWeight.toFixed(1)} – ${curr.maxWeight.toFixed(1)} kg</span></div>`:""}
-    ${row("Palautuminen",curr.avgRecovery?.toFixed(1)??null,"/5",p?.avgRecovery,false)}
-    ${row("Yleinen vire",curr.avgMotivation?.toFixed(1)??null,"/5",p?.avgMotivation,false)}
-    ${curr.avgSteps!=null?row("Askeleet ka",Math.round(curr.avgSteps),"/pv",p?.avgSteps?Math.round(p.avgSteps):null,false):""}
+    ${row("Palautuminen",curr.avgRecovery?.toFixed(1)??null,"/5",p?.avgRecovery,false,"var(--text)",0.3)}
+    ${row("Yleinen vire",curr.avgMotivation?.toFixed(1)??null,"/5",p?.avgMotivation,false,"var(--text)",0.3)}
+    ${curr.avgSteps!=null?row("Askeleet ka",Math.round(curr.avgSteps),"/pv",p?.avgSteps?Math.round(p.avgSteps):null,false,"var(--text)",Math.max(500,(p?.avgSteps||0)*0.1)):""}
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0${curr.medAdherence?.length?";border-bottom:1px solid var(--bord)":""}">
       <span style="color:var(--dim);font-size:13px">Kirjauksia</span>
       <span style="font-size:15px;font-weight:700;color:var(--text)">${curr.loggedDays}<span style="color:var(--dim);font-size:13px;font-weight:400"> / ${curr.totalDays} pv</span></span>
     </div>
     ${(curr.medAdherence||[]).map(m=>{
       const pct=m.scheduled>0?Math.round(m.taken/m.scheduled*100):0;
-      const col=pct>=80?"var(--green)":pct>=50?"var(--yellow)":"var(--red)";
+      const col="var(--text)"; // v2.18.213: ei arvottavia värejä
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
         <span style="color:var(--dim);font-size:13px">${esc(m.name)}</span>
         <div style="display:flex;align-items:center;gap:8px">
@@ -6408,7 +6415,8 @@ function findConnections(start, effEnd){
 function buildConnectionsHTML(start, effEnd){
   const conn=findConnections(start, effEnd);
   if(!conn) return "";
-  const tentative=conn.n<60; // alle 30+30 kokonaisotos — merkitään kokeelliseksi
+  const tentative=conn.n<60; // alle 30+30 kokonaisotos
+  if(tentative) return ""; // v2.18.213: alustavaa yhteyttä ei näytetä – pieni otos näyttää löydöltä, vaikka se on sattumaa
   return `<div class="card" style="margin-bottom:12px">
     <div class="section-head" style="margin-bottom:6px">Yhteys datastasi${tentative?" (alustava)":""}</div>
     <div style="font-size:13px;color:var(--text);line-height:1.55">${conn.text}</div>
@@ -6426,7 +6434,7 @@ function buildInjurySummaryHTML(start, effEnd){
   if(!partsInRange.size) return "";
   const partName=id=>{const pt=INJURY_PARTS.find(p=>p.id===id);return pt?pt.l:(INJURY_LEGACY[id]||id);};
   const fmtD=ds=>{const d=new Date(ds+"T00:00:00");return `${d.getDate()}.${d.getMonth()+1}.`;};
-  const dirLbl={paranee:{t:"↑ Paranee",c:"var(--green)"},sama:{t:"→ Sama",c:"var(--yellow)"},pahenee:{t:"↓ Pahenee",c:"var(--red)"}};
+  const dirLbl={paranee:{t:"↑ Paranee",c:"var(--text)"},sama:{t:"→ Sama",c:"var(--text)"},pahenee:{t:"↓ Pahenee",c:"var(--text)"}};
 
   const cards=[...partsInRange].map(id=>{
     const eps=calcInjuryEpisodes(id);
@@ -6439,13 +6447,13 @@ function buildInjurySummaryHTML(start, effEnd){
     const trendInfo=ep.lastDir?dirLbl[ep.lastDir]:(ep.days>=2&&ep.lastLevel!=null&&ep.maxLevel>ep.lastLevel?dirLbl.paranee:null);
     return {sortKey:(active?"1":"0")+ep.lastDate, html:`<div style="padding:9px 0;border-bottom:1px solid var(--bord)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="color:${active?"var(--text)":"var(--green)"};font-size:13px;font-weight:600">${active?"":"✓ "}${partName(id)}</span>
-        <span style="font-size:11px;font-weight:600;color:${active?"var(--yellow)":"var(--green)"}">${active?"Aktiivinen":"Ohi "+fmtD(ep.endDate)}</span>
+        <span style="color:var(--text);font-size:13px;font-weight:600">${active?"":"✓ "}${partName(id)}</span>
+        <span style="font-size:11px;font-weight:600;color:var(--dim)">${active?"Aktiivinen":"Ohi "+fmtD(ep.endDate)}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--dim)">
         <span>Alkoi ${fmtD(ep.startDate)}</span>
         <span>· ${ep.days} kipupäivää</span>
-        <span>· korkein <b style="color:${ep.maxLevel>=3?"var(--red)":"var(--yellow)"}">${ep.maxLevel}/5</b></span>
+        <span>· korkein <b style="color:var(--text)">${ep.maxLevel}/5</b></span>
         ${ep.lastLevel!=null&&ep.lastLevel!==ep.maxLevel?`<span>· viimeisin ${ep.lastLevel}/5</span>`:""}
         ${trendInfo?`<span style="color:${trendInfo.c}">· ${trendInfo.t}</span>`:""}
         ${older>0?`<span>· ${older} aiempi${older>1?"ä jaksoa":" jakso"}</span>`:""}
@@ -6845,7 +6853,7 @@ function buildWeekScoreHTML(days, wEntries){
   const targets=[];
   targets.push({l:"Kirjaukset",n:wEntries.filter(hasMeaningfulEntry).length,d:passedDays,col:"var(--orange)"});
   if(trk("sleep")&&g.sleepHours&&wEntries.some(e=>e.sleep!=null)) targets.push({l:"Uni ≥"+g.sleepHours+"h",n:wEntries.filter(e=>e.sleep>=g.sleepHours).length,d:wEntries.filter(e=>e.sleep!=null).length,col:"var(--blue)"});
-  if(trk("training")&&g.workoutsPerWeek) targets.push({l:"Treeni",n:wEntries.filter(e=>e.training_done).length,d:g.workoutsPerWeek,col:"var(--green)"});
+  if(trk("training")&&g.workoutsPerWeek) targets.push({l:"Treeni",n:wEntries.filter(e=>e.training_done).length,d:g.workoutsPerWeek,col:"var(--orange)"});
   if(trk("cardio")&&g.cardioPerWeek) targets.push({l:"Cardio",n:wEntries.filter(e=>e.cardio_done).length,d:g.cardioPerWeek,col:"var(--purple)"});
   // Ei kokonaisprosenttia — vain erilliset faktat, ei moraalista onnistuit/epäonnistuit-tulkintaa
   const rows=targets.map(tt=>{
@@ -8059,6 +8067,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Trendit kertoo muutoksen vain, kun se on selvä. Pienet heilahdukset näkyvät sanalla \"ennallaan\". Liikkeiden kehitys verrataan nyt parhaaseen sarjaan edelliseen jaksoon nähden, joten yksi kevyt treeni ei käännä suuntaa.",
     "Trendeissä verenpaineen käyrä näkyy nyt, vaikka mittaisit vain kerran viikossa: käyrä näyttää viimeiset mittaukset. Verensokerille on oma käyrä ja migreenipäiville viikoittainen kaavio."
   ]},
   {d:"26.11.2026", items:[
@@ -12307,29 +12316,25 @@ function gymTrendHTML(start,end){
   if(!gymOn()) return "";
   const ss=G.sessions.filter(s=>s.endedAt&&s.date>=start&&s.date<=end);
   if(!ss.length) return "";
-  const keys={};
-  ss.forEach(s=>s.exercises.forEach(e=>{ if(doneSets(e).length) (keys[e.key]=keys[e.key]||[]).push({s,e}); }));
-  const up=[], same=[], down=[];
-  Object.values(keys).forEach(list=>{
-    if(list.length<2) return;
-    list.sort((a,b)=>a.s.startedAt-b.s.startedAt);
-    const top=x=>bestSet(doneSets(x.e));
-    const a=top(list[0]), b=top(list[list.length-1]);
-    const ea=e1c(a.kg,a.reps), eb=e1c(b.kg,b.reps);
-    const lab=`${esc(list[list.length-1].e.name)}: ${a.kg!=null?kgX(a.kg):""}${a.reps} → ${b.kg!=null?kgX(b.kg):""}${b.reps}`;
-    if(!ea||!eb){ return; }
-    const dr=setDir(a,b,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab);
-  });
-  const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0);
+  // v2.18.213: vertailu = jakson paras sarja vs. edellisen yhtä pitkän jakson paras sarja (e1RM).
+  // Ennen jakson ensimmäinen ja viimeinen yksittäinen kerta → yksi huono päivä tai kevennysviikko käänsi suunnan.
+  const {start:pS,end:pE}=getPrevPeriod(start,end);
+  const best=list=>{ const map={}; list.forEach(s=>s.exercises.forEach(e=>{ const d=doneSets(e); if(!d.length) return; const b=bestSet(d); const v=e1c(b.kg,b.reps);
+    if(!map[e.key]||v>map[e.key].v) map[e.key]={v,set:b,name:e.name}; })); return map; };
+  const cur=best(ss), prev=best(G.sessions.filter(s=>s.endedAt&&s.date>=pS&&s.date<=pE));
+  const up=[], same=[], down=[]; let fresh=0;
+  Object.keys(cur).forEach(k=>{ const a=prev[k], b=cur[k]; if(!a){ fresh++; return; } if(!a.v||!b.v) return;
+    const lab=`${esc(b.name)}: ${a.set.kg!=null?kgX(a.set.kg):""}${a.set.reps} → ${b.set.kg!=null?kgX(b.set.kg):""}${b.set.reps}`;
+    const dr=setDir(a.set,b.set,0.01); (dr==="up"?up:dr==="down"?down:same).push(lab); });
+  const sets=ss.reduce((n,s)=>n+sessionStats(s).sets,0), any=up.length||same.length||down.length;
   let h=`<div class="card"><div class="ttl-ico" style="color:var(--text);font-weight:700;font-size:15px;margin-bottom:10px">${ico("dumbbell",18)}Salitreenit</div>
-    <div style="font-size:13px;color:var(--dim);margin-bottom:${up.length||same.length||down.length?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
+    <div style="font-size:13px;color:var(--dim);margin-bottom:${any?"10px":"0"}">${ss.length} treeniä · ${sets} sarjaa</div>`;
   const grp=(t,a)=>a.length?`<div class="lbl-small" style="margin-top:8px">${t} (${a.length})</div>${a.slice(0,5).map(x=>`<div style="font-size:14px;color:var(--text);padding:3px 0">${x}</div>`).join("")}${a.length>5?`<div style="font-size:13px;color:var(--dim);padding:3px 0">+ ${a.length-5} muuta. Kaikki liikkeet: Treeni → Liikkeiden kehitys</div>`:""}`:"";
   h+=grp("Nousi",up)+grp("Ennallaan",same)+grp("Laski",down);
-  if(!up.length&&!same.length&&!down.length) h+=`<div style="font-size:13px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty jaksolla vähintään kahdesti.</div>`;
+  if(any) h+=`<div style="font-size:11px;color:var(--dim);margin-top:8px">Paras sarja tällä jaksolla verrattuna edelliseen yhtä pitkään jaksoon.${fresh?` ${fresh}\u00a0${fresh===1?"liike on":"liikettä on"} uusia tällä jaksolla.`:""}</div>`;
+  else h+=`<div style="font-size:13px;color:var(--dim)">Liikekohtainen vertailu näkyy, kun sama liike on tehty myös edellisellä jaksolla.</div>`;
   return h+`</div>`;
 }
-
-
 // ═══ GOOGLE DRIVE -SYNKRONOINTI (v2.18.0) ═══════════════════════════
 // Data kulkee puhelimesta suoraan käyttäjän omaan Driveen piilotettuun sovelluskansioon (appDataFolder,
 // oikeus drive.appdata: sovellus ei näe muita tiedostoja). Omaa palvelinta ei ole.
