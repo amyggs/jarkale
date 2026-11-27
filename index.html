@@ -2453,7 +2453,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.217</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.218</span>
       </div>
     </div>
   </div>
@@ -2518,6 +2518,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.218", d:"marraskuu 2026", items:[
+    "Mitat: rasvaprosentin ja FFMI:n vierestä poistettu luokkamerkki (Keskitaso, Korkea…). Arvio voi heittää 3–4 prosenttiyksikköä, ja luokka luvun vieressä näytti varmalta tiedolta; FFMI:lle ei ole tutkimukseen perustuvia luokkia. Rasvaprosentin yleiset viiterajat \"Mistä luvut tulevat?\" -selityksessä. Verenpaineen viitearvot (120/80) jäävät käyrään: vakiintunut lääketieteellinen viite, ei käyttäjän luokittelu."
+  ]},
   {v:"2.18.217", d:"marraskuu 2026", items:[
     "Korjattu: Mikä muuttui -kortin painorivillä desimaalipiste (\"+0.00 kg viikossa\").",
     "Trendien Salitreenit-kortti selkeämmäksi (Akun havainto: \"kaikki yhdessä putkessa\"): ennätys omalla rivillään (liike vasemmalla, uusi tulos oikealla lihavoituna, aiempi paras sen alla), rivien välissä viivat. 5 näkyy, \"Näytä kaikki N\" avaa loput. Rasitus ja cardio treenimäärän rivillä, ei selitteen perässä. Selite: \"Ennätys = raskain paino tai paras laskettu suoritus (paino × toistot)\"."
@@ -7380,11 +7383,11 @@ function renderMeasurementsInner(){
       if(!idx.length) return;
       const li=idx[idx.length-1], v=vals[li];
       const prevV=idx.length>=2?vals[idx[idx.length-2]]:null, firstV=idx.length>=2?vals[idx[0]]:null;
-      const c=k.cat?k.cat(v):null;
+      // v2.18.218: ei luokkamerkkiä (Keskitaso, Korkea…) luvun vieressä – arvio ±3–4 %-yks., luokka näytti varmalta; rajat selityksessä
       rows+=`<div class="mo-kpi">
         <div class="mo-kl">
           <div class="mo-kn">${k.l}</div>
-          <div class="mo-kv">${v}<small>${k.u}</small>${c?`<span class="mo-tag">${c.lbl}</span>`:""}</div>
+          <div class="mo-kv">${v}<small>${k.u}</small></div>
           ${idx.length>=2?`<div class="mo-kd">${measDelta(v-prevV,k.dir,k.u)} edellisestä · ${measDelta(v-firstV,k.dir,k.u)} alusta</div>`
             :`<div class="mo-kd">Ensimmäinen arvo ${measFmtDate(all[li].date,multiYear)}</div>`}
         </div>
@@ -7403,7 +7406,8 @@ function renderMeasurementsInner(){
         <p><b>Navy-rasvaprosentti</b> lasketaan vyötäröstä, kaulasta${S.settings.gender==="female"?", lantiosta":""} ja pituudesta. Karkea arvio, ei huomioi lihasmassaa.</p>
         <p><b>Ihopoimu (Jackson-Pollock 3-kohta)</b> on erillinen, rinnakkainen arvio. Tulos riippuu eniten siitä, osuuko poimu joka kerta samaan kohtaan.</p>
         <p><b>FFMI</b> on rasvaton massa suhteessa pituuteen (normalisoitu 180 cm:iin). Laskettu painosta (±3 pv mittauksesta) ja Navy-rasvaprosentista, ja jos ihopoimut on mitattu, erikseen myös ihopoimuarviosta. Rasvaprosenttiarviot voivat erota selvästi: lihaksikkaalla Navy-kaava arvioi rasvaprosentin usein korkeammaksi, koska vyötärönympärys kasvaa myös lihaksista. <b>FMI</b> on sama rasvamassasta (Navy).</p>
-        <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Luvun vieressä oleva merkki (esim. Matala, Keskitaso) on yleinen viiteluokka, ei arvio sinun tavoitteestasi. Rasvaprosentissa hyvin matala vastaa elimistölle välttämätöntä rasvaa, matala on tyypillinen urheilijoilla ja melko matala kuntoilijoilla.</p>
+        <p>Muutoksen etumerkki kertoo suunnan (+ kasvanut, − pienentynyt). Seuraa ennen kaikkea omaa suuntaasi samalla mittaustavalla: arviot voivat heittää 3–4 prosenttiyksikköä, mutta toistuva virhe on yleensä samaan suuntaan.</p>
+        <p><b>Yleiset viiterajat rasvaprosentille</b> (karkeita, mittaustapa vaikuttaa enemmän kuin raja): ${S.settings.gender==="female"?"naisilla alle 21 % matala, 21–25 % melko matala, 25–32 % keskitaso ja yli 32 % korkea":"miehillä alle 14 % matala, 14–18 % melko matala, 18–25 % keskitaso ja yli 25 % korkea"}. Elimistölle välttämätön rasva on ${S.settings.gender==="female"?"noin 10–13 %":"noin 2–5 %"}. FFMI:lle ei ole tutkimukseen perustuvia luokkia.</p>
       </div>`:""}
     </div>`;
 
@@ -8150,6 +8154,7 @@ function renderGenderSection(){
 // Julkaisun yhteydessä: lisää kohta tänne vain, jos pilotti huomaa muutoksen tai hyötyy siitä.
 const PILOT_CHANGELOG=[
   {d:"27.11.2026", items:[
+    "Mitat-sivulla rasvaprosentin ja FFMI:n vieressä ei enää ole luokkaa (esim. Keskitaso). Arviot heittävät useita prosenttiyksiköitä, joten oleellisinta on oma suunta. Yleiset viiterajat löytyvät kohdasta Mistä luvut tulevat?",
     "Trendien salitreeneissä näkyvät jakson uudet ennätykset ja aiempi paras. Liikkeitä ei enää jaeta nousseisiin ja laskeneisiin, koska kunnon mukaan treenatessa vaihtelu on tavallista.",
     "Trendit on selkeämpi. Ylimpänä näkyy, mikä muuttui edelliseen jaksoon verrattuna, ja jokaisella seurattavalla asialla on oma korttinsa, jossa keskiarvo, käyrä ja kirjausmäärä ovat yhdessä. Samoja lukuja ei enää toisteta useassa kohdassa.",
     "Trendit kertoo muutoksen vain, kun se on selvä. Pienet heilahdukset näkyvät sanalla \"ennallaan\". Liikkeiden kehitys verrataan nyt parhaaseen sarjaan edelliseen jaksoon nähden, joten yksi kevyt treeni ei käännä suuntaa.",

@@ -115,8 +115,9 @@ const ok=(c,msg)=>{ if(c)pass++; else fail++; console.log((c?'  ✓ ':'  ✗ ')+
     const el=document.getElementById('historia-content'); const cols=[...el.querySelectorAll('.mo-kd span, .mo-ch span, .mo-tag')].map(e=>getComputedStyle(e).color);
     const g=getComputedStyle(document.documentElement); const mk=v=>{ const t=document.createElement('i'); t.style.color=`var(${v})`; el.appendChild(t); const c=getComputedStyle(t).color; t.remove(); return c; };
     return {n:cols.length, bad:cols.filter(c=>c===mk('--green')||c===mk('--red')).length, txt:el.innerText}; });
-  ok(mc.n>=4&&mc.bad===0,'muutosluvuissa ja luokkamerkeissä ei vihreää tai punaista ('+mc.n+' kohtaa)');
+  ok(mc.n>=2&&mc.bad===0,'muutosluvuissa ja luokkamerkeissä ei vihreää tai punaista ('+mc.n+' kohtaa)');
   ok(/−3/.test(mc.txt)&&/\+1/.test(mc.txt),'etumerkki kertoo suunnan');
+  ok(!/Keskitaso|Melko matala|Korkea/.test(mc.txt.split('Mistä luvut tulevat')[0]),'v2.18.218: ei luokkamerkkiä rasvaprosentin tai FFMI:n vieressä');
   ok(!/Vihreä\/punainen/.test(mc.txt)&&!/\bHyvä\b(?! kunto)/.test(mc.txt),'ei arvottavaa selitystä eikä FFMI-luokkaa "Hyvä"');
 
   // v2.18.186: viikko alkaa maanantaista myös lääkkeen päivävalinnassa ja päivälistassa
