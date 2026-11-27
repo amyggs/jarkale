@@ -1961,6 +1961,9 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
   /* luvun tasaus kuten painossa: vasemmalle kevyissä teemoissa, keskelle näyttöteemoissa */
   :is([data-palette="soitin"],[data-palette="manageri"],[data-palette="tekstitv"],[data-palette="fosfori"],[data-palette="kuusnelonen"],[data-palette="magnesium"]) #view-log.row3>#track-steps-wrap .stepper-row>input{text-align:center;}
 }
+/* v2.18.223: unen piilokentän ohjeteksti ei näy luvun päällä (Soitin), Managerin eilinen uni himmeänä kuten paino */
+#view-log #track-sleep-wrap .stepper-row>div:not(.editing) input::placeholder{color:transparent!important;text-shadow:none!important;}
+:is([data-palette="manageri"],[data-palette="soitin"],[data-palette="tekstitv"]) #view-log #track-sleep-wrap .sleep-hm.ghost :is(b,small){opacity:.4!important;}
 /* v2.18.222: puhelimessa paino, uni ja askeleet riveinä: otsikko vasemmalla (yhteinen leveys --lw, logFit), luku samassa sarakkeessa, − ja + oikealla.
    Kortti ei jää puolityhjäksi (Akun havainto Uni-kortista), ja asettelu on sama kaikilla leveyksillä ja tekstikoilla. Tabletti ennallaan (row3). */
 @media (max-width:699px){
@@ -2482,7 +2485,7 @@ html.ios-sa #app{bottom:auto;height:var(--ios-h,100%);}
 
       <div style="color:var(--dim);font-size:11px;text-align:center;line-height:1.7;padding:0 10px 16px">
         <span id="stg-foot-data"></span>
-        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.222</span>
+        <span style="color:var(--dim);font-weight:600">Järkäle tracking v2.18.223</span>
       </div>
     </div>
   </div>
@@ -2547,6 +2550,9 @@ if(TS_K!==1) tsApply();
 // ═══ HISTORICAL DATA ═══════════════════════════════════════════
 const HIST_W=[];const HIST_S=[];const HIST_BP=[];const HIST_MEAS=[];const WEEK1=new Date("2020-01-01");
 const CHANGELOG=[
+  {v:"2.18.223", d:"marraskuu 2026", items:[
+    "Korjattu: Soitin-teemassa unen piilokentän ohjeteksti (esim. 7:24) näkyi luvun päällä; Manageri-, Soitin- ja Teksti-TV-teemassa eilinen uni näkyi kirkkaana (nyt himmeä kuten paino). Esittelysivun teemakuvat päivitetty uuteen Kirjaa-näkymään."
+  ]},
   {v:"2.18.222", d:"marraskuu 2026", items:[
     "Kirjaa-näkymä puhelimessa: paino, uni ja askeleet riveinä (Akun palaute: Uni-kortti puolityhjä; malli Google Healthista, mutta − ja + säilyvät). Otsikko vasemmalla yhteisellä leveydellä (--lw), luvut samassa sarakkeessa, napit oikealla. Isolla tekstillä tai kapealla näytöllä otsikko siirtyy luvun yläpuolelle (.lstack), ettei luku pienene; Teksti-TV:ssä aina (otsikkopalkki). Puhelimen kolmen kortin asettelu (v2.18.219, r3p) poistettu, tabletti ennallaan.",
     "Uni Kirjaa-näkymässä aina minuuttien kanssa (\"7 h 00 min\"), ettei luvun leveys hypi napautettaessa. \"himmeä = eilen\" → \"eilen\" (selitys title-tekstissä). Painon päivämuutos desimaalipilkulla.",
