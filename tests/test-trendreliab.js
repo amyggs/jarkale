@@ -48,6 +48,14 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
     S.rangeId='d28'; renderTrendit(); return document.getElementById('content').innerText.replace(/\u00a0/g,' '); });
   ok(/Uusia ennätyksiä 3: RDL, Hack kyykky ja Reiden ojennukset\./.test(pr2),'ennätysliikkeet nimeltä; kevyempi paino isoilla toistoilla, lasku ja uusi liike eivät ole ennätyksiä');
   ok(/Treenipäiviä \d+(,\d)? viikossa, tavoite 4\./.test(pr2)&&!/mukaisesti/.test(pr2),'treenipäivät ilman tulkintaa');
+  // v2.18.216: yhtenäiset korttiotsikot (15 px lihavoitu) Trendeissä, Mitoissa; Treenin osionimet tavallisin kirjaimin
+  const hd=await p.evaluate(()=>{ const f=el=>{ const c=getComputedStyle(el); return c.fontSize+' '+c.fontWeight; };
+    S.rangeId='d28'; setTab('trendit'); renderTrendit(); const tr=[...document.querySelectorAll('#view-trendit .tc-h b')].map(f);
+    S.measurements=[{id:1,date:today(),waist:90}]; setTab('historia'); const mi=[...document.querySelectorAll('#view-historia .tc-h b')].map(f);
+    setTab('treeni'); const ts=[...document.querySelectorAll('#view-treeni .tr-sec')].map(e=>getComputedStyle(e).textTransform);
+    return {tr,mi,ts}; });
+  ok(hd.tr.length>=5&&hd.mi.length===2&&[...hd.tr,...hd.mi].every(x=>x==='15px 700'),'korttiotsikot 15 px lihavoitu Trendeissä ja Mitoissa ('+hd.mi.join(',')+')');
+  ok(hd.ts.every(x=>x==='none'),'Treenin osionimet tavallisin kirjaimin');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();
