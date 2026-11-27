@@ -23,9 +23,9 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
   ok(/Yleinen vire 3,8\/5, edellisellä jaksolla 3,0\/5\./.test(mm),'kohinarajan ylittävä muutos näkyy ('+mm.replace(/\n/g,' ').slice(0,200)+')');
   ok(!/Askeleita/.test(mm)&&/Askeleet[\s\S]{0,10}ka[\s\S]{0,5}8 300/.test(r.txt),'askeleiden alle 10 % muutos ei nouse korttiin; Askeleet-kortti näyttää keskiarvon');
   ok(r.colored===0,'muutosnuolet eivät ole vihreitä tai punaisia');
-  ok(/Ennätykset tällä jaksolla \(1\)\s*Penkkipunnerrus 105 kg × 5 · aiempi paras 100 kg × 5/.test(r.txt)&&!/Laski|Nousi/.test(r.txt),'sali: jakson uusi ennätys ja aiempi paras, ei nousi/laski-listoja; kevennyskerta ei näy');
+  ok(/Ennätykset tällä jaksolla \(1\)\s*Penkkipunnerrus\s*105 kg × 5\s*aiempi 100 kg × 5/.test(r.txt)&&!/Laski|Nousi/.test(r.txt),'sali: jakson uusi ennätys ja aiempi paras, ei nousi/laski-listoja; kevennyskerta ei näy');
   ok(/Uusi ennätys: Penkkipunnerrus\./.test(mm),'Mikä muuttui nimeää ennätysliikkeen ('+mm.replace(/\n/g,' ').slice(0,160)+')');
-  ok(/Ennätys = liikkeen raskain paino/.test(r.txt),'ennätyksen peruste kerrotaan');
+  ok(/Ennätys = raskain paino tai paras laskettu suoritus \(paino × toistot\)/.test(r.txt),'ennätyksen peruste kerrotaan');
   const c2=await p.evaluate(()=>{ const html=buildConnectionsHTML(iso(new Date(Date.now()-20*864e5)),today()); return html; });
   ok(c2==='','alustavaa yhteyttä (pieni otos) ei näytetä');
   // v2.18.214: aihekortit
@@ -56,6 +56,15 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'  ✓ ':'  �
     return {tr,mi,ts}; });
   ok(hd.tr.length>=5&&hd.mi.length===2&&[...hd.tr,...hd.mi].every(x=>x==='15px 700'),'korttiotsikot 15 px lihavoitu Trendeissä ja Mitoissa ('+hd.mi.join(',')+')');
   ok(hd.ts.every(x=>x==='none'),'Treenin osionimet tavallisin kirjaimin');
+  // v2.18.217: ennätysrivit, 5 näkyy + Näytä kaikki
+  const pr=await p.evaluate(()=>{ const t=new Date(today()+'T00:00:00'); const D=o=>{ const d=new Date(t); d.setDate(t.getDate()-o); return iso(d); };
+    const ex=(k,kg)=>({key:k,name:'Liike '+k,sets:[{kg,reps:5,done:true}]});
+    const ks=['a','b','c','d','e','f','g']; G.sessions=[{id:'o',date:D(40),startedAt:1,endedAt:2,exercises:ks.map(k=>ex(k,50))},{id:'n',date:D(3),startedAt:3,endedAt:4,exercises:ks.map(k=>ex(k,60))}];
+    TR_PR_ALL=false; S.rangeId='d28'; setTab('trendit'); renderTrendit(); const a=document.querySelectorAll('.pr-row').length, btn=document.querySelector('.pr-more')?.innerText;
+    document.querySelector('.pr-more').click(); const b=document.querySelectorAll('.pr-row').length; const row=document.querySelector('.pr-row').innerText.replace(/\u00a0/g,' ').replace(/\n/g,' | ');
+    const stats=[...document.querySelectorAll('.tcard')].find(c=>/Salitreenit/.test(c.innerText)).innerText; TR_PR_ALL=false; return {a,b,btn,row,stats}; });
+  ok(pr.a===5&&pr.b===7&&pr.btn==='Näytä kaikki 7','5 ennätystä näkyy, Näytä kaikki avaa loput ('+pr.btn+')');
+  ok(/^Liike a \| 60 kg × 5 \| aiempi 50 kg × 5$/.test(pr.row),'ennätysrivi: nimi, uusi tulos, aiempi omilla paikoillaan ('+pr.row+')');
   ok(errs.length===0,'ei sivuvirheitä '+errs.join('|'));
   await b.close();console.log(`\n${pass}/${pass+fail} läpi`);process.exit(fail?1:0);
 })();
